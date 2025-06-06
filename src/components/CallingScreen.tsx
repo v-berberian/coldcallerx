@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Phone, ArrowLeft, ArrowRight, Shuffle, X, Upload } from 'lucide-react';
 import SearchAutocomplete from './SearchAutocomplete';
 import ThemeToggle from './ThemeToggle';
@@ -39,26 +38,26 @@ const CallingScreen: React.FC<CallingScreenProps> = ({
   const [navigationHistory, setNavigationHistory] = useState<number[]>([0]);
   const [historyIndex, setHistoryIndex] = useState(0);
   const [showAutocomplete, setShowAutocomplete] = useState(false);
-  const [timezoneFilter, setTimezoneFilter] = useState<'ALL' | 'EST' | 'CST'>('ALL');
+  const [timezoneFilter, setTimezoneFilter] = useState<'ALL' | 'EST_CST'>('ALL');
 
   useEffect(() => {
     // Filter leads based on search query and timezone
     let filtered = leadsData;
-    
+
     // Apply timezone filter first
     filtered = filterLeadsByTimezone(filtered);
-    
+
     // Then apply search filter
     if (searchQuery.trim()) {
-      filtered = filtered.filter(lead => 
-        lead.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
+      filtered = filtered.filter(lead =>
+        lead.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
         lead.phone.includes(searchQuery)
       );
       setIsSearching(true);
     } else {
       setIsSearching(false);
     }
-    
+
     setFilteredLeads(filtered);
     setCurrentIndex(0);
     setNavigationHistory([0]);
@@ -357,15 +356,15 @@ const CallingScreen: React.FC<CallingScreenProps> = ({
         '985': { state: 'LA', timezone: 'America/Chicago' },
         '989': { state: 'MI', timezone: 'America/New_York' }
       };
-      
+
       const info = stateMap[areaCode];
       if (info) {
         const now = new Date();
-        const timeInZone = new Date(now.toLocaleString("en-US", {timeZone: info.timezone}));
-        const timeString = timeInZone.toLocaleTimeString('en-US', { 
-          hour: 'numeric', 
+        const timeInZone = new Date(now.toLocaleString("en-US", { timeZone: info.timezone }));
+        const timeString = timeInZone.toLocaleTimeString('en-US', {
+          hour: 'numeric',
           minute: '2-digit',
-          hour12: true 
+          hour12: true
         });
         return `${info.state} (${timeString})`;
       }
@@ -657,7 +656,7 @@ const CallingScreen: React.FC<CallingScreenProps> = ({
         '985': { timezone: 'America/Chicago' },
         '989': { timezone: 'America/New_York' }
       };
-      
+
       const info = stateMap[areaCode];
       if (info) {
         if (info.timezone === 'America/New_York') return 'EST';
@@ -669,17 +668,17 @@ const CallingScreen: React.FC<CallingScreenProps> = ({
 
   const filterLeadsByTimezone = (leads: Lead[]): Lead[] => {
     if (timezoneFilter === 'ALL') return leads;
-    
+
     return leads.filter(lead => {
       const timezoneGroup = getTimezoneGroup(lead.phone);
-      return timezoneGroup === timezoneFilter;
+      return timezoneGroup === 'EST' || timezoneGroup === 'CST';
     });
   };
 
   const parseCSV = (text: string): Lead[] => {
     const lines = text.split('\n');
     const leads: Lead[] = [];
-    
+
     for (let i = 1; i < lines.length; i++) {
       const line = lines[i].trim();
       if (line) {
@@ -692,7 +691,7 @@ const CallingScreen: React.FC<CallingScreenProps> = ({
         }
       }
     }
-    
+
     return leads;
   };
 
@@ -720,7 +719,7 @@ const CallingScreen: React.FC<CallingScreenProps> = ({
       alert('Error reading file');
     };
     reader.readAsText(file);
-    
+
     // Reset the input
     event.target.value = '';
   };
@@ -757,7 +756,7 @@ const CallingScreen: React.FC<CallingScreenProps> = ({
     newHistory.push(nextIndex);
     setNavigationHistory(newHistory);
     setHistoryIndex(newHistory.length - 1);
-    
+
     if (autoCall && filteredLeads[nextIndex]) {
       setTimeout(() => {
         const phoneNumber = filteredLeads[nextIndex].phone.replace(/\D/g, '');
@@ -810,6 +809,10 @@ const CallingScreen: React.FC<CallingScreenProps> = ({
     }
   };
 
+  const toggleTimezoneFilter = () => {
+    setTimezoneFilter(timezoneFilter === 'ALL' ? 'EST_CST' : 'ALL');
+  };
+
   if (leadsData.length === 0) {
     return (
       <div className="min-h-screen bg-background">
@@ -825,10 +828,10 @@ const CallingScreen: React.FC<CallingScreenProps> = ({
                 className="hidden"
               />
             </label>
-            
+
             <ThemeToggle />
           </div>
-          
+
           <div className="flex items-center justify-center">
             <div className="flex items-center space-x-3">
               <h1 className="text-2xl font-bold">
@@ -862,12 +865,12 @@ const CallingScreen: React.FC<CallingScreenProps> = ({
   }
 
   // Calculate the actual index in the original array
-  const actualLeadIndex = isSearching 
+  const actualLeadIndex = isSearching
     ? leadsData.findIndex(lead => lead.name === currentLead.name && lead.phone === currentLead.phone) + 1
     : currentIndex + 1;
 
   return (
-    <div className="min-h-screen bg-background flex flex-col">
+    <div className="min-h-screen min-h-[100dvh] bg-background flex flex-col">
       {/* Header */}
       <div className="bg-background border-b border-border p-4 flex-shrink-0">
         <div className="flex items-center justify-between mb-4">
@@ -880,7 +883,7 @@ const CallingScreen: React.FC<CallingScreenProps> = ({
               className="hidden"
             />
           </label>
-          
+
           <div className="flex items-center space-x-3">
             <h1 className="text-2xl font-bold">
               <span className="text-blue-500">Cold</span>
@@ -888,34 +891,34 @@ const CallingScreen: React.FC<CallingScreenProps> = ({
               <span className="text-blue-500">X</span>
             </h1>
           </div>
-          
+
           <ThemeToggle />
         </div>
-        
+
         {/* Search Bar */}
         <div className="relative">
-          <input 
-            type="text" 
-            placeholder="Search leads by name or phone number" 
-            value={searchQuery} 
-            onChange={e => setSearchQuery(e.target.value)} 
-            onFocus={handleSearchFocus} 
-            onBlur={handleSearchBlur} 
-            className="w-full px-4 py-2 bg-muted/30 rounded-xl border border-input text-center placeholder:text-center caret-transparent" 
+          <input
+            type="text"
+            placeholder="Search leads by name or phone number"
+            value={searchQuery}
+            onChange={e => setSearchQuery(e.target.value)}
+            onFocus={handleSearchFocus}
+            onBlur={handleSearchBlur}
+            className="w-full px-4 py-2 bg-muted/30 rounded-xl border border-input text-center placeholder:text-center caret-transparent"
           />
           {searchQuery && (
             <button onClick={clearSearch} className="absolute right-3 top-1/2 transform -translate-y-1/2">
               <X className="h-4 w-4 text-muted-foreground" />
             </button>
           )}
-          
+
           {/* Autocomplete Dropdown */}
           {showAutocomplete && (
-            <SearchAutocomplete 
-              leads={searchQuery ? filteredLeads : filterLeadsByTimezone(leadsData)} 
-              onLeadSelect={handleLeadSelect} 
+            <SearchAutocomplete
+              leads={searchQuery ? filteredLeads : filterLeadsByTimezone(leadsData)}
+              onLeadSelect={handleLeadSelect}
               searchQuery={searchQuery}
-              actualIndices={(searchQuery ? filteredLeads : filterLeadsByTimezone(leadsData)).map(lead => 
+              actualIndices={(searchQuery ? filteredLeads : filterLeadsByTimezone(leadsData)).map(lead =>
                 leadsData.findIndex(l => l.name === lead.name && l.phone === lead.phone) + 1
               )}
               totalLeads={leadsData.length}
@@ -924,12 +927,22 @@ const CallingScreen: React.FC<CallingScreenProps> = ({
         </div>
       </div>
 
-      {/* Main Content - Centered */}
-      <div className="flex-1 flex items-center justify-center min-h-0">
-        <div className="w-full max-w-md space-y-6 px-6 flex flex-col justify-center">
+      {/* Main Content - Centered with better mobile support */}
+      <div className="flex-1 flex items-center justify-center min-h-0 px-4 py-4 safe-area-inset">
+        <div className="w-full max-w-md space-y-6 flex flex-col justify-center">
           {/* Current Lead Card */}
           <Card className="shadow-2xl border-border/50 rounded-3xl bg-card h-[400px] flex flex-col">
-            <CardContent className="p-6 space-y-6 flex-1 flex flex-col justify-center">
+            <CardContent className="p-6 space-y-4 flex-1 flex flex-col">
+              {/* Timezone Filter - Top Center */}
+              <div className="flex justify-center">
+                <button
+                  onClick={toggleTimezoneFilter}
+                  className="text-sm text-muted-foreground hover:text-foreground transition-colors px-2 py-1"
+                >
+                  {timezoneFilter === 'ALL' ? 'All States' : 'EST & CST'}
+                </button>
+              </div>
+
               {/* Top row with count and list name */}
               <div className="flex items-start justify-between">
                 <p className="text-sm text-muted-foreground opacity-30">
@@ -940,42 +953,20 @@ const CallingScreen: React.FC<CallingScreenProps> = ({
                 </p>
               </div>
 
-              {/* Lead info */}
-              <div className="text-center space-y-4 flex-1 flex flex-col justify-center">
+              {/* Lead info - Main content area */}
+              <div className="text-center space-y-3 flex-1 flex flex-col justify-center">
                 <h2 className="text-3xl font-bold text-foreground">{currentLead.name}</h2>
-                
+
                 <div className="flex items-center justify-center space-x-2">
                   <Phone className="h-4 w-4 text-muted-foreground" />
                   <p className="text-lg text-muted-foreground">{currentLead.phone}</p>
                 </div>
 
-                {/* Timezone Filter */}
-                <div className="flex justify-center">
-                  <RadioGroup 
-                    value={timezoneFilter} 
-                    onValueChange={(value: 'ALL' | 'EST' | 'CST') => setTimezoneFilter(value)}
-                    className="flex flex-row space-x-4"
-                  >
-                    <div className="flex items-center space-x-1">
-                      <RadioGroupItem value="ALL" id="all" />
-                      <label htmlFor="all" className="text-sm text-muted-foreground cursor-pointer">ALL</label>
-                    </div>
-                    <div className="flex items-center space-x-1">
-                      <RadioGroupItem value="EST" id="est" />
-                      <label htmlFor="est" className="text-sm text-muted-foreground cursor-pointer">EST</label>
-                    </div>
-                    <div className="flex items-center space-x-1">
-                      <RadioGroupItem value="CST" id="cst" />
-                      <label htmlFor="cst" className="text-sm text-muted-foreground cursor-pointer">CST</label>
-                    </div>
-                  </RadioGroup>
-                </div>
-                
                 {/* State and timezone */}
                 <p className="text-sm text-muted-foreground">
                   {getStateFromAreaCode(currentLead.phone)}
                 </p>
-                
+
                 <p className="text-sm text-muted-foreground">
                   Called: {currentLead.called || 0} times
                 </p>
@@ -987,9 +978,9 @@ const CallingScreen: React.FC<CallingScreenProps> = ({
               </div>
 
               {/* Main Call Button */}
-              <Button 
-                onClick={handleCall} 
-                size="lg" 
+              <Button
+                onClick={handleCall}
+                size="lg"
                 className="w-full h-16 text-lg font-semibold bg-green-600 text-white rounded-2xl shadow-lg"
               >
                 <Phone className="h-6 w-6 mr-2" />
@@ -1002,27 +993,27 @@ const CallingScreen: React.FC<CallingScreenProps> = ({
           <div className="space-y-4">
             {/* Previous/Next Navigation */}
             <div className="flex gap-4">
-              <Button 
-                variant="outline" 
-                onClick={handlePrevious} 
-                disabled={historyIndex <= 0} 
+              <Button
+                variant="outline"
+                onClick={handlePrevious}
+                disabled={historyIndex <= 0}
                 className="flex-1 h-12 rounded-2xl shadow-lg active:scale-95 transition-transform duration-100 select-none outline-none focus:outline-none focus-visible:ring-0 focus-visible:ring-offset-0"
                 style={{ WebkitTapHighlightColor: 'transparent' }}
-                onTouchStart={() => {}}
-                onTouchEnd={() => {}}
+                onTouchStart={() => { }}
+                onTouchEnd={() => { }}
               >
                 <ArrowLeft className="h-4 w-4 mr-2" />
                 Previous
               </Button>
-              
-              <Button 
-                variant="outline" 
-                onClick={handleNext} 
-                disabled={filteredLeads.length <= 1} 
+
+              <Button
+                variant="outline"
+                onClick={handleNext}
+                disabled={filteredLeads.length <= 1}
                 className="flex-1 h-12 rounded-2xl shadow-lg active:scale-95 transition-transform duration-100 select-none outline-none focus:outline-none focus-visible:ring-0 focus-visible:ring-offset-0"
                 style={{ WebkitTapHighlightColor: 'transparent' }}
-                onTouchStart={() => {}}
-                onTouchEnd={() => {}}
+                onTouchStart={() => { }}
+                onTouchEnd={() => { }}
               >
                 Next
                 <ArrowRight className="h-4 w-4 ml-2" />
@@ -1032,19 +1023,19 @@ const CallingScreen: React.FC<CallingScreenProps> = ({
             {/* Bottom Controls */}
             <div className="flex items-center justify-between">
               <div className="flex flex-col items-center space-y-1 flex-1">
-                <button 
-                  onClick={toggleShuffle} 
-                  disabled={filteredLeads.length <= 1} 
+                <button
+                  onClick={toggleShuffle}
+                  disabled={filteredLeads.length <= 1}
                   className="p-3 rounded-full disabled:opacity-50"
                   style={{ WebkitTapHighlightColor: 'transparent' }}
                 >
                   <Shuffle className={`h-5 w-5 ${shuffleMode ? 'text-orange-500' : 'text-muted-foreground'}`} />
                 </button>
               </div>
-              
+
               <div className="flex flex-col items-center space-y-1 flex-1">
-                <button 
-                  onClick={toggleAutoCall} 
+                <button
+                  onClick={toggleAutoCall}
                   className={`text-sm font-medium px-3 py-1 rounded ${autoCall ? 'text-green-600' : 'text-muted-foreground'}`}
                   style={{ WebkitTapHighlightColor: 'transparent' }}
                 >
