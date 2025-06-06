@@ -12,9 +12,15 @@ interface SearchAutocompleteProps {
   leads: Lead[];
   onLeadSelect: (lead: Lead) => void;
   searchQuery: string;
+  actualIndices: number[];
 }
 
-const SearchAutocomplete: React.FC<SearchAutocompleteProps> = ({ leads, onLeadSelect, searchQuery }) => {
+const SearchAutocomplete: React.FC<SearchAutocompleteProps> = ({ 
+  leads, 
+  onLeadSelect, 
+  searchQuery, 
+  actualIndices 
+}) => {
   if (leads.length === 0) {
     return (
       <Card className="absolute top-full left-0 right-0 z-50 mt-1 p-4 text-center text-muted-foreground rounded-xl shadow-lg">
@@ -38,7 +44,7 @@ const SearchAutocomplete: React.FC<SearchAutocompleteProps> = ({ leads, onLeadSe
                 <p className="text-sm text-muted-foreground">{lead.phone}</p>
               </div>
               <div className="ml-2 text-xs text-muted-foreground">
-                #{leads.indexOf(lead) + 1}
+                #{actualIndices[index]}
               </div>
             </div>
           </button>
