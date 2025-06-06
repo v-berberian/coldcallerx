@@ -2,8 +2,8 @@
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
 import { Phone, ArrowLeft, ArrowRight, Shuffle, Search, X } from 'lucide-react';
+import SearchAutocomplete from './SearchAutocomplete';
 
 interface Lead {
   name: string;
@@ -28,6 +28,7 @@ const CallingScreen: React.FC<CallingScreenProps> = ({ leads, fileName, onBack }
   const [leadsData, setLeadsData] = useState<Lead[]>(leads.map(lead => ({ ...lead, called: 0 })));
   const [navigationHistory, setNavigationHistory] = useState<number[]>([0]);
   const [historyIndex, setHistoryIndex] = useState(0);
+  const [showAutocomplete, setShowAutocomplete] = useState(false);
 
   useEffect(() => {
     if (searchQuery.trim()) {
@@ -48,6 +49,7 @@ const CallingScreen: React.FC<CallingScreenProps> = ({ leads, fileName, onBack }
 
   const currentLead = filteredLeads[currentIndex];
   const totalLeads = isSearching ? filteredLeads.length : leadsData.length;
+  const currentLeadNumber = currentIndex + 1;
 
   const handleCall = () => {
     if (currentLead) {
@@ -118,6 +120,27 @@ const CallingScreen: React.FC<CallingScreenProps> = ({ leads, fileName, onBack }
     setCurrentIndex(0);
     setNavigationHistory([0]);
     setHistoryIndex(0);
+    setShowAutocomplete(false);
+  };
+
+  const handleSearchFocus = () => {
+    setShowAutocomplete(true);
+  };
+
+  const handleSearchBlur = () => {
+    // Delay hiding to allow selection
+    setTimeout(() => setShowAutocomplete(false), 150);
+  };
+
+  const handleLeadSelect = (lead: Lead) => {
+    const leadIndex = filteredLeads.findIndex(l => l.name === lead.name && l.phone === lead.phone);
+    if (leadIndex !== -1) {
+      setCurrentIndex(leadIndex);
+      setNavigationHistory([leadIndex]);
+      setHistoryIndex(0);
+      setSearchQuery('');
+      setShowAutocomplete(false);
+    }
   };
 
   if (!currentLead) {
@@ -150,12 +173,14 @@ const CallingScreen: React.FC<CallingScreenProps> = ({ leads, fileName, onBack }
         {/* Search Bar */}
         <div className="relative">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input
+          <input
             type="text"
             placeholder="Search leads by name or phone number"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-10 pr-10 bg-muted/30 rounded-xl"
+            onFocus={handleSearchFocus}
+            onBlur={handleSearchBlur}
+            className="w-full pl-10 pr-10 py-2 bg-muted/30 rounded-xl border border-input text-center placeholder:text-center focus:outline-none focus:ring-2 focus:ring-ring"
           />
           {searchQuery && (
             <button
@@ -164,6 +189,15 @@ const CallingScreen: React.FC<CallingScreenProps> = ({ leads, fileName, onBack }
             >
               <X className="h-4 w-4 text-muted-foreground" />
             </button>
+          )}
+          
+          {/* Autocomplete Dropdown */}
+          {showAutocomplete && (
+            <SearchAutocomplete
+              leads={searchQuery ? filteredLeads : leadsData}
+              onLeadSelect={handleLeadSelect}
+              searchQuery={searchQuery}
+            />
           )}
         </div>
       </div>
@@ -181,11 +215,17 @@ const CallingScreen: React.FC<CallingScreenProps> = ({ leads, fileName, onBack }
         </div>
 
         {/* Current Lead Card */}
-        <Card className="shadow-xl border-border/50 rounded-3xl">
+        <Card className="shadow-2xl border-border/50 rounded-3xl bg-card">
           <CardContent className="p-8 text-center space-y-6">
-            <div>
-              <h2 className="text-3xl font-bold text-foreground mb-4">{currentLead.name}</h2>
-              <p className="text-lg text-muted-foreground mb-4">{currentLead.phone}</p>
+            <div className="space-y-4">
+              <p className="text-lg font-medium text-muted-foreground">#{currentLeadNumber}</p>
+              <h2 className="text-3xl font-bold text-foreground">{currentLead.name}</h2>
+              
+              <div className="flex items-center justify-center space-x-2">
+                <Phone className="h-4 w-4 text-muted-foreground" />
+                <p className="text-lg text-muted-foreground">{currentLead.phone}</p>
+              </div>
+              
               <p className="text-sm text-muted-foreground">
                 Called: {currentLead.called || 0} times
               </p>
@@ -211,46 +251,51 @@ const CallingScreen: React.FC<CallingScreenProps> = ({ leads, fileName, onBack }
         {/* Navigation Controls */}
         <div className="space-y-4">
           {/* Previous/Next Navigation */}
-          <div className="flex gap-4">
-            <Button
-              variant="outline"
-              onClick={handlePrevious}
-              disabled={historyIndex <= 0 || (currentLead.called || 0) === 0}
-              className="flex-1 h-12 rounded-xl shadow-md"
-            >
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              Previous
-            </Button>
-            
-            <Button
-              variant="outline"
-              onClick={handleNext}
-              disabled={filteredLeads.length <= 1}
-              className="flex-1 h-12 rounded-xl shadow-md"
-            >
-              Next
-              <ArrowRight className="h-4 w-4 ml-2" />
-            </Button>
-          </div>
+          {(currentLead.called || 0) > 0 && (
+            <div className="flex gap-4">
+              <Button
+                variant="outline"
+                onClick={handlePrevious}
+                disabled={historyIndex <= 0}
+                className="flex-1 h-12 rounded-2xl shadow-lg"
+              >
+                <ArrowLeft className="h-4 w-4 mr-2" />
+                Previous
+              </Button>
+              
+              <Button
+                variant="outline"
+                onClick={handleNext}
+                disabled={filteredLeads.length <= 1}
+                className="flex-1 h-12 rounded-2xl shadow-lg"
+              >
+                Next
+                <ArrowRight className="h-4 w-4 ml-2" />
+              </Button>
+            </div>
+          )}
 
           {/* Bottom Controls */}
           <div className="flex items-center justify-between">
-            <Button
-              variant={shuffleMode ? "default" : "outline"}
-              size="icon"
-              onClick={toggleShuffle}
-              disabled={filteredLeads.length <= 1}
-              className={`h-12 w-12 rounded-xl shadow-md ${shuffleMode ? 'bg-orange-200 hover:bg-orange-300 text-orange-800' : ''}`}
-            >
-              <Shuffle className="h-5 w-5" />
-            </Button>
+            <div className="flex flex-col items-center space-y-1">
+              <button
+                onClick={toggleShuffle}
+                disabled={filteredLeads.length <= 1}
+                className="p-3 rounded-full transition-colors disabled:opacity-50"
+              >
+                <Shuffle className={`h-5 w-5 ${shuffleMode ? 'text-orange-500' : 'text-muted-foreground'}`} />
+              </button>
+              <span className="text-xs text-muted-foreground">Shuffle</span>
+            </div>
             
-            <button
-              onClick={toggleAutoCall}
-              className={`text-sm font-medium transition-colors ${autoCall ? 'text-green-600' : 'text-muted-foreground'}`}
-            >
-              Auto Call
-            </button>
+            <div className="flex flex-col items-center space-y-1">
+              <button
+                onClick={toggleAutoCall}
+                className={`text-sm font-medium transition-colors px-3 py-1 rounded ${autoCall ? 'text-green-600' : 'text-muted-foreground'}`}
+              >
+                Auto Call
+              </button>
+            </div>
           </div>
         </div>
       </div>
