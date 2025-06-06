@@ -3,6 +3,7 @@ import CallingScreenHeader from '@/components/CallingScreenHeader';
 import LeadCard from '@/components/LeadCard';
 import NavigationControls from '@/components/NavigationControls';
 import SearchBar from '@/components/SearchBar';
+import { timezoneMapping } from '@/utils/timezoneMapping';
 
 interface Lead {
   name: string;
