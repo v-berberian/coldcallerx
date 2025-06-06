@@ -452,7 +452,7 @@ const CallingScreen: React.FC<CallingScreenProps> = ({
         '401': { timezone: 'America/New_York' },
         '402': { timezone: 'America/Chicago' },
         '404': { timezone: 'America/New_York' },
-        '405': { state: 'OK', timezone: 'America/Chicago' },
+        '405': { timezone: 'America/Chicago' },
         '406': { timezone: 'America/Denver' },
         '407': { timezone: 'America/New_York' },
         '408': { timezone: 'America/Los_Angeles' },
