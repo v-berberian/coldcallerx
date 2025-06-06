@@ -33,12 +33,12 @@ const LeadCard: React.FC<LeadCardProps> = ({
   return (
     <Card className="shadow-2xl border-border/50 rounded-3xl bg-card h-[400px] flex flex-col">
       <CardContent className="p-6 space-y-4 flex-1 flex flex-col">
-        {/* Top row with lead count and file name */}
-        <div className="flex items-center justify-between">
+        {/* Top row with lead count top left and file name top right */}
+        <div className="flex items-start justify-between">
           <p className="text-sm text-muted-foreground">
             {actualLeadIndex}/{totalLeadCount}
           </p>
-          <p className="text-sm text-muted-foreground opacity-40">
+          <p className="text-sm text-muted-foreground">
             {fileName}
           </p>
         </div>

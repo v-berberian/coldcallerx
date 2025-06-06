@@ -16,14 +16,14 @@ const FilterBar: React.FC<FilterBarProps> = ({
   onCallStatusFilterChange
 }) => {
   return (
-    <div className="space-y-3">
-      {/* Timezone Filter */}
+    <div className="flex justify-between items-center">
+      {/* Timezone Filter - Left */}
       <div className="flex gap-1">
         <Button
           onClick={() => onTimezoneFilterChange('ALL')}
           variant={timezoneFilter === 'ALL' ? 'default' : 'outline'}
           size="sm"
-          className="flex-1 text-xs rounded-xl"
+          className="text-xs rounded-xl"
         >
           All States
         </Button>
@@ -31,7 +31,7 @@ const FilterBar: React.FC<FilterBarProps> = ({
           onClick={() => onTimezoneFilterChange('EST_CST')}
           variant={timezoneFilter === 'EST_CST' ? 'default' : 'outline'}
           size="sm"
-          className="flex-1 text-xs rounded-xl"
+          className="text-xs rounded-xl"
         >
           EST & CST
         </Button>
@@ -39,19 +39,19 @@ const FilterBar: React.FC<FilterBarProps> = ({
           onClick={() => onTimezoneFilterChange('PST')}
           variant={timezoneFilter === 'PST' ? 'default' : 'outline'}
           size="sm"
-          className="flex-1 text-xs rounded-xl"
+          className="text-xs rounded-xl"
         >
           PST
         </Button>
       </div>
 
-      {/* Call Status Filter */}
+      {/* Call Status Filter - Right */}
       <div className="flex gap-1">
         <Button
           onClick={() => onCallStatusFilterChange('ALL')}
           variant={callStatusFilter === 'ALL' ? 'default' : 'outline'}
           size="sm"
-          className="flex-1 text-xs rounded-xl"
+          className="text-xs rounded-xl"
         >
           All Numbers
         </Button>
@@ -59,7 +59,7 @@ const FilterBar: React.FC<FilterBarProps> = ({
           onClick={() => onCallStatusFilterChange('UNCALLED')}
           variant={callStatusFilter === 'UNCALLED' ? 'default' : 'outline'}
           size="sm"
-          className="flex-1 text-xs rounded-xl"
+          className="text-xs rounded-xl"
         >
           Uncalled Numbers
         </Button>
