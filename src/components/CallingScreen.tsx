@@ -610,8 +610,8 @@ const CallingScreen: React.FC<CallingScreenProps> = ({
       </div>
 
       {/* Main Content - Centered */}
-      <div className="flex-1 flex items-center justify-center">
-        <div className="w-full max-w-md space-y-6 px-6">
+      <div className="flex-1 flex items-center justify-center min-h-0">
+        <div className="w-full max-w-md space-y-6 px-6 flex flex-col justify-center">
           {/* Current Lead Card */}
           <Card className="shadow-2xl border-border/50 rounded-3xl bg-card h-[400px] flex flex-col">
             <CardContent className="p-6 space-y-6 flex-1 flex flex-col justify-center">
