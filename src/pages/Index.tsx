@@ -1,8 +1,5 @@
 
 import React, { useState, useEffect } from 'react';
-import { Button } from '@/components/ui/button';
-import { Upload, Phone } from 'lucide-react';
-import CSVImporter from '@/components/CSVImporter';
 import CallingScreen from '@/components/CallingScreen';
 import ThemeToggle from '@/components/ThemeToggle';
 
@@ -16,7 +13,6 @@ interface Lead {
 const Index = () => {
   const [leads, setLeads] = useState<Lead[]>([]);
   const [fileName, setFileName] = useState<string>('');
-  const [showCallingScreen, setShowCallingScreen] = useState(false);
 
   // Load saved data on component mount
   useEffect(() => {
@@ -28,7 +24,6 @@ const Index = () => {
         const parsedLeads = JSON.parse(savedLeads);
         setLeads(parsedLeads);
         setFileName(savedFileName);
-        setShowCallingScreen(true);
       } catch (error) {
         console.error('Error parsing saved leads:', error);
         // Clear corrupted data
@@ -38,23 +33,8 @@ const Index = () => {
     }
   }, []);
 
-  const handleImport = (importedLeads: Lead[], importedFileName: string) => {
-    console.log('Imported leads:', importedLeads);
-    console.log('File name:', importedFileName);
-    
-    // Save to localStorage
-    localStorage.setItem('coldcaller-leads', JSON.stringify(importedLeads));
-    localStorage.setItem('coldcaller-filename', importedFileName);
-    
-    setLeads(importedLeads);
-    setFileName(importedFileName);
-    setShowCallingScreen(true);
-  };
-
   const handleBack = () => {
-    setShowCallingScreen(false);
-    
-    // Clear saved data when going back to import
+    // Clear saved data when going back
     localStorage.removeItem('coldcaller-leads');
     localStorage.removeItem('coldcaller-filename');
     
@@ -62,26 +42,34 @@ const Index = () => {
     setFileName('');
   };
 
-  if (showCallingScreen) {
+  // If no leads, show empty state
+  if (leads.length === 0) {
     return (
-      <CallingScreen 
-        leads={leads} 
-        fileName={fileName} 
-        onBack={handleBack}
-        onImport={handleImport}
-      />
+      <div className="h-screen h-[100vh] h-[100svh] bg-background overflow-hidden">
+        <div className="absolute top-4 right-4 z-10">
+          <ThemeToggle />
+        </div>
+        
+        <div className="flex items-center justify-center h-full">
+          <div className="text-center space-y-4">
+            <h1 className="text-4xl font-bold">
+              <span className="text-blue-500">Cold</span>
+              <span className="text-foreground">Caller </span>
+              <span className="text-blue-500">X</span>
+            </h1>
+            <p className="text-lg text-muted-foreground">No leads available</p>
+          </div>
+        </div>
+      </div>
     );
   }
 
   return (
-    <div className="relative min-h-screen">
-      {/* Theme toggle in top right corner */}
-      <div className="absolute top-4 right-4 z-10">
-        <ThemeToggle />
-      </div>
-      
-      <CSVImporter onImport={handleImport} />
-    </div>
+    <CallingScreen 
+      leads={leads} 
+      fileName={fileName} 
+      onBack={handleBack}
+    />
   );
 };
 

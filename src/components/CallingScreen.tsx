@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { Phone, ArrowLeft, ArrowRight, Shuffle, X, Upload } from 'lucide-react';
+import { Phone, ArrowLeft, ArrowRight, Shuffle, X } from 'lucide-react';
 import SearchAutocomplete from './SearchAutocomplete';
 import ThemeToggle from './ThemeToggle';
 
@@ -16,14 +16,12 @@ interface CallingScreenProps {
   leads: Lead[];
   fileName: string;
   onBack: () => void;
-  onImport: (leads: Lead[], fileName: string) => void;
 }
 
 const CallingScreen: React.FC<CallingScreenProps> = ({
   leads,
   fileName,
-  onBack,
-  onImport
+  onBack
 }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [autoCall, setAutoCall] = useState(false);
@@ -33,7 +31,8 @@ const CallingScreen: React.FC<CallingScreenProps> = ({
   const [isSearching, setIsSearching] = useState(false);
   const [leadsData, setLeadsData] = useState<Lead[]>(leads.map(lead => ({
     ...lead,
-    called: 0
+    called: lead.called || 0,
+    lastCalled: lead.lastCalled || undefined
   })));
   const [navigationHistory, setNavigationHistory] = useState<number[]>([0]);
   const [historyIndex, setHistoryIndex] = useState(0);
@@ -675,59 +674,8 @@ const CallingScreen: React.FC<CallingScreenProps> = ({
     });
   };
 
-  const parseCSV = (text: string): Lead[] => {
-    const lines = text.split('\n');
-    const leads: Lead[] = [];
-
-    for (let i = 1; i < lines.length; i++) {
-      const line = lines[i].trim();
-      if (line) {
-        const [name, phone] = line.split(',').map(cell => cell.trim().replace(/"/g, ''));
-        if (name && phone) {
-          leads.push({
-            name,
-            phone: formatPhoneNumber(phone)
-          });
-        }
-      }
-    }
-
-    return leads;
-  };
-
-  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (!file) return;
-
-    if (file.type !== 'text/csv' && !file.name.endsWith('.csv')) {
-      alert('Please select a valid CSV file');
-      return;
-    }
-
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      const text = e.target?.result as string;
-      const newLeads = parseCSV(text);
-      if (newLeads.length === 0) {
-        alert('No valid leads found in the CSV file');
-        return;
-      }
-      const fileName = file.name.replace('.csv', '');
-      onImport(newLeads, fileName);
-    };
-    reader.onerror = () => {
-      alert('Error reading file');
-    };
-    reader.readAsText(file);
-
-    // Reset the input
-    event.target.value = '';
-  };
-
-  const currentLead = filteredLeads[currentIndex];
-  const totalLeads = isSearching ? filteredLeads.length : filterLeadsByTimezone(leadsData).length;
-
   const handleCall = () => {
+    const currentLead = filteredLeads[currentIndex];
     if (currentLead) {
       const phoneNumber = currentLead.phone.replace(/\D/g, '');
       window.location.href = `tel:${phoneNumber}`;
@@ -813,25 +761,12 @@ const CallingScreen: React.FC<CallingScreenProps> = ({
     setTimezoneFilter(timezoneFilter === 'ALL' ? 'EST_CST' : 'ALL');
   };
 
+  const currentLead = filteredLeads[currentIndex];
+
   if (leadsData.length === 0) {
     return (
-      <div className="min-h-screen bg-background">
-        {/* Header */}
+      <div className="h-screen h-[100vh] h-[100svh] bg-background overflow-hidden">
         <div className="bg-background border-b border-border p-4">
-          <div className="flex items-center justify-between mb-4">
-            <label className="cursor-pointer p-2 rounded-lg text-muted-foreground">
-              <Upload className="h-4 w-4" />
-              <input
-                type="file"
-                accept=".csv,text/csv"
-                onChange={handleFileUpload}
-                className="hidden"
-              />
-            </label>
-
-            <ThemeToggle />
-          </div>
-
           <div className="flex items-center justify-center">
             <div className="flex items-center space-x-3">
               <h1 className="text-2xl font-bold">
@@ -843,7 +778,6 @@ const CallingScreen: React.FC<CallingScreenProps> = ({
           </div>
         </div>
 
-        {/* Empty state content */}
         <div className="p-6 text-center">
           <p className="text-lg text-muted-foreground">No leads imported</p>
         </div>
@@ -853,7 +787,7 @@ const CallingScreen: React.FC<CallingScreenProps> = ({
 
   if (!currentLead) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center p-4">
+      <div className="h-screen h-[100vh] h-[100svh] bg-background flex items-center justify-center p-4 overflow-hidden">
         <Card className="w-full max-w-md shadow-lg rounded-2xl">
           <CardContent className="p-8 text-center">
             <p className="text-lg">No leads found</p>
@@ -865,25 +799,17 @@ const CallingScreen: React.FC<CallingScreenProps> = ({
   }
 
   // Calculate the actual index in the original array
-  const actualLeadIndex = isSearching
+  const actualLeadIndex = isSearching 
     ? leadsData.findIndex(lead => lead.name === currentLead.name && lead.phone === currentLead.phone) + 1
     : currentIndex + 1;
 
   return (
-    <div className="min-h-screen min-h-[100dvh] bg-background flex flex-col">
+    <div className="h-screen h-[100vh] h-[100svh] bg-background flex flex-col overflow-hidden">
       {/* Header */}
       <div className="bg-background border-b border-border p-4 flex-shrink-0">
         <div className="flex items-center justify-between mb-4">
-          <label className="cursor-pointer p-2 rounded-lg text-muted-foreground">
-            <Upload className="h-4 w-4" />
-            <input
-              type="file"
-              accept=".csv,text/csv"
-              onChange={handleFileUpload}
-              className="hidden"
-            />
-          </label>
-
+          <div></div>
+          
           <div className="flex items-center space-x-3">
             <h1 className="text-2xl font-bold">
               <span className="text-blue-500">Cold</span>
@@ -891,34 +817,34 @@ const CallingScreen: React.FC<CallingScreenProps> = ({
               <span className="text-blue-500">X</span>
             </h1>
           </div>
-
+          
           <ThemeToggle />
         </div>
-
+        
         {/* Search Bar */}
         <div className="relative">
-          <input
-            type="text"
-            placeholder="Search leads by name or phone number"
-            value={searchQuery}
-            onChange={e => setSearchQuery(e.target.value)}
-            onFocus={handleSearchFocus}
-            onBlur={handleSearchBlur}
-            className="w-full px-4 py-2 bg-muted/30 rounded-xl border border-input text-center placeholder:text-center caret-transparent"
+          <input 
+            type="text" 
+            placeholder="Search leads by name or phone number" 
+            value={searchQuery} 
+            onChange={e => setSearchQuery(e.target.value)} 
+            onFocus={handleSearchFocus} 
+            onBlur={handleSearchBlur} 
+            className="w-full px-4 py-2 bg-muted/30 rounded-xl border border-input text-center placeholder:text-center caret-transparent" 
           />
           {searchQuery && (
             <button onClick={clearSearch} className="absolute right-3 top-1/2 transform -translate-y-1/2">
               <X className="h-4 w-4 text-muted-foreground" />
             </button>
           )}
-
+          
           {/* Autocomplete Dropdown */}
           {showAutocomplete && (
-            <SearchAutocomplete
-              leads={searchQuery ? filteredLeads : filterLeadsByTimezone(leadsData)}
-              onLeadSelect={handleLeadSelect}
+            <SearchAutocomplete 
+              leads={searchQuery ? filteredLeads : filterLeadsByTimezone(leadsData)} 
+              onLeadSelect={handleLeadSelect} 
               searchQuery={searchQuery}
-              actualIndices={(searchQuery ? filteredLeads : filterLeadsByTimezone(leadsData)).map(lead =>
+              actualIndices={(searchQuery ? filteredLeads : filterLeadsByTimezone(leadsData)).map(lead => 
                 leadsData.findIndex(l => l.name === lead.name && l.phone === lead.phone) + 1
               )}
               totalLeads={leadsData.length}
@@ -927,27 +853,20 @@ const CallingScreen: React.FC<CallingScreenProps> = ({
         </div>
       </div>
 
-      {/* Main Content - Centered with better mobile support */}
-      <div className="flex-1 flex items-center justify-center min-h-0 px-4 py-4 safe-area-inset">
-        <div className="w-full max-w-md space-y-6 flex flex-col justify-center">
+      {/* Main Content - Perfectly centered */}
+      <div className="flex-1 flex items-center justify-center p-4 min-h-0">
+        <div className="w-full max-w-md space-y-6">
           {/* Current Lead Card */}
           <Card className="shadow-2xl border-border/50 rounded-3xl bg-card h-[400px] flex flex-col">
             <CardContent className="p-6 space-y-4 flex-1 flex flex-col">
-              {/* Timezone Filter - Top Center */}
-              <div className="flex justify-center">
+              {/* Top row with timezone filter and file name */}
+              <div className="flex items-start justify-between">
                 <button
                   onClick={toggleTimezoneFilter}
                   className="text-sm text-muted-foreground hover:text-foreground transition-colors px-2 py-1"
                 >
                   {timezoneFilter === 'ALL' ? 'All States' : 'EST & CST'}
                 </button>
-              </div>
-
-              {/* Top row with count and list name */}
-              <div className="flex items-start justify-between">
-                <p className="text-sm text-muted-foreground opacity-30">
-                  {actualLeadIndex}/{leadsData.length}
-                </p>
                 <p className="text-sm text-muted-foreground opacity-30">
                   {fileName}
                 </p>
@@ -955,18 +874,23 @@ const CallingScreen: React.FC<CallingScreenProps> = ({
 
               {/* Lead info - Main content area */}
               <div className="text-center space-y-3 flex-1 flex flex-col justify-center">
+                {/* Lead counter above name */}
+                <p className="text-sm text-muted-foreground opacity-60">
+                  {actualLeadIndex}/{leadsData.length}
+                </p>
+                
                 <h2 className="text-3xl font-bold text-foreground">{currentLead.name}</h2>
-
+                
                 <div className="flex items-center justify-center space-x-2">
                   <Phone className="h-4 w-4 text-muted-foreground" />
                   <p className="text-lg text-muted-foreground">{currentLead.phone}</p>
                 </div>
-
+                
                 {/* State and timezone */}
                 <p className="text-sm text-muted-foreground">
                   {getStateFromAreaCode(currentLead.phone)}
                 </p>
-
+                
                 <p className="text-sm text-muted-foreground">
                   Called: {currentLead.called || 0} times
                 </p>
@@ -978,9 +902,9 @@ const CallingScreen: React.FC<CallingScreenProps> = ({
               </div>
 
               {/* Main Call Button */}
-              <Button
-                onClick={handleCall}
-                size="lg"
+              <Button 
+                onClick={handleCall} 
+                size="lg" 
                 className="w-full h-16 text-lg font-semibold bg-green-600 text-white rounded-2xl shadow-lg"
               >
                 <Phone className="h-6 w-6 mr-2" />
@@ -993,27 +917,27 @@ const CallingScreen: React.FC<CallingScreenProps> = ({
           <div className="space-y-4">
             {/* Previous/Next Navigation */}
             <div className="flex gap-4">
-              <Button
-                variant="outline"
-                onClick={handlePrevious}
-                disabled={historyIndex <= 0}
+              <Button 
+                variant="outline" 
+                onClick={handlePrevious} 
+                disabled={historyIndex <= 0} 
                 className="flex-1 h-12 rounded-2xl shadow-lg active:scale-95 transition-transform duration-100 select-none outline-none focus:outline-none focus-visible:ring-0 focus-visible:ring-offset-0"
                 style={{ WebkitTapHighlightColor: 'transparent' }}
-                onTouchStart={() => { }}
-                onTouchEnd={() => { }}
+                onTouchStart={() => {}}
+                onTouchEnd={() => {}}
               >
                 <ArrowLeft className="h-4 w-4 mr-2" />
                 Previous
               </Button>
-
-              <Button
-                variant="outline"
-                onClick={handleNext}
-                disabled={filteredLeads.length <= 1}
+              
+              <Button 
+                variant="outline" 
+                onClick={handleNext} 
+                disabled={filteredLeads.length <= 1} 
                 className="flex-1 h-12 rounded-2xl shadow-lg active:scale-95 transition-transform duration-100 select-none outline-none focus:outline-none focus-visible:ring-0 focus-visible:ring-offset-0"
                 style={{ WebkitTapHighlightColor: 'transparent' }}
-                onTouchStart={() => { }}
-                onTouchEnd={() => { }}
+                onTouchStart={() => {}}
+                onTouchEnd={() => {}}
               >
                 Next
                 <ArrowRight className="h-4 w-4 ml-2" />
@@ -1023,19 +947,19 @@ const CallingScreen: React.FC<CallingScreenProps> = ({
             {/* Bottom Controls */}
             <div className="flex items-center justify-between">
               <div className="flex flex-col items-center space-y-1 flex-1">
-                <button
-                  onClick={toggleShuffle}
-                  disabled={filteredLeads.length <= 1}
+                <button 
+                  onClick={toggleShuffle} 
+                  disabled={filteredLeads.length <= 1} 
                   className="p-3 rounded-full disabled:opacity-50"
                   style={{ WebkitTapHighlightColor: 'transparent' }}
                 >
                   <Shuffle className={`h-5 w-5 ${shuffleMode ? 'text-orange-500' : 'text-muted-foreground'}`} />
                 </button>
               </div>
-
+              
               <div className="flex flex-col items-center space-y-1 flex-1">
-                <button
-                  onClick={toggleAutoCall}
+                <button 
+                  onClick={toggleAutoCall} 
                   className={`text-sm font-medium px-3 py-1 rounded ${autoCall ? 'text-green-600' : 'text-muted-foreground'}`}
                   style={{ WebkitTapHighlightColor: 'transparent' }}
                 >
