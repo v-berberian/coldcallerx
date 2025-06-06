@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Phone, ArrowLeft, ArrowRight, Shuffle, X, Upload } from 'lucide-react';
 import SearchAutocomplete from './SearchAutocomplete';
 import ThemeToggle from './ThemeToggle';
@@ -38,23 +39,31 @@ const CallingScreen: React.FC<CallingScreenProps> = ({
   const [navigationHistory, setNavigationHistory] = useState<number[]>([0]);
   const [historyIndex, setHistoryIndex] = useState(0);
   const [showAutocomplete, setShowAutocomplete] = useState(false);
+  const [timezoneFilter, setTimezoneFilter] = useState<'ALL' | 'EST' | 'CST'>('ALL');
 
   useEffect(() => {
+    // Filter leads based on search query and timezone
+    let filtered = leadsData;
+    
+    // Apply timezone filter first
+    filtered = filterLeadsByTimezone(filtered);
+    
+    // Then apply search filter
     if (searchQuery.trim()) {
-      const filtered = leadsData.filter(lead => lead.name.toLowerCase().includes(searchQuery.toLowerCase()) || lead.phone.includes(searchQuery));
-      setFilteredLeads(filtered);
-      setCurrentIndex(0);
-      setNavigationHistory([0]);
-      setHistoryIndex(0);
+      filtered = filtered.filter(lead => 
+        lead.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
+        lead.phone.includes(searchQuery)
+      );
       setIsSearching(true);
     } else {
-      setFilteredLeads(leadsData);
       setIsSearching(false);
     }
-  }, [searchQuery, leadsData]);
-
-  const currentLead = filteredLeads[currentIndex];
-  const totalLeads = isSearching ? filteredLeads.length : leadsData.length;
+    
+    setFilteredLeads(filtered);
+    setCurrentIndex(0);
+    setNavigationHistory([0]);
+    setHistoryIndex(0);
+  }, [searchQuery, leadsData, timezoneFilter]);
 
   const formatPhoneNumber = (phone: string): string => {
     const digits = phone.replace(/\D/g, '');
@@ -364,6 +373,309 @@ const CallingScreen: React.FC<CallingScreenProps> = ({
     return '';
   };
 
+  const getTimezoneGroup = (phone: string): 'EST' | 'CST' | 'OTHER' => {
+    const digits = phone.replace(/\D/g, '');
+    if (digits.length >= 3) {
+      const areaCode = digits.slice(0, 3);
+      const stateMap: { [key: string]: { timezone: string } } = {
+        '201': { timezone: 'America/New_York' },
+        '202': { timezone: 'America/New_York' },
+        '203': { timezone: 'America/New_York' },
+        '205': { timezone: 'America/Chicago' },
+        '206': { timezone: 'America/Los_Angeles' },
+        '207': { timezone: 'America/New_York' },
+        '208': { timezone: 'America/Boise' },
+        '209': { timezone: 'America/Los_Angeles' },
+        '210': { timezone: 'America/Chicago' },
+        '212': { timezone: 'America/New_York' },
+        '213': { timezone: 'America/Los_Angeles' },
+        '214': { timezone: 'America/Chicago' },
+        '215': { timezone: 'America/New_York' },
+        '216': { timezone: 'America/New_York' },
+        '217': { timezone: 'America/Chicago' },
+        '218': { timezone: 'America/Chicago' },
+        '219': { timezone: 'America/New_York' },
+        '224': { timezone: 'America/Chicago' },
+        '225': { timezone: 'America/Chicago' },
+        '228': { timezone: 'America/Chicago' },
+        '229': { timezone: 'America/New_York' },
+        '231': { timezone: 'America/New_York' },
+        '234': { timezone: 'America/New_York' },
+        '239': { timezone: 'America/New_York' },
+        '240': { timezone: 'America/New_York' },
+        '248': { timezone: 'America/New_York' },
+        '251': { timezone: 'America/Chicago' },
+        '252': { timezone: 'America/New_York' },
+        '253': { timezone: 'America/Los_Angeles' },
+        '254': { timezone: 'America/Chicago' },
+        '256': { timezone: 'America/Chicago' },
+        '260': { timezone: 'America/New_York' },
+        '262': { timezone: 'America/Chicago' },
+        '267': { timezone: 'America/New_York' },
+        '269': { timezone: 'America/New_York' },
+        '270': { timezone: 'America/Chicago' },
+        '276': { timezone: 'America/New_York' },
+        '281': { timezone: 'America/Chicago' },
+        '301': { timezone: 'America/New_York' },
+        '302': { timezone: 'America/New_York' },
+        '303': { timezone: 'America/Denver' },
+        '304': { timezone: 'America/New_York' },
+        '305': { timezone: 'America/New_York' },
+        '307': { timezone: 'America/Denver' },
+        '308': { timezone: 'America/Chicago' },
+        '309': { timezone: 'America/Chicago' },
+        '310': { timezone: 'America/Los_Angeles' },
+        '312': { timezone: 'America/Chicago' },
+        '313': { timezone: 'America/New_York' },
+        '314': { timezone: 'America/Chicago' },
+        '315': { timezone: 'America/New_York' },
+        '316': { timezone: 'America/Chicago' },
+        '317': { timezone: 'America/New_York' },
+        '318': { timezone: 'America/Chicago' },
+        '319': { timezone: 'America/Chicago' },
+        '320': { timezone: 'America/Chicago' },
+        '321': { timezone: 'America/New_York' },
+        '323': { timezone: 'America/Los_Angeles' },
+        '330': { timezone: 'America/New_York' },
+        '331': { timezone: 'America/Chicago' },
+        '334': { timezone: 'America/Chicago' },
+        '336': { timezone: 'America/New_York' },
+        '337': { timezone: 'America/Chicago' },
+        '339': { timezone: 'America/New_York' },
+        '347': { timezone: 'America/New_York' },
+        '351': { timezone: 'America/New_York' },
+        '352': { timezone: 'America/New_York' },
+        '360': { timezone: 'America/Los_Angeles' },
+        '361': { timezone: 'America/Chicago' },
+        '386': { timezone: 'America/New_York' },
+        '401': { timezone: 'America/New_York' },
+        '402': { timezone: 'America/Chicago' },
+        '404': { timezone: 'America/New_York' },
+        '405': { timezone: 'America/Chicago' },
+        '406': { timezone: 'America/Denver' },
+        '407': { timezone: 'America/New_York' },
+        '408': { timezone: 'America/Los_Angeles' },
+        '409': { timezone: 'America/Chicago' },
+        '410': { timezone: 'America/New_York' },
+        '412': { timezone: 'America/New_York' },
+        '413': { timezone: 'America/New_York' },
+        '414': { timezone: 'America/Chicago' },
+        '415': { timezone: 'America/Los_Angeles' },
+        '417': { timezone: 'America/Chicago' },
+        '419': { timezone: 'America/New_York' },
+        '423': { timezone: 'America/New_York' },
+        '424': { timezone: 'America/Los_Angeles' },
+        '425': { timezone: 'America/Los_Angeles' },
+        '430': { timezone: 'America/Chicago' },
+        '432': { timezone: 'America/Chicago' },
+        '434': { timezone: 'America/New_York' },
+        '435': { timezone: 'America/Denver' },
+        '440': { timezone: 'America/New_York' },
+        '443': { timezone: 'America/New_York' },
+        '458': { timezone: 'America/Los_Angeles' },
+        '469': { timezone: 'America/Chicago' },
+        '470': { timezone: 'America/New_York' },
+        '475': { timezone: 'America/New_York' },
+        '478': { timezone: 'America/New_York' },
+        '479': { timezone: 'America/Chicago' },
+        '480': { timezone: 'America/Phoenix' },
+        '484': { timezone: 'America/New_York' },
+        '501': { timezone: 'America/Chicago' },
+        '502': { timezone: 'America/New_York' },
+        '503': { timezone: 'America/Los_Angeles' },
+        '504': { timezone: 'America/Chicago' },
+        '505': { timezone: 'America/Denver' },
+        '507': { timezone: 'America/Chicago' },
+        '508': { timezone: 'America/New_York' },
+        '509': { timezone: 'America/Los_Angeles' },
+        '510': { timezone: 'America/Los_Angeles' },
+        '512': { timezone: 'America/Chicago' },
+        '513': { timezone: 'America/New_York' },
+        '515': { timezone: 'America/Chicago' },
+        '516': { timezone: 'America/New_York' },
+        '517': { timezone: 'America/New_York' },
+        '518': { timezone: 'America/New_York' },
+        '520': { timezone: 'America/Phoenix' },
+        '530': { timezone: 'America/Los_Angeles' },
+        '540': { timezone: 'America/New_York' },
+        '541': { timezone: 'America/Los_Angeles' },
+        '551': { timezone: 'America/New_York' },
+        '559': { timezone: 'America/Los_Angeles' },
+        '561': { timezone: 'America/New_York' },
+        '562': { timezone: 'America/Los_Angeles' },
+        '563': { timezone: 'America/Chicago' },
+        '567': { timezone: 'America/New_York' },
+        '570': { timezone: 'America/New_York' },
+        '571': { timezone: 'America/New_York' },
+        '573': { timezone: 'America/Chicago' },
+        '574': { timezone: 'America/New_York' },
+        '575': { timezone: 'America/Denver' },
+        '580': { timezone: 'America/Chicago' },
+        '585': { timezone: 'America/New_York' },
+        '586': { timezone: 'America/New_York' },
+        '601': { timezone: 'America/Chicago' },
+        '602': { timezone: 'America/Phoenix' },
+        '603': { timezone: 'America/New_York' },
+        '605': { timezone: 'America/Chicago' },
+        '606': { timezone: 'America/New_York' },
+        '607': { timezone: 'America/New_York' },
+        '608': { timezone: 'America/Chicago' },
+        '609': { timezone: 'America/New_York' },
+        '610': { timezone: 'America/New_York' },
+        '612': { timezone: 'America/Chicago' },
+        '614': { timezone: 'America/New_York' },
+        '615': { timezone: 'America/Chicago' },
+        '616': { timezone: 'America/New_York' },
+        '617': { timezone: 'America/New_York' },
+        '618': { timezone: 'America/Chicago' },
+        '619': { timezone: 'America/Los_Angeles' },
+        '620': { timezone: 'America/Chicago' },
+        '623': { timezone: 'America/Phoenix' },
+        '626': { timezone: 'America/Los_Angeles' },
+        '630': { timezone: 'America/Chicago' },
+        '631': { timezone: 'America/New_York' },
+        '636': { timezone: 'America/Chicago' },
+        '641': { timezone: 'America/Chicago' },
+        '646': { timezone: 'America/New_York' },
+        '650': { timezone: 'America/Los_Angeles' },
+        '651': { timezone: 'America/Chicago' },
+        '660': { timezone: 'America/Chicago' },
+        '661': { timezone: 'America/Los_Angeles' },
+        '662': { timezone: 'America/Chicago' },
+        '678': { timezone: 'America/New_York' },
+        '682': { timezone: 'America/Chicago' },
+        '701': { timezone: 'America/Chicago' },
+        '702': { timezone: 'America/Los_Angeles' },
+        '703': { timezone: 'America/New_York' },
+        '704': { timezone: 'America/New_York' },
+        '706': { timezone: 'America/New_York' },
+        '707': { timezone: 'America/Los_Angeles' },
+        '708': { timezone: 'America/Chicago' },
+        '712': { timezone: 'America/Chicago' },
+        '713': { timezone: 'America/Chicago' },
+        '714': { timezone: 'America/Los_Angeles' },
+        '715': { timezone: 'America/Chicago' },
+        '716': { timezone: 'America/New_York' },
+        '717': { timezone: 'America/New_York' },
+        '718': { timezone: 'America/New_York' },
+        '719': { timezone: 'America/Denver' },
+        '720': { timezone: 'America/Denver' },
+        '724': { timezone: 'America/New_York' },
+        '727': { timezone: 'America/New_York' },
+        '731': { timezone: 'America/Chicago' },
+        '732': { timezone: 'America/New_York' },
+        '734': { timezone: 'America/New_York' },
+        '737': { timezone: 'America/Chicago' },
+        '740': { timezone: 'America/New_York' },
+        '757': { timezone: 'America/New_York' },
+        '760': { timezone: 'America/Los_Angeles' },
+        '763': { timezone: 'America/Chicago' },
+        '765': { timezone: 'America/New_York' },
+        '770': { timezone: 'America/New_York' },
+        '772': { timezone: 'America/New_York' },
+        '773': { timezone: 'America/Chicago' },
+        '774': { timezone: 'America/New_York' },
+        '775': { timezone: 'America/Los_Angeles' },
+        '781': { timezone: 'America/New_York' },
+        '785': { timezone: 'America/Chicago' },
+        '786': { timezone: 'America/New_York' },
+        '801': { timezone: 'America/Denver' },
+        '802': { timezone: 'America/New_York' },
+        '803': { timezone: 'America/New_York' },
+        '804': { timezone: 'America/New_York' },
+        '805': { timezone: 'America/Los_Angeles' },
+        '806': { timezone: 'America/Chicago' },
+        '808': { timezone: 'Pacific/Honolulu' },
+        '810': { timezone: 'America/New_York' },
+        '812': { timezone: 'America/New_York' },
+        '813': { timezone: 'America/New_York' },
+        '814': { timezone: 'America/New_York' },
+        '815': { timezone: 'America/Chicago' },
+        '816': { timezone: 'America/Chicago' },
+        '817': { timezone: 'America/Chicago' },
+        '818': { timezone: 'America/Los_Angeles' },
+        '828': { timezone: 'America/New_York' },
+        '830': { timezone: 'America/Chicago' },
+        '831': { timezone: 'America/Los_Angeles' },
+        '832': { timezone: 'America/Chicago' },
+        '843': { timezone: 'America/New_York' },
+        '845': { timezone: 'America/New_York' },
+        '847': { timezone: 'America/Chicago' },
+        '850': { timezone: 'America/Chicago' },
+        '856': { timezone: 'America/New_York' },
+        '857': { timezone: 'America/New_York' },
+        '858': { timezone: 'America/Los_Angeles' },
+        '859': { timezone: 'America/New_York' },
+        '860': { timezone: 'America/New_York' },
+        '862': { timezone: 'America/New_York' },
+        '863': { timezone: 'America/New_York' },
+        '864': { timezone: 'America/New_York' },
+        '865': { timezone: 'America/New_York' },
+        '870': { timezone: 'America/Chicago' },
+        '872': { timezone: 'America/Chicago' },
+        '878': { timezone: 'America/New_York' },
+        '901': { timezone: 'America/Chicago' },
+        '903': { timezone: 'America/Chicago' },
+        '904': { timezone: 'America/New_York' },
+        '906': { timezone: 'America/New_York' },
+        '907': { timezone: 'America/Anchorage' },
+        '908': { timezone: 'America/New_York' },
+        '909': { timezone: 'America/Los_Angeles' },
+        '910': { timezone: 'America/New_York' },
+        '912': { timezone: 'America/New_York' },
+        '913': { timezone: 'America/Chicago' },
+        '914': { timezone: 'America/New_York' },
+        '915': { timezone: 'America/Denver' },
+        '916': { timezone: 'America/Los_Angeles' },
+        '917': { timezone: 'America/New_York' },
+        '918': { timezone: 'America/Chicago' },
+        '919': { timezone: 'America/New_York' },
+        '920': { timezone: 'America/Chicago' },
+        '925': { timezone: 'America/Los_Angeles' },
+        '928': { timezone: 'America/Phoenix' },
+        '929': { timezone: 'America/New_York' },
+        '931': { timezone: 'America/Chicago' },
+        '936': { timezone: 'America/Chicago' },
+        '937': { timezone: 'America/New_York' },
+        '940': { timezone: 'America/Chicago' },
+        '941': { timezone: 'America/New_York' },
+        '947': { timezone: 'America/New_York' },
+        '949': { timezone: 'America/Los_Angeles' },
+        '951': { timezone: 'America/Los_Angeles' },
+        '952': { timezone: 'America/Chicago' },
+        '954': { timezone: 'America/New_York' },
+        '956': { timezone: 'America/Chicago' },
+        '959': { timezone: 'America/New_York' },
+        '970': { timezone: 'America/Denver' },
+        '971': { timezone: 'America/Los_Angeles' },
+        '972': { timezone: 'America/Chicago' },
+        '973': { timezone: 'America/New_York' },
+        '978': { timezone: 'America/New_York' },
+        '979': { timezone: 'America/Chicago' },
+        '980': { timezone: 'America/New_York' },
+        '984': { timezone: 'America/New_York' },
+        '985': { timezone: 'America/Chicago' },
+        '989': { timezone: 'America/New_York' }
+      };
+      
+      const info = stateMap[areaCode];
+      if (info) {
+        if (info.timezone === 'America/New_York') return 'EST';
+        if (info.timezone === 'America/Chicago') return 'CST';
+      }
+    }
+    return 'OTHER';
+  };
+
+  const filterLeadsByTimezone = (leads: Lead[]): Lead[] => {
+    if (timezoneFilter === 'ALL') return leads;
+    
+    return leads.filter(lead => {
+      const timezoneGroup = getTimezoneGroup(lead.phone);
+      return timezoneGroup === timezoneFilter;
+    });
+  };
+
   const parseCSV = (text: string): Lead[] => {
     const lines = text.split('\n');
     const leads: Lead[] = [];
@@ -412,6 +724,9 @@ const CallingScreen: React.FC<CallingScreenProps> = ({
     // Reset the input
     event.target.value = '';
   };
+
+  const currentLead = filteredLeads[currentIndex];
+  const totalLeads = isSearching ? filteredLeads.length : filterLeadsByTimezone(leadsData).length;
 
   const handleCall = () => {
     if (currentLead) {
@@ -597,12 +912,12 @@ const CallingScreen: React.FC<CallingScreenProps> = ({
           {/* Autocomplete Dropdown */}
           {showAutocomplete && (
             <SearchAutocomplete 
-              leads={searchQuery ? filteredLeads : leadsData} 
+              leads={searchQuery ? filteredLeads : filterLeadsByTimezone(leadsData)} 
               onLeadSelect={handleLeadSelect} 
               searchQuery={searchQuery}
-              actualIndices={searchQuery ? filteredLeads.map(lead => 
+              actualIndices={(searchQuery ? filteredLeads : filterLeadsByTimezone(leadsData)).map(lead => 
                 leadsData.findIndex(l => l.name === lead.name && l.phone === lead.phone) + 1
-              ) : leadsData.map((_, index) => index + 1)}
+              )}
               totalLeads={leadsData.length}
             />
           )}
@@ -632,6 +947,28 @@ const CallingScreen: React.FC<CallingScreenProps> = ({
                 <div className="flex items-center justify-center space-x-2">
                   <Phone className="h-4 w-4 text-muted-foreground" />
                   <p className="text-lg text-muted-foreground">{currentLead.phone}</p>
+                </div>
+
+                {/* Timezone Filter */}
+                <div className="flex justify-center">
+                  <RadioGroup 
+                    value={timezoneFilter} 
+                    onValueChange={(value: 'ALL' | 'EST' | 'CST') => setTimezoneFilter(value)}
+                    className="flex flex-row space-x-4"
+                  >
+                    <div className="flex items-center space-x-1">
+                      <RadioGroupItem value="ALL" id="all" />
+                      <label htmlFor="all" className="text-sm text-muted-foreground cursor-pointer">ALL</label>
+                    </div>
+                    <div className="flex items-center space-x-1">
+                      <RadioGroupItem value="EST" id="est" />
+                      <label htmlFor="est" className="text-sm text-muted-foreground cursor-pointer">EST</label>
+                    </div>
+                    <div className="flex items-center space-x-1">
+                      <RadioGroupItem value="CST" id="cst" />
+                      <label htmlFor="cst" className="text-sm text-muted-foreground cursor-pointer">CST</label>
+                    </div>
+                  </RadioGroup>
                 </div>
                 
                 {/* State and timezone */}
