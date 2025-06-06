@@ -502,7 +502,7 @@ const CallingScreen: React.FC<CallingScreenProps> = ({
         {/* Header */}
         <div className="bg-background border-b border-border p-4">
           <div className="flex items-center justify-between mb-4">
-            <label className="cursor-pointer p-2 rounded-lg transition-colors hover:bg-muted/50 text-muted-foreground hover:text-foreground">
+            <label className="cursor-pointer p-2 rounded-lg transition-colors text-muted-foreground">
               <Upload className="h-4 w-4" />
               <input
                 type="file"
@@ -518,9 +518,9 @@ const CallingScreen: React.FC<CallingScreenProps> = ({
           <div className="flex items-center justify-center">
             <div className="flex items-center space-x-3">
               <h1 className="text-2xl font-bold">
-                <span className="text-blue-400">Cold</span>
-                <span className="text-blue-400">Caller </span>
-                <span className="text-blue-400">X</span>
+                <span className="text-blue-500">Cold</span>
+                <span className="text-foreground">Caller </span>
+                <span className="text-blue-500">X</span>
               </h1>
             </div>
           </div>
@@ -557,7 +557,7 @@ const CallingScreen: React.FC<CallingScreenProps> = ({
       {/* Header */}
       <div className="bg-background border-b border-border p-4">
         <div className="flex items-center justify-between mb-4">
-          <label className="cursor-pointer p-2 rounded-lg transition-colors hover:bg-muted/50 text-muted-foreground hover:text-foreground">
+          <label className="cursor-pointer p-2 rounded-lg transition-colors text-muted-foreground">
             <Upload className="h-4 w-4" />
             <input
               type="file"
@@ -569,9 +569,9 @@ const CallingScreen: React.FC<CallingScreenProps> = ({
           
           <div className="flex items-center space-x-3">
             <h1 className="text-2xl font-bold">
-              <span className="text-blue-400">Cold</span>
-              <span className="text-primary">Caller </span>
-              <span className="text-blue-400">X</span>
+              <span className="text-blue-500">Cold</span>
+              <span className="text-foreground">Caller </span>
+              <span className="text-blue-500">X</span>
             </h1>
           </div>
           
@@ -587,7 +587,7 @@ const CallingScreen: React.FC<CallingScreenProps> = ({
             onChange={e => setSearchQuery(e.target.value)} 
             onFocus={handleSearchFocus} 
             onBlur={handleSearchBlur} 
-            className="w-full px-4 py-2 bg-muted/30 rounded-xl border border-input text-center placeholder:text-center focus:outline-none focus:ring-2 focus:ring-ring caret-transparent" 
+            className="w-full px-4 py-2 bg-muted/30 rounded-xl border border-input text-center placeholder:text-center caret-transparent" 
           />
           {searchQuery && (
             <button onClick={clearSearch} className="absolute right-3 top-1/2 transform -translate-y-1/2">
@@ -614,14 +614,14 @@ const CallingScreen: React.FC<CallingScreenProps> = ({
       <div className="flex-grow flex items-center justify-center p-6">
         <div className="w-full max-w-md space-y-6">
           {/* Current Lead Card */}
-          <Card className="shadow-2xl border-border/50 rounded-3xl bg-card">
+          <Card className="shadow-2xl border-border/50 rounded-3xl bg-card min-h-[400px]">
             <CardContent className="p-6 space-y-6">
               {/* Top row with count and list name */}
               <div className="flex items-start justify-between">
-                <p className="text-sm text-muted-foreground/40">
+                <p className="text-sm text-muted-foreground/30">
                   {actualLeadIndex}/{leadsData.length}
                 </p>
-                <p className="text-sm text-muted-foreground/40">
+                <p className="text-sm text-muted-foreground/30">
                   {fileName}
                 </p>
               </div>
@@ -654,7 +654,7 @@ const CallingScreen: React.FC<CallingScreenProps> = ({
               <Button 
                 onClick={handleCall} 
                 size="lg" 
-                className="w-full h-16 text-lg font-semibold bg-green-600 hover:bg-green-700 text-white rounded-2xl shadow-lg transition-colors focus-visible:outline-none focus-visible:ring-0"
+                className="w-full h-16 text-lg font-semibold bg-green-600 text-white rounded-2xl shadow-lg transition-none"
               >
                 <Phone className="h-6 w-6 mr-2" />
                 Call
@@ -670,7 +670,7 @@ const CallingScreen: React.FC<CallingScreenProps> = ({
                 variant="outline" 
                 onClick={handlePrevious} 
                 disabled={historyIndex <= 0} 
-                className="flex-1 h-12 rounded-2xl shadow-lg transition-all duration-100 focus-visible:outline-none focus-visible:ring-0 active:scale-95 active:shadow-md"
+                className="flex-1 h-12 rounded-2xl shadow-lg transition-transform duration-100 active:scale-95"
               >
                 <ArrowLeft className="h-4 w-4 mr-2" />
                 Previous
@@ -680,7 +680,7 @@ const CallingScreen: React.FC<CallingScreenProps> = ({
                 variant="outline" 
                 onClick={handleNext} 
                 disabled={filteredLeads.length <= 1} 
-                className="flex-1 h-12 rounded-2xl shadow-lg transition-all duration-100 focus-visible:outline-none focus-visible:ring-0 active:scale-95 active:shadow-md"
+                className="flex-1 h-12 rounded-2xl shadow-lg transition-transform duration-100 active:scale-95"
               >
                 Next
                 <ArrowRight className="h-4 w-4 ml-2" />
@@ -693,7 +693,7 @@ const CallingScreen: React.FC<CallingScreenProps> = ({
                 <button 
                   onClick={toggleShuffle} 
                   disabled={filteredLeads.length <= 1} 
-                  className="p-3 rounded-full transition-colors disabled:opacity-50 focus-visible:outline-none"
+                  className="p-3 rounded-full transition-none disabled:opacity-50"
                 >
                   <Shuffle className={`h-5 w-5 ${shuffleMode ? 'text-orange-500' : 'text-muted-foreground'}`} />
                 </button>
@@ -702,7 +702,7 @@ const CallingScreen: React.FC<CallingScreenProps> = ({
               <div className="flex flex-col items-center space-y-1 flex-1">
                 <button 
                   onClick={toggleAutoCall} 
-                  className={`text-sm font-medium transition-colors px-3 py-1 rounded focus-visible:outline-none ${autoCall ? 'text-green-600' : 'text-muted-foreground'}`}
+                  className={`text-sm font-medium transition-none px-3 py-1 rounded ${autoCall ? 'text-green-600' : 'text-muted-foreground'}`}
                 >
                   Auto Call
                 </button>

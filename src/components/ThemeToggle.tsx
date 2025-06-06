@@ -7,7 +7,7 @@ type Theme = 'light' | 'dark' | 'system';
 const ThemeToggle: React.FC = () => {
   const [theme, setTheme] = useState<Theme>(() => {
     const saved = localStorage.getItem('theme') as Theme;
-    return saved || 'system';
+    return saved || 'light';
   });
 
   useEffect(() => {
@@ -50,7 +50,7 @@ const ThemeToggle: React.FC = () => {
   return (
     <button
       onClick={cycleTheme}
-      className="p-2 rounded-lg transition-colors hover:bg-muted/50 active:bg-muted/80 text-muted-foreground hover:text-foreground"
+      className="p-2 rounded-lg transition-none text-muted-foreground"
       title={`Current theme: ${theme}`}
     >
       {getIcon()}
