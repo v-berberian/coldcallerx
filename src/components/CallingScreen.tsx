@@ -610,8 +610,8 @@ const CallingScreen: React.FC<CallingScreenProps> = ({
       </div>
 
       {/* Main Content - Centered */}
-      <div className="flex-1 flex items-center justify-center p-6">
-        <div className="w-full max-w-md space-y-6">
+      <div className="flex-1 flex items-center justify-center">
+        <div className="w-full max-w-md space-y-6 px-6">
           {/* Current Lead Card */}
           <Card className="shadow-2xl border-border/50 rounded-3xl bg-card h-[400px] flex flex-col">
             <CardContent className="p-6 space-y-6 flex-1 flex flex-col justify-center">
@@ -669,7 +669,7 @@ const CallingScreen: React.FC<CallingScreenProps> = ({
                 variant="outline" 
                 onClick={handlePrevious} 
                 disabled={historyIndex <= 0} 
-                className="flex-1 h-12 rounded-2xl shadow-lg active:scale-95 transition-transform duration-100 select-none outline-none focus:outline-none"
+                className="flex-1 h-12 rounded-2xl shadow-lg active:scale-95 transition-transform duration-100 select-none outline-none focus:outline-none focus-visible:ring-0 focus-visible:ring-offset-0"
                 style={{ WebkitTapHighlightColor: 'transparent' }}
                 onTouchStart={() => {}}
                 onTouchEnd={() => {}}
@@ -682,7 +682,7 @@ const CallingScreen: React.FC<CallingScreenProps> = ({
                 variant="outline" 
                 onClick={handleNext} 
                 disabled={filteredLeads.length <= 1} 
-                className="flex-1 h-12 rounded-2xl shadow-lg active:scale-95 transition-transform duration-100 select-none outline-none focus:outline-none"
+                className="flex-1 h-12 rounded-2xl shadow-lg active:scale-95 transition-transform duration-100 select-none outline-none focus:outline-none focus-visible:ring-0 focus-visible:ring-offset-0"
                 style={{ WebkitTapHighlightColor: 'transparent' }}
                 onTouchStart={() => {}}
                 onTouchEnd={() => {}}
