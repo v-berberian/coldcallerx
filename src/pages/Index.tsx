@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import CallingScreen from '@/components/CallingScreen';
 import ThemeToggle from '@/components/ThemeToggle';
+import CSVImporter from '@/components/CSVImporter';
 
 interface Lead {
   name: string;
@@ -42,7 +43,16 @@ const Index = () => {
     setFileName('');
   };
 
-  // If no leads, show empty state
+  const handleLeadsImported = (importedLeads: Lead[], importedFileName: string) => {
+    setLeads(importedLeads);
+    setFileName(importedFileName);
+    
+    // Save to localStorage
+    localStorage.setItem('coldcaller-leads', JSON.stringify(importedLeads));
+    localStorage.setItem('coldcaller-filename', importedFileName);
+  };
+
+  // If no leads, show empty state with import functionality
   if (leads.length === 0) {
     return (
       <div className="h-screen h-[100vh] h-[100svh] bg-background overflow-hidden">
@@ -50,14 +60,25 @@ const Index = () => {
           <ThemeToggle />
         </div>
         
-        <div className="flex items-center justify-center h-full">
-          <div className="text-center space-y-4">
-            <h1 className="text-4xl font-bold">
+        {/* Header with logo and import */}
+        <div className="flex items-center justify-between p-4 border-b border-border">
+          <div className="flex items-center space-x-4">
+            <h1 className="text-2xl font-bold">
               <span className="text-blue-500">Cold</span>
               <span className="text-foreground">Caller </span>
               <span className="text-blue-500">X</span>
             </h1>
+          </div>
+          
+          <div className="flex items-center space-x-4">
+            <CSVImporter onLeadsImported={handleLeadsImported} />
+          </div>
+        </div>
+        
+        <div className="flex items-center justify-center h-full">
+          <div className="text-center space-y-4">
             <p className="text-lg text-muted-foreground">No leads available</p>
+            <p className="text-sm text-muted-foreground">Import a CSV file to get started</p>
           </div>
         </div>
       </div>
