@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -708,11 +709,10 @@ const CallingScreen: React.FC<CallingScreenProps> = ({
     setNavigationHistory(newHistory);
     setHistoryIndex(newHistory.length - 1);
 
+    // Remove delay for auto call - make it immediate
     if (autoCall && filteredLeads[nextIndex]) {
-      setTimeout(() => {
-        const phoneNumber = filteredLeads[nextIndex].phone.replace(/\D/g, '');
-        window.location.href = `tel:${phoneNumber}`;
-      }, 500);
+      const phoneNumber = filteredLeads[nextIndex].phone.replace(/\D/g, '');
+      window.location.href = `tel:${phoneNumber}`;
     }
   };
 
@@ -806,6 +806,9 @@ const CallingScreen: React.FC<CallingScreenProps> = ({
     ? leadsData.findIndex(lead => lead.name === currentLead.name && lead.phone === currentLead.phone) + 1
     : currentIndex + 1;
 
+  // Get the total count based on current filter
+  const totalLeadCount = timezoneFilter === 'ALL' ? leadsData.length : filterLeadsByTimezone(leadsData).length;
+
   return (
     <div className="h-screen h-[100vh] h-[100svh] bg-background flex flex-col overflow-hidden">
       {/* Header */}
@@ -856,30 +859,30 @@ const CallingScreen: React.FC<CallingScreenProps> = ({
         </div>
       </div>
 
-      {/* Main Content - Perfectly centered */}
-      <div className="flex-1 flex items-center justify-center p-4 min-h-0">
-        <div className="w-full max-w-md space-y-6">
+      {/* Main Content - Better centering for mobile app */}
+      <div className="flex-1 flex items-center justify-center p-4 min-h-0 px-6">
+        <div className="w-full max-w-sm space-y-6">
           {/* Current Lead Card */}
           <Card className="shadow-2xl border-border/50 rounded-3xl bg-card h-[400px] flex flex-col">
             <CardContent className="p-6 space-y-4 flex-1 flex flex-col">
-              {/* Top row with timezone filter and file name */}
-              <div className="flex items-start justify-between">
+              {/* Top row with timezone filter and file name - improved alignment */}
+              <div className="flex items-center justify-between">
                 <button
                   onClick={toggleTimezoneFilter}
                   className="text-sm text-muted-foreground hover:text-foreground transition-colors px-2 py-1"
                 >
                   {timezoneFilter === 'ALL' ? 'All States' : 'EST & CST'}
                 </button>
-                <p className="text-sm text-muted-foreground opacity-60">
+                <p className="text-sm text-muted-foreground opacity-40">
                   {fileName}
                 </p>
               </div>
 
               {/* Lead info - Main content area */}
               <div className="text-center space-y-3 flex-1 flex flex-col justify-center">
-                {/* Lead counter above name */}
+                {/* Lead counter above name - use filtered count */}
                 <p className="text-sm text-muted-foreground opacity-60">
-                  {actualLeadIndex}/{leadsData.length}
+                  {actualLeadIndex}/{totalLeadCount}
                 </p>
                 
                 <h2 className="text-3xl font-bold text-foreground">{currentLead.name}</h2>
@@ -904,11 +907,11 @@ const CallingScreen: React.FC<CallingScreenProps> = ({
                 )}
               </div>
 
-              {/* Main Call Button */}
+              {/* Main Call Button - ensure it's always green */}
               <Button 
                 onClick={handleCall} 
                 size="lg" 
-                className="w-full h-16 text-lg font-semibold bg-green-600 text-white rounded-2xl shadow-lg"
+                className="w-full h-16 text-lg font-semibold bg-green-600 hover:bg-green-700 text-white rounded-2xl shadow-lg"
               >
                 <Phone className="h-6 w-6 mr-2" />
                 Call
