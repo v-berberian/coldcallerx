@@ -14,10 +14,8 @@ interface Lead {
 interface LeadCardProps {
   currentLead: Lead;
   fileName: string;
-  timezoneFilter: 'ALL' | 'EST_CST';
   actualLeadIndex: number;
   totalLeadCount: number;
-  onToggleTimezoneFilter: () => void;
   onCall: () => void;
   getTimezone: (phone: string) => string;
   formatLastCalled: (dateString: string) => string;
@@ -26,10 +24,8 @@ interface LeadCardProps {
 const LeadCard: React.FC<LeadCardProps> = ({
   currentLead,
   fileName,
-  timezoneFilter,
   actualLeadIndex,
   totalLeadCount,
-  onToggleTimezoneFilter,
   onCall,
   getTimezone,
   formatLastCalled
@@ -37,14 +33,11 @@ const LeadCard: React.FC<LeadCardProps> = ({
   return (
     <Card className="shadow-2xl border-border/50 rounded-3xl bg-card h-[400px] flex flex-col">
       <CardContent className="p-6 space-y-4 flex-1 flex flex-col">
-        {/* Top row with timezone filter and file name - improved alignment */}
+        {/* Top row with lead count and file name */}
         <div className="flex items-center justify-between">
-          <button
-            onClick={onToggleTimezoneFilter}
-            className="text-sm text-muted-foreground hover:text-foreground transition-colors px-2 py-1"
-          >
-            {timezoneFilter === 'ALL' ? 'All States' : 'EST & CST'}
-          </button>
+          <p className="text-sm text-muted-foreground">
+            {actualLeadIndex}/{totalLeadCount}
+          </p>
           <p className="text-sm text-muted-foreground opacity-40">
             {fileName}
           </p>
@@ -52,11 +45,6 @@ const LeadCard: React.FC<LeadCardProps> = ({
 
         {/* Lead info - Main content area */}
         <div className="text-center space-y-3 flex-1 flex flex-col justify-center">
-          {/* Lead counter above name - use filtered count */}
-          <p className="text-sm text-muted-foreground opacity-60">
-            {actualLeadIndex}/{totalLeadCount}
-          </p>
-          
           <h2 className="text-3xl font-bold text-foreground">{currentLead.name}</h2>
           <p className="text-xl text-muted-foreground font-mono tracking-wider">{currentLead.phone}</p>
           

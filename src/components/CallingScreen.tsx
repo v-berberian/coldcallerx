@@ -3,6 +3,7 @@ import CallingScreenHeader from '@/components/CallingScreenHeader';
 import LeadCard from '@/components/LeadCard';
 import NavigationControls from '@/components/NavigationControls';
 import SearchBar from '@/components/SearchBar';
+import FilterBar from '@/components/FilterBar';
 
 interface Lead {
   name: string;
@@ -27,7 +28,8 @@ const CallingScreen: React.FC<CallingScreenProps> = ({ leads, fileName, onBack, 
   const [navigationHistory, setNavigationHistory] = useState<number[]>([0]);
   const [historyIndex, setHistoryIndex] = useState(0);
   const [autoCall, setAutoCall] = useState(false);
-  const [timezoneFilter, setTimezoneFilter] = useState<'ALL' | 'EST_CST'>('ALL');
+  const [timezoneFilter, setTimezoneFilter] = useState<'ALL' | 'EST_CST' | 'PST'>('ALL');
+  const [callStatusFilter, setCallStatusFilter] = useState<'ALL' | 'UNCALLED'>('ALL');
 
   // Load saved state
   useEffect(() => {
@@ -40,6 +42,7 @@ const CallingScreen: React.FC<CallingScreenProps> = ({ leads, fileName, onBack, 
           setCurrentIndex(parsed.currentIndex || 0);
           setAutoCall(parsed.autoCall || false);
           setTimezoneFilter(parsed.timezoneFilter || 'ALL');
+          setCallStatusFilter(parsed.callStatusFilter || 'ALL');
         }
       } catch (error) {
         console.error('Error loading saved state:', error);
@@ -54,10 +57,11 @@ const CallingScreen: React.FC<CallingScreenProps> = ({ leads, fileName, onBack, 
       currentIndex,
       autoCall,
       timezoneFilter,
+      callStatusFilter,
       fileName
     };
     localStorage.setItem('coldcaller-state', JSON.stringify(stateToSave));
-  }, [leadsData, currentIndex, autoCall, timezoneFilter, fileName]);
+  }, [leadsData, currentIndex, autoCall, timezoneFilter, callStatusFilter, fileName]);
 
   // Search functionality
   useEffect(() => {
@@ -122,10 +126,21 @@ const CallingScreen: React.FC<CallingScreenProps> = ({ leads, fileName, onBack, 
 
   const filterLeadsByTimezone = (leads: Lead[]): Lead[] => {
     if (timezoneFilter === 'ALL') return leads;
+    if (timezoneFilter === 'PST') {
+      return leads.filter(lead => {
+        const timezone = getTimezone(lead.phone);
+        return timezone === 'PST';
+      });
+    }
     return leads.filter(lead => {
       const timezone = getTimezone(lead.phone);
       return timezone === 'EST' || timezone === 'CST';
     });
+  };
+
+  const filterLeadsByCallStatus = (leads: Lead[]): Lead[] => {
+    if (callStatusFilter === 'ALL') return leads;
+    return leads.filter(lead => !lead.called || lead.called === 0);
   };
 
   const formatLastCalled = (dateString: string): string => {
@@ -145,10 +160,16 @@ const CallingScreen: React.FC<CallingScreenProps> = ({ leads, fileName, onBack, 
     }
   };
 
-  const filteredLeads = filterLeadsByTimezone(leadsData);
-  const currentLead = isSearching 
-    ? leadsData.find(lead => lead.name === searchResults[0]?.name && lead.phone === searchResults[0]?.phone) || filteredLeads[currentIndex]
-    : filteredLeads[currentIndex];
+  const applyFilters = (leads: Lead[]): Lead[] => {
+    const timezoneFiltered = filterLeadsByTimezone(leads);
+    return filterLeadsByCallStatus(timezoneFiltered);
+  };
+
+  const filteredLeads = applyFilters(leadsData);
+  
+  const currentLead = isSearching && searchResults.length > 0
+    ? searchResults[0]
+    : filteredLeads[currentIndex] || filteredLeads[0];
 
   const handleCall = () => {
     const phoneNumber = currentLead.phone.replace(/\D/g, '');
@@ -178,7 +199,6 @@ const CallingScreen: React.FC<CallingScreenProps> = ({ leads, fileName, onBack, 
     setNavigationHistory(newHistory);
     setHistoryIndex(newHistory.length - 1);
 
-    // Remove delay for auto call - make it immediate
     if (autoCall && filteredLeads[nextIndex]) {
       const phoneNumber = filteredLeads[nextIndex].phone.replace(/\D/g, '');
       window.location.href = `tel:${phoneNumber}`;
@@ -231,25 +251,28 @@ const CallingScreen: React.FC<CallingScreenProps> = ({ leads, fileName, onBack, 
   };
 
   const handleLeadSelect = (lead: Lead) => {
-    const leadIndex = leadsData.findIndex(l => l.name === lead.name && l.phone === lead.phone);
-    if (leadIndex !== -1) {
-      const filteredIndex = filteredLeads.findIndex(l => l.name === lead.name && l.phone === lead.phone);
-      if (filteredIndex !== -1) {
-        setCurrentIndex(filteredIndex);
-        setIsSearching(false);
-        setSearchQuery('');
-        
-        const newHistory = navigationHistory.slice(0, historyIndex + 1);
-        newHistory.push(filteredIndex);
-        setNavigationHistory(newHistory);
-        setHistoryIndex(newHistory.length - 1);
-      }
+    const filteredIndex = filteredLeads.findIndex(l => l.name === lead.name && l.phone === lead.phone);
+    if (filteredIndex !== -1) {
+      setCurrentIndex(filteredIndex);
+      setIsSearching(false);
+      setSearchQuery('');
+      
+      const newHistory = navigationHistory.slice(0, historyIndex + 1);
+      newHistory.push(filteredIndex);
+      setNavigationHistory(newHistory);
+      setHistoryIndex(newHistory.length - 1);
     }
   };
 
-  const toggleTimezoneFilter = () => {
-    const newFilter = timezoneFilter === 'ALL' ? 'EST_CST' : 'ALL';
-    setTimezoneFilter(newFilter);
+  const handleTimezoneFilterChange = (filter: 'ALL' | 'EST_CST' | 'PST') => {
+    setTimezoneFilter(filter);
+    setCurrentIndex(0);
+    setNavigationHistory([0]);
+    setHistoryIndex(0);
+  };
+
+  const handleCallStatusFilterChange = (filter: 'ALL' | 'UNCALLED') => {
+    setCallStatusFilter(filter);
     setCurrentIndex(0);
     setNavigationHistory([0]);
     setHistoryIndex(0);
@@ -259,12 +282,11 @@ const CallingScreen: React.FC<CallingScreenProps> = ({ leads, fileName, onBack, 
     setAutoCall(!autoCall);
   };
 
-  const actualLeadIndex = isSearching 
+  const actualLeadIndex = isSearching && searchResults.length > 0
     ? leadsData.findIndex(lead => lead.name === currentLead.name && lead.phone === currentLead.phone) + 1
-    : currentIndex + 1;
+    : filteredLeads.findIndex(lead => lead.name === currentLead.name && lead.phone === currentLead.phone) + 1;
 
-  // Get the total count based on current filter
-  const totalLeadCount = timezoneFilter === 'ALL' ? leadsData.length : filterLeadsByTimezone(leadsData).length;
+  const totalLeadCount = filteredLeads.length;
 
   const searchResultsWithIndices = searchResults.map(result => {
     const actualIndex = leadsData.findIndex(lead => lead.name === result.name && lead.phone === result.phone);
@@ -279,16 +301,20 @@ const CallingScreen: React.FC<CallingScreenProps> = ({ leads, fileName, onBack, 
         onLeadsImported={onLeadsImported}
       />
 
-      {/* Main Content - Better centering for mobile app */}
       <div className="flex-1 flex items-center justify-center p-4 min-h-0 px-6">
         <div className="w-full max-w-sm space-y-6">
+          <FilterBar
+            timezoneFilter={timezoneFilter}
+            callStatusFilter={callStatusFilter}
+            onTimezoneFilterChange={handleTimezoneFilterChange}
+            onCallStatusFilterChange={handleCallStatusFilterChange}
+          />
+
           <LeadCard
             currentLead={currentLead}
             fileName={fileName}
-            timezoneFilter={timezoneFilter}
             actualLeadIndex={actualLeadIndex}
             totalLeadCount={totalLeadCount}
-            onToggleTimezoneFilter={toggleTimezoneFilter}
             onCall={handleCall}
             getTimezone={getTimezone}
             formatLastCalled={formatLastCalled}
