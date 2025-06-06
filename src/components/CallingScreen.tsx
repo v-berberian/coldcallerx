@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -250,34 +249,32 @@ const CallingScreen: React.FC<CallingScreenProps> = ({ leads, fileName, onBack }
 
         {/* Navigation Controls */}
         <div className="space-y-4">
-          {/* Previous/Next Navigation */}
-          {(currentLead.called || 0) > 0 && (
-            <div className="flex gap-4">
-              <Button
-                variant="outline"
-                onClick={handlePrevious}
-                disabled={historyIndex <= 0}
-                className="flex-1 h-12 rounded-2xl shadow-lg"
-              >
-                <ArrowLeft className="h-4 w-4 mr-2" />
-                Previous
-              </Button>
-              
-              <Button
-                variant="outline"
-                onClick={handleNext}
-                disabled={filteredLeads.length <= 1}
-                className="flex-1 h-12 rounded-2xl shadow-lg"
-              >
-                Next
-                <ArrowRight className="h-4 w-4 ml-2" />
-              </Button>
-            </div>
-          )}
+          {/* Previous/Next Navigation - Always visible */}
+          <div className="flex gap-4">
+            <Button
+              variant="outline"
+              onClick={handlePrevious}
+              disabled={historyIndex <= 0}
+              className="flex-1 h-12 rounded-2xl shadow-lg"
+            >
+              <ArrowLeft className="h-4 w-4 mr-2" />
+              Previous
+            </Button>
+            
+            <Button
+              variant="outline"
+              onClick={handleNext}
+              disabled={filteredLeads.length <= 1}
+              className="flex-1 h-12 rounded-2xl shadow-lg"
+            >
+              Next
+              <ArrowRight className="h-4 w-4 ml-2" />
+            </Button>
+          </div>
 
           {/* Bottom Controls */}
           <div className="flex items-center justify-between">
-            <div className="flex flex-col items-center space-y-1">
+            <div className="flex flex-col items-center space-y-1 flex-1">
               <button
                 onClick={toggleShuffle}
                 disabled={filteredLeads.length <= 1}
@@ -288,7 +285,7 @@ const CallingScreen: React.FC<CallingScreenProps> = ({ leads, fileName, onBack }
               <span className="text-xs text-muted-foreground">Shuffle</span>
             </div>
             
-            <div className="flex flex-col items-center space-y-1">
+            <div className="flex flex-col items-center space-y-1 flex-1">
               <button
                 onClick={toggleAutoCall}
                 className={`text-sm font-medium transition-colors px-3 py-1 rounded ${autoCall ? 'text-green-600' : 'text-muted-foreground'}`}
