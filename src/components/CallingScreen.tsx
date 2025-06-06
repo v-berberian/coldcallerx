@@ -4,6 +4,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Phone, ArrowLeft, ArrowRight, Shuffle, X } from 'lucide-react';
 import SearchAutocomplete from './SearchAutocomplete';
 import ThemeToggle from './ThemeToggle';
+import CSVImporter from './CSVImporter';
 
 interface Lead {
   name: string;
@@ -16,12 +17,14 @@ interface CallingScreenProps {
   leads: Lead[];
   fileName: string;
   onBack: () => void;
+  onLeadsImported: (leads: Lead[], fileName: string) => void;
 }
 
 const CallingScreen: React.FC<CallingScreenProps> = ({
   leads,
   fileName,
-  onBack
+  onBack,
+  onLeadsImported
 }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [autoCall, setAutoCall] = useState(false);
@@ -449,7 +452,7 @@ const CallingScreen: React.FC<CallingScreenProps> = ({
         '401': { timezone: 'America/New_York' },
         '402': { timezone: 'America/Chicago' },
         '404': { timezone: 'America/New_York' },
-        '405': { timezone: 'America/Chicago' },
+        '405': { state: 'OK', timezone: 'America/Chicago' },
         '406': { timezone: 'America/Denver' },
         '407': { timezone: 'America/New_York' },
         '408': { timezone: 'America/Los_Angeles' },
@@ -808,7 +811,7 @@ const CallingScreen: React.FC<CallingScreenProps> = ({
       {/* Header */}
       <div className="bg-background border-b border-border p-4 flex-shrink-0">
         <div className="flex items-center justify-between mb-4">
-          <div></div>
+          <CSVImporter onLeadsImported={onLeadsImported} />
           
           <div className="flex items-center space-x-3">
             <h1 className="text-2xl font-bold">
@@ -867,7 +870,7 @@ const CallingScreen: React.FC<CallingScreenProps> = ({
                 >
                   {timezoneFilter === 'ALL' ? 'All States' : 'EST & CST'}
                 </button>
-                <p className="text-sm text-muted-foreground opacity-30">
+                <p className="text-sm text-muted-foreground opacity-60">
                   {fileName}
                 </p>
               </div>

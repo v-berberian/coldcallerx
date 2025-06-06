@@ -10,10 +10,10 @@ interface Lead {
 }
 
 interface CSVImporterProps {
-  onImport: (leads: Lead[], fileName: string) => void;
+  onLeadsImported: (leads: Lead[], fileName: string) => void;
 }
 
-const CSVImporter: React.FC<CSVImporterProps> = ({ onImport }) => {
+const CSVImporter: React.FC<CSVImporterProps> = ({ onLeadsImported }) => {
   const [isDragOver, setIsDragOver] = useState(false);
   const [error, setError] = useState<string>('');
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -67,7 +67,7 @@ const CSVImporter: React.FC<CSVImporterProps> = ({ onImport }) => {
         return;
       }
       const fileName = file.name.replace('.csv', '');
-      onImport(leads, fileName);
+      onLeadsImported(leads, fileName);
     };
     reader.onerror = () => {
       setError('Error reading file');
@@ -107,49 +107,21 @@ const CSVImporter: React.FC<CSVImporterProps> = ({ onImport }) => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-white dark:from-gray-900 dark:to-gray-800 flex items-center justify-center p-4">
-      <Card className="w-full max-w-md shadow-xl">
-        <CardHeader className="text-center">
-          <div className="flex items-center justify-center space-x-3 mb-2">
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center backdrop-blur-sm border border-white/20 shadow-lg">
-              <Phone className="h-4 w-4 text-white" />
-            </div>
-            <CardTitle className="text-2xl font-bold text-primary">ColdCaller X</CardTitle>
-          </div>
-          <p className="text-muted-foreground">Import your leads to get started</p>
-        </CardHeader>
-        <CardContent>
-          <div
-            className={`border-2 border-dashed rounded-lg p-8 text-center transition-colors ${
-              isDragOver ? 'border-blue-500 bg-blue-50 dark:bg-blue-950' : 'border-gray-300'
-            }`}
-            onDrop={handleDrop}
-            onDragOver={handleDragOver}
-            onDragLeave={handleDragLeave}
-          >
-            <FileText className="mx-auto h-12 w-12 text-blue-500 mb-4" />
-            <p className="text-lg font-medium mb-2">Drop CSV file here</p>
-            <p className="text-sm text-muted-foreground mb-4">
-              File should contain Name and Phone columns
-            </p>
-            <Button onClick={handleButtonClick} className="cursor-pointer hover:bg-primary/90 active:bg-primary/80 transition-colors">
-              <Upload className="mr-2 h-4 w-4" />
-              Choose File
-            </Button>
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept=".csv,text/csv"
-              onChange={handleFileChange}
-              className="hidden"
-            />
-            {error && (
-              <p className="text-red-500 text-sm mt-4">{error}</p>
-            )}
-          </div>
-        </CardContent>
-      </Card>
-    </div>
+    <Button 
+      onClick={handleButtonClick} 
+      variant="outline" 
+      size="sm"
+      className="rounded-xl"
+    >
+      <Upload className="h-4 w-4" />
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept=".csv,text/csv"
+        onChange={handleFileChange}
+        className="hidden"
+      />
+    </Button>
   );
 };
 
