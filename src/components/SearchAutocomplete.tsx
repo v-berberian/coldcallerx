@@ -1,6 +1,7 @@
 
 import React from 'react';
 import { Card } from '@/components/ui/card';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 interface Lead {
   name: string;
@@ -15,10 +16,7 @@ interface SearchAutocompleteProps {
 }
 
 const SearchAutocomplete: React.FC<SearchAutocompleteProps> = ({ leads, onLeadSelect, searchQuery }) => {
-  // Limit to first 5 results for better UX
-  const displayLeads = leads.slice(0, 5);
-
-  if (displayLeads.length === 0) {
+  if (leads.length === 0) {
     return (
       <Card className="absolute top-full left-0 right-0 z-50 mt-1 p-4 text-center text-muted-foreground rounded-xl shadow-lg">
         No leads found
@@ -28,8 +26,8 @@ const SearchAutocomplete: React.FC<SearchAutocompleteProps> = ({ leads, onLeadSe
 
   return (
     <Card className="absolute top-full left-0 right-0 z-50 mt-1 rounded-xl shadow-lg overflow-hidden">
-      <div className="max-h-60 overflow-y-auto">
-        {displayLeads.map((lead, index) => (
+      <ScrollArea className="max-h-60">
+        {leads.map((lead, index) => (
           <button
             key={`${lead.name}-${lead.phone}-${index}`}
             onClick={() => onLeadSelect(lead)}
@@ -46,7 +44,7 @@ const SearchAutocomplete: React.FC<SearchAutocompleteProps> = ({ leads, onLeadSe
             </div>
           </button>
         ))}
-      </div>
+      </ScrollArea>
     </Card>
   );
 };

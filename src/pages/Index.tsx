@@ -1,7 +1,10 @@
 
 import React, { useState, useEffect } from 'react';
+import { Button } from '@/components/ui/button';
+import { Upload } from 'lucide-react';
 import CSVImporter from '@/components/CSVImporter';
 import CallingScreen from '@/components/CallingScreen';
+import ThemeToggle from '@/components/ThemeToggle';
 
 interface Lead {
   name: string;
@@ -61,15 +64,42 @@ const Index = () => {
 
   if (showCallingScreen && leads.length > 0) {
     return (
-      <CallingScreen 
-        leads={leads} 
-        fileName={fileName} 
-        onBack={handleBack}
-      />
+      <div className="relative min-h-screen">
+        {/* Top corner controls */}
+        <div className="absolute top-4 left-4 z-10">
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            onClick={handleBack}
+            className="p-2 h-auto text-muted-foreground hover:text-foreground"
+          >
+            <Upload className="h-4 w-4" />
+          </Button>
+        </div>
+        
+        <div className="absolute top-4 right-4 z-10">
+          <ThemeToggle />
+        </div>
+        
+        <CallingScreen 
+          leads={leads} 
+          fileName={fileName} 
+          onBack={handleBack}
+        />
+      </div>
     );
   }
 
-  return <CSVImporter onImport={handleImport} />;
+  return (
+    <div className="relative min-h-screen">
+      {/* Theme toggle in top right corner */}
+      <div className="absolute top-4 right-4 z-10">
+        <ThemeToggle />
+      </div>
+      
+      <CSVImporter onImport={handleImport} />
+    </div>
+  );
 };
 
 export default Index;

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { Phone, ArrowLeft, ArrowRight, Shuffle, Search, X } from 'lucide-react';
+import { Phone, ArrowLeft, ArrowRight, Shuffle, X } from 'lucide-react';
 import SearchAutocomplete from './SearchAutocomplete';
 
 interface Lead {
@@ -171,7 +171,6 @@ const CallingScreen: React.FC<CallingScreenProps> = ({ leads, fileName, onBack }
         
         {/* Search Bar */}
         <div className="relative">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <input
             type="text"
             placeholder="Search leads by name or phone number"
@@ -179,7 +178,7 @@ const CallingScreen: React.FC<CallingScreenProps> = ({ leads, fileName, onBack }
             onChange={(e) => setSearchQuery(e.target.value)}
             onFocus={handleSearchFocus}
             onBlur={handleSearchBlur}
-            className="w-full pl-10 pr-10 py-2 bg-muted/30 rounded-xl border border-input text-center placeholder:text-center focus:outline-none focus:ring-2 focus:ring-ring"
+            className="w-full px-4 py-2 bg-muted/30 rounded-xl border border-input text-center placeholder:text-center focus:outline-none focus:ring-2 focus:ring-ring caret-transparent"
           />
           {searchQuery && (
             <button
@@ -203,21 +202,20 @@ const CallingScreen: React.FC<CallingScreenProps> = ({ leads, fileName, onBack }
 
       {/* Main Content */}
       <div className="p-6 space-y-6">
-        {/* Lead Info */}
-        <div className="text-center space-y-2">
-          <p className="text-sm text-muted-foreground">
-            List: {fileName}
-          </p>
-          <p className="text-sm text-muted-foreground">
-            {currentIndex + 1}/{totalLeads}
-          </p>
-        </div>
-
         {/* Current Lead Card */}
-        <Card className="shadow-2xl border-border/50 rounded-3xl bg-card">
-          <CardContent className="p-8 text-center space-y-6">
+        <Card className="shadow-2xl border-border/50 rounded-3xl bg-card relative">
+          {/* Lead count - top left */}
+          <div className="absolute top-4 left-4">
+            <p className="text-sm text-muted-foreground">#{currentLeadNumber}/{totalLeads}</p>
+          </div>
+          
+          {/* List name - top right */}
+          <div className="absolute top-4 right-4">
+            <p className="text-sm text-muted-foreground">{fileName}</p>
+          </div>
+          
+          <CardContent className="p-8 pt-12 text-center space-y-6">
             <div className="space-y-4">
-              <p className="text-lg font-medium text-muted-foreground">#{currentLeadNumber}</p>
               <h2 className="text-3xl font-bold text-foreground">{currentLead.name}</h2>
               
               <div className="flex items-center justify-center space-x-2">
@@ -282,7 +280,6 @@ const CallingScreen: React.FC<CallingScreenProps> = ({ leads, fileName, onBack }
               >
                 <Shuffle className={`h-5 w-5 ${shuffleMode ? 'text-orange-500' : 'text-muted-foreground'}`} />
               </button>
-              <span className="text-xs text-muted-foreground">Shuffle</span>
             </div>
             
             <div className="flex flex-col items-center space-y-1 flex-1">
