@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Upload, FileText } from 'lucide-react';
@@ -15,6 +15,8 @@ interface CSVImporterProps {
 
 const CSVImporter: React.FC<CSVImporterProps> = ({ onImport }) => {
   const [isDragOver, setIsDragOver] = useState(false);
+  const [error, setError] = useState<string>('');
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const formatPhoneNumber = (phone: string): string => {
     // Remove all non-digit characters
@@ -49,18 +51,39 @@ const CSVImporter: React.FC<CSVImporterProps> = ({ onImport }) => {
     return leads;
   };
 
+  const handleFileProcess = (file: File) => {
+    if (file.type !== 'text/csv' && !file.name.endsWith('.csv')) {
+      setError('Please select a valid CSV file');
+      return;
+    }
+
+    setError('');
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const text = e.target?.result as string;
+      const leads = parseCSV(text);
+      if (leads.length === 0) {
+        setError('No valid leads found in the CSV file');
+        return;
+      }
+      const fileName = file.name.replace('.csv', '');
+      onImport(leads, fileName);
+    };
+    reader.onerror = () => {
+      setError('Error reading file');
+    };
+    reader.readAsText(file);
+  };
+
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
-    if (file && file.type === 'text/csv') {
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        const text = e.target?.result as string;
-        const leads = parseCSV(text);
-        const fileName = file.name.replace('.csv', '');
-        onImport(leads, fileName);
-      };
-      reader.readAsText(file);
+    if (file) {
+      handleFileProcess(file);
     }
+  };
+
+  const handleButtonClick = () => {
+    fileInputRef.current?.click();
   };
 
   const handleDrop = (event: React.DragEvent) => {
@@ -68,15 +91,8 @@ const CSVImporter: React.FC<CSVImporterProps> = ({ onImport }) => {
     setIsDragOver(false);
     
     const file = event.dataTransfer.files[0];
-    if (file && file.type === 'text/csv') {
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        const text = e.target?.result as string;
-        const leads = parseCSV(text);
-        const fileName = file.name.replace('.csv', '');
-        onImport(leads, fileName);
-      };
-      reader.readAsText(file);
+    if (file) {
+      handleFileProcess(file);
     }
   };
 
@@ -111,19 +127,20 @@ const CSVImporter: React.FC<CSVImporterProps> = ({ onImport }) => {
             <p className="text-sm text-muted-foreground mb-4">
               File should contain Name and Phone columns
             </p>
-            <label htmlFor="csv-upload">
-              <Button className="cursor-pointer">
-                <Upload className="mr-2 h-4 w-4" />
-                Choose File
-              </Button>
-            </label>
+            <Button onClick={handleButtonClick} className="cursor-pointer">
+              <Upload className="mr-2 h-4 w-4" />
+              Choose File
+            </Button>
             <input
-              id="csv-upload"
+              ref={fileInputRef}
               type="file"
-              accept=".csv"
+              accept=".csv,text/csv"
               onChange={handleFileChange}
               className="hidden"
             />
+            {error && (
+              <p className="text-red-500 text-sm mt-4">{error}</p>
+            )}
           </div>
         </CardContent>
       </Card>
