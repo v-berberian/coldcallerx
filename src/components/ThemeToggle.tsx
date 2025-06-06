@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { Sun, Moon, Monitor } from 'lucide-react';
+import { Sun, Moon, Smartphone } from 'lucide-react';
 
 type Theme = 'light' | 'dark' | 'system';
 
@@ -37,7 +37,7 @@ const ThemeToggle: React.FC = () => {
       case 'dark':
         return <Moon className="h-5 w-5" />;
       case 'system':
-        return <Monitor className="h-5 w-5" />;
+        return <Smartphone className="h-5 w-5" />;
     }
   };
 

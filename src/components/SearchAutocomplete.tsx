@@ -1,7 +1,6 @@
 
 import React from 'react';
 import { Card } from '@/components/ui/card';
-import { ScrollArea } from '@/components/ui/scroll-area';
 
 interface Lead {
   name: string;
@@ -26,7 +25,7 @@ const SearchAutocomplete: React.FC<SearchAutocompleteProps> = ({ leads, onLeadSe
 
   return (
     <Card className="absolute top-full left-0 right-0 z-50 mt-1 rounded-xl shadow-lg overflow-hidden">
-      <ScrollArea className="max-h-60">
+      <div className="max-h-60 overflow-y-auto">
         {leads.map((lead, index) => (
           <button
             key={`${lead.name}-${lead.phone}-${index}`}
@@ -44,7 +43,7 @@ const SearchAutocomplete: React.FC<SearchAutocompleteProps> = ({ leads, onLeadSe
             </div>
           </button>
         ))}
-      </ScrollArea>
+      </div>
     </Card>
   );
 };
