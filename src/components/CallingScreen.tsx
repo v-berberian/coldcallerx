@@ -1,18 +1,10 @@
+
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { Phone, ArrowLeft, ArrowRight, Shuffle, Search, X, Upload } from 'lucide-react';
+import { Phone, ArrowLeft, ArrowRight, Shuffle, X, Upload } from 'lucide-react';
 import SearchAutocomplete from './SearchAutocomplete';
-import CSVImporter from './CSVImporter';
 import ThemeToggle from './ThemeToggle';
-import {
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from "@/components/ui/sheet";
 
 interface Lead {
   name: string;
@@ -47,7 +39,6 @@ const CallingScreen: React.FC<CallingScreenProps> = ({
   const [navigationHistory, setNavigationHistory] = useState<number[]>([0]);
   const [historyIndex, setHistoryIndex] = useState(0);
   const [showAutocomplete, setShowAutocomplete] = useState(false);
-  const [isImportOpen, setIsImportOpen] = useState(false);
 
   useEffect(() => {
     if (searchQuery.trim()) {
@@ -65,7 +56,63 @@ const CallingScreen: React.FC<CallingScreenProps> = ({
 
   const currentLead = filteredLeads[currentIndex];
   const totalLeads = isSearching ? filteredLeads.length : leadsData.length;
-  const currentLeadNumber = currentIndex + 1;
+
+  const formatPhoneNumber = (phone: string): string => {
+    const digits = phone.replace(/\D/g, '');
+    if (digits.length === 10) {
+      return `(${digits.slice(0, 3)}) ${digits.slice(3, 6)}-${digits.slice(6)}`;
+    }
+    return phone;
+  };
+
+  const parseCSV = (text: string): Lead[] => {
+    const lines = text.split('\n');
+    const leads: Lead[] = [];
+    
+    for (let i = 1; i < lines.length; i++) {
+      const line = lines[i].trim();
+      if (line) {
+        const [name, phone] = line.split(',').map(cell => cell.trim().replace(/"/g, ''));
+        if (name && phone) {
+          leads.push({
+            name,
+            phone: formatPhoneNumber(phone)
+          });
+        }
+      }
+    }
+    
+    return leads;
+  };
+
+  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    if (file.type !== 'text/csv' && !file.name.endsWith('.csv')) {
+      alert('Please select a valid CSV file');
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const text = e.target?.result as string;
+      const newLeads = parseCSV(text);
+      if (newLeads.length === 0) {
+        alert('No valid leads found in the CSV file');
+        return;
+      }
+      const fileName = file.name.replace('.csv', '');
+      onImport(newLeads, fileName);
+    };
+    reader.onerror = () => {
+      alert('Error reading file');
+    };
+    reader.readAsText(file);
+    
+    // Reset the input
+    event.target.value = '';
+  };
 
   const handleCall = () => {
     if (currentLead) {
@@ -149,41 +196,32 @@ const CallingScreen: React.FC<CallingScreenProps> = ({
     }
   };
 
-  const handleImportFromModal = (importedLeads: Lead[], importedFileName: string) => {
-    onImport(importedLeads, importedFileName);
-    setIsImportOpen(false);
-  };
-
   if (leadsData.length === 0) {
     return (
       <div className="min-h-screen bg-background">
         {/* Header */}
         <div className="bg-background border-b border-border p-4">
           <div className="flex items-center justify-between mb-4">
-            <Sheet open={isImportOpen} onOpenChange={setIsImportOpen}>
-              <SheetTrigger asChild>
-                <Button variant="ghost" size="sm" className="p-2 h-auto text-muted-foreground hover:text-foreground">
-                  <Upload className="h-4 w-4" />
-                </Button>
-              </SheetTrigger>
-              <SheetContent side="bottom" className="h-[90vh]">
-                <SheetHeader>
-                  <SheetTitle>Import Leads</SheetTitle>
-                  <SheetDescription>
-                    Upload a CSV file to import your leads
-                  </SheetDescription>
-                </SheetHeader>
-                <div className="mt-6">
-                  <CSVImporter onImport={handleImportFromModal} />
-                </div>
-              </SheetContent>
-            </Sheet>
+            <label className="cursor-pointer p-2 rounded-lg transition-colors hover:bg-muted/50 text-muted-foreground hover:text-foreground">
+              <Upload className="h-4 w-4" />
+              <input
+                type="file"
+                accept=".csv,text/csv"
+                onChange={handleFileUpload}
+                className="hidden"
+              />
+            </label>
             
             <ThemeToggle />
           </div>
           
           <div className="flex items-center justify-center">
-            <h1 className="text-2xl font-bold text-primary">ColdCaller</h1>
+            <div className="flex items-center space-x-3">
+              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center backdrop-blur-sm border border-white/20 shadow-lg">
+                <Phone className="h-4 w-4 text-white" />
+              </div>
+              <h1 className="text-2xl font-bold text-primary">ColdCaller X</h1>
+            </div>
           </div>
         </div>
 
@@ -213,26 +251,22 @@ const CallingScreen: React.FC<CallingScreenProps> = ({
       {/* Header */}
       <div className="bg-background border-b border-border p-4">
         <div className="flex items-center justify-between mb-4">
-          <Sheet open={isImportOpen} onOpenChange={setIsImportOpen}>
-            <SheetTrigger asChild>
-              <Button variant="ghost" size="sm" className="p-2 h-auto text-muted-foreground hover:text-foreground">
-                <Upload className="h-4 w-4" />
-              </Button>
-            </SheetTrigger>
-            <SheetContent side="bottom" className="h-[90vh]">
-              <SheetHeader>
-                <SheetTitle>Import Leads</SheetTitle>
-                <SheetDescription>
-                  Upload a CSV file to import your leads
-                </SheetDescription>
-              </SheetHeader>
-              <div className="mt-6">
-                <CSVImporter onImport={handleImportFromModal} />
-              </div>
-            </SheetContent>
-          </Sheet>
+          <label className="cursor-pointer p-2 rounded-lg transition-colors hover:bg-muted/50 text-muted-foreground hover:text-foreground">
+            <Upload className="h-4 w-4" />
+            <input
+              type="file"
+              accept=".csv,text/csv"
+              onChange={handleFileUpload}
+              className="hidden"
+            />
+          </label>
           
-          <h1 className="text-2xl font-bold text-primary">ColdCaller</h1>
+          <div className="flex items-center space-x-3">
+            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center backdrop-blur-sm border border-white/20 shadow-lg">
+              <Phone className="h-4 w-4 text-white" />
+            </div>
+            <h1 className="text-2xl font-bold text-primary">ColdCaller X</h1>
+          </div>
           
           <ThemeToggle />
         </div>
@@ -282,7 +316,6 @@ const CallingScreen: React.FC<CallingScreenProps> = ({
 
             {/* Lead info */}
             <div className="text-center space-y-4">
-              <p className="text-lg font-medium text-muted-foreground">#{currentLeadNumber}</p>
               <h2 className="text-3xl font-bold text-foreground">{currentLead.name}</h2>
               
               <div className="flex items-center justify-center space-x-2">
@@ -304,7 +337,7 @@ const CallingScreen: React.FC<CallingScreenProps> = ({
             <Button 
               onClick={handleCall} 
               size="lg" 
-              className="w-full h-16 text-lg font-semibold bg-green-600 hover:bg-green-700 text-white rounded-2xl shadow-lg"
+              className="w-full h-16 text-lg font-semibold bg-green-600 hover:bg-green-700 active:bg-green-800 text-white rounded-2xl shadow-lg transition-colors"
             >
               <Phone className="h-6 w-6 mr-2" />
               Call
@@ -320,7 +353,7 @@ const CallingScreen: React.FC<CallingScreenProps> = ({
               variant="outline" 
               onClick={handlePrevious} 
               disabled={historyIndex <= 0} 
-              className="flex-1 h-12 rounded-2xl shadow-lg"
+              className="flex-1 h-12 rounded-2xl shadow-lg hover:bg-accent active:bg-accent/80 transition-colors"
             >
               <ArrowLeft className="h-4 w-4 mr-2" />
               Previous
@@ -330,7 +363,7 @@ const CallingScreen: React.FC<CallingScreenProps> = ({
               variant="outline" 
               onClick={handleNext} 
               disabled={filteredLeads.length <= 1} 
-              className="flex-1 h-12 rounded-2xl shadow-lg"
+              className="flex-1 h-12 rounded-2xl shadow-lg hover:bg-accent active:bg-accent/80 transition-colors"
             >
               Next
               <ArrowRight className="h-4 w-4 ml-2" />
@@ -343,7 +376,7 @@ const CallingScreen: React.FC<CallingScreenProps> = ({
               <button 
                 onClick={toggleShuffle} 
                 disabled={filteredLeads.length <= 1} 
-                className="p-3 rounded-full transition-colors disabled:opacity-50"
+                className="p-3 rounded-full transition-colors disabled:opacity-50 hover:bg-muted/50 active:bg-muted/80"
               >
                 <Shuffle className={`h-5 w-5 ${shuffleMode ? 'text-orange-500' : 'text-muted-foreground'}`} />
               </button>
@@ -352,7 +385,7 @@ const CallingScreen: React.FC<CallingScreenProps> = ({
             <div className="flex flex-col items-center space-y-1 flex-1">
               <button 
                 onClick={toggleAutoCall} 
-                className={`text-sm font-medium transition-colors px-3 py-1 rounded ${autoCall ? 'text-green-600' : 'text-muted-foreground'}`}
+                className={`text-sm font-medium transition-colors px-3 py-1 rounded hover:bg-muted/50 active:bg-muted/80 ${autoCall ? 'text-green-600' : 'text-muted-foreground'}`}
               >
                 Auto Call
               </button>
