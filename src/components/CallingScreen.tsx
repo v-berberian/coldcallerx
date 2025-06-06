@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -517,8 +518,9 @@ const CallingScreen: React.FC<CallingScreenProps> = ({
           <div className="flex items-center justify-center">
             <div className="flex items-center space-x-3">
               <h1 className="text-2xl font-bold">
-                <span className="text-blue-500">Cold</span>
-                <span className="text-primary">Caller X</span>
+                <span className="text-blue-400">Cold</span>
+                <span className="text-blue-400">Caller </span>
+                <span className="text-blue-400">X</span>
               </h1>
             </div>
           </div>
@@ -567,8 +569,9 @@ const CallingScreen: React.FC<CallingScreenProps> = ({
           
           <div className="flex items-center space-x-3">
             <h1 className="text-2xl font-bold">
-              <span className="text-blue-500">Cold</span>
-              <span className="text-primary">Caller X</span>
+              <span className="text-blue-400">Cold</span>
+              <span className="text-primary">Caller </span>
+              <span className="text-blue-400">X</span>
             </h1>
           </div>
           
@@ -601,12 +604,13 @@ const CallingScreen: React.FC<CallingScreenProps> = ({
               actualIndices={searchQuery ? filteredLeads.map(lead => 
                 leadsData.findIndex(l => l.name === lead.name && l.phone === lead.phone) + 1
               ) : leadsData.map((_, index) => index + 1)}
+              totalLeads={leadsData.length}
             />
           )}
         </div>
       </div>
 
-      {/* Main Content - Flex-grow to push content down */}
+      {/* Main Content - Centered */}
       <div className="flex-grow flex items-center justify-center p-6">
         <div className="w-full max-w-md space-y-6">
           {/* Current Lead Card */}
@@ -614,10 +618,10 @@ const CallingScreen: React.FC<CallingScreenProps> = ({
             <CardContent className="p-6 space-y-6">
               {/* Top row with count and list name */}
               <div className="flex items-start justify-between">
-                <p className="text-sm text-muted-foreground/60">
+                <p className="text-sm text-muted-foreground/40">
                   {actualLeadIndex}/{leadsData.length}
                 </p>
-                <p className="text-sm text-muted-foreground/60">
+                <p className="text-sm text-muted-foreground/40">
                   {fileName}
                 </p>
               </div>
@@ -650,7 +654,7 @@ const CallingScreen: React.FC<CallingScreenProps> = ({
               <Button 
                 onClick={handleCall} 
                 size="lg" 
-                className="w-full h-16 text-lg font-semibold bg-green-600 hover:bg-green-700 active:bg-green-800 text-white rounded-2xl shadow-lg transition-colors"
+                className="w-full h-16 text-lg font-semibold bg-green-600 hover:bg-green-700 text-white rounded-2xl shadow-lg transition-colors focus-visible:outline-none focus-visible:ring-0"
               >
                 <Phone className="h-6 w-6 mr-2" />
                 Call
@@ -666,7 +670,7 @@ const CallingScreen: React.FC<CallingScreenProps> = ({
                 variant="outline" 
                 onClick={handlePrevious} 
                 disabled={historyIndex <= 0} 
-                className="flex-1 h-12 rounded-2xl shadow-lg active:bg-accent/80 transition-colors"
+                className="flex-1 h-12 rounded-2xl shadow-lg transition-all duration-100 focus-visible:outline-none focus-visible:ring-0 active:scale-95 active:shadow-md"
               >
                 <ArrowLeft className="h-4 w-4 mr-2" />
                 Previous
@@ -676,7 +680,7 @@ const CallingScreen: React.FC<CallingScreenProps> = ({
                 variant="outline" 
                 onClick={handleNext} 
                 disabled={filteredLeads.length <= 1} 
-                className="flex-1 h-12 rounded-2xl shadow-lg active:bg-accent/80 transition-colors"
+                className="flex-1 h-12 rounded-2xl shadow-lg transition-all duration-100 focus-visible:outline-none focus-visible:ring-0 active:scale-95 active:shadow-md"
               >
                 Next
                 <ArrowRight className="h-4 w-4 ml-2" />
@@ -689,7 +693,7 @@ const CallingScreen: React.FC<CallingScreenProps> = ({
                 <button 
                   onClick={toggleShuffle} 
                   disabled={filteredLeads.length <= 1} 
-                  className="p-3 rounded-full transition-colors disabled:opacity-50 active:bg-muted/80"
+                  className="p-3 rounded-full transition-colors disabled:opacity-50 focus-visible:outline-none"
                 >
                   <Shuffle className={`h-5 w-5 ${shuffleMode ? 'text-orange-500' : 'text-muted-foreground'}`} />
                 </button>
@@ -698,7 +702,7 @@ const CallingScreen: React.FC<CallingScreenProps> = ({
               <div className="flex flex-col items-center space-y-1 flex-1">
                 <button 
                   onClick={toggleAutoCall} 
-                  className={`text-sm font-medium transition-colors px-3 py-1 rounded active:bg-muted/80 ${autoCall ? 'text-green-600' : 'text-muted-foreground'}`}
+                  className={`text-sm font-medium transition-colors px-3 py-1 rounded focus-visible:outline-none ${autoCall ? 'text-green-600' : 'text-muted-foreground'}`}
                 >
                   Auto Call
                 </button>

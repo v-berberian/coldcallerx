@@ -13,13 +13,15 @@ interface SearchAutocompleteProps {
   onLeadSelect: (lead: Lead) => void;
   searchQuery: string;
   actualIndices: number[];
+  totalLeads: number;
 }
 
 const SearchAutocomplete: React.FC<SearchAutocompleteProps> = ({ 
   leads, 
   onLeadSelect, 
   searchQuery, 
-  actualIndices 
+  actualIndices,
+  totalLeads
 }) => {
   if (leads.length === 0) {
     return (
@@ -44,7 +46,7 @@ const SearchAutocomplete: React.FC<SearchAutocompleteProps> = ({
                 <p className="text-sm text-muted-foreground">{lead.phone}</p>
               </div>
               <div className="ml-2 text-xs text-muted-foreground">
-                #{actualIndices[index]}
+                {actualIndices[index]}/{totalLeads}
               </div>
             </div>
           </button>
