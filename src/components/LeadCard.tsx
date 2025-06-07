@@ -17,9 +17,7 @@ interface LeadCardProps {
   currentIndex: number;
   totalCount: number;
   fileName: string;
-  timezoneFilter: 'ALL' | 'EST_CST';
   onCall: () => void;
-  onToggleTimezoneFilter: () => void;
 }
 
 const LeadCard: React.FC<LeadCardProps> = ({
@@ -27,21 +25,20 @@ const LeadCard: React.FC<LeadCardProps> = ({
   currentIndex,
   totalCount,
   fileName,
-  timezoneFilter,
-  onCall,
-  onToggleTimezoneFilter
+  onCall
 }) => {
   return (
-    <Card className="shadow-2xl border-border/50 rounded-3xl bg-card h-[400px] flex flex-col">
+    <Card className="shadow-2xl border-border/50 rounded-3xl bg-card h-[400px] flex flex-col relative">
       <CardContent className="p-6 space-y-4 flex-1 flex flex-col">
-        {/* Top row with timezone filter and file name */}
-        <div className="flex items-center justify-between">
-          <button
-            onClick={onToggleTimezoneFilter}
-            className="text-sm text-muted-foreground hover:text-foreground transition-colors px-2 py-1"
-          >
-            {timezoneFilter === 'ALL' ? 'All States' : 'EST & CST'}
-          </button>
+        {/* Lead counter in top left corner */}
+        <div className="absolute top-4 left-4">
+          <p className="text-sm text-muted-foreground opacity-60">
+            {currentIndex + 1}/{totalCount}
+          </p>
+        </div>
+
+        {/* File name in top right */}
+        <div className="flex justify-end">
           <p className="text-sm text-muted-foreground opacity-40">
             {fileName}
           </p>
@@ -49,11 +46,6 @@ const LeadCard: React.FC<LeadCardProps> = ({
 
         {/* Lead info - Main content area */}
         <div className="text-center space-y-3 flex-1 flex flex-col justify-center">
-          {/* Lead counter above name */}
-          <p className="text-sm text-muted-foreground opacity-60">
-            {currentIndex + 1}/{totalCount}
-          </p>
-          
           <h2 className="text-3xl font-bold text-foreground">{lead.name}</h2>
           
           <div className="flex items-center justify-center space-x-2">

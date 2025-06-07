@@ -8,6 +8,7 @@ export const useLeadNavigation = (totalLeads: number) => {
   const [shuffleMode, setShuffleMode] = useState(false);
 
   const navigateToIndex = (index: number) => {
+    console.log('navigateToIndex called with:', index, 'totalLeads:', totalLeads);
     setCurrentIndex(index);
     const newHistory = navigationHistory.slice(0, historyIndex + 1);
     newHistory.push(index);
@@ -16,6 +17,7 @@ export const useLeadNavigation = (totalLeads: number) => {
   };
 
   const handleNext = () => {
+    console.log('handleNext called, currentIndex:', currentIndex, 'totalLeads:', totalLeads);
     let nextIndex;
     if (shuffleMode) {
       do {
@@ -24,20 +26,24 @@ export const useLeadNavigation = (totalLeads: number) => {
     } else {
       nextIndex = (currentIndex + 1) % totalLeads;
     }
+    console.log('Next index calculated:', nextIndex);
     navigateToIndex(nextIndex);
     return nextIndex;
   };
 
   const handlePrevious = () => {
+    console.log('handlePrevious called, historyIndex:', historyIndex);
     if (historyIndex > 0) {
       const newHistoryIndex = historyIndex - 1;
       const prevIndex = navigationHistory[newHistoryIndex];
+      console.log('Going to previous index:', prevIndex);
       setCurrentIndex(prevIndex);
       setHistoryIndex(newHistoryIndex);
     }
   };
 
   const resetNavigation = () => {
+    console.log('resetNavigation called');
     setCurrentIndex(0);
     setNavigationHistory([0]);
     setHistoryIndex(0);

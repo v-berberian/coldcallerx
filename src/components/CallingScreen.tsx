@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -50,6 +49,7 @@ const CallingScreen: React.FC<CallingScreenProps> = ({
   };
 
   const baseFilteredLeads = filterLeadsByTimezone(leadsData);
+  console.log('baseFilteredLeads length:', baseFilteredLeads.length);
   
   // Use search hook with timezone-filtered leads
   const {
@@ -62,6 +62,8 @@ const CallingScreen: React.FC<CallingScreenProps> = ({
     handleSearchFocus,
     handleSearchBlur
   } = useLeadSearch(baseFilteredLeads);
+
+  console.log('filteredLeads length:', filteredLeads.length);
 
   // Use navigation hook
   const {
@@ -76,8 +78,11 @@ const CallingScreen: React.FC<CallingScreenProps> = ({
     canGoPrevious
   } = useLeadNavigation(filteredLeads.length);
 
+  console.log('Current navigation state - currentIndex:', currentIndex, 'filteredLeads.length:', filteredLeads.length);
+
   // Reset navigation when filtered leads change
   useEffect(() => {
+    console.log('Filtered leads changed, resetting navigation');
     resetNavigation();
   }, [filteredLeads.length, resetNavigation]);
 
@@ -92,6 +97,7 @@ const CallingScreen: React.FC<CallingScreenProps> = ({
 
   const handleCall = () => {
     const currentLead = filteredLeads[currentIndex];
+    console.log('handleCall - currentLead:', currentLead);
     if (currentLead) {
       const phoneNumber = currentLead.phone.replace(/\D/g, '');
       window.location.href = `tel:${phoneNumber}`;
@@ -108,6 +114,7 @@ const CallingScreen: React.FC<CallingScreenProps> = ({
   };
 
   const handleNextWithAutoCall = () => {
+    console.log('handleNextWithAutoCall called');
     const nextIndex = handleNext();
     
     if (autoCall && filteredLeads[nextIndex]) {
@@ -133,6 +140,7 @@ const CallingScreen: React.FC<CallingScreenProps> = ({
   };
 
   const currentLead = filteredLeads[currentIndex];
+  console.log('Current lead:', currentLead);
 
   if (leadsData.length === 0) {
     return (
@@ -260,15 +268,21 @@ const CallingScreen: React.FC<CallingScreenProps> = ({
 
       {/* Main Content - Centered properly for PWA */}
       <div className="flex-1 flex items-center justify-center p-4 min-h-0 px-6">
-        <div className="w-full max-w-sm space-y-6">
+        <div className="w-full max-w-sm space-y-6 relative">
+          {/* Timezone filter button - positioned to the left of the card */}
+          <button
+            onClick={toggleTimezoneFilter}
+            className="absolute -left-16 top-1/2 transform -translate-y-1/2 text-sm text-muted-foreground hover:text-foreground transition-colors px-2 py-1 -rotate-90 whitespace-nowrap"
+          >
+            {timezoneFilter === 'ALL' ? 'All States' : 'EST & CST'}
+          </button>
+
           <LeadCard
             lead={currentLead}
             currentIndex={actualLeadIndex - 1}
             totalCount={totalLeadCount}
             fileName={fileName}
-            timezoneFilter={timezoneFilter}
             onCall={handleCall}
-            onToggleTimezoneFilter={toggleTimezoneFilter}
           />
 
           <NavigationControls
