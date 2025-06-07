@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Phone, ArrowLeft, ArrowRight, Shuffle, X } from 'lucide-react';
 import SearchAutocomplete from './SearchAutocomplete';
+import SearchBar from './SearchBar';
 import ThemeToggle from './ThemeToggle';
 import CSVImporter from './CSVImporter';
 
@@ -550,7 +551,7 @@ const CallingScreen: React.FC<CallingScreenProps> = ({
         '703': { timezone: 'America/New_York' },
         '704': { timezone: 'America/New_York' },
         '706': { timezone: 'America/New_York' },
-        '707': { state: 'CA', timezone: 'America/Los_Angeles' },
+        '707': { timezone: 'America/Los_Angeles' },
         '708': { timezone: 'America/Chicago' },
         '712': { timezone: 'America/Chicago' },
         '713': { timezone: 'America/Chicago' },
