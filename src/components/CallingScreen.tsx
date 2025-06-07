@@ -136,7 +136,7 @@ const CallingScreen: React.FC<CallingScreenProps> = ({
 
   if (leadsData.length === 0) {
     return (
-      <div className="h-screen h-[100vh] h-[100svh] bg-background overflow-hidden">
+      <div className="h-screen h-[100vh] h-[100dvh] bg-background overflow-hidden">
         <div className="bg-background border-b border-border p-4">
           <div className="flex items-center justify-center">
             <div className="flex items-center space-x-3">
@@ -158,7 +158,7 @@ const CallingScreen: React.FC<CallingScreenProps> = ({
   // Fixed: Show "No results found" message instead of kicking to empty state
   if (!currentLead && isSearching) {
     return (
-      <div className="h-screen h-[100vh] h-[100svh] bg-background flex flex-col overflow-hidden">
+      <div className="h-screen h-[100vh] h-[100dvh] bg-background flex flex-col overflow-hidden">
         {/* Header */}
         <div className="bg-background border-b border-border p-4 flex-shrink-0">
           <div className="flex items-center justify-between mb-4">
@@ -200,7 +200,7 @@ const CallingScreen: React.FC<CallingScreenProps> = ({
 
   if (!currentLead) {
     return (
-      <div className="h-screen h-[100vh] h-[100svh] bg-background flex items-center justify-center p-4 overflow-hidden">
+      <div className="h-screen h-[100vh] h-[100dvh] bg-background flex items-center justify-center p-4 overflow-hidden">
         <Card className="w-full max-w-md shadow-lg rounded-2xl">
           <CardContent className="p-8 text-center">
             <p className="text-lg">No leads found</p>
@@ -219,7 +219,7 @@ const CallingScreen: React.FC<CallingScreenProps> = ({
   const totalLeadCount = baseFilteredLeads.length;
 
   return (
-    <div className="h-screen h-[100vh] h-[100svh] bg-background flex flex-col overflow-hidden">
+    <div className="h-screen h-[100vh] h-[100dvh] bg-background flex flex-col overflow-hidden">
       {/* Header */}
       <div className="bg-background border-b border-border p-4 flex-shrink-0">
         <div className="flex items-center justify-between mb-4">
@@ -258,7 +258,7 @@ const CallingScreen: React.FC<CallingScreenProps> = ({
         )}
       </div>
 
-      {/* Main Content */}
+      {/* Main Content - Centered properly for PWA */}
       <div className="flex-1 flex items-center justify-center p-4 min-h-0 px-6">
         <div className="w-full max-w-sm space-y-6">
           <LeadCard
