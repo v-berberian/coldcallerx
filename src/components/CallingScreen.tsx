@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -551,7 +550,7 @@ const CallingScreen: React.FC<CallingScreenProps> = ({
         '703': { timezone: 'America/New_York' },
         '704': { timezone: 'America/New_York' },
         '706': { timezone: 'America/New_York' },
-        '707': { timezone: 'America/Los_Angeles' },
+        '707': { state: 'CA', timezone: 'America/Los_Angeles' },
         '708': { timezone: 'America/Chicago' },
         '712': { timezone: 'America/Chicago' },
         '713': { timezone: 'America/Chicago' },
@@ -829,20 +828,14 @@ const CallingScreen: React.FC<CallingScreenProps> = ({
         
         {/* Search Bar */}
         <div className="relative">
-          <input 
-            type="text" 
-            placeholder="Search leads by name or phone number" 
-            value={searchQuery} 
-            onChange={e => setSearchQuery(e.target.value)} 
-            onFocus={handleSearchFocus} 
-            onBlur={handleSearchBlur} 
-            className="w-full px-4 py-2 bg-muted/30 rounded-xl border border-input text-center placeholder:text-center caret-transparent" 
+          <SearchBar
+            searchQuery={searchQuery}
+            onSearchChange={setSearchQuery}
+            onSearchFocus={handleSearchFocus}
+            onSearchBlur={handleSearchBlur}
+            onClearSearch={clearSearch}
+            fileName={fileName}
           />
-          {searchQuery && (
-            <button onClick={clearSearch} className="absolute right-3 top-1/2 transform -translate-y-1/2">
-              <X className="h-4 w-4 text-muted-foreground" />
-            </button>
-          )}
           
           {/* Autocomplete Dropdown */}
           {showAutocomplete && (
