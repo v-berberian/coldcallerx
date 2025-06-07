@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import CallingScreen from '@/components/CallingScreen';
 import ThemeToggle from '@/components/ThemeToggle';
@@ -13,19 +14,6 @@ interface Lead {
 const Index = () => {
   const [leads, setLeads] = useState<Lead[]>([]);
   const [fileName, setFileName] = useState<string>('');
-
-  // Set status bar color to white for mobile apps
-  useEffect(() => {
-    const metaTag = document.querySelector('meta[name="theme-color"]');
-    if (metaTag) {
-      metaTag.setAttribute('content', '#ffffff');
-    } else {
-      const newMetaTag = document.createElement('meta');
-      newMetaTag.setAttribute('name', 'theme-color');
-      newMetaTag.setAttribute('content', '#ffffff');
-      document.head.appendChild(newMetaTag);
-    }
-  }, []);
 
   // Load saved data on component mount
   useEffect(() => {
