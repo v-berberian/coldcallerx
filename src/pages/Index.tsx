@@ -55,7 +55,7 @@ const Index = () => {
   // If no leads, show empty state with proper header
   if (leads.length === 0) {
     return (
-      <div className="h-screen h-[100vh] h-[100dvh] bg-background overflow-hidden">
+      <div className="h-screen h-[100vh] h-[100svh] bg-background overflow-hidden">
         {/* Header with import icon, logo, and theme toggle */}
         <div className="flex items-center justify-between p-4 border-b border-border">
           <CSVImporter onLeadsImported={handleLeadsImported} />
