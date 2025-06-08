@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useCallback } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -69,7 +70,7 @@ const CallingScreen: React.FC<CallingScreenProps> = ({
     if (currentIndex < totalLeadCount - 1) {
       setCurrentIndex(currentIndex + 1);
       setCurrentLead(leads[currentIndex + 1]);
-      setCardKey(prevKey => prevKey + 1); // Update key for animation
+      setCardKey(prevKey => prevKey + 1);
     }
   };
 
@@ -77,7 +78,7 @@ const CallingScreen: React.FC<CallingScreenProps> = ({
     if (currentIndex > 0) {
       setCurrentIndex(currentIndex - 1);
       setCurrentLead(leads[currentIndex - 1]);
-      setCardKey(prevKey => prevKey + 1); // Update key for animation
+      setCardKey(prevKey => prevKey + 1);
     }
   };
 
@@ -94,9 +95,9 @@ const CallingScreen: React.FC<CallingScreenProps> = ({
     if (index !== -1) {
       setCurrentIndex(index);
       setCurrentLead(lead);
-      setSearchQuery(''); // Clear search query
-      setIsSearchFocused(false); // Hide autocomplete
-      setCardKey(prevKey => prevKey + 1); // Update key for animation
+      setSearchQuery('');
+      setIsSearchFocused(false);
+      setCardKey(prevKey => prevKey + 1);
     }
   };
 
@@ -186,25 +187,26 @@ const CallingScreen: React.FC<CallingScreenProps> = ({
 
               {/* Lead info - Main content area with animation */}
               <div key={`${currentLead.name}-${currentLead.phone}`} className="text-center space-y-3 flex-1 flex flex-col justify-center animate-content-change">
-                {/* State and timezone - moved to top with consistent styling */}
+                {/* State and timezone - above contact name with same styling as called/last called */}
                 <p className="text-xs text-muted-foreground">
                   {getStateFromAreaCode(currentLead.phone)}
                 </p>
                 
-                <h2 className="text-3xl font-bold text-foreground">{currentLead.name}</h2>
-                
-                <p className="text-lg text-muted-foreground text-center">{formatPhoneNumber(currentLead.phone)}</p>
-                
-                <div className="flex items-center justify-center">
-                  <p className="text-xs text-muted-foreground">
-                    Called: {currentLead.called || 0} times
-                  </p>
-                  <button onClick={resetCallCount} className="ml-2 p-1 hover:bg-accent/50 rounded-full transition-colors" style={{
+                {/* Contact name with reset button */}
+                <div className="relative">
+                  <h2 className="text-3xl font-bold text-foreground">{currentLead.name}</h2>
+                  <button onClick={resetCallCount} className="absolute -top-2 -right-2 p-1 hover:bg-accent/50 rounded-full transition-colors" style={{
                     WebkitTapHighlightColor: 'transparent'
                   }}>
                     <X className="h-3 w-3 text-muted-foreground" />
                   </button>
                 </div>
+                
+                <p className="text-lg text-muted-foreground text-center">{formatPhoneNumber(currentLead.phone)}</p>
+                
+                <p className="text-xs text-muted-foreground">
+                  Called: {currentLead.called || 0} times
+                </p>
                 
                 {currentLead.lastCalled && (
                   <p className="text-xs text-muted-foreground">
