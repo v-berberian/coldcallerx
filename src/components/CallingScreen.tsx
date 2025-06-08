@@ -31,7 +31,7 @@ const CallingScreen: React.FC<CallingScreenProps> = ({
   const [autoCall, setAutoCall] = useState(false);
   const [shuffleMode, setShuffleMode] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
-  const [filteredLeads, setFilteredLeads] = useState(leads);
+  const [searchResults, setSearchResults] = useState(leads); // Separate search results from main navigation
   const [isSearching, setIsSearching] = useState(false);
   const [leadsData, setLeadsData] = useState<Lead[]>(leads.map(lead => ({
     ...lead,
@@ -42,33 +42,27 @@ const CallingScreen: React.FC<CallingScreenProps> = ({
   const [historyIndex, setHistoryIndex] = useState(0);
   const [showAutocomplete, setShowAutocomplete] = useState(false);
   const [timezoneFilter, setTimezoneFilter] = useState<'ALL' | 'EST_CST'>('ALL');
-  const [cardKey, setCardKey] = useState(0); // For card animation
+  const [cardKey, setCardKey] = useState(0);
+
+  // Get the base leads list (filtered by timezone but not by search)
+  const getBaseLeads = () => {
+    return filterLeadsByTimezone(leadsData);
+  };
 
   useEffect(() => {
-    // Filter leads based on search query and timezone
-    let filtered = leadsData;
-
-    // Apply timezone filter first
-    filtered = filterLeadsByTimezone(filtered);
-
-    // Then apply search filter
+    // Update search results based on search query
+    const baseLeads = getBaseLeads();
+    
     if (searchQuery.trim()) {
-      filtered = filtered.filter(lead =>
+      const filtered = baseLeads.filter(lead =>
         lead.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
         lead.phone.includes(searchQuery)
       );
+      setSearchResults(filtered);
       setIsSearching(true);
     } else {
+      setSearchResults(baseLeads);
       setIsSearching(false);
-    }
-
-    setFilteredLeads(filtered);
-    
-    // Only reset index if we're starting a new search or clearing search
-    if (searchQuery.trim() === '' || currentIndex >= filtered.length) {
-      setCurrentIndex(0);
-      setNavigationHistory([0]);
-      setHistoryIndex(0);
     }
   }, [searchQuery, leadsData, timezoneFilter]);
 
@@ -684,7 +678,8 @@ const CallingScreen: React.FC<CallingScreenProps> = ({
   };
 
   const handleCall = () => {
-    const currentLead = filteredLeads[currentIndex];
+    const baseLeads = getBaseLeads();
+    const currentLead = baseLeads[currentIndex];
     if (currentLead) {
       const phoneNumber = currentLead.phone.replace(/\D/g, '');
       window.location.href = `tel:${phoneNumber}`;
@@ -699,25 +694,25 @@ const CallingScreen: React.FC<CallingScreenProps> = ({
   };
 
   const handleNext = () => {
+    const baseLeads = getBaseLeads();
     let nextIndex;
     if (shuffleMode) {
       do {
-        nextIndex = Math.floor(Math.random() * filteredLeads.length);
-      } while (nextIndex === currentIndex && filteredLeads.length > 1);
+        nextIndex = Math.floor(Math.random() * baseLeads.length);
+      } while (nextIndex === currentIndex && baseLeads.length > 1);
     } else {
-      nextIndex = (currentIndex + 1) % filteredLeads.length;
+      nextIndex = (currentIndex + 1) % baseLeads.length;
     }
     setCurrentIndex(nextIndex);
-    setCardKey(prev => prev + 1); // Trigger card animation
+    setCardKey(prev => prev + 1);
 
     const newHistory = navigationHistory.slice(0, historyIndex + 1);
     newHistory.push(nextIndex);
     setNavigationHistory(newHistory);
     setHistoryIndex(newHistory.length - 1);
 
-    // Remove delay for auto call - make it immediate
-    if (autoCall && filteredLeads[nextIndex]) {
-      const phoneNumber = filteredLeads[nextIndex].phone.replace(/\D/g, '');
+    if (autoCall && baseLeads[nextIndex]) {
+      const phoneNumber = baseLeads[nextIndex].phone.replace(/\D/g, '');
       window.location.href = `tel:${phoneNumber}`;
     }
   };
@@ -728,7 +723,7 @@ const CallingScreen: React.FC<CallingScreenProps> = ({
       const prevIndex = navigationHistory[newHistoryIndex];
       setCurrentIndex(prevIndex);
       setHistoryIndex(newHistoryIndex);
-      setCardKey(prev => prev + 1); // Trigger card animation
+      setCardKey(prev => prev + 1);
     }
   };
 
@@ -757,14 +752,15 @@ const CallingScreen: React.FC<CallingScreenProps> = ({
   };
 
   const handleLeadSelect = (lead: Lead) => {
-    const leadIndex = filteredLeads.findIndex(l => l.name === lead.name && l.phone === lead.phone);
+    const baseLeads = getBaseLeads();
+    const leadIndex = baseLeads.findIndex(l => l.name === lead.name && l.phone === lead.phone);
     if (leadIndex !== -1) {
       setCurrentIndex(leadIndex);
       setNavigationHistory([leadIndex]);
       setHistoryIndex(0);
       setSearchQuery('');
       setShowAutocomplete(false);
-      setCardKey(prev => prev + 1); // Trigger card animation
+      setCardKey(prev => prev + 1);
     }
   };
 
@@ -772,7 +768,9 @@ const CallingScreen: React.FC<CallingScreenProps> = ({
     setTimezoneFilter(timezoneFilter === 'ALL' ? 'EST_CST' : 'ALL');
   };
 
-  const currentLead = filteredLeads[currentIndex];
+  // Use base leads for main navigation, search results for autocomplete
+  const baseLeads = getBaseLeads();
+  const currentLead = baseLeads[currentIndex];
 
   if (leadsData.length === 0) {
     return (
@@ -810,9 +808,7 @@ const CallingScreen: React.FC<CallingScreenProps> = ({
   }
 
   // Calculate the actual index in the original array
-  const actualLeadIndex = isSearching 
-    ? leadsData.findIndex(lead => lead.name === currentLead.name && lead.phone === currentLead.phone) + 1
-    : currentIndex + 1;
+  const actualLeadIndex = leadsData.findIndex(lead => lead.name === currentLead.name && lead.phone === currentLead.phone) + 1;
 
   // Get the total count based on current filter
   const totalLeadCount = timezoneFilter === 'ALL' ? leadsData.length : filterLeadsByTimezone(leadsData).length;
@@ -849,10 +845,10 @@ const CallingScreen: React.FC<CallingScreenProps> = ({
           {/* Autocomplete Dropdown */}
           {showAutocomplete && (
             <SearchAutocomplete 
-              leads={searchQuery ? filteredLeads : filterLeadsByTimezone(leadsData)} 
+              leads={searchResults} 
               onLeadSelect={handleLeadSelect} 
               searchQuery={searchQuery}
-              actualIndices={(searchQuery ? filteredLeads : filterLeadsByTimezone(leadsData)).map(lead => 
+              actualIndices={searchResults.map(lead => 
                 leadsData.findIndex(l => l.name === lead.name && l.phone === lead.phone) + 1
               )}
               totalLeads={leadsData.length}
@@ -946,7 +942,7 @@ const CallingScreen: React.FC<CallingScreenProps> = ({
               <Button 
                 variant="outline" 
                 onClick={handleNext} 
-                disabled={filteredLeads.length <= 1} 
+                disabled={baseLeads.length <= 1} 
                 className="flex-1 h-12 rounded-2xl shadow-lg active:scale-95 transition-all duration-100 select-none outline-none focus:outline-none focus-visible:ring-0 focus-visible:ring-offset-0"
                 style={{ WebkitTapHighlightColor: 'transparent' }}
                 onTouchStart={() => {}}
@@ -962,7 +958,7 @@ const CallingScreen: React.FC<CallingScreenProps> = ({
               <div className="flex flex-col items-center space-y-1 flex-1">
                 <button 
                   onClick={toggleShuffle} 
-                  disabled={filteredLeads.length <= 1} 
+                  disabled={baseLeads.length <= 1} 
                   className="p-3 rounded-full disabled:opacity-50 transition-colors"
                   style={{ WebkitTapHighlightColor: 'transparent' }}
                 >
