@@ -42,11 +42,18 @@ const CallingScreen: React.FC<CallingScreenProps> = ({
   const [historyIndex, setHistoryIndex] = useState(0);
   const [showAutocomplete, setShowAutocomplete] = useState(false);
   const [timezoneFilter, setTimezoneFilter] = useState<'ALL' | 'EST_CST'>('ALL');
+  const [callFilter, setCallFilter] = useState<'ALL' | 'UNCALLED'>('ALL');
   const [cardKey, setCardKey] = useState(0);
 
-  // Get the base leads list (filtered by timezone but not by search)
+  // Get the base leads list (filtered by timezone and call status but not by search)
   const getBaseLeads = () => {
-    return filterLeadsByTimezone(leadsData);
+    let filtered = filterLeadsByTimezone(leadsData);
+    
+    if (callFilter === 'UNCALLED') {
+      filtered = filtered.filter(lead => !lead.called || lead.called === 0);
+    }
+    
+    return filtered;
   };
 
   useEffect(() => {
@@ -64,7 +71,7 @@ const CallingScreen: React.FC<CallingScreenProps> = ({
       setSearchResults(baseLeads);
       setIsSearching(false);
     }
-  }, [searchQuery, leadsData, timezoneFilter]);
+  }, [searchQuery, leadsData, timezoneFilter, callFilter]);
 
   const formatPhoneNumber = (phone: string): string => {
     const digits = phone.replace(/\D/g, '');
@@ -388,7 +395,7 @@ const CallingScreen: React.FC<CallingScreenProps> = ({
         '208': { timezone: 'America/Boise' },
         '209': { timezone: 'America/Los_Angeles' },
         '210': { timezone: 'America/Chicago' },
-        '212': { state: 'America/New_York' },
+        '212': { timezone: 'America/New_York' },
         '213': { timezone: 'America/Los_Angeles' },
         '214': { timezone: 'America/Chicago' },
         '215': { timezone: 'America/New_York' },
@@ -464,7 +471,7 @@ const CallingScreen: React.FC<CallingScreenProps> = ({
         '415': { timezone: 'America/Los_Angeles' },
         '417': { timezone: 'America/Chicago' },
         '419': { timezone: 'America/New_York' },
-        '423': { timezone: 'America/New_York' },
+        '423': { timezone: 'America/Chicago' },
         '424': { timezone: 'America/Los_Angeles' },
         '425': { timezone: 'America/Los_Angeles' },
         '430': { timezone: 'America/Chicago' },
@@ -768,6 +775,10 @@ const CallingScreen: React.FC<CallingScreenProps> = ({
     setTimezoneFilter(timezoneFilter === 'ALL' ? 'EST_CST' : 'ALL');
   };
 
+  const toggleCallFilter = () => {
+    setCallFilter(callFilter === 'ALL' ? 'UNCALLED' : 'ALL');
+  };
+
   // Use base leads for main navigation, search results for autocomplete
   const baseLeads = getBaseLeads();
   const currentLead = baseLeads[currentIndex];
@@ -860,7 +871,7 @@ const CallingScreen: React.FC<CallingScreenProps> = ({
       {/* Main Content - Better centering for mobile app */}
       <div className="flex-1 flex items-center justify-center p-4 min-h-0 px-6">
         <div className="w-full max-w-sm space-y-6">
-          {/* Timezone Filter Button - Centered relative to Previous button */}
+          {/* Filter Buttons - Centered relative to Previous and Next buttons */}
           <div className="flex">
             <div className="flex-1 flex justify-center">
               <button
@@ -871,7 +882,15 @@ const CallingScreen: React.FC<CallingScreenProps> = ({
                 {timezoneFilter === 'ALL' ? 'All States' : 'EST & CST'}
               </button>
             </div>
-            <div className="flex-1"></div>
+            <div className="flex-1 flex justify-center">
+              <button
+                onClick={toggleCallFilter}
+                className={`text-sm font-medium px-3 py-1 rounded transition-colors ${callFilter === 'UNCALLED' ? 'text-blue-600' : 'text-muted-foreground'}`}
+                style={{ WebkitTapHighlightColor: 'transparent' }}
+              >
+                {callFilter === 'ALL' ? 'All Numbers' : 'Uncalled Numbers'}
+              </button>
+            </div>
           </div>
 
           {/* Current Lead Card */}
