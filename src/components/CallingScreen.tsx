@@ -2229,7 +2229,7 @@ const CallingScreen: React.FC<CallingScreenProps> = ({
               </button>
             </div>
             <div className="flex-1 flex justify-center">
-              <button onClick={toggleCallFilter} className={`text-sm font-medium px-3 py-1 rounded transition-colors ${callFilter === 'UNCALLED' ? 'text-blue-600' : 'text-muted-foreground'}`} style={{
+              <button onClick={toggleCallFilter} className={`text-sm font-medium px-3 py-1 rounded transition-colors ${callFilter === 'UNCALLED' ? 'text-purple-600' : 'text-muted-foreground'}`} style={{
               WebkitTapHighlightColor: 'transparent'
             }}>
                 {callFilter === 'ALL' ? 'All Numbers' : 'Uncalled Numbers'}
@@ -2256,7 +2256,7 @@ const CallingScreen: React.FC<CallingScreenProps> = ({
                 
                 <div className="flex justify-center items-center">
                   <Phone className="h-4 w-4 text-muted-foreground mr-2" />
-                  <p className="text-lg text-muted-foreground">{formatPhoneNumber(currentLead.phone)}</p>
+                  <p className="text-lg text-muted-foreground text-center">{formatPhoneNumber(currentLead.phone)}</p>
                 </div>
                 
                 {/* State and timezone */}
