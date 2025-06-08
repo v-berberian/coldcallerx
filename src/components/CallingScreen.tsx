@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { Phone, ArrowLeft, ArrowRight, Shuffle, X } from 'lucide-react';
+import { Phone, ArrowLeft, ArrowRight, X } from 'lucide-react';
 import SearchAutocomplete from './SearchAutocomplete';
 import SearchBar from './SearchBar';
 import ThemeToggle from './ThemeToggle';
@@ -821,8 +821,8 @@ const CallingScreen: React.FC<CallingScreenProps> = ({
   // Calculate the actual index in the original array
   const actualLeadIndex = leadsData.findIndex(lead => lead.name === currentLead.name && lead.phone === currentLead.phone) + 1;
 
-  // Get the total count based on current filter
-  const totalLeadCount = timezoneFilter === 'ALL' ? leadsData.length : filterLeadsByTimezone(leadsData).length;
+  // Get the total count based on current filters
+  const totalLeadCount = baseLeads.length;
 
   return (
     <div className="h-screen h-[100vh] h-[100svh] bg-background flex flex-col overflow-hidden">
@@ -870,7 +870,7 @@ const CallingScreen: React.FC<CallingScreenProps> = ({
 
       {/* Main Content - Better centering for mobile app */}
       <div className="flex-1 flex items-center justify-center p-4 min-h-0 px-6">
-        <div className="w-full max-w-sm space-y-6">
+        <div className="w-full max-w-sm space-y-4">
           {/* Filter Buttons - Centered relative to Previous and Next buttons */}
           <div className="flex">
             <div className="flex-1 flex justify-center">
@@ -902,7 +902,7 @@ const CallingScreen: React.FC<CallingScreenProps> = ({
               {/* Top row with lead count and file name */}
               <div className="flex items-center justify-between">
                 <p className="text-sm text-muted-foreground">
-                  {actualLeadIndex}/{totalLeadCount}
+                  {currentIndex + 1}/{totalLeadCount}
                 </p>
                 <p className="text-sm text-muted-foreground opacity-40">
                   {fileName}
@@ -982,10 +982,10 @@ const CallingScreen: React.FC<CallingScreenProps> = ({
                 <button 
                   onClick={toggleShuffle} 
                   disabled={baseLeads.length <= 1} 
-                  className="p-3 rounded-full disabled:opacity-50 transition-colors"
+                  className={`text-sm font-medium px-3 py-1 rounded transition-colors disabled:opacity-50 ${shuffleMode ? 'text-orange-500' : 'text-muted-foreground'}`}
                   style={{ WebkitTapHighlightColor: 'transparent' }}
                 >
-                  <Shuffle className={`h-5 w-5 ${shuffleMode ? 'text-orange-500' : 'text-muted-foreground'}`} />
+                  Shuffle
                 </button>
               </div>
               
