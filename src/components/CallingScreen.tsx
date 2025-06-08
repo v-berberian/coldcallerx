@@ -2242,7 +2242,7 @@ const CallingScreen: React.FC<CallingScreenProps> = ({
             <CardContent className="p-6 space-y-4 flex-1 flex flex-col">
               {/* Top row with lead count and file name */}
               <div className="flex items-center justify-between">
-                <p className="text-sm text-muted-foreground">
+                <p className="text-sm text-muted-foreground opacity-40">
                   {currentIndex + 1}/{totalLeadCount}
                 </p>
                 <p className="text-sm text-muted-foreground opacity-40">
@@ -2254,8 +2254,8 @@ const CallingScreen: React.FC<CallingScreenProps> = ({
               <div className="text-center space-y-3 flex-1 flex flex-col justify-center">
                 <h2 className="text-3xl font-bold text-foreground">{currentLead.name}</h2>
                 
-                <div className="relative flex justify-center items-center">
-                  <Phone className="h-4 w-4 text-muted-foreground absolute -left-6" />
+                <div className="flex justify-center items-center">
+                  <Phone className="h-4 w-4 text-muted-foreground mr-2" />
                   <p className="text-lg text-muted-foreground">{formatPhoneNumber(currentLead.phone)}</p>
                 </div>
                 
