@@ -8,7 +8,7 @@ interface Lead {
   name: string;
   phone: string;
   called?: number;
-  lastCalled?: Date;
+  lastCalled?: string;
 }
 
 const Index = () => {
@@ -23,12 +23,7 @@ const Index = () => {
     if (savedLeads && savedFileName) {
       try {
         const parsedLeads = JSON.parse(savedLeads);
-        // Convert lastCalled strings back to Date objects
-        const processedLeads = parsedLeads.map((lead: any) => ({
-          ...lead,
-          lastCalled: lead.lastCalled ? new Date(lead.lastCalled) : undefined
-        }));
-        setLeads(processedLeads);
+        setLeads(parsedLeads);
         setFileName(savedFileName);
       } catch (error) {
         console.error('Error parsing saved leads:', error);
@@ -48,23 +43,13 @@ const Index = () => {
     setFileName('');
   };
 
-  const handleLeadsImported = (importedLeads: Lead[], importedFileName?: string) => {
+  const handleLeadsImported = (importedLeads: Lead[], importedFileName: string) => {
     setLeads(importedLeads);
-    if (importedFileName) {
-      setFileName(importedFileName);
-    }
+    setFileName(importedFileName);
     
     // Save to localStorage
     localStorage.setItem('coldcaller-leads', JSON.stringify(importedLeads));
-    if (importedFileName) {
-      localStorage.setItem('coldcaller-filename', importedFileName);
-    }
-  };
-
-  const handleLeadsUpdated = (updatedLeads: Lead[]) => {
-    setLeads(updatedLeads);
-    // Save to localStorage
-    localStorage.setItem('coldcaller-leads', JSON.stringify(updatedLeads));
+    localStorage.setItem('coldcaller-filename', importedFileName);
   };
 
   // If no leads, show empty state with proper header
@@ -98,7 +83,7 @@ const Index = () => {
       leads={leads} 
       fileName={fileName} 
       onBack={handleBack}
-      onLeadsImported={handleLeadsUpdated}
+      onLeadsImported={handleLeadsImported}
     />
   );
 };
