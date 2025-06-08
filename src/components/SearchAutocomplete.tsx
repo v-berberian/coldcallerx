@@ -38,7 +38,7 @@ const SearchAutocomplete: React.FC<SearchAutocompleteProps> = ({
           <button
             key={`${lead.name}-${lead.phone}-${index}`}
             onClick={() => onLeadSelect(lead)}
-            className="w-full px-4 py-3 text-left transition-colors duration-100 border-b border-border last:border-b-0 hover:bg-muted/50"
+            className="w-full px-4 py-3 text-left border-b border-border last:border-b-0"
           >
             <div className="flex justify-between items-start">
               <div className="flex-1 min-w-0">
