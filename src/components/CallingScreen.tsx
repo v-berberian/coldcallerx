@@ -2264,7 +2264,7 @@ const CallingScreen: React.FC<CallingScreenProps> = ({
 
               {/* Lead info - Main content area with animation */}
               <div key={`${currentLead.name}-${currentLead.phone}`} className="text-center space-y-3 flex-1 flex flex-col justify-center animate-content-change">
-                {/* State and timezone - moved to top */}
+                {/* State and timezone - moved to top with same font size as "Called: times" */}
                 <p className="text-sm text-muted-foreground">
                   {getStateFromAreaCode(currentLead.phone)}
                 </p>
