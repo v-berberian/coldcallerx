@@ -19,7 +19,7 @@ const SearchBar: React.FC<SearchBarProps> = ({
   onClearSearch,
   fileName
 }) => {
-  const placeholder = `Search leads in ${fileName}`;
+  const placeholder = "Search leads by name or phone number";
 
   return (
     <div className="relative">
