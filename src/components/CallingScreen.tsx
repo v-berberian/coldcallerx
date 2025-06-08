@@ -2250,8 +2250,8 @@ const CallingScreen: React.FC<CallingScreenProps> = ({
                 </p>
               </div>
 
-              {/* Lead info - Main content area */}
-              <div className="text-center space-y-3 flex-1 flex flex-col justify-center">
+              {/* Lead info - Main content area with animation */}
+              <div key={`${currentLead.name}-${currentLead.phone}`} className="text-center space-y-3 flex-1 flex flex-col justify-center animate-content-change">
                 <h2 className="text-3xl font-bold text-foreground">{currentLead.name}</h2>
                 
                 <div className="flex justify-center items-center">
