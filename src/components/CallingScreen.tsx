@@ -42,6 +42,7 @@ const CallingScreen: React.FC<CallingScreenProps> = ({
   const [historyIndex, setHistoryIndex] = useState(0);
   const [showAutocomplete, setShowAutocomplete] = useState(false);
   const [timezoneFilter, setTimezoneFilter] = useState<'ALL' | 'EST_CST'>('ALL');
+  const [cardKey, setCardKey] = useState(0); // For card animation
 
   useEffect(() => {
     // Filter leads based on search query and timezone
@@ -62,9 +63,13 @@ const CallingScreen: React.FC<CallingScreenProps> = ({
     }
 
     setFilteredLeads(filtered);
-    setCurrentIndex(0);
-    setNavigationHistory([0]);
-    setHistoryIndex(0);
+    
+    // Only reset index if we're starting a new search or clearing search
+    if (searchQuery.trim() === '' || currentIndex >= filtered.length) {
+      setCurrentIndex(0);
+      setNavigationHistory([0]);
+      setHistoryIndex(0);
+    }
   }, [searchQuery, leadsData, timezoneFilter]);
 
   const formatPhoneNumber = (phone: string): string => {
@@ -703,6 +708,7 @@ const CallingScreen: React.FC<CallingScreenProps> = ({
       nextIndex = (currentIndex + 1) % filteredLeads.length;
     }
     setCurrentIndex(nextIndex);
+    setCardKey(prev => prev + 1); // Trigger card animation
 
     const newHistory = navigationHistory.slice(0, historyIndex + 1);
     newHistory.push(nextIndex);
@@ -722,6 +728,7 @@ const CallingScreen: React.FC<CallingScreenProps> = ({
       const prevIndex = navigationHistory[newHistoryIndex];
       setCurrentIndex(prevIndex);
       setHistoryIndex(newHistoryIndex);
+      setCardKey(prev => prev + 1); // Trigger card animation
     }
   };
 
@@ -757,6 +764,7 @@ const CallingScreen: React.FC<CallingScreenProps> = ({
       setHistoryIndex(0);
       setSearchQuery('');
       setShowAutocomplete(false);
+      setCardKey(prev => prev + 1); // Trigger card animation
     }
   };
 
@@ -856,17 +864,27 @@ const CallingScreen: React.FC<CallingScreenProps> = ({
       {/* Main Content - Better centering for mobile app */}
       <div className="flex-1 flex items-center justify-center p-4 min-h-0 px-6">
         <div className="w-full max-w-sm space-y-6">
+          {/* Timezone Filter Button - Outside card */}
+          <div className="flex justify-start">
+            <button
+              onClick={toggleTimezoneFilter}
+              className="text-sm text-muted-foreground hover:text-foreground transition-colors px-3 py-2 rounded-lg border border-border hover:bg-muted/20"
+            >
+              {timezoneFilter === 'ALL' ? 'All States' : 'EST & CST'}
+            </button>
+          </div>
+
           {/* Current Lead Card */}
-          <Card className="shadow-2xl border-border/50 rounded-3xl bg-card h-[400px] flex flex-col">
+          <Card 
+            key={cardKey}
+            className="shadow-2xl border-border/50 rounded-3xl bg-card h-[400px] flex flex-col animate-scale-in"
+          >
             <CardContent className="p-6 space-y-4 flex-1 flex flex-col">
-              {/* Top row with timezone filter and file name - improved alignment */}
+              {/* Top row with lead count and file name */}
               <div className="flex items-center justify-between">
-                <button
-                  onClick={toggleTimezoneFilter}
-                  className="text-sm text-muted-foreground hover:text-foreground transition-colors px-2 py-1"
-                >
-                  {timezoneFilter === 'ALL' ? 'All States' : 'EST & CST'}
-                </button>
+                <p className="text-sm text-muted-foreground">
+                  {actualLeadIndex}/{totalLeadCount}
+                </p>
                 <p className="text-sm text-muted-foreground opacity-40">
                   {fileName}
                 </p>
@@ -874,11 +892,6 @@ const CallingScreen: React.FC<CallingScreenProps> = ({
 
               {/* Lead info - Main content area */}
               <div className="text-center space-y-3 flex-1 flex flex-col justify-center">
-                {/* Lead counter above name - use filtered count */}
-                <p className="text-sm text-muted-foreground opacity-60">
-                  {actualLeadIndex}/{totalLeadCount}
-                </p>
-                
                 <h2 className="text-3xl font-bold text-foreground">{currentLead.name}</h2>
                 
                 <div className="flex items-center justify-center space-x-2">
@@ -921,7 +934,7 @@ const CallingScreen: React.FC<CallingScreenProps> = ({
                 variant="outline" 
                 onClick={handlePrevious} 
                 disabled={historyIndex <= 0} 
-                className="flex-1 h-12 rounded-2xl shadow-lg active:scale-95 transition-transform duration-100 select-none outline-none focus:outline-none focus-visible:ring-0 focus-visible:ring-offset-0"
+                className="flex-1 h-12 rounded-2xl shadow-lg active:scale-95 transition-all duration-100 select-none outline-none focus:outline-none focus-visible:ring-0 focus-visible:ring-offset-0"
                 style={{ WebkitTapHighlightColor: 'transparent' }}
                 onTouchStart={() => {}}
                 onTouchEnd={() => {}}
@@ -934,7 +947,7 @@ const CallingScreen: React.FC<CallingScreenProps> = ({
                 variant="outline" 
                 onClick={handleNext} 
                 disabled={filteredLeads.length <= 1} 
-                className="flex-1 h-12 rounded-2xl shadow-lg active:scale-95 transition-transform duration-100 select-none outline-none focus:outline-none focus-visible:ring-0 focus-visible:ring-offset-0"
+                className="flex-1 h-12 rounded-2xl shadow-lg active:scale-95 transition-all duration-100 select-none outline-none focus:outline-none focus-visible:ring-0 focus-visible:ring-offset-0"
                 style={{ WebkitTapHighlightColor: 'transparent' }}
                 onTouchStart={() => {}}
                 onTouchEnd={() => {}}
@@ -950,7 +963,7 @@ const CallingScreen: React.FC<CallingScreenProps> = ({
                 <button 
                   onClick={toggleShuffle} 
                   disabled={filteredLeads.length <= 1} 
-                  className="p-3 rounded-full disabled:opacity-50"
+                  className="p-3 rounded-full disabled:opacity-50 transition-colors"
                   style={{ WebkitTapHighlightColor: 'transparent' }}
                 >
                   <Shuffle className={`h-5 w-5 ${shuffleMode ? 'text-orange-500' : 'text-muted-foreground'}`} />
@@ -960,7 +973,7 @@ const CallingScreen: React.FC<CallingScreenProps> = ({
               <div className="flex flex-col items-center space-y-1 flex-1">
                 <button 
                   onClick={toggleAutoCall} 
-                  className={`text-sm font-medium px-3 py-1 rounded ${autoCall ? 'text-green-600' : 'text-muted-foreground'}`}
+                  className={`text-sm font-medium px-3 py-1 rounded transition-colors ${autoCall ? 'text-green-600' : 'text-muted-foreground'}`}
                   style={{ WebkitTapHighlightColor: 'transparent' }}
                 >
                   Auto Call
