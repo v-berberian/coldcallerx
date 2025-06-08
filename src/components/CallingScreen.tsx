@@ -1,4 +1,5 @@
 
+
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -861,6 +862,17 @@ const CallingScreen: React.FC<CallingScreenProps> = ({
       {/* Main Content - Better centering for mobile app */}
       <div className="flex-1 flex items-center justify-center p-4 min-h-0 px-6">
         <div className="w-full max-w-sm space-y-6">
+          {/* Timezone Filter Button - Centered relative to Previous button */}
+          <div className="flex justify-start">
+            <button
+              onClick={toggleTimezoneFilter}
+              className={`text-sm font-medium px-3 py-1 rounded transition-colors ${timezoneFilter === 'EST_CST' ? 'text-blue-600' : 'text-muted-foreground'}`}
+              style={{ WebkitTapHighlightColor: 'transparent' }}
+            >
+              {timezoneFilter === 'ALL' ? 'All States' : 'EST & CST'}
+            </button>
+          </div>
+
           {/* Current Lead Card */}
           <Card 
             key={cardKey}
@@ -959,16 +971,6 @@ const CallingScreen: React.FC<CallingScreenProps> = ({
               
               <div className="flex flex-col items-center space-y-1 flex-1">
                 <button 
-                  onClick={toggleTimezoneFilter} 
-                  className={`text-sm font-medium px-3 py-1 rounded transition-colors ${timezoneFilter === 'EST_CST' ? 'text-blue-600' : 'text-muted-foreground'}`}
-                  style={{ WebkitTapHighlightColor: 'transparent' }}
-                >
-                  {timezoneFilter === 'ALL' ? 'All States' : 'EST & CST'}
-                </button>
-              </div>
-              
-              <div className="flex flex-col items-center space-y-1 flex-1">
-                <button 
                   onClick={toggleAutoCall} 
                   className={`text-sm font-medium px-3 py-1 rounded transition-colors ${autoCall ? 'text-green-600' : 'text-muted-foreground'}`}
                   style={{ WebkitTapHighlightColor: 'transparent' }}
@@ -985,3 +987,4 @@ const CallingScreen: React.FC<CallingScreenProps> = ({
 };
 
 export default CallingScreen;
+
