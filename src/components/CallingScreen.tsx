@@ -1,5 +1,3 @@
-
-
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -166,7 +164,7 @@ const CallingScreen: React.FC<CallingScreenProps> = ({
         '415': { state: 'CA', timezone: 'America/Los_Angeles' },
         '417': { state: 'MO', timezone: 'America/Chicago' },
         '419': { state: 'OH', timezone: 'America/New_York' },
-        '423': { state: 'TN', timezone: 'America/New_York' },
+        '423': { state: 'TN', timezone: 'America/Chicago' },
         '424': { state: 'CA', timezone: 'America/Los_Angeles' },
         '425': { state: 'WA', timezone: 'America/Los_Angeles' },
         '430': { state: 'TX', timezone: 'America/Chicago' },
@@ -390,7 +388,7 @@ const CallingScreen: React.FC<CallingScreenProps> = ({
         '208': { timezone: 'America/Boise' },
         '209': { timezone: 'America/Los_Angeles' },
         '210': { timezone: 'America/Chicago' },
-        '212': { timezone: 'America/New_York' },
+        '212': { state: 'America/New_York' },
         '213': { timezone: 'America/Los_Angeles' },
         '214': { timezone: 'America/Chicago' },
         '215': { timezone: 'America/New_York' },
@@ -863,14 +861,17 @@ const CallingScreen: React.FC<CallingScreenProps> = ({
       <div className="flex-1 flex items-center justify-center p-4 min-h-0 px-6">
         <div className="w-full max-w-sm space-y-6">
           {/* Timezone Filter Button - Centered relative to Previous button */}
-          <div className="flex justify-start">
-            <button
-              onClick={toggleTimezoneFilter}
-              className={`text-sm font-medium px-3 py-1 rounded transition-colors ${timezoneFilter === 'EST_CST' ? 'text-blue-600' : 'text-muted-foreground'}`}
-              style={{ WebkitTapHighlightColor: 'transparent' }}
-            >
-              {timezoneFilter === 'ALL' ? 'All States' : 'EST & CST'}
-            </button>
+          <div className="flex">
+            <div className="flex-1 flex justify-center">
+              <button
+                onClick={toggleTimezoneFilter}
+                className={`text-sm font-medium px-3 py-1 rounded transition-colors ${timezoneFilter === 'EST_CST' ? 'text-blue-600' : 'text-muted-foreground'}`}
+                style={{ WebkitTapHighlightColor: 'transparent' }}
+              >
+                {timezoneFilter === 'ALL' ? 'All States' : 'EST & CST'}
+              </button>
+            </div>
+            <div className="flex-1"></div>
           </div>
 
           {/* Current Lead Card */}
@@ -987,4 +988,3 @@ const CallingScreen: React.FC<CallingScreenProps> = ({
 };
 
 export default CallingScreen;
-
