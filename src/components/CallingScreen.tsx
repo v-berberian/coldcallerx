@@ -2251,9 +2251,9 @@ const CallingScreen: React.FC<CallingScreenProps> = ({
               <div className="text-center space-y-3 flex-1 flex flex-col justify-center">
                 <h2 className="text-3xl font-bold text-foreground">{currentLead.name}</h2>
                 
-                <div className="flex items-center justify-center space-x-2">
-                  <Phone className="h-4 w-4 text-muted-foreground" />
-                  <p className="text-lg text-muted-foreground text-center">{formatPhoneNumber(currentLead.phone)}</p>
+                <div className="relative flex justify-center">
+                  <Phone className="h-4 w-4 text-muted-foreground absolute left-0 top-1/2 transform -translate-y-1/2 -translate-x-6" />
+                  <p className="text-lg text-muted-foreground">{formatPhoneNumber(currentLead.phone)}</p>
                 </div>
                 
                 {/* State and timezone */}
