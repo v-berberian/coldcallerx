@@ -2152,6 +2152,7 @@ const CallingScreen: React.FC<CallingScreenProps> = ({
   // Use base leads for main navigation, search results for autocomplete
   const baseLeads = getBaseLeads();
   const currentLead = baseLeads[currentIndex];
+  
   if (leadsData.length === 0) {
     return <div className="h-screen h-[100vh] h-[100svh] bg-background overflow-hidden">
         <div className="bg-background border-b border-border p-4">
@@ -2171,6 +2172,7 @@ const CallingScreen: React.FC<CallingScreenProps> = ({
         </div>
       </div>;
   }
+  
   if (!currentLead) {
     return <div className="h-screen h-[100vh] h-[100svh] bg-background flex items-center justify-center p-4 overflow-hidden">
         <Card className="w-full max-w-md shadow-lg rounded-2xl">
@@ -2187,6 +2189,7 @@ const CallingScreen: React.FC<CallingScreenProps> = ({
 
   // Get the total count based on current filters
   const totalLeadCount = baseLeads.length;
+  
   return <div className="h-screen h-[100vh] h-[100svh] bg-background flex flex-col overflow-hidden">
       {/* Header */}
       <div className="bg-background border-b border-border p-4 flex-shrink-0">
@@ -2251,8 +2254,8 @@ const CallingScreen: React.FC<CallingScreenProps> = ({
               <div className="text-center space-y-3 flex-1 flex flex-col justify-center">
                 <h2 className="text-3xl font-bold text-foreground">{currentLead.name}</h2>
                 
-                <div className="relative flex justify-center">
-                  <Phone className="h-4 w-4 text-muted-foreground absolute left-0 top-1/2 transform -translate-y-1/2 -translate-x-6 mx-[80px] py-0 px-0 my-[4px]" />
+                <div className="relative flex justify-center items-center">
+                  <Phone className="h-4 w-4 text-muted-foreground absolute -left-6" />
                   <p className="text-lg text-muted-foreground">{formatPhoneNumber(currentLead.phone)}</p>
                 </div>
                 
