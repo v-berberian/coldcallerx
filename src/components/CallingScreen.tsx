@@ -2252,7 +2252,7 @@ const CallingScreen: React.FC<CallingScreenProps> = ({
                 <h2 className="text-3xl font-bold text-foreground">{currentLead.name}</h2>
                 
                 <div className="relative flex justify-center">
-                  <Phone className="h-4 w-4 text-muted-foreground absolute left-0 top-1/2 transform -translate-y-1/2 -translate-x-6" />
+                  <Phone className="h-4 w-4 text-muted-foreground absolute left-0 top-1/2 transform -translate-y-1/2 -translate-x-6 mx-[80px] py-0 px-0 my-[4px]" />
                   <p className="text-lg text-muted-foreground">{formatPhoneNumber(currentLead.phone)}</p>
                 </div>
                 
