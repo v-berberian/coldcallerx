@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -915,7 +916,7 @@ const CallingScreen: React.FC<CallingScreenProps> = ({
                 
                 <div className="flex items-center justify-center space-x-2">
                   <Phone className="h-4 w-4 text-muted-foreground" />
-                  <p className="text-lg text-muted-foreground">{currentLead.phone}</p>
+                  <p className="text-lg text-muted-foreground">{formatPhoneNumber(currentLead.phone)}</p>
                 </div>
                 
                 {/* State and timezone */}
