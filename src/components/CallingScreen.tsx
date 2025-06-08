@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -860,16 +861,6 @@ const CallingScreen: React.FC<CallingScreenProps> = ({
       {/* Main Content - Better centering for mobile app */}
       <div className="flex-1 flex items-center justify-center p-4 min-h-0 px-6">
         <div className="w-full max-w-sm space-y-6">
-          {/* Timezone Filter Button - Outside card */}
-          <div className="flex justify-start">
-            <button
-              onClick={toggleTimezoneFilter}
-              className="text-sm text-muted-foreground hover:text-foreground transition-colors px-3 py-2 rounded-lg border border-border hover:bg-muted/20"
-            >
-              {timezoneFilter === 'ALL' ? 'All States' : 'EST & CST'}
-            </button>
-          </div>
-
           {/* Current Lead Card */}
           <Card 
             key={cardKey}
@@ -963,6 +954,16 @@ const CallingScreen: React.FC<CallingScreenProps> = ({
                   style={{ WebkitTapHighlightColor: 'transparent' }}
                 >
                   <Shuffle className={`h-5 w-5 ${shuffleMode ? 'text-orange-500' : 'text-muted-foreground'}`} />
+                </button>
+              </div>
+              
+              <div className="flex flex-col items-center space-y-1 flex-1">
+                <button 
+                  onClick={toggleTimezoneFilter} 
+                  className={`text-sm font-medium px-3 py-1 rounded transition-colors ${timezoneFilter === 'EST_CST' ? 'text-blue-600' : 'text-muted-foreground'}`}
+                  style={{ WebkitTapHighlightColor: 'transparent' }}
+                >
+                  {timezoneFilter === 'ALL' ? 'All States' : 'EST & CST'}
                 </button>
               </div>
               
