@@ -2222,14 +2222,14 @@ const CallingScreen: React.FC<CallingScreenProps> = ({
           {/* Filter Buttons - Centered relative to Previous and Next buttons */}
           <div className="flex">
             <div className="flex-1 flex justify-center">
-              <button onClick={toggleTimezoneFilter} className={`text-sm font-medium px-3 py-1 rounded transition-colors ${timezoneFilter === 'EST_CST' ? 'text-blue-600' : 'text-muted-foreground'}`} style={{
+              <button onClick={toggleTimezoneFilter} className={`text-sm font-medium px-3 py-1 rounded transition-all duration-200 ${timezoneFilter === 'EST_CST' ? 'text-blue-600 animate-button-switch' : 'text-muted-foreground'}`} style={{
               WebkitTapHighlightColor: 'transparent'
             }}>
                 {timezoneFilter === 'ALL' ? 'All States' : 'EST & CST'}
               </button>
             </div>
             <div className="flex-1 flex justify-center">
-              <button onClick={toggleCallFilter} className={`text-sm font-medium px-3 py-1 rounded transition-colors ${callFilter === 'UNCALLED' ? 'text-purple-600' : 'text-muted-foreground'}`} style={{
+              <button onClick={toggleCallFilter} className={`text-sm font-medium px-3 py-1 rounded transition-all duration-200 ${callFilter === 'UNCALLED' ? 'text-purple-600 animate-button-switch' : 'text-muted-foreground'}`} style={{
               WebkitTapHighlightColor: 'transparent'
             }}>
                 {callFilter === 'ALL' ? 'All Numbers' : 'Uncalled Numbers'}
@@ -2254,19 +2254,27 @@ const CallingScreen: React.FC<CallingScreenProps> = ({
               <div key={`${currentLead.name}-${currentLead.phone}`} className="text-center space-y-3 flex-1 flex flex-col justify-center animate-content-change">
                 <h2 className="text-3xl font-bold text-foreground">{currentLead.name}</h2>
                 
-                <div className="flex justify-center items-center">
-                  <Phone className="h-4 w-4 text-muted-foreground mr-2" />
-                  <p className="text-lg text-muted-foreground text-center">{formatPhoneNumber(currentLead.phone)}</p>
-                </div>
+                <p className="text-lg text-muted-foreground text-center">{formatPhoneNumber(currentLead.phone)}</p>
                 
                 {/* State and timezone */}
                 <p className="text-sm text-muted-foreground">
                   {getStateFromAreaCode(currentLead.phone)}
                 </p>
                 
-                <p className="text-sm text-muted-foreground">
-                  Called: {currentLead.called || 0} times
-                </p>
+                <div className="flex items-center justify-center">
+                  <p className="text-sm text-muted-foreground">
+                    Called: {currentLead.called || 0} times
+                  </p>
+                  {(currentLead.called || 0) > 0 && (
+                    <button
+                      onClick={resetCallCount}
+                      className="ml-2 p-1 hover:bg-muted rounded transition-colors"
+                      title="Reset call count"
+                    >
+                      <X className="h-3 w-3 text-muted-foreground hover:text-foreground" />
+                    </button>
+                  )}
+                </div>
                 {currentLead.lastCalled && <p className="text-sm text-muted-foreground">
                     Last called: {currentLead.lastCalled}
                   </p>}
@@ -2322,4 +2330,5 @@ const CallingScreen: React.FC<CallingScreenProps> = ({
       </div>
     </div>;
 };
+
 export default CallingScreen;
