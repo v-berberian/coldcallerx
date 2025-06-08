@@ -2148,6 +2148,18 @@ const CallingScreen: React.FC<CallingScreenProps> = ({
   const toggleCallFilter = () => {
     setCallFilter(callFilter === 'ALL' ? 'UNCALLED' : 'ALL');
   };
+  const resetCallCount = () => {
+    const baseLeads = getBaseLeads();
+    const currentLead = baseLeads[currentIndex];
+    if (currentLead) {
+      const updatedLeads = leadsData.map(lead => 
+        lead.name === currentLead.name && lead.phone === currentLead.phone 
+          ? { ...lead, called: 0, lastCalled: undefined }
+          : lead
+      );
+      setLeadsData(updatedLeads);
+    }
+  };
 
   // Use base leads for main navigation, search results for autocomplete
   const baseLeads = getBaseLeads();
