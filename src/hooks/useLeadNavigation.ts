@@ -1,3 +1,4 @@
+
 import { useEffect } from 'react';
 import { Lead } from '../types/lead';
 import { useNavigationState } from './useNavigationState';
@@ -156,11 +157,39 @@ export const useLeadNavigation = (initialLeads: Lead[]) => {
     if (autoCall && pendingCallLead) {
       console.log('Marking pending call as completed and proceeding with navigation');
       markPendingCallAsCompleted();
-      // After marking as completed, continue with normal navigation
+      
+      // After marking as completed, we need to get fresh leads data and navigate
+      // Use setTimeout to ensure the state update is processed
+      setTimeout(() => {
+        const freshBaseLeads = getBaseLeads();
+        console.log('Fresh leads after marking call as completed:', freshBaseLeads.length);
+        
+        if (freshBaseLeads.length > 0) {
+          // Find next available lead from current position
+          let nextIndex = 0;
+          if (currentIndex < freshBaseLeads.length - 1) {
+            nextIndex = currentIndex + 1;
+          } else {
+            nextIndex = 0; // Wrap around
+          }
+          
+          const nextLead = freshBaseLeads[nextIndex];
+          console.log('Navigating to next lead after call completion:', nextLead?.name, 'at index:', nextIndex);
+          
+          updateNavigation(nextIndex);
+          
+          // Auto-call the next lead
+          if (autoCall && nextLead) {
+            executeAutoCall(nextLead);
+          }
+        }
+      }, 10);
+      
+      return;
     }
     
-    // Prevent next if auto-call is in progress (but allow if we just completed a pending call)
-    if (isAutoCallInProgress && pendingCallLead) {
+    // Prevent next if auto-call is in progress
+    if (isAutoCallInProgress) {
       console.log('Preventing next navigation because auto-call is in progress');
       return;
     }
