@@ -56,16 +56,16 @@ export const useLeadNavigation = (initialLeads: Lead[]) => {
   );
 
   useEffect(() => {
-    // Don't auto-navigate during auto-call operations
-    if (isAutoCallInProgress) {
-      console.log('Skipping filter navigation because auto-call is in progress');
+    // Don't auto-navigate during auto-call operations or when filters are changing
+    if (isAutoCallInProgress || isFilterChanging) {
+      console.log('Skipping filter navigation because auto-call is in progress or filters are changing');
       return;
     }
 
     console.log('Filter change effect triggered', { timezoneFilter, callFilter });
     setFilterChanging(true);
     
-    const baseLeadsBeforeFilter = getBaseLeads();
+    const baseLeadsBeforeFilter = filterLeadsByTimezone(leadsData, 'ALL');
     const currentlyViewedLead = baseLeadsBeforeFilter[currentIndex];
     
     console.log('Currently viewed lead:', currentlyViewedLead?.name);
@@ -141,7 +141,7 @@ export const useLeadNavigation = (initialLeads: Lead[]) => {
     }
     
     setTimeout(() => setFilterChanging(false), 100);
-  }, [timezoneFilter, callFilter, leadsData, isAutoCallInProgress]);
+  }, [timezoneFilter, callFilter, leadsData]);
 
   useEffect(() => {
     const baseLeads = getBaseLeads();
@@ -151,6 +151,12 @@ export const useLeadNavigation = (initialLeads: Lead[]) => {
   }, [timezoneFilter, callFilter, currentIndex]);
 
   const handleNext = () => {
+    // Prevent next if auto-call is in progress
+    if (isAutoCallInProgress) {
+      console.log('Preventing next navigation because auto-call is in progress');
+      return;
+    }
+    
     const baseLeads = getBaseLeads();
     navigationHandleNext(baseLeads, autoCall, executeAutoCall);
   };
