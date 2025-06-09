@@ -50,6 +50,7 @@ const CallingScreen: React.FC<CallingScreenProps> = ({
     }
     return filtered;
   };
+
   useEffect(() => {
     // Update search results based on search query
     const baseLeads = getBaseLeads();
@@ -62,6 +63,18 @@ const CallingScreen: React.FC<CallingScreenProps> = ({
       setIsSearching(false);
     }
   }, [searchQuery, leadsData, timezoneFilter, callFilter]);
+
+  // Reset current index when filters change and we have fewer leads
+  useEffect(() => {
+    const baseLeads = getBaseLeads();
+    if (currentIndex >= baseLeads.length && baseLeads.length > 0) {
+      setCurrentIndex(0);
+      setNavigationHistory([0]);
+      setHistoryIndex(0);
+      setCardKey(prev => prev + 1);
+    }
+  }, [timezoneFilter, callFilter, currentIndex]);
+
   const formatPhoneNumber = (phone: string): string => {
     const digits = phone.replace(/\D/g, '');
     if (digits.length === 10) {
@@ -2067,6 +2080,7 @@ const CallingScreen: React.FC<CallingScreenProps> = ({
       return timezoneGroup === 'EST' || timezoneGroup === 'CST';
     });
   };
+
   const handleCall = () => {
     const baseLeads = getBaseLeads();
     const currentLead = baseLeads[currentIndex];
@@ -2189,8 +2203,22 @@ const CallingScreen: React.FC<CallingScreenProps> = ({
     return <div className="h-screen h-[100vh] h-[100svh] bg-background flex items-center justify-center p-4 overflow-hidden">
         <Card className="w-full max-w-md shadow-lg rounded-2xl">
           <CardContent className="p-8 text-center">
-            <p className="text-lg">No leads found</p>
-            <Button onClick={onBack} className="mt-4 rounded-xl">Back to Import</Button>
+            <p className="text-lg">No leads found with current filters</p>
+            <div className="mt-4 space-y-2">
+              <Button 
+                onClick={() => {
+                  setTimezoneFilter('ALL');
+                  setCallFilter('ALL');
+                  setSearchQuery('');
+                }} 
+                className="w-full rounded-xl"
+              >
+                Clear All Filters
+              </Button>
+              <Button onClick={onBack} variant="outline" className="w-full rounded-xl">
+                Back to Import
+              </Button>
+            </div>
           </CardContent>
         </Card>
       </div>;
