@@ -36,13 +36,14 @@ export const useLeadNavigation = (initialLeads: Lead[]) => {
   const {
     leadsData,
     makeCall,
+    markLeadAsCalled,
     resetCallCount,
     resetAllCallCounts
   } = useLeadsData(initialLeads);
 
   const { getBaseLeads } = useLeadFiltering(leadsData, timezoneFilter, callFilter);
 
-  const { isAutoCallInProgress, pendingCallLead, executeAutoCall, markPendingCallAsCompleted } = useAutoCall(makeCall);
+  const { isAutoCallInProgress, pendingCallLead, executeAutoCall, markPendingCallAsCompleted } = useAutoCall(makeCall, markLeadAsCalled);
 
   const { handleNext: navigationHandleNext, handlePrevious, selectLead } = useNavigation(
     currentIndex,
@@ -151,15 +152,16 @@ export const useLeadNavigation = (initialLeads: Lead[]) => {
   }, [timezoneFilter, callFilter, currentIndex]);
 
   const handleNext = () => {
-    // Prevent next if auto-call is in progress
-    if (isAutoCallInProgress) {
-      console.log('Preventing next navigation because auto-call is in progress');
-      return;
-    }
-    
     // If there's a pending call from auto-call, mark it as completed first
     if (autoCall && pendingCallLead) {
+      console.log('Marking pending call as completed and proceeding with navigation');
       markPendingCallAsCompleted();
+    }
+    
+    // Prevent next if auto-call is in progress (but allow if we just completed a pending call)
+    if (isAutoCallInProgress && !pendingCallLead) {
+      console.log('Preventing next navigation because auto-call is in progress');
+      return;
     }
     
     const baseLeads = getBaseLeads();

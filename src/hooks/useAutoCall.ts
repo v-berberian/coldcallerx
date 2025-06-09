@@ -2,7 +2,10 @@
 import { useState } from 'react';
 import { Lead } from '../types/lead';
 
-export const useAutoCall = (makeCall: (lead: Lead, markAsCalled?: boolean) => void) => {
+export const useAutoCall = (
+  makeCall: (lead: Lead, markAsCalled?: boolean) => void,
+  markLeadAsCalled: (lead: Lead) => void
+) => {
   const [isAutoCallInProgress, setIsAutoCallInProgress] = useState(false);
   const [pendingCallLead, setPendingCallLead] = useState<Lead | null>(null);
 
@@ -29,7 +32,8 @@ export const useAutoCall = (makeCall: (lead: Lead, markAsCalled?: boolean) => vo
   const markPendingCallAsCompleted = () => {
     if (pendingCallLead) {
       console.log('Marking pending call as completed for:', pendingCallLead.name);
-      makeCall(pendingCallLead, true);
+      // Just mark as called without triggering phone dialer again
+      markLeadAsCalled(pendingCallLead);
       setPendingCallLead(null);
     }
   };
