@@ -66,20 +66,34 @@ const CallingScreen: React.FC<CallingScreenProps> = ({
 
   // Handle timezone and call filter changes more intelligently
   useEffect(() => {
-    const baseLeads = getBaseLeads();
+    console.log('Filter change effect triggered', { timezoneFilter, callFilter });
+    
+    // Calculate the new filtered leads manually since getBaseLeads might not reflect the new filter yet
+    let newFilteredLeads = filterLeadsByTimezone(leadsData);
+    if (callFilter === 'UNCALLED') {
+      newFilteredLeads = newFilteredLeads.filter(lead => !lead.called || lead.called === 0);
+    }
+    
+    console.log('New filtered leads count:', newFilteredLeads.length);
     
     // Get the current lead we're viewing before the filter change
     const currentLeadsToCheck = isSearching ? searchResults : getBaseLeads();
     const currentlyViewedLead = currentLeadsToCheck[currentIndex];
     
+    console.log('Currently viewed lead:', currentlyViewedLead?.name);
+    
     // If the currently viewed lead is no longer in the new filtered results
-    if (currentlyViewedLead && !baseLeads.some(lead => 
+    if (currentlyViewedLead && !newFilteredLeads.some(lead => 
       lead.name === currentlyViewedLead.name && lead.phone === currentlyViewedLead.phone
     )) {
+      console.log('Current lead not in new filtered results, finding next lead');
+      
       // Find the original position of this lead in the full dataset
       const originalIndex = leadsData.findIndex(lead => 
         lead.name === currentlyViewedLead.name && lead.phone === currentlyViewedLead.phone
       );
+      
+      console.log('Original index of current lead:', originalIndex);
       
       // Look for the next available lead starting from the position after the original lead
       let nextIndex = 0;
@@ -87,27 +101,30 @@ const CallingScreen: React.FC<CallingScreenProps> = ({
       
       for (let i = originalIndex + 1; i < leadsData.length; i++) {
         const leadAtIndex = leadsData[i];
-        const indexInFiltered = baseLeads.findIndex(filteredLead => 
+        const indexInFiltered = newFilteredLeads.findIndex(filteredLead => 
           filteredLead.name === leadAtIndex.name && filteredLead.phone === leadAtIndex.phone
         );
         
         if (indexInFiltered !== -1) {
           nextIndex = indexInFiltered;
           foundNextLead = true;
+          console.log('Found next lead at index:', nextIndex, 'lead:', leadAtIndex.name);
           break;
         }
       }
       
       // If no lead found after current position, wrap around to beginning
       if (!foundNextLead) {
+        console.log('No lead found after current, wrapping to beginning');
         for (let i = 0; i <= originalIndex; i++) {
           const leadAtIndex = leadsData[i];
-          const indexInFiltered = baseLeads.findIndex(filteredLead => 
+          const indexInFiltered = newFilteredLeads.findIndex(filteredLead => 
             filteredLead.name === leadAtIndex.name && filteredLead.phone === leadAtIndex.phone
           );
           
           if (indexInFiltered !== -1) {
             nextIndex = indexInFiltered;
+            console.log('Found wrapped lead at index:', nextIndex, 'lead:', leadAtIndex.name);
             break;
           }
         }
@@ -117,8 +134,9 @@ const CallingScreen: React.FC<CallingScreenProps> = ({
       setNavigationHistory([nextIndex]);
       setHistoryIndex(0);
       setCardKey(prev => prev + 1);
-    } else if (!currentlyViewedLead && baseLeads.length > 0) {
+    } else if (!currentlyViewedLead && newFilteredLeads.length > 0) {
       // Fallback if no current lead
+      console.log('No current lead, setting to first');
       setCurrentIndex(0);
       setNavigationHistory([0]);
       setHistoryIndex(0);
