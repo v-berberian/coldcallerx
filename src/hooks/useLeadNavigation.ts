@@ -1,43 +1,48 @@
-import { useState, useEffect } from 'react';
-import { filterLeadsByTimezone, getTimezoneGroup } from '../utils/timezoneUtils';
-import { getPhoneDigits } from '../utils/phoneUtils';
 
-interface Lead {
-  name: string;
-  phone: string;
-  called?: number;
-  lastCalled?: string;
-}
+import { useEffect } from 'react';
+import { Lead } from '../types/lead';
+import { useNavigationState } from './useNavigationState';
+import { useFilters } from './useFilters';
+import { useLeadsData } from './useLeadsData';
+import { useLeadFiltering } from './useLeadFiltering';
 
 export const useLeadNavigation = (initialLeads: Lead[]) => {
-  const [leadsData, setLeadsData] = useState<Lead[]>(
-    initialLeads.map(lead => ({
-      ...lead,
-      called: lead.called || 0,
-      lastCalled: lead.lastCalled || undefined
-    }))
-  );
-  const [currentIndex, setCurrentIndex] = useState(0);
-  const [navigationHistory, setNavigationHistory] = useState<number[]>([0]);
-  const [historyIndex, setHistoryIndex] = useState(0);
-  const [cardKey, setCardKey] = useState(0);
-  const [timezoneFilter, setTimezoneFilter] = useState<'ALL' | 'EST_CST'>('ALL');
-  const [callFilter, setCallFilter] = useState<'ALL' | 'UNCALLED'>('ALL');
-  const [shuffleMode, setShuffleMode] = useState(false);
-  const [autoCall, setAutoCall] = useState(false);
-  const [isFilterChanging, setIsFilterChanging] = useState(false);
+  const {
+    currentIndex,
+    cardKey,
+    historyIndex,
+    updateNavigation,
+    goToPrevious,
+    resetNavigation,
+    setCurrentIndex,
+    setCardKey
+  } = useNavigationState();
 
-  const getBaseLeads = () => {
-    let filtered = filterLeadsByTimezone(leadsData, timezoneFilter);
-    if (callFilter === 'UNCALLED') {
-      filtered = filtered.filter(lead => !lead.called || lead.called === 0);
-    }
-    return filtered;
-  };
+  const {
+    timezoneFilter,
+    callFilter,
+    shuffleMode,
+    autoCall,
+    isFilterChanging,
+    toggleTimezoneFilter,
+    toggleCallFilter,
+    toggleShuffle,
+    toggleAutoCall,
+    setFilterChanging
+  } = useFilters();
+
+  const {
+    leadsData,
+    makeCall,
+    resetCallCount,
+    resetAllCallCounts
+  } = useLeadsData(initialLeads);
+
+  const { getBaseLeads } = useLeadFiltering(leadsData, timezoneFilter, callFilter);
 
   useEffect(() => {
     console.log('Filter change effect triggered', { timezoneFilter, callFilter });
-    setIsFilterChanging(true);
+    setFilterChanging(true);
     
     const baseLeadsBeforeFilter = getBaseLeads();
     const currentlyViewedLead = baseLeadsBeforeFilter[currentIndex];
@@ -62,12 +67,8 @@ export const useLeadNavigation = (initialLeads: Lead[]) => {
         );
         console.log('Current lead matches new filter, keeping at index:', newIndexOfCurrentLead);
         setCurrentIndex(newIndexOfCurrentLead);
-        // Keep existing history but add current position
-        setNavigationHistory(prev => [...prev, newIndexOfCurrentLead]);
-        setHistoryIndex(prev => prev + 1);
         setCardKey(prev => prev + 1);
-        // Reset filter changing flag after state updates
-        setTimeout(() => setIsFilterChanging(false), 100);
+        setTimeout(() => setFilterChanging(false), 100);
         return;
       }
       
@@ -111,49 +112,24 @@ export const useLeadNavigation = (initialLeads: Lead[]) => {
       }
       
       setCurrentIndex(nextIndex);
-      // Keep existing history but add new position
-      setNavigationHistory(prev => [...prev, nextIndex]);
-      setHistoryIndex(prev => prev + 1);
       setCardKey(prev => prev + 1);
     } else if (newFilteredLeads.length > 0) {
       console.log('No current lead, setting to first');
       setCurrentIndex(0);
-      // Keep existing history but add new position
-      setNavigationHistory(prev => [...prev, 0]);
-      setHistoryIndex(prev => prev + 1);
       setCardKey(prev => prev + 1);
     }
     
-    // Reset filter changing flag after all updates
-    setTimeout(() => setIsFilterChanging(false), 100);
+    setTimeout(() => setFilterChanging(false), 100);
   }, [timezoneFilter, callFilter]);
 
   useEffect(() => {
     const baseLeads = getBaseLeads();
     if (currentIndex >= baseLeads.length && baseLeads.length > 0) {
-      setCurrentIndex(0);
-      setNavigationHistory([0]);
-      setHistoryIndex(0);
-      setCardKey(prev => prev + 1);
+      resetNavigation(0);
     }
   }, [timezoneFilter, callFilter, currentIndex]);
 
-  const makeCall = (lead: Lead) => {
-    const phoneNumber = getPhoneDigits(lead.phone);
-    window.location.href = `tel:${phoneNumber}`;
-    
-    const updatedLeads = leadsData.map(l => 
-      l.name === lead.name && l.phone === lead.phone ? {
-        ...l,
-        called: (l.called || 0) + 1,
-        lastCalled: new Date().toLocaleDateString()
-      } : l
-    );
-    setLeadsData(updatedLeads);
-  };
-
   const handleNext = () => {
-    // Always get fresh baseLeads to ensure we're working with current filtered data
     const baseLeads = getBaseLeads();
     let nextIndex;
     
@@ -174,16 +150,9 @@ export const useLeadNavigation = (initialLeads: Lead[]) => {
       nextIndex = (currentIndex + 1) % baseLeads.length;
     }
     
-    setCurrentIndex(nextIndex);
-    setCardKey(prev => prev + 1);
-    const newHistory = navigationHistory.slice(0, historyIndex + 1);
-    newHistory.push(nextIndex);
-    setNavigationHistory(newHistory);
-    setHistoryIndex(newHistory.length - 1);
+    updateNavigation(nextIndex);
     
-    // Only auto-call if not currently changing filters and we have a valid lead
     if (autoCall && !isFilterChanging && baseLeads[nextIndex]) {
-      // Small delay to ensure state updates are complete
       setTimeout(() => {
         const currentBaseLeads = getBaseLeads();
         if (currentBaseLeads[nextIndex]) {
@@ -195,41 +164,14 @@ export const useLeadNavigation = (initialLeads: Lead[]) => {
   };
 
   const handlePrevious = () => {
-    if (historyIndex > 0) {
-      const newHistoryIndex = historyIndex - 1;
-      const prevIndex = navigationHistory[newHistoryIndex];
-      setCurrentIndex(prevIndex);
-      setHistoryIndex(newHistoryIndex);
-      setCardKey(prev => prev + 1);
-    }
-  };
-
-  const resetCallCount = (lead: Lead) => {
-    const updatedLeads = leadsData.map(l => 
-      l.name === lead.name && l.phone === lead.phone 
-        ? { ...l, called: 0, lastCalled: undefined }
-        : l
-    );
-    setLeadsData(updatedLeads);
-  };
-
-  const resetAllCallCounts = () => {
-    const updatedLeads = leadsData.map(l => ({
-      ...l,
-      called: 0,
-      lastCalled: undefined
-    }));
-    setLeadsData(updatedLeads);
+    goToPrevious();
   };
 
   const selectLead = (lead: Lead) => {
     const baseLeads = getBaseLeads();
     const leadIndex = baseLeads.findIndex(l => l.name === lead.name && l.phone === lead.phone);
     if (leadIndex !== -1) {
-      setCurrentIndex(leadIndex);
-      setNavigationHistory([leadIndex]);
-      setHistoryIndex(0);
-      setCardKey(prev => prev + 1);
+      resetNavigation(leadIndex);
     }
   };
 
@@ -249,9 +191,9 @@ export const useLeadNavigation = (initialLeads: Lead[]) => {
     resetCallCount,
     resetAllCallCounts,
     selectLead,
-    toggleTimezoneFilter: () => setTimezoneFilter(prev => prev === 'ALL' ? 'EST_CST' : 'ALL'),
-    toggleCallFilter: () => setCallFilter(prev => prev === 'ALL' ? 'UNCALLED' : 'ALL'),
-    toggleShuffle: () => setShuffleMode(prev => !prev),
-    toggleAutoCall: () => setAutoCall(prev => !prev)
+    toggleTimezoneFilter,
+    toggleCallFilter,
+    toggleShuffle,
+    toggleAutoCall
   };
 };
