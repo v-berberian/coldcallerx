@@ -2228,8 +2228,8 @@ const CallingScreen: React.FC<CallingScreenProps> = ({
         </div>
       </div>
 
-      {/* Main Content - Reduced top padding for iOS web app */}
-      <div className="flex-1 flex items-center justify-center p-4 pt-2 min-h-0 px-6">
+      {/* Main Content - No top padding for better iOS web app centering */}
+      <div className="flex-1 flex items-center justify-center p-4 pt-0 min-h-0 px-6">
         <div className="w-full max-w-sm space-y-4">
           {/* Filter Buttons - Centered relative to Previous and Next buttons */}
           <div className="flex">
