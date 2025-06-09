@@ -147,6 +147,7 @@ export const useLeadNavigation = (initialLeads: Lead[]) => {
   };
 
   const handleNext = () => {
+    // Always get fresh baseLeads to ensure we're working with current filtered data
     const baseLeads = getBaseLeads();
     let nextIndex;
     
@@ -174,9 +175,16 @@ export const useLeadNavigation = (initialLeads: Lead[]) => {
     setNavigationHistory(newHistory);
     setHistoryIndex(newHistory.length - 1);
     
-    // Fix: Call the correct lead that we actually navigated to
+    // Use a setTimeout to ensure the state updates are applied before making the call
+    // This ensures we're calling the lead we actually navigated to
     if (autoCall && baseLeads[nextIndex]) {
-      makeCall(baseLeads[nextIndex]);
+      setTimeout(() => {
+        // Get fresh baseLeads again to ensure we have the most current data
+        const currentBaseLeads = getBaseLeads();
+        if (currentBaseLeads[nextIndex]) {
+          makeCall(currentBaseLeads[nextIndex]);
+        }
+      }, 0);
     }
   };
 
