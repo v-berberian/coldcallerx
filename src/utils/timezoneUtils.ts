@@ -1,4 +1,3 @@
-
 const AREA_CODE_MAP: {
   [key: string]: {
     state: string;
@@ -306,7 +305,7 @@ export const getStateFromAreaCode = (phone: string): string => {
   return '';
 };
 
-export const getTimezoneGroup = (phone: string): 'EST' | 'CST' | 'OTHER' => {
+export const getTimezoneGroup = (phone: string): 'EST' | 'CST' | 'CDT' | 'OTHER' => {
   const digits = phone.replace(/\D/g, '');
   if (digits.length >= 3) {
     const areaCode = digits.slice(0, 3);
@@ -314,6 +313,8 @@ export const getTimezoneGroup = (phone: string): 'EST' | 'CST' | 'OTHER' => {
     if (info) {
       if (info.timezone === 'America/New_York') return 'EST';
       if (info.timezone === 'America/Chicago') return 'CST';
+      // CDT is effectively the same as CST (Chicago timezone), just different seasons
+      if (info.timezone === 'America/Chicago') return 'CDT';
     }
   }
   return 'OTHER';
@@ -323,6 +324,6 @@ export const filterLeadsByTimezone = (leads: any[], timezoneFilter: 'ALL' | 'EST
   if (timezoneFilter === 'ALL') return leads;
   return leads.filter(lead => {
     const timezoneGroup = getTimezoneGroup(lead.phone);
-    return timezoneGroup === 'EST' || timezoneGroup === 'CST';
+    return timezoneGroup === 'EST' || timezoneGroup === 'CST' || timezoneGroup === 'CDT';
   });
 };

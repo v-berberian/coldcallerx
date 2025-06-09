@@ -27,7 +27,7 @@ const FilterButtons: React.FC<FilterButtonsProps> = ({
           }`} 
           style={{ WebkitTapHighlightColor: 'transparent' }}
         >
-          {timezoneFilter === 'ALL' ? 'All States' : 'EST & CST'}
+          {timezoneFilter === 'ALL' ? 'All States' : 'EST, CST & CDT'}
         </button>
       </div>
       <div className="flex-1 flex justify-center items-center gap-2">

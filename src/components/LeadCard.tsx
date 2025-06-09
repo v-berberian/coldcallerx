@@ -71,7 +71,7 @@ const LeadCard: React.FC<LeadCardProps> = ({
             )}
           </div>
           {lead.lastCalled && (
-            <p className="text-sm text-muted-foreground">
+            <p className="text-sm text-muted-foreground animate-fade-in">
               Last called: {lead.lastCalled}
             </p>
           )}
