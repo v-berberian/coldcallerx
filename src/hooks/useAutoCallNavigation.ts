@@ -32,16 +32,26 @@ export const useAutoCallNavigation = (
       nextIndex,
       leadName: nextLead?.name,
       leadPhone: nextLead?.phone,
-      totalFilteredLeads: baseLeads.length
+      totalFilteredLeads: baseLeads.length,
+      autoCallEnabled: autoCall
     });
     
     // Update navigation first to show the correct lead
     updateNavigation(nextIndex);
     
-    // Then execute auto-call if enabled with the EXACT lead that's now displayed
+    // Then execute auto-call ONLY if enabled and we have a lead
+    // Use a small delay to ensure the UI has updated before calling
     if (autoCall && nextLead) {
-      console.log('Executing auto-call for displayed lead:', nextLead.name, nextLead.phone);
-      executeAutoCall(nextLead);
+      console.log('Auto-call enabled - will call lead after UI update:', nextLead.name, nextLead.phone);
+      setTimeout(() => {
+        // Get the lead again from the updated position to ensure consistency
+        const updatedBaseLeads = getBaseLeads();
+        const leadToCall = updatedBaseLeads[nextIndex];
+        if (leadToCall) {
+          console.log('Executing auto-call for displayed lead:', leadToCall.name, leadToCall.phone);
+          executeAutoCall(leadToCall);
+        }
+      }, 50);
     }
   };
 

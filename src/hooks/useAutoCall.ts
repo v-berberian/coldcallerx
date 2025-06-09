@@ -14,7 +14,12 @@ export const useAutoCall = (
       return;
     }
     
-    console.log('Executing auto-call for lead:', lead.name, lead.phone);
+    console.log('AUTO-CALL: Executing call for lead:', {
+      name: lead.name,
+      phone: lead.phone,
+      called: lead.called
+    });
+    
     setIsAutoCallInProgress(true);
     
     // Make the call for the specific lead passed in
@@ -23,6 +28,7 @@ export const useAutoCall = (
     // Clear the auto-call flag after a short delay
     setTimeout(() => {
       setIsAutoCallInProgress(false);
+      console.log('AUTO-CALL: Call completed and flag cleared');
     }, 500);
   };
 
