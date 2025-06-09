@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { filterLeadsByTimezone, getTimezoneGroup } from '../utils/timezoneUtils';
 import { getPhoneDigits } from '../utils/phoneUtils';
@@ -26,6 +25,7 @@ export const useLeadNavigation = (initialLeads: Lead[]) => {
   const [callFilter, setCallFilter] = useState<'ALL' | 'UNCALLED'>('ALL');
   const [shuffleMode, setShuffleMode] = useState(false);
   const [autoCall, setAutoCall] = useState(false);
+  const [isFilterChanging, setIsFilterChanging] = useState(false);
 
   const getBaseLeads = () => {
     let filtered = filterLeadsByTimezone(leadsData, timezoneFilter);
@@ -37,6 +37,7 @@ export const useLeadNavigation = (initialLeads: Lead[]) => {
 
   useEffect(() => {
     console.log('Filter change effect triggered', { timezoneFilter, callFilter });
+    setIsFilterChanging(true);
     
     const baseLeadsBeforeFilter = getBaseLeads();
     const currentlyViewedLead = baseLeadsBeforeFilter[currentIndex];
@@ -65,6 +66,8 @@ export const useLeadNavigation = (initialLeads: Lead[]) => {
         setNavigationHistory(prev => [...prev, newIndexOfCurrentLead]);
         setHistoryIndex(prev => prev + 1);
         setCardKey(prev => prev + 1);
+        // Reset filter changing flag after state updates
+        setTimeout(() => setIsFilterChanging(false), 100);
         return;
       }
       
@@ -120,6 +123,9 @@ export const useLeadNavigation = (initialLeads: Lead[]) => {
       setHistoryIndex(prev => prev + 1);
       setCardKey(prev => prev + 1);
     }
+    
+    // Reset filter changing flag after all updates
+    setTimeout(() => setIsFilterChanging(false), 100);
   }, [timezoneFilter, callFilter]);
 
   useEffect(() => {
@@ -175,16 +181,16 @@ export const useLeadNavigation = (initialLeads: Lead[]) => {
     setNavigationHistory(newHistory);
     setHistoryIndex(newHistory.length - 1);
     
-    // Use a setTimeout to ensure the state updates are applied before making the call
-    // This ensures we're calling the lead we actually navigated to
-    if (autoCall && baseLeads[nextIndex]) {
+    // Only auto-call if not currently changing filters and we have a valid lead
+    if (autoCall && !isFilterChanging && baseLeads[nextIndex]) {
+      // Small delay to ensure state updates are complete
       setTimeout(() => {
-        // Get fresh baseLeads again to ensure we have the most current data
         const currentBaseLeads = getBaseLeads();
         if (currentBaseLeads[nextIndex]) {
+          console.log('Auto-calling lead:', currentBaseLeads[nextIndex].name, currentBaseLeads[nextIndex].phone);
           makeCall(currentBaseLeads[nextIndex]);
         }
-      }, 0);
+      }, 50);
     }
   };
 
