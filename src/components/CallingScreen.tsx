@@ -2228,9 +2228,9 @@ const CallingScreen: React.FC<CallingScreenProps> = ({
         </div>
       </div>
 
-      {/* Main Content - Better centering for mobile app */}
+      {/* Main Content - Better centering for mobile app with improved spacing */}
       <div className="flex-1 flex items-center justify-center p-4 min-h-0 px-6">
-        <div className="w-full max-w-sm space-y-4">
+        <div className="w-full max-w-sm space-y-3 sm:space-y-4">
           {/* Filter Buttons - Centered relative to Previous and Next buttons */}
           <div className="flex">
             <div className="flex-1 flex justify-center">
@@ -2249,9 +2249,9 @@ const CallingScreen: React.FC<CallingScreenProps> = ({
             </div>
           </div>
 
-          {/* Current Lead Card */}
-          <Card key={cardKey} className="shadow-2xl border-border/50 rounded-3xl bg-card h-[400px] flex flex-col animate-scale-in">
-            <CardContent className="p-6 space-y-4 flex-1 flex flex-col">
+          {/* Current Lead Card - Responsive height for better centering */}
+          <Card key={cardKey} className="shadow-2xl border-border/50 rounded-3xl bg-card min-h-[300px] sm:min-h-[350px] flex flex-col animate-scale-in">
+            <CardContent className="p-4 sm:p-6 space-y-3 sm:space-y-4 flex-1 flex flex-col">
               {/* Top row with lead count and file name */}
               <div className="flex items-center justify-between">
                 <p className="text-sm text-muted-foreground opacity-40">
@@ -2262,16 +2262,16 @@ const CallingScreen: React.FC<CallingScreenProps> = ({
                 </p>
               </div>
 
-              {/* Lead info - Main content area with animation */}
-              <div key={`${currentLead.name}-${currentLead.phone}`} className="text-center space-y-3 flex-1 flex flex-col justify-center animate-content-change">
+              {/* Lead info - Main content area with animation and optimized spacing */}
+              <div key={`${currentLead.name}-${currentLead.phone}`} className="text-center space-y-2 sm:space-y-3 flex-1 flex flex-col justify-center animate-content-change">
                 {/* State and timezone - moved to top with same font size as "Called: times" */}
                 <p className="text-sm text-muted-foreground">
                   {getStateFromAreaCode(currentLead.phone)}
                 </p>
                 
-                <h2 className="text-3xl font-bold text-foreground">{currentLead.name}</h2>
+                <h2 className="text-2xl sm:text-3xl font-bold text-foreground">{currentLead.name}</h2>
                 
-                <p className="text-lg text-muted-foreground text-center">{formatPhoneNumber(currentLead.phone)}</p>
+                <p className="text-base sm:text-lg text-muted-foreground text-center">{formatPhoneNumber(currentLead.phone)}</p>
                 
                 <div className="flex items-center justify-center">
                   <p className="text-sm text-muted-foreground">
@@ -2292,26 +2292,26 @@ const CallingScreen: React.FC<CallingScreenProps> = ({
                   </p>}
               </div>
 
-              {/* Main Call Button - ensure it's always green */}
-              <Button onClick={handleCall} size="lg" className="w-full h-16 text-lg font-semibold bg-green-600 hover:bg-green-700 text-white rounded-2xl shadow-lg">
-                <Phone className="h-6 w-6 mr-2" />
+              {/* Main Call Button - ensure it's always green with responsive sizing */}
+              <Button onClick={handleCall} size="lg" className="w-full h-14 sm:h-16 text-base sm:text-lg font-semibold bg-green-600 hover:bg-green-700 text-white rounded-2xl shadow-lg">
+                <Phone className="h-5 w-5 sm:h-6 sm:w-6 mr-2" />
                 Call
               </Button>
             </CardContent>
           </Card>
 
-          {/* Navigation Controls */}
-          <div className="space-y-4">
+          {/* Navigation Controls - Improved spacing */}
+          <div className="space-y-3 sm:space-y-4">
             {/* Previous/Next Navigation */}
-            <div className="flex gap-4">
-              <Button variant="outline" onClick={handlePrevious} disabled={historyIndex <= 0} className="flex-1 h-12 rounded-2xl shadow-lg active:scale-95 transition-all duration-100 select-none outline-none focus:outline-none focus-visible:ring-0 focus-visible:ring-offset-0" style={{
+            <div className="flex gap-3 sm:gap-4">
+              <Button variant="outline" onClick={handlePrevious} disabled={historyIndex <= 0} className="flex-1 h-10 sm:h-12 rounded-2xl shadow-lg active:scale-95 transition-all duration-100 select-none outline-none focus:outline-none focus-visible:ring-0 focus-visible:ring-offset-0" style={{
               WebkitTapHighlightColor: 'transparent'
             }} onTouchStart={() => {}} onTouchEnd={() => {}}>
                 <ArrowLeft className="h-4 w-4 mr-2" />
                 Previous
               </Button>
               
-              <Button variant="outline" onClick={handleNext} disabled={baseLeads.length <= 1} className="flex-1 h-12 rounded-2xl shadow-lg active:scale-95 transition-all duration-100 select-none outline-none focus:outline-none focus-visible:ring-0 focus-visible:ring-offset-0" style={{
+              <Button variant="outline" onClick={handleNext} disabled={baseLeads.length <= 1} className="flex-1 h-10 sm:h-12 rounded-2xl shadow-lg active:scale-95 transition-all duration-100 select-none outline-none focus:outline-none focus-visible:ring-0 focus-visible:ring-offset-0" style={{
               WebkitTapHighlightColor: 'transparent'
             }} onTouchStart={() => {}} onTouchEnd={() => {}}>
                 Next
