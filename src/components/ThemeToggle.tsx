@@ -1,37 +1,14 @@
 
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { Sun, Moon, Smartphone } from 'lucide-react';
-
-type Theme = 'light' | 'dark' | 'system';
+import { useTheme } from 'next-themes';
 
 const ThemeToggle: React.FC = () => {
-  const [theme, setTheme] = useState<Theme>(() => {
-    const saved = localStorage.getItem('theme') as Theme;
-    return saved || 'light';
-  });
-
-  useEffect(() => {
-    const root = document.documentElement;
-    
-    // Remove both classes first
-    root.classList.remove('dark', 'light');
-    
-    if (theme === 'system') {
-      const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-      if (systemTheme === 'dark') {
-        root.classList.add('dark');
-      }
-    } else if (theme === 'dark') {
-      root.classList.add('dark');
-    }
-    // For light theme, we don't add any class as the default CSS variables are for light mode
-    
-    localStorage.setItem('theme', theme);
-  }, [theme]);
+  const { theme, setTheme } = useTheme();
 
   const cycleTheme = () => {
-    const themes: Theme[] = ['light', 'dark', 'system'];
-    const currentIndex = themes.indexOf(theme);
+    const themes = ['light', 'dark', 'system'];
+    const currentIndex = themes.indexOf(theme || 'light');
     const nextIndex = (currentIndex + 1) % themes.length;
     setTheme(themes[nextIndex]);
   };
@@ -44,6 +21,8 @@ const ThemeToggle: React.FC = () => {
         return <Moon className="h-5 w-5" />;
       case 'system':
         return <Smartphone className="h-5 w-5" />;
+      default:
+        return <Sun className="h-5 w-5" />;
     }
   };
 
@@ -51,7 +30,7 @@ const ThemeToggle: React.FC = () => {
     <button
       onClick={cycleTheme}
       className="p-2 rounded-lg transition-none text-muted-foreground"
-      title={`Current theme: ${theme}`}
+      title={`Current theme: ${theme || 'light'}`}
     >
       {getIcon()}
     </button>
