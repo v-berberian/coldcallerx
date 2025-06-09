@@ -5,6 +5,7 @@ import { useNavigationState } from './useNavigationState';
 import { useFilters } from './useFilters';
 import { useLeadsData } from './useLeadsData';
 import { useLeadFiltering } from './useLeadFiltering';
+import { filterLeadsByTimezone } from '../utils/timezoneUtils';
 
 export const useLeadNavigation = (initialLeads: Lead[]) => {
   const {
