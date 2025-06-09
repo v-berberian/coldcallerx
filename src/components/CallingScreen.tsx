@@ -71,17 +71,18 @@ const CallingScreen: React.FC<CallingScreenProps> = ({
     
     // If current lead is no longer in filtered results, find the next best option
     if (!currentLead && baseLeads.length > 0) {
-      // Get the original current lead from the full dataset
-      const originalCurrentLead = leadsData[currentIndex] || leadsData[Math.min(currentIndex, leadsData.length - 1)];
+      // Get the current lead from the filtered results we were viewing
+      const previousBaseLeads = isSearching ? searchResults : getBaseLeads();
+      const originalCurrentLead = previousBaseLeads[currentIndex];
       
       if (originalCurrentLead) {
-        // Find the next lead in the original order that matches our filters
-        let nextIndex = 0;
+        // Find this lead's position in the full dataset
         const originalIndex = leadsData.findIndex(lead => 
           lead.name === originalCurrentLead.name && lead.phone === originalCurrentLead.phone
         );
         
         // Look for the next available lead starting from the original position
+        let nextIndex = 0;
         for (let i = originalIndex + 1; i < leadsData.length; i++) {
           const leadAtIndex = leadsData[i];
           const isInFilteredResults = baseLeads.some(filteredLead => 
@@ -96,19 +97,20 @@ const CallingScreen: React.FC<CallingScreenProps> = ({
           }
         }
         
-        // If no lead found after current position, start from beginning
-        if (nextIndex === 0 && baseLeads.length > 0) {
-          const firstAvailableOriginalIndex = leadsData.findIndex(lead => 
-            baseLeads.some(filteredLead => 
-              filteredLead.name === lead.name && filteredLead.phone === lead.phone
-            )
-          );
-          
-          if (firstAvailableOriginalIndex !== -1) {
-            const firstAvailableLead = leadsData[firstAvailableOriginalIndex];
-            nextIndex = baseLeads.findIndex(filteredLead => 
-              filteredLead.name === firstAvailableLead.name && filteredLead.phone === firstAvailableLead.phone
+        // If no lead found after current position, wrap around to beginning
+        if (nextIndex === 0) {
+          for (let i = 0; i < originalIndex; i++) {
+            const leadAtIndex = leadsData[i];
+            const isInFilteredResults = baseLeads.some(filteredLead => 
+              filteredLead.name === leadAtIndex.name && filteredLead.phone === leadAtIndex.phone
             );
+            
+            if (isInFilteredResults) {
+              nextIndex = baseLeads.findIndex(filteredLead => 
+                filteredLead.name === leadAtIndex.name && filteredLead.phone === leadAtIndex.phone
+              );
+              break;
+            }
           }
         }
         
