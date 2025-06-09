@@ -140,57 +140,75 @@ export const useLeadNavigation = (initialLeads: Lead[]) => {
 
   const handleNext = () => {
     // Prevent navigation if filters are currently changing
-    if (isFilterChanging) {
-      console.log('Skipping navigation because filters are changing');
+    if (isFilterChanging || isAutoCallInProgress) {
+      console.log('Skipping navigation because filters are changing or auto-call in progress');
       return;
     }
     
     const baseLeads = getBaseLeads();
     let nextIndex;
+    let leadToCall;
     
     if (shuffleMode) {
-      const uncalledLeads = baseLeads.filter(lead => !lead.called || lead.called === 0);
+      // When shuffle + uncalled filter is on, prioritize uncalled leads
+      let availableLeads = baseLeads;
+      if (callFilter === 'UNCALLED') {
+        const uncalledLeads = baseLeads.filter(lead => !lead.called || lead.called === 0);
+        if (uncalledLeads.length > 0) {
+          availableLeads = uncalledLeads;
+        }
+      }
       
-      if (uncalledLeads.length > 0) {
-        const randomUncalledLead = uncalledLeads[Math.floor(Math.random() * uncalledLeads.length)];
+      if (availableLeads.length > 0) {
+        const randomLead = availableLeads[Math.floor(Math.random() * availableLeads.length)];
         nextIndex = baseLeads.findIndex(lead => 
-          lead.name === randomUncalledLead.name && lead.phone === randomUncalledLead.phone
+          lead.name === randomLead.name && lead.phone === randomLead.phone
         );
+        leadToCall = randomLead;
       } else {
-        do {
-          nextIndex = Math.floor(Math.random() * baseLeads.length);
-        } while (nextIndex === currentIndex && baseLeads.length > 1);
+        nextIndex = currentIndex;
+        leadToCall = baseLeads[currentIndex];
       }
     } else {
       nextIndex = (currentIndex + 1) % baseLeads.length;
+      leadToCall = baseLeads[nextIndex];
     }
     
-    const leadToCall = baseLeads[nextIndex];
+    console.log('Navigating to index:', nextIndex, 'lead:', leadToCall?.name);
     updateNavigation(nextIndex);
     
     // Auto-call the specific lead we navigated to
     if (autoCall && leadToCall) {
       setIsAutoCallInProgress(true);
+      console.log('Starting auto-call for:', leadToCall.name, leadToCall.phone);
+      
       setTimeout(() => {
-        if (!isFilterChanging) {
-          console.log('Auto-calling lead:', leadToCall.name, leadToCall.phone);
-          makeCall(leadToCall);
-          // Clear the auto-call flag after a brief delay to allow the call to process
-          setTimeout(() => {
-            setIsAutoCallInProgress(false);
-          }, 200);
-        } else {
+        console.log('Executing auto-call for:', leadToCall.name, leadToCall.phone);
+        makeCall(leadToCall);
+        
+        // Clear the auto-call flag after the call is processed
+        setTimeout(() => {
+          console.log('Auto-call completed, clearing flag');
           setIsAutoCallInProgress(false);
-        }
-      }, 50);
+        }, 300);
+      }, 100);
     }
   };
 
   const handlePrevious = () => {
+    if (isAutoCallInProgress) {
+      console.log('Skipping previous navigation because auto-call in progress');
+      return;
+    }
     goToPrevious();
   };
 
   const selectLead = (lead: Lead) => {
+    if (isAutoCallInProgress) {
+      console.log('Skipping lead selection because auto-call in progress');
+      return;
+    }
+    
     const baseLeads = getBaseLeads();
     const leadIndex = baseLeads.findIndex(l => l.name === lead.name && l.phone === lead.phone);
     if (leadIndex !== -1) {
