@@ -7,8 +7,7 @@ export const useAutoCallNavigation = (
   getBaseLeads: () => Lead[],
   updateNavigation: (index: number) => void,
   executeAutoCall: (lead: Lead) => void,
-  isAutoCallInProgress: boolean,
-  navigationHandleNext: (baseLeads: Lead[], autoCall: boolean, executeAutoCall: (lead: Lead) => void) => void
+  isAutoCallInProgress: boolean
 ) => {
   const handleNext = () => {
     // Prevent rapid navigation during auto-call
@@ -24,17 +23,24 @@ export const useAutoCallNavigation = (
       return;
     }
     
-    // Calculate next index manually to ensure consistency
+    // Calculate next index in the filtered leads
     const nextIndex = (currentIndex + 1) % baseLeads.length;
     const nextLead = baseLeads[nextIndex];
     
-    console.log('Navigating to index:', nextIndex, 'lead:', nextLead?.name);
+    console.log('Auto-call navigation:', {
+      currentIndex,
+      nextIndex,
+      leadName: nextLead?.name,
+      leadPhone: nextLead?.phone,
+      totalFilteredLeads: baseLeads.length
+    });
     
-    // Update navigation first
+    // Update navigation first to show the correct lead
     updateNavigation(nextIndex);
     
-    // Then execute auto-call if enabled
+    // Then execute auto-call if enabled with the EXACT lead that's now displayed
     if (autoCall && nextLead) {
+      console.log('Executing auto-call for displayed lead:', nextLead.name, nextLead.phone);
       executeAutoCall(nextLead);
     }
   };

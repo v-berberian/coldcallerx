@@ -9,12 +9,15 @@ export const useAutoCall = (
   const [isAutoCallInProgress, setIsAutoCallInProgress] = useState(false);
 
   const executeAutoCall = (lead: Lead) => {
-    if (!lead) return;
+    if (!lead) {
+      console.log('No lead provided for auto-call');
+      return;
+    }
     
-    console.log('Executing auto-call for:', lead.name, lead.phone);
+    console.log('Executing auto-call for lead:', lead.name, lead.phone);
     setIsAutoCallInProgress(true);
     
-    // Make the call immediately and mark as called
+    // Make the call for the specific lead passed in
     makeCall(lead, true);
     
     // Clear the auto-call flag after a short delay

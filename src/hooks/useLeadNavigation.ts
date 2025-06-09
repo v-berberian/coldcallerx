@@ -1,4 +1,3 @@
-
 import { Lead } from '../types/lead';
 import { useNavigationState } from './useNavigationState';
 import { useFilters } from './useFilters';
@@ -62,8 +61,7 @@ export const useLeadNavigation = (initialLeads: Lead[]) => {
     getBaseLeads,
     updateNavigation,
     executeAutoCall,
-    isAutoCallInProgress,
-    navigationHandleNext
+    isAutoCallInProgress
   );
 
   useFilterChangeEffects(
