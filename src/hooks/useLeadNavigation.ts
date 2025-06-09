@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { filterLeadsByTimezone, getTimezoneGroup } from '../utils/timezoneUtils';
 import { getPhoneDigits } from '../utils/phoneUtils';
@@ -61,8 +60,9 @@ export const useLeadNavigation = (initialLeads: Lead[]) => {
         );
         console.log('Current lead matches new filter, keeping at index:', newIndexOfCurrentLead);
         setCurrentIndex(newIndexOfCurrentLead);
-        setNavigationHistory([newIndexOfCurrentLead]);
-        setHistoryIndex(0);
+        // Keep existing history but add current position
+        setNavigationHistory(prev => [...prev, newIndexOfCurrentLead]);
+        setHistoryIndex(prev => prev + 1);
         setCardKey(prev => prev + 1);
         return;
       }
@@ -107,14 +107,16 @@ export const useLeadNavigation = (initialLeads: Lead[]) => {
       }
       
       setCurrentIndex(nextIndex);
-      setNavigationHistory([nextIndex]);
-      setHistoryIndex(0);
+      // Keep existing history but add new position
+      setNavigationHistory(prev => [...prev, nextIndex]);
+      setHistoryIndex(prev => prev + 1);
       setCardKey(prev => prev + 1);
     } else if (newFilteredLeads.length > 0) {
       console.log('No current lead, setting to first');
       setCurrentIndex(0);
-      setNavigationHistory([0]);
-      setHistoryIndex(0);
+      // Keep existing history but add new position
+      setNavigationHistory(prev => [...prev, 0]);
+      setHistoryIndex(prev => prev + 1);
       setCardKey(prev => prev + 1);
     }
   }, [timezoneFilter, callFilter]);
