@@ -15,17 +15,12 @@ export const useLeadSelection = () => {
     currentIndex: number, 
     callFilter: CallFilter
   ) => {
-    let availableLeads = baseLeads;
+    // When using shuffle mode, we want to pick a random lead from the available leads
+    // But we need to ensure we're working with the already filtered baseLeads
+    // and not re-filtering them here
     
-    if (callFilter === 'UNCALLED') {
-      const uncalledLeads = baseLeads.filter(lead => !lead.called || lead.called === 0);
-      if (uncalledLeads.length > 0) {
-        availableLeads = uncalledLeads;
-      }
-    }
-    
-    if (availableLeads.length > 0) {
-      const randomLead = availableLeads[Math.floor(Math.random() * availableLeads.length)];
+    if (baseLeads.length > 0) {
+      const randomLead = baseLeads[Math.floor(Math.random() * baseLeads.length)];
       const nextIndex = baseLeads.findIndex(lead => 
         lead.name === randomLead.name && lead.phone === randomLead.phone
       );

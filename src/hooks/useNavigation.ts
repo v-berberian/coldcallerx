@@ -34,6 +34,8 @@ export const useNavigation = (
     }
     
     console.log('Navigating to index:', nextIndex, 'lead:', leadToCall?.name);
+    
+    // Only update navigation once
     updateNavigation(nextIndex);
     
     // Auto-call the specific lead we navigated to
