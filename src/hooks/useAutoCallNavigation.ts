@@ -54,6 +54,7 @@ export const useAutoCallNavigation = (
       return;
     }
     
+    // For normal navigation (no pending call), use the regular navigation logic
     const baseLeads = getBaseLeads();
     navigationHandleNext(baseLeads, autoCall, executeAutoCall);
   };
