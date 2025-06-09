@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -46,6 +45,7 @@ const CallingScreen: React.FC<CallingScreenProps> = ({
     handleNext,
     handlePrevious,
     resetCallCount,
+    resetAllCallCounts,
     selectLead,
     toggleTimezoneFilter,
     toggleCallFilter,
@@ -198,6 +198,7 @@ const CallingScreen: React.FC<CallingScreenProps> = ({
             callFilter={callFilter}
             onToggleTimezone={toggleTimezoneFilter}
             onToggleCallFilter={toggleCallFilter}
+            onResetAllCalls={resetAllCallCounts}
           />
 
           {/* Current Lead Card */}

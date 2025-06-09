@@ -197,6 +197,15 @@ export const useLeadNavigation = (initialLeads: Lead[]) => {
     setLeadsData(updatedLeads);
   };
 
+  const resetAllCallCounts = () => {
+    const updatedLeads = leadsData.map(l => ({
+      ...l,
+      called: 0,
+      lastCalled: undefined
+    }));
+    setLeadsData(updatedLeads);
+  };
+
   const selectLead = (lead: Lead) => {
     const baseLeads = getBaseLeads();
     const leadIndex = baseLeads.findIndex(l => l.name === lead.name && l.phone === lead.phone);
@@ -222,6 +231,7 @@ export const useLeadNavigation = (initialLeads: Lead[]) => {
     handleNext,
     handlePrevious,
     resetCallCount,
+    resetAllCallCounts,
     selectLead,
     toggleTimezoneFilter: () => setTimezoneFilter(prev => prev === 'ALL' ? 'EST_CST' : 'ALL'),
     toggleCallFilter: () => setCallFilter(prev => prev === 'ALL' ? 'UNCALLED' : 'ALL'),
