@@ -56,25 +56,28 @@ const LeadCard: React.FC<LeadCardProps> = ({
           
           <p className="text-lg text-muted-foreground text-center">{formatPhoneNumber(lead.phone)}</p>
           
-          <div className="flex items-center justify-center">
-            <p className="text-sm text-muted-foreground">
-              Called: {lead.called || 0} times
-            </p>
-            {(lead.called || 0) > 0 && (
-              <button
-                onClick={onResetCallCount}
-                className="ml-2 p-1 hover:bg-muted rounded transition-colors"
-                title="Reset call count"
-              >
-                <X className="h-3 w-3 text-muted-foreground hover:text-foreground" />
-              </button>
+          <div className="relative">
+            <div className="flex items-center justify-center">
+              <p className="text-sm text-muted-foreground">
+                Called: {lead.called || 0} times
+              </p>
+              {(lead.called || 0) > 0 && (
+                <button
+                  onClick={onResetCallCount}
+                  className="ml-2 p-1 hover:bg-muted rounded transition-colors"
+                  title="Reset call count"
+                >
+                  <X className="h-3 w-3 text-muted-foreground hover:text-foreground" />
+                </button>
+              )}
+            </div>
+            {/* Last called text positioned absolutely to prevent layout shift */}
+            {lead.lastCalled && (
+              <p className="absolute top-full left-1/2 transform -translate-x-1/2 mt-1 text-sm text-muted-foreground animate-fade-in whitespace-nowrap">
+                Last called: {lead.lastCalled}
+              </p>
             )}
           </div>
-          {lead.lastCalled && (
-            <p className="text-sm text-muted-foreground animate-fade-in">
-              Last called: {lead.lastCalled}
-            </p>
-          )}
         </div>
 
         {/* Main Call Button - ensure it's always green */}
