@@ -83,7 +83,25 @@ const CallingScreen: React.FC<CallingScreenProps> = ({
     console.log('New filtered leads count:', newFilteredLeads.length);
     
     if (currentlyViewedLead) {
-      // Find the original position of the current lead in the full dataset
+      // Check if the current lead still matches the new filters
+      const currentLeadMatchesNewFilter = newFilteredLeads.some(lead => 
+        lead.name === currentlyViewedLead.name && lead.phone === currentlyViewedLead.phone
+      );
+      
+      if (currentLeadMatchesNewFilter) {
+        // Current lead matches new filter, keep showing it
+        const newIndexOfCurrentLead = newFilteredLeads.findIndex(lead => 
+          lead.name === currentlyViewedLead.name && lead.phone === currentlyViewedLead.phone
+        );
+        console.log('Current lead matches new filter, keeping at index:', newIndexOfCurrentLead);
+        setCurrentIndex(newIndexOfCurrentLead);
+        setNavigationHistory([newIndexOfCurrentLead]);
+        setHistoryIndex(0);
+        setCardKey(prev => prev + 1);
+        return;
+      }
+      
+      // Current lead doesn't match new filter, find next lead after its original position
       const originalIndex = leadsData.findIndex(lead => 
         lead.name === currentlyViewedLead.name && lead.phone === currentlyViewedLead.phone
       );
