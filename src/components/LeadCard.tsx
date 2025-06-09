@@ -56,7 +56,7 @@ const LeadCard: React.FC<LeadCardProps> = ({
           
           <p className="text-lg text-muted-foreground text-center">{formatPhoneNumber(lead.phone)}</p>
           
-          <div className="relative flex flex-col items-center">
+          <div className="relative flex flex-col items-center space-y-3">
             <div className="flex items-center justify-center">
               <p className="text-sm text-muted-foreground">
                 Called: {lead.called || 0} times
@@ -73,7 +73,7 @@ const LeadCard: React.FC<LeadCardProps> = ({
             </div>
             {/* Last called text centered and fading in */}
             {lead.lastCalled && (
-              <p className="text-sm text-muted-foreground animate-fade-in whitespace-nowrap mt-1">
+              <p className="text-sm text-muted-foreground animate-fade-in whitespace-nowrap">
                 Last called: {lead.lastCalled}
               </p>
             )}
