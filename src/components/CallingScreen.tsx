@@ -64,6 +64,68 @@ const CallingScreen: React.FC<CallingScreenProps> = ({
     }
   }, [searchQuery, leadsData, timezoneFilter, callFilter]);
 
+  // Handle timezone and call filter changes more intelligently
+  useEffect(() => {
+    const baseLeads = getBaseLeads();
+    const currentLead = baseLeads[currentIndex];
+    
+    // If current lead is no longer in filtered results, find the next best option
+    if (!currentLead && baseLeads.length > 0) {
+      // Get the original current lead from the full dataset
+      const originalCurrentLead = leadsData[currentIndex] || leadsData[Math.min(currentIndex, leadsData.length - 1)];
+      
+      if (originalCurrentLead) {
+        // Find the next lead in the original order that matches our filters
+        let nextIndex = 0;
+        const originalIndex = leadsData.findIndex(lead => 
+          lead.name === originalCurrentLead.name && lead.phone === originalCurrentLead.phone
+        );
+        
+        // Look for the next available lead starting from the original position
+        for (let i = originalIndex + 1; i < leadsData.length; i++) {
+          const leadAtIndex = leadsData[i];
+          const isInFilteredResults = baseLeads.some(filteredLead => 
+            filteredLead.name === leadAtIndex.name && filteredLead.phone === leadAtIndex.phone
+          );
+          
+          if (isInFilteredResults) {
+            nextIndex = baseLeads.findIndex(filteredLead => 
+              filteredLead.name === leadAtIndex.name && filteredLead.phone === leadAtIndex.phone
+            );
+            break;
+          }
+        }
+        
+        // If no lead found after current position, start from beginning
+        if (nextIndex === 0 && baseLeads.length > 0) {
+          const firstAvailableOriginalIndex = leadsData.findIndex(lead => 
+            baseLeads.some(filteredLead => 
+              filteredLead.name === lead.name && filteredLead.phone === lead.phone
+            )
+          );
+          
+          if (firstAvailableOriginalIndex !== -1) {
+            const firstAvailableLead = leadsData[firstAvailableOriginalIndex];
+            nextIndex = baseLeads.findIndex(filteredLead => 
+              filteredLead.name === firstAvailableLead.name && filteredLead.phone === firstAvailableLead.phone
+            );
+          }
+        }
+        
+        setCurrentIndex(nextIndex);
+        setNavigationHistory([nextIndex]);
+        setHistoryIndex(0);
+        setCardKey(prev => prev + 1);
+      } else {
+        // Fallback to first lead if we can't find a better option
+        setCurrentIndex(0);
+        setNavigationHistory([0]);
+        setHistoryIndex(0);
+        setCardKey(prev => prev + 1);
+      }
+    }
+  }, [timezoneFilter, callFilter]);
+
   // Reset current index when filters change and we have fewer leads
   useEffect(() => {
     const baseLeads = getBaseLeads();
