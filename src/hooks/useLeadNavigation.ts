@@ -156,10 +156,11 @@ export const useLeadNavigation = (initialLeads: Lead[]) => {
     if (autoCall && pendingCallLead) {
       console.log('Marking pending call as completed and proceeding with navigation');
       markPendingCallAsCompleted();
+      // After marking as completed, continue with normal navigation
     }
     
     // Prevent next if auto-call is in progress (but allow if we just completed a pending call)
-    if (isAutoCallInProgress && !pendingCallLead) {
+    if (isAutoCallInProgress && pendingCallLead) {
       console.log('Preventing next navigation because auto-call is in progress');
       return;
     }
