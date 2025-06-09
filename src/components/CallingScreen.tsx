@@ -77,10 +77,70 @@ const CallingScreen: React.FC<CallingScreenProps> = ({
     console.log('New filtered leads count:', newFilteredLeads.length);
     
     // Get the current lead we're viewing before the filter change
-    const currentLeadsToCheck = isSearching ? searchResults : getBaseLeads();
-    const currentlyViewedLead = currentLeadsToCheck[currentIndex];
+    const baseLeadsBeforeFilter = getBaseLeads();
+    const currentlyViewedLead = baseLeadsBeforeFilter[currentIndex];
     
     console.log('Currently viewed lead:', currentlyViewedLead?.name);
+    
+    // If we're searching, we need to find the lead that matches the search
+    if (isSearching && searchQuery.trim()) {
+      const searchedLead = leadsData.find(lead => 
+        lead.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
+        lead.phone.includes(searchQuery)
+      );
+      
+      if (searchedLead) {
+        console.log('Found searched lead:', searchedLead.name);
+        
+        // Find this lead's original position in the full dataset
+        const originalIndex = leadsData.findIndex(lead => 
+          lead.name === searchedLead.name && lead.phone === searchedLead.phone
+        );
+        
+        console.log('Original index of searched lead:', originalIndex);
+        
+        // Look for the next available lead starting from the position after the searched lead
+        let nextIndex = 0;
+        let foundNextLead = false;
+        
+        for (let i = originalIndex + 1; i < leadsData.length; i++) {
+          const leadAtIndex = leadsData[i];
+          const indexInFiltered = newFilteredLeads.findIndex(filteredLead => 
+            filteredLead.name === leadAtIndex.name && filteredLead.phone === leadAtIndex.phone
+          );
+          
+          if (indexInFiltered !== -1) {
+            nextIndex = indexInFiltered;
+            foundNextLead = true;
+            console.log('Found next lead after searched lead at index:', nextIndex, 'lead:', leadAtIndex.name);
+            break;
+          }
+        }
+        
+        // If no lead found after searched position, wrap around to beginning
+        if (!foundNextLead) {
+          console.log('No lead found after searched lead, wrapping to beginning');
+          for (let i = 0; i <= originalIndex; i++) {
+            const leadAtIndex = leadsData[i];
+            const indexInFiltered = newFilteredLeads.findIndex(filteredLead => 
+              filteredLead.name === leadAtIndex.name && filteredLead.phone === leadAtIndex.phone
+            );
+            
+            if (indexInFiltered !== -1) {
+              nextIndex = indexInFiltered;
+              console.log('Found wrapped lead at index:', nextIndex, 'lead:', leadAtIndex.name);
+              break;
+            }
+          }
+        }
+        
+        setCurrentIndex(nextIndex);
+        setNavigationHistory([nextIndex]);
+        setHistoryIndex(0);
+        setCardKey(prev => prev + 1);
+        return;
+      }
+    }
     
     // If the currently viewed lead is no longer in the new filtered results
     if (currentlyViewedLead && !newFilteredLeads.some(lead => 
@@ -2178,22 +2238,48 @@ const CallingScreen: React.FC<CallingScreenProps> = ({
   const handleNext = () => {
     const baseLeads = getBaseLeads();
     let nextIndex;
+    
     if (shuffleMode) {
-      do {
-        nextIndex = Math.floor(Math.random() * baseLeads.length);
-      } while (nextIndex === currentIndex && baseLeads.length > 1);
+      // Prioritize uncalled numbers when shuffling
+      const uncalledLeads = baseLeads.filter(lead => !lead.called || lead.called === 0);
+      
+      if (uncalledLeads.length > 0) {
+        // Pick random uncalled lead
+        const randomUncalledLead = uncalledLeads[Math.floor(Math.random() * uncalledLeads.length)];
+        nextIndex = baseLeads.findIndex(lead => 
+          lead.name === randomUncalledLead.name && lead.phone === randomUncalledLead.phone
+        );
+      } else {
+        // No uncalled leads, pick any random lead
+        do {
+          nextIndex = Math.floor(Math.random() * baseLeads.length);
+        } while (nextIndex === currentIndex && baseLeads.length > 1);
+      }
     } else {
       nextIndex = (currentIndex + 1) % baseLeads.length;
     }
+    
     setCurrentIndex(nextIndex);
     setCardKey(prev => prev + 1);
     const newHistory = navigationHistory.slice(0, historyIndex + 1);
     newHistory.push(nextIndex);
     setNavigationHistory(newHistory);
     setHistoryIndex(newHistory.length - 1);
+    
+    // Auto call and increment call count if auto call is enabled
     if (autoCall && baseLeads[nextIndex]) {
       const phoneNumber = baseLeads[nextIndex].phone.replace(/\D/g, '');
       window.location.href = `tel:${phoneNumber}`;
+      
+      // Increment call count for auto-called lead
+      const updatedLeads = leadsData.map(lead => 
+        lead.name === baseLeads[nextIndex].name && lead.phone === baseLeads[nextIndex].phone ? {
+          ...lead,
+          called: (lead.called || 0) + 1,
+          lastCalled: new Date().toLocaleDateString()
+        } : lead
+      );
+      setLeadsData(updatedLeads);
     }
   };
   const handlePrevious = () => {
