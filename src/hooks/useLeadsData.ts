@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { Lead } from '../types/lead';
 import { getPhoneDigits } from '../utils/phoneUtils';
@@ -22,11 +23,20 @@ export const useLeadsData = (initialLeads: Lead[]) => {
   };
 
   const markLeadAsCalled = (lead: Lead) => {
+    const now = new Date();
+    const dateString = now.toLocaleDateString();
+    const timeString = now.toLocaleTimeString('en-US', {
+      hour: 'numeric',
+      minute: '2-digit',
+      hour12: true
+    });
+    const lastCalledString = `${dateString} at ${timeString}`;
+
     const updatedLeads = leadsData.map(l => 
       l.name === lead.name && l.phone === lead.phone ? {
         ...l,
         called: (l.called || 0) + 1,
-        lastCalled: new Date().toLocaleDateString()
+        lastCalled: lastCalledString
       } : l
     );
     setLeadsData(updatedLeads);

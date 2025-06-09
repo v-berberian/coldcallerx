@@ -71,12 +71,14 @@ const LeadCard: React.FC<LeadCardProps> = ({
                 </button>
               )}
             </div>
-            {/* Last called text centered and fading in */}
-            {lead.lastCalled && (
-              <p className="text-sm text-muted-foreground animate-fade-in whitespace-nowrap">
-                Last called: {lead.lastCalled}
-              </p>
-            )}
+            {/* Reserve space for last called text to prevent layout shift */}
+            <div className="h-5 flex items-center justify-center">
+              {lead.lastCalled && (
+                <p className="text-sm text-muted-foreground animate-fade-in whitespace-nowrap">
+                  Last called: {lead.lastCalled}
+                </p>
+              )}
+            </div>
           </div>
         </div>
 
