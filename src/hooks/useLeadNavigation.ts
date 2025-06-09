@@ -131,9 +131,9 @@ export const useLeadNavigation = (initialLeads: Lead[]) => {
   }, [timezoneFilter, callFilter, currentIndex]);
 
   const handleNext = () => {
-    // Prevent auto-call if filters are currently changing
+    // Prevent navigation if filters are currently changing
     if (isFilterChanging) {
-      console.log('Skipping auto-call because filters are changing');
+      console.log('Skipping navigation because filters are changing');
       return;
     }
     
@@ -157,15 +157,15 @@ export const useLeadNavigation = (initialLeads: Lead[]) => {
       nextIndex = (currentIndex + 1) % baseLeads.length;
     }
     
+    const leadToCall = baseLeads[nextIndex];
     updateNavigation(nextIndex);
     
-    // Only auto-call if explicitly requested and not during filter changes
-    if (autoCall && baseLeads[nextIndex]) {
+    // Auto-call the specific lead we navigated to
+    if (autoCall && leadToCall) {
       setTimeout(() => {
-        const currentBaseLeads = getBaseLeads();
-        if (currentBaseLeads[nextIndex] && !isFilterChanging) {
-          console.log('Auto-calling lead:', currentBaseLeads[nextIndex].name, currentBaseLeads[nextIndex].phone);
-          makeCall(currentBaseLeads[nextIndex]);
+        if (!isFilterChanging) {
+          console.log('Auto-calling lead:', leadToCall.name, leadToCall.phone);
+          makeCall(leadToCall);
         }
       }, 50);
     }
