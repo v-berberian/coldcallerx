@@ -1,5 +1,5 @@
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { Lead } from '../types/lead';
 import { useNavigationState } from './useNavigationState';
 import { useFilters } from './useFilters';
@@ -8,6 +8,8 @@ import { useLeadFiltering } from './useLeadFiltering';
 import { filterLeadsByTimezone } from '../utils/timezoneUtils';
 
 export const useLeadNavigation = (initialLeads: Lead[]) => {
+  const [isAutoCallInProgress, setIsAutoCallInProgress] = useState(false);
+
   const {
     currentIndex,
     cardKey,
@@ -42,6 +44,12 @@ export const useLeadNavigation = (initialLeads: Lead[]) => {
   const { getBaseLeads } = useLeadFiltering(leadsData, timezoneFilter, callFilter);
 
   useEffect(() => {
+    // Don't auto-navigate during auto-call operations
+    if (isAutoCallInProgress) {
+      console.log('Skipping filter navigation because auto-call is in progress');
+      return;
+    }
+
     console.log('Filter change effect triggered', { timezoneFilter, callFilter });
     setFilterChanging(true);
     
@@ -121,7 +129,7 @@ export const useLeadNavigation = (initialLeads: Lead[]) => {
     }
     
     setTimeout(() => setFilterChanging(false), 100);
-  }, [timezoneFilter, callFilter]);
+  }, [timezoneFilter, callFilter, leadsData, isAutoCallInProgress]);
 
   useEffect(() => {
     const baseLeads = getBaseLeads();
@@ -162,10 +170,17 @@ export const useLeadNavigation = (initialLeads: Lead[]) => {
     
     // Auto-call the specific lead we navigated to
     if (autoCall && leadToCall) {
+      setIsAutoCallInProgress(true);
       setTimeout(() => {
         if (!isFilterChanging) {
           console.log('Auto-calling lead:', leadToCall.name, leadToCall.phone);
           makeCall(leadToCall);
+          // Clear the auto-call flag after a brief delay to allow the call to process
+          setTimeout(() => {
+            setIsAutoCallInProgress(false);
+          }, 200);
+        } else {
+          setIsAutoCallInProgress(false);
         }
       }, 50);
     }
