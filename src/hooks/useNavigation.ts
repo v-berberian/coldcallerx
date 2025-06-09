@@ -13,16 +13,15 @@ export const useNavigation = (
 ) => {
   const { getNextLeadInSequential, getNextLeadInShuffle } = useLeadSelection();
 
-  const handleNext = (baseLeads: Lead[], autoCall: boolean, executeAutoCall: (lead: Lead) => void) => {
-    // This function is only used for manual navigation when auto-call is OFF
-    if (autoCall) {
-      console.log('Manual navigation skipped - auto-call is handling navigation');
-      return;
-    }
-    
+  const handleNext = (baseLeads: Lead[]) => {
     // Prevent navigation if filters are currently changing
     if (isFilterChanging || isAutoCallInProgress) {
       console.log('Skipping navigation because filters are changing or auto-call in progress');
+      return;
+    }
+    
+    if (baseLeads.length === 0) {
+      console.log('No leads available for navigation');
       return;
     }
     
@@ -30,16 +29,18 @@ export const useNavigation = (
     let leadToCall: Lead;
     
     if (shuffleMode) {
+      console.log('Using shuffle mode for navigation');
       const result = getNextLeadInShuffle(baseLeads, currentIndex, callFilter);
       nextIndex = result.index;
       leadToCall = result.lead;
     } else {
+      console.log('Using sequential mode for navigation');
       const result = getNextLeadInSequential(baseLeads, currentIndex);
       nextIndex = result.index;
       leadToCall = result.lead;
     }
     
-    console.log('Manual navigation to index:', nextIndex, 'lead:', leadToCall?.name);
+    console.log('Manual navigation to index:', nextIndex, 'lead:', leadToCall?.name, 'shuffle:', shuffleMode);
     updateNavigation(nextIndex);
   };
 

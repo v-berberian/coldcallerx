@@ -61,7 +61,9 @@ export const useLeadNavigation = (initialLeads: Lead[]) => {
     getBaseLeads,
     updateNavigation,
     executeAutoCall,
-    isAutoCallInProgress
+    isAutoCallInProgress,
+    shuffleMode,
+    callFilter
   );
 
   useFilterChangeEffects(
@@ -77,6 +79,17 @@ export const useLeadNavigation = (initialLeads: Lead[]) => {
     getBaseLeads,
     resetNavigation
   );
+
+  const handleNextWrapper = () => {
+    if (autoCall) {
+      // Use auto-call navigation (which includes shuffle logic)
+      handleNext();
+    } else {
+      // Use manual navigation (which also includes shuffle logic)
+      const baseLeads = getBaseLeads();
+      navigationHandleNext(baseLeads);
+    }
+  };
 
   const handlePreviousWrapper = () => {
     handlePrevious(goToPrevious);
@@ -98,7 +111,7 @@ export const useLeadNavigation = (initialLeads: Lead[]) => {
     historyIndex,
     getBaseLeads,
     makeCall,
-    handleNext,
+    handleNext: handleNextWrapper,
     handlePrevious: handlePreviousWrapper,
     resetCallCount,
     resetAllCallCounts,

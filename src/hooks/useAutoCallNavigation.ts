@@ -7,7 +7,9 @@ export const useAutoCallNavigation = (
   getBaseLeads: () => Lead[],
   updateNavigation: (index: number) => void,
   executeAutoCall: (lead: Lead) => void,
-  isAutoCallInProgress: boolean
+  isAutoCallInProgress: boolean,
+  shuffleMode: boolean,
+  callFilter: string
 ) => {
   const handleNext = () => {
     // Prevent rapid navigation during auto-call
@@ -23,9 +25,21 @@ export const useAutoCallNavigation = (
       return;
     }
     
-    // Calculate next index in the filtered leads
-    const nextIndex = (currentIndex + 1) % baseLeads.length;
-    const nextLead = baseLeads[nextIndex];
+    let nextIndex: number;
+    let nextLead: Lead;
+    
+    // Use shuffle logic if shuffle mode is enabled
+    if (shuffleMode) {
+      console.log('Auto-call using shuffle mode');
+      nextLead = baseLeads[Math.floor(Math.random() * baseLeads.length)];
+      nextIndex = baseLeads.findIndex(lead => 
+        lead.name === nextLead.name && lead.phone === nextLead.phone
+      );
+    } else {
+      console.log('Auto-call using sequential mode');
+      nextIndex = (currentIndex + 1) % baseLeads.length;
+      nextLead = baseLeads[nextIndex];
+    }
     
     console.log('Auto-call navigation:', {
       currentIndex,
@@ -33,7 +47,8 @@ export const useAutoCallNavigation = (
       leadName: nextLead?.name,
       leadPhone: nextLead?.phone,
       totalFilteredLeads: baseLeads.length,
-      autoCallEnabled: autoCall
+      autoCallEnabled: autoCall,
+      shuffleMode
     });
     
     // Update navigation first to show the correct lead
