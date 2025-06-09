@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { filterLeadsByTimezone, getTimezoneGroup } from '../utils/timezoneUtils';
 import { getPhoneDigits } from '../utils/phoneUtils';
@@ -173,6 +174,7 @@ export const useLeadNavigation = (initialLeads: Lead[]) => {
     setNavigationHistory(newHistory);
     setHistoryIndex(newHistory.length - 1);
     
+    // Fix: Call the lead at the new index after navigation is complete
     if (autoCall && baseLeads[nextIndex]) {
       makeCall(baseLeads[nextIndex]);
     }
