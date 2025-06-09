@@ -174,7 +174,7 @@ export const useLeadNavigation = (initialLeads: Lead[]) => {
     setNavigationHistory(newHistory);
     setHistoryIndex(newHistory.length - 1);
     
-    // Fix: Call the lead at the new index after navigation is complete
+    // Fix: Call the correct lead that we actually navigated to
     if (autoCall && baseLeads[nextIndex]) {
       makeCall(baseLeads[nextIndex]);
     }
