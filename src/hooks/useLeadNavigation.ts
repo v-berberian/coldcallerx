@@ -44,7 +44,7 @@ export const useLeadNavigation = (initialLeads: Lead[]) => {
 
   const { getBaseLeads } = useLeadFiltering(leadsData, timezoneFilter, callFilter);
 
-  const { isAutoCallInProgress, pendingCallLead, executeAutoCall, markPendingCallAsCompleted } = useAutoCall(makeCall, markLeadAsCalled);
+  const { isAutoCallInProgress, executeAutoCall } = useAutoCall(makeCall, markLeadAsCalled);
 
   const { handleNext: navigationHandleNext, handlePrevious, selectLead } = useNavigation(
     currentIndex,
@@ -58,9 +58,7 @@ export const useLeadNavigation = (initialLeads: Lead[]) => {
 
   const { handleNext } = useAutoCallNavigation(
     autoCall,
-    pendingCallLead,
     currentIndex,
-    markPendingCallAsCompleted,
     getBaseLeads,
     updateNavigation,
     executeAutoCall,
