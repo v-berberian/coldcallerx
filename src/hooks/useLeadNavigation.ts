@@ -1,4 +1,3 @@
-
 import { useEffect } from 'react';
 import { Lead } from '../types/lead';
 import { useNavigationState } from './useNavigationState';
@@ -43,7 +42,7 @@ export const useLeadNavigation = (initialLeads: Lead[]) => {
 
   const { getBaseLeads } = useLeadFiltering(leadsData, timezoneFilter, callFilter);
 
-  const { isAutoCallInProgress, executeAutoCall } = useAutoCall(makeCall);
+  const { isAutoCallInProgress, pendingCallLead, executeAutoCall, markPendingCallAsCompleted } = useAutoCall(makeCall);
 
   const { handleNext: navigationHandleNext, handlePrevious, selectLead } = useNavigation(
     currentIndex,
@@ -156,6 +155,11 @@ export const useLeadNavigation = (initialLeads: Lead[]) => {
     if (isAutoCallInProgress) {
       console.log('Preventing next navigation because auto-call is in progress');
       return;
+    }
+    
+    // If there's a pending call from auto-call, mark it as completed first
+    if (autoCall && pendingCallLead) {
+      markPendingCallAsCompleted();
     }
     
     const baseLeads = getBaseLeads();

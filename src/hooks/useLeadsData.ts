@@ -12,18 +12,21 @@ export const useLeadsData = (initialLeads: Lead[]) => {
     }))
   );
 
-  const makeCall = (lead: Lead) => {
+  const makeCall = (lead: Lead, markAsCalled: boolean = true) => {
     const phoneNumber = getPhoneDigits(lead.phone);
     window.location.href = `tel:${phoneNumber}`;
     
-    const updatedLeads = leadsData.map(l => 
-      l.name === lead.name && l.phone === lead.phone ? {
-        ...l,
-        called: (l.called || 0) + 1,
-        lastCalled: new Date().toLocaleDateString()
-      } : l
-    );
-    setLeadsData(updatedLeads);
+    // Only update the lead data if we should mark it as called
+    if (markAsCalled) {
+      const updatedLeads = leadsData.map(l => 
+        l.name === lead.name && l.phone === lead.phone ? {
+          ...l,
+          called: (l.called || 0) + 1,
+          lastCalled: new Date().toLocaleDateString()
+        } : l
+      );
+      setLeadsData(updatedLeads);
+    }
   };
 
   const resetCallCount = (lead: Lead) => {
