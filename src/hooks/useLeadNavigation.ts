@@ -1,3 +1,4 @@
+
 import { useEffect } from 'react';
 import { Lead } from '../types/lead';
 import { useNavigationState } from './useNavigationState';
@@ -56,9 +57,9 @@ export const useLeadNavigation = (initialLeads: Lead[]) => {
 
   useEffect(() => {
     // Don't auto-navigate during auto-call operations or when filters are changing
-    // IMPORTANT: Also don't navigate if auto-call is enabled to prevent double navigation
-    if (isAutoCallInProgress || isFilterChanging || autoCall) {
-      console.log('Skipping filter navigation because auto-call is in progress, filters are changing, or auto-call is enabled');
+    // IMPORTANT: Don't navigate during auto-call to prevent jumping away from called leads
+    if (isAutoCallInProgress || isFilterChanging) {
+      console.log('Skipping filter navigation because auto-call is in progress or filters are changing');
       return;
     }
 
@@ -141,7 +142,7 @@ export const useLeadNavigation = (initialLeads: Lead[]) => {
     }
     
     setTimeout(() => setFilterChanging(false), 100);
-  }, [timezoneFilter, callFilter, leadsData]);
+  }, [timezoneFilter, callFilter]);
 
   useEffect(() => {
     const baseLeads = getBaseLeads();
