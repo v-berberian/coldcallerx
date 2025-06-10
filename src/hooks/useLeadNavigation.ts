@@ -1,4 +1,5 @@
 
+import { useState } from 'react';
 import { Lead } from '../types/lead';
 import { useNavigationState } from './useNavigationState';
 import { useFilters } from './useFilters';
@@ -9,6 +10,8 @@ import { useNavigation } from './useNavigation';
 import { useFilterChangeEffects } from './useFilterChangeEffects';
 
 export const useLeadNavigation = (initialLeads: Lead[]) => {
+  const [shouldAutoCall, setShouldAutoCall] = useState(false);
+
   const {
     currentIndex,
     cardKey,
@@ -55,8 +58,6 @@ export const useLeadNavigation = (initialLeads: Lead[]) => {
     callFilter,
     isFilterChanging,
     isAutoCallInProgress,
-    autoCall,
-    executeAutoCall,
     markLeadAsCalledOnNavigation
   );
 
@@ -77,6 +78,11 @@ export const useLeadNavigation = (initialLeads: Lead[]) => {
   const handleNextWrapper = () => {
     const baseLeads = getBaseLeads();
     handleNext(baseLeads);
+    
+    // Set flag to trigger auto-call after navigation
+    if (autoCall) {
+      setShouldAutoCall(true);
+    }
   };
 
   const handlePreviousWrapper = () => {
@@ -108,8 +114,11 @@ export const useLeadNavigation = (initialLeads: Lead[]) => {
     shuffleMode,
     autoCall,
     historyIndex,
+    shouldAutoCall,
+    setShouldAutoCall,
     getBaseLeads,
     makeCall,
+    executeAutoCall,
     handleNext: handleNextWrapper,
     handlePrevious: handlePreviousWrapper,
     resetCallCount,

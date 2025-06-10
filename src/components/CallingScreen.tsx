@@ -40,8 +40,11 @@ const CallingScreen: React.FC<CallingScreenProps> = ({
     shuffleMode,
     autoCall,
     historyIndex,
+    shouldAutoCall,
+    setShouldAutoCall,
     getBaseLeads,
     makeCall,
+    executeAutoCall,
     handleNext,
     handlePrevious,
     resetCallCount,
@@ -70,6 +73,21 @@ const CallingScreen: React.FC<CallingScreenProps> = ({
       localStorage.setItem('coldcaller-leads', JSON.stringify(leadsData));
     }
   }, [leadsData]);
+
+  // Handle auto-call using the currently displayed lead
+  useEffect(() => {
+    if (shouldAutoCall && autoCall) {
+      const baseLeads = getBaseLeads();
+      const currentLead = baseLeads[currentIndex];
+      
+      if (currentLead) {
+        console.log('Auto-call triggered for displayed lead:', currentLead.name, currentLead.phone);
+        executeAutoCall(currentLead);
+      }
+      
+      setShouldAutoCall(false);
+    }
+  }, [shouldAutoCall, autoCall, currentIndex, cardKey]);
 
   useEffect(() => {
     const baseLeads = getBaseLeads();

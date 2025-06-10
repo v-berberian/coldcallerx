@@ -1,3 +1,4 @@
+
 import { Lead, CallFilter } from '../types/lead';
 import { useLeadSelection } from './useLeadSelection';
 
@@ -9,8 +10,6 @@ export const useNavigation = (
   callFilter: CallFilter,
   isFilterChanging: boolean,
   isAutoCallInProgress: boolean,
-  autoCall: boolean,
-  executeAutoCall: (lead: Lead) => void,
   markLeadAsCalledOnNavigation: (lead: Lead) => void
 ) => {
   const { getNextLeadInSequential, getNextLeadInShuffle } = useLeadSelection();
@@ -48,15 +47,8 @@ export const useNavigation = (
       nextLead = result.lead;
     }
     
-    console.log('Navigation to index:', nextIndex, 'lead:', nextLead?.name, 'shuffle:', shuffleMode, 'autoCall:', autoCall);
+    console.log('Navigation to index:', nextIndex, 'lead:', nextLead?.name, 'shuffle:', shuffleMode);
     updateNavigation(nextIndex);
-
-    // If auto-call is enabled, use the lead at the new index position from baseLeads
-    if (autoCall && baseLeads[nextIndex]) {
-      const leadToCall = baseLeads[nextIndex];
-      console.log('Auto-call enabled - calling lead at new position:', leadToCall.name, leadToCall.phone);
-      executeAutoCall(leadToCall);
-    }
   };
 
   const handlePrevious = (goToPrevious: () => void) => {
