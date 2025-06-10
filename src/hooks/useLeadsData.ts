@@ -12,9 +12,14 @@ export const useLeadsData = (initialLeads: Lead[]) => {
     }))
   );
 
-  const makeCall = (lead: Lead) => {
+  const makeCall = (lead: Lead, markAsCalled: boolean = true) => {
     const phoneNumber = getPhoneDigits(lead.phone);
     window.location.href = `tel:${phoneNumber}`;
+    
+    // Only update the lead data if we should mark it as called
+    if (markAsCalled) {
+      markLeadAsCalled(lead);
+    }
   };
 
   const markLeadAsCalled = (lead: Lead) => {
@@ -55,11 +60,17 @@ export const useLeadsData = (initialLeads: Lead[]) => {
     setLeadsData(updatedLeads);
   };
 
+  // New function to mark a lead as called when navigating away
+  const markLeadAsCalledOnNavigation = (lead: Lead) => {
+    markLeadAsCalled(lead);
+  };
+
   return {
     leadsData,
     setLeadsData,
     makeCall,
     markLeadAsCalled,
+    markLeadAsCalledOnNavigation,
     resetCallCount,
     resetAllCallCounts
   };

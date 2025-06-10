@@ -1,8 +1,13 @@
-
 import React, { useState, useEffect } from 'react';
-import CallingScreenHeader from './CallingScreenHeader';
-import CallingScreenMain from './CallingScreenMain';
-import CallingScreenEmpty from './CallingScreenEmpty';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
+import SearchAutocomplete from './SearchAutocomplete';
+import SearchBar from './SearchBar';
+import ThemeToggle from './ThemeToggle';
+import CSVImporter from './CSVImporter';
+import LeadCard from './LeadCard';
+import FilterButtons from './FilterButtons';
+import NavigationControls from './NavigationControls';
 import { useLeadNavigation } from '../hooks/useLeadNavigation';
 import { filterLeadsByTimezone } from '../utils/timezoneUtils';
 
@@ -100,12 +105,6 @@ const CallingScreen: React.FC<CallingScreenProps> = ({
     setShowAutocomplete(false);
   };
 
-  const handleClearFilters = () => {
-    toggleTimezoneFilter();
-    toggleCallFilter();
-    setSearchQuery('');
-  };
-
   const baseLeads = getBaseLeads();
   const currentLead = baseLeads[currentIndex];
   
@@ -132,10 +131,28 @@ const CallingScreen: React.FC<CallingScreenProps> = ({
   
   if (!currentLead) {
     return (
-      <CallingScreenEmpty
-        onClearFilters={handleClearFilters}
-        onBack={onBack}
-      />
+      <div className="h-screen h-[100vh] h-[100svh] bg-background flex items-center justify-center p-4 overflow-hidden">
+        <Card className="w-full max-w-md shadow-lg rounded-2xl">
+          <CardContent className="p-8 text-center">
+            <p className="text-lg">No leads found with current filters</p>
+            <div className="mt-4 space-y-2">
+              <Button 
+                onClick={() => {
+                  toggleTimezoneFilter();
+                  toggleCallFilter();
+                  setSearchQuery('');
+                }} 
+                className="w-full rounded-xl"
+              >
+                Clear All Filters
+              </Button>
+              <Button onClick={onBack} variant="outline" className="w-full rounded-xl">
+                Back to Import
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
     );
   }
 
@@ -143,43 +160,84 @@ const CallingScreen: React.FC<CallingScreenProps> = ({
   
   return (
     <div className="h-screen h-[100vh] h-[100svh] bg-background flex flex-col overflow-hidden">
-      <CallingScreenHeader
-        fileName={fileName}
-        searchQuery={searchQuery}
-        showAutocomplete={showAutocomplete}
-        searchResults={searchResults}
-        leadsData={leadsData}
-        onLeadsImported={onLeadsImported}
-        onSearchChange={setSearchQuery}
-        onSearchFocus={handleSearchFocus}
-        onSearchBlur={handleSearchBlur}
-        onClearSearch={clearSearch}
-        onLeadSelect={handleLeadSelect}
-      />
+      {/* Header */}
+      <div className="bg-background border-b border-border p-4 flex-shrink-0">
+        <div className="flex items-center justify-between mb-4">
+          <CSVImporter onLeadsImported={onLeadsImported} />
+          
+          <div className="flex items-center space-x-3">
+            <h1 className="text-2xl font-bold">
+              <span className="text-blue-500">Cold</span>
+              <span className="text-foreground">Caller </span>
+              <span className="text-blue-500">X</span>
+            </h1>
+          </div>
+          
+          <ThemeToggle />
+        </div>
+        
+        {/* Search Bar */}
+        <div className="relative">
+          <SearchBar 
+            searchQuery={searchQuery} 
+            onSearchChange={setSearchQuery} 
+            onSearchFocus={handleSearchFocus} 
+            onSearchBlur={handleSearchBlur} 
+            onClearSearch={clearSearch} 
+            fileName={fileName} 
+          />
+          
+          {/* Autocomplete Dropdown */}
+          {showAutocomplete && (
+            <SearchAutocomplete 
+              leads={searchResults} 
+              onLeadSelect={handleLeadSelect} 
+              searchQuery={searchQuery} 
+              actualIndices={searchResults.map(lead => 
+                leadsData.findIndex(l => l.name === lead.name && l.phone === lead.phone) + 1
+              )} 
+              totalLeads={leadsData.length} 
+            />
+          )}
+        </div>
+      </div>
 
-      <CallingScreenMain
-        currentLead={currentLead}
-        currentIndex={currentIndex}
-        totalCount={totalLeadCount}
-        fileName={fileName}
-        cardKey={cardKey}
-        timezoneFilter={timezoneFilter}
-        callFilter={callFilter}
-        shuffleMode={shuffleMode}
-        autoCall={autoCall}
-        historyIndex={historyIndex}
-        canGoPrevious={historyIndex > 0}
-        canGoNext={baseLeads.length > 1}
-        onCall={() => makeCall(currentLead)}
-        onResetCallCount={() => resetCallCount(currentLead)}
-        onToggleTimezone={toggleTimezoneFilter}
-        onToggleCallFilter={toggleCallFilter}
-        onResetAllCalls={resetAllCallCounts}
-        onPrevious={handlePrevious}
-        onNext={handleNext}
-        onToggleShuffle={toggleShuffle}
-        onToggleAutoCall={toggleAutoCall}
-      />
+      {/* Main Content */}
+      <div className="flex-1 flex items-start justify-center pt-8 p-4 min-h-0 px-6">
+        <div className="w-full max-w-sm space-y-4">
+          {/* Filter Buttons */}
+          <FilterButtons
+            timezoneFilter={timezoneFilter}
+            callFilter={callFilter}
+            onToggleTimezone={toggleTimezoneFilter}
+            onToggleCallFilter={toggleCallFilter}
+            onResetAllCalls={resetAllCallCounts}
+          />
+
+          {/* Current Lead Card */}
+          <LeadCard
+            lead={currentLead}
+            currentIndex={currentIndex}
+            totalCount={totalLeadCount}
+            fileName={fileName}
+            cardKey={cardKey}
+            onCall={() => makeCall(currentLead)}
+            onResetCallCount={() => resetCallCount(currentLead)}
+          />
+
+          {/* Navigation Controls */}
+          <NavigationControls
+            onPrevious={handlePrevious}
+            onNext={handleNext}
+            canGoPrevious={historyIndex > 0}
+            canGoNext={baseLeads.length > 1}
+            shuffleMode={shuffleMode}
+            autoCall={autoCall}
+            onToggleShuffle={toggleShuffle}
+            onToggleAutoCall={toggleAutoCall}
+          />
+        </div>
+      </div>
     </div>
   );
 };
