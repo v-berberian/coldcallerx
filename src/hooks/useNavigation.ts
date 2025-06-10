@@ -1,4 +1,3 @@
-
 import { Lead, CallFilter } from '../types/lead';
 import { useLeadSelection } from './useLeadSelection';
 
@@ -52,10 +51,11 @@ export const useNavigation = (
     console.log('Navigation to index:', nextIndex, 'lead:', nextLead?.name, 'shuffle:', shuffleMode, 'autoCall:', autoCall);
     updateNavigation(nextIndex);
 
-    // If auto-call is enabled, call the next lead using the lead at the new index
-    if (autoCall && nextLead) {
-      console.log('Auto-call enabled - calling next lead:', nextLead.name, nextLead.phone);
-      executeAutoCall(nextLead);
+    // If auto-call is enabled, use the lead at the new index position from baseLeads
+    if (autoCall && baseLeads[nextIndex]) {
+      const leadToCall = baseLeads[nextIndex];
+      console.log('Auto-call enabled - calling lead at new position:', leadToCall.name, leadToCall.phone);
+      executeAutoCall(leadToCall);
     }
   };
 
