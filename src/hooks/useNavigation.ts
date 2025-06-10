@@ -52,7 +52,7 @@ export const useNavigation = (
     console.log('Navigation to index:', nextIndex, 'lead:', nextLead?.name, 'shuffle:', shuffleMode, 'autoCall:', autoCall);
     updateNavigation(nextIndex);
 
-    // If auto-call is enabled, call the next lead
+    // If auto-call is enabled, call the next lead using the lead at the new index
     if (autoCall && nextLead) {
       console.log('Auto-call enabled - calling next lead:', nextLead.name, nextLead.phone);
       executeAutoCall(nextLead);

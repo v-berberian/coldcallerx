@@ -13,20 +13,16 @@ export const useAutoCall = (
       return;
     }
     
-    console.log('AUTO-CALL: Preparing to call:', lead.name, lead.phone);
+    console.log('AUTO-CALL: Making call to:', lead.name, lead.phone);
     setIsAutoCallInProgress(true);
     
-    // Add 1 second delay to ensure lead card is fully rendered
+    // Make the call without marking as called immediately
+    makeCall(lead, false);
+    
+    // Clear the auto-call flag after the call is made
     setTimeout(() => {
-      console.log('AUTO-CALL: Making delayed call to:', lead.name, lead.phone);
-      // Make the call without marking as called immediately
-      makeCall(lead, false);
-      
-      // Clear the auto-call flag after the call is made
-      setTimeout(() => {
-        setIsAutoCallInProgress(false);
-      }, 500);
-    }, 1000);
+      setIsAutoCallInProgress(false);
+    }, 500);
   };
 
   return {
