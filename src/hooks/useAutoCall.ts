@@ -3,7 +3,8 @@ import { useState } from 'react';
 import { Lead } from '../types/lead';
 
 export const useAutoCall = (
-  makeCall: (lead: Lead, markAsCalled?: boolean) => void
+  makeCall: (lead: Lead) => void,
+  markLeadAsPendingCall?: (lead: Lead) => void
 ) => {
   const [isAutoCallInProgress, setIsAutoCallInProgress] = useState(false);
 
@@ -16,10 +17,12 @@ export const useAutoCall = (
     console.log('AUTO-CALL: Making call to:', lead.name, lead.phone);
     setIsAutoCallInProgress(true);
     
-    // Make the call without marking as called immediately
-    makeCall(lead, false);
+    makeCall(lead);
     
-    // Clear the auto-call flag after a short delay
+    if (markLeadAsPendingCall) {
+      markLeadAsPendingCall(lead);
+    }
+    
     setTimeout(() => {
       setIsAutoCallInProgress(false);
     }, 1000);

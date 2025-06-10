@@ -7,6 +7,7 @@ import { useLeadFiltering } from './useLeadFiltering';
 import { useAutoCall } from './useAutoCall';
 import { useNavigation } from './useNavigation';
 import { useFilterChangeEffects } from './useFilterChangeEffects';
+import { useUncalledFilter } from './useUncalledFilter';
 
 export const useLeadNavigation = (initialLeads: Lead[]) => {
   const {
@@ -38,14 +39,29 @@ export const useLeadNavigation = (initialLeads: Lead[]) => {
     setLeadsData,
     makeCall,
     markLeadAsCalled,
-    markLeadAsCalledOnNavigation,
     resetCallCount,
     resetAllCallCounts
   } = useLeadsData(initialLeads);
 
-  const { getBaseLeads } = useLeadFiltering(leadsData, timezoneFilter, callFilter);
+  const {
+    markLeadAsPendingCall,
+    commitPendingCalls,
+    clearPendingCalls,
+    isLeadPendingCall
+  } = useUncalledFilter();
 
-  const { isAutoCallInProgress, executeAutoCall } = useAutoCall(makeCall);
+  const { getBaseLeads } = useLeadFiltering(
+    leadsData, 
+    timezoneFilter, 
+    callFilter,
+    new Set() // We'll pass the actual pending calls when needed
+  );
+
+  const { isAutoCallInProgress, executeAutoCall } = useAutoCall(makeCall, markLeadAsPendingCall);
+
+  const commitPendingCallsWrapper = () => {
+    commitPendingCalls(leadsData, setLeadsData);
+  };
 
   const { handleNext, handlePrevious, selectLead } = useNavigation(
     currentIndex,
@@ -53,11 +69,10 @@ export const useLeadNavigation = (initialLeads: Lead[]) => {
     resetNavigation,
     shuffleMode,
     callFilter,
-    isFilterChanging,
     isAutoCallInProgress,
     autoCall,
     executeAutoCall,
-    markLeadAsCalledOnNavigation
+    commitPendingCallsWrapper
   );
 
   useFilterChangeEffects(
@@ -74,6 +89,15 @@ export const useLeadNavigation = (initialLeads: Lead[]) => {
     resetNavigation
   );
 
+  const handleCall = (lead: Lead) => {
+    makeCall(lead);
+    if (callFilter === 'UNCALLED') {
+      markLeadAsPendingCall(lead);
+    } else {
+      markLeadAsCalled(lead);
+    }
+  };
+
   const handleNextWrapper = () => {
     const baseLeads = getBaseLeads();
     handleNext(baseLeads);
@@ -88,7 +112,6 @@ export const useLeadNavigation = (initialLeads: Lead[]) => {
     selectLead(lead, baseLeads, leadsData);
   };
 
-  // Function to reset leads data (for CSV import)
   const resetLeadsData = (newLeads: Lead[]) => {
     const formattedLeads = newLeads.map(lead => ({
       ...lead,
@@ -96,6 +119,7 @@ export const useLeadNavigation = (initialLeads: Lead[]) => {
       lastCalled: lead.lastCalled || undefined
     }));
     setLeadsData(formattedLeads);
+    clearPendingCalls();
     resetNavigation(0);
   };
 
@@ -109,7 +133,7 @@ export const useLeadNavigation = (initialLeads: Lead[]) => {
     autoCall,
     historyIndex,
     getBaseLeads,
-    makeCall,
+    makeCall: handleCall,
     handleNext: handleNextWrapper,
     handlePrevious: handlePreviousWrapper,
     resetCallCount,
@@ -119,6 +143,7 @@ export const useLeadNavigation = (initialLeads: Lead[]) => {
     toggleCallFilter,
     toggleShuffle,
     toggleAutoCall,
-    resetLeadsData
+    resetLeadsData,
+    isLeadPendingCall
   };
 };

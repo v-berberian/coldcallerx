@@ -8,18 +8,16 @@ export const useNavigation = (
   resetNavigation: (index: number) => void,
   shuffleMode: boolean,
   callFilter: CallFilter,
-  isFilterChanging: boolean,
   isAutoCallInProgress: boolean,
   autoCall: boolean,
   executeAutoCall: (lead: Lead) => void,
-  markLeadAsCalledOnNavigation: (lead: Lead) => void
+  commitPendingCalls: () => void
 ) => {
   const { getNextLeadInSequential, getNextLeadInShuffle } = useLeadSelection();
 
   const handleNext = (baseLeads: Lead[]) => {
-    // Prevent navigation if filters are currently changing
-    if (isFilterChanging || isAutoCallInProgress) {
-      console.log('Skipping navigation because filters are changing or auto-call in progress');
+    if (isAutoCallInProgress) {
+      console.log('Skipping navigation because auto-call in progress');
       return;
     }
     
@@ -28,11 +26,8 @@ export const useNavigation = (
       return;
     }
 
-    // Mark current lead as called when navigating away (for uncalled filter behavior)
-    const currentLead = baseLeads[currentIndex];
-    if (currentLead) {
-      markLeadAsCalledOnNavigation(currentLead);
-    }
+    // Commit any pending call updates when navigating away
+    commitPendingCalls();
     
     let nextIndex: number;
     let nextLead: Lead;
@@ -73,7 +68,6 @@ export const useNavigation = (
       return;
     }
     
-    // Find the lead's index in the filtered baseLeads array for proper navigation context
     const leadIndex = baseLeads.findIndex(l => l.name === lead.name && l.phone === lead.phone);
     if (leadIndex !== -1) {
       console.log('Selecting lead:', lead.name, 'at filtered array index:', leadIndex);

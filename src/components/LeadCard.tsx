@@ -1,10 +1,9 @@
 
 import React from 'react';
-import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Phone, X } from 'lucide-react';
+import { Card, CardContent } from '@/components/ui/card';
+import { Phone, RotateCcw } from 'lucide-react';
 import { formatPhoneNumber } from '../utils/phoneUtils';
-import { getStateFromAreaCode } from '../utils/timezoneUtils';
 
 interface Lead {
   name: string;
@@ -21,70 +20,63 @@ interface LeadCardProps {
   cardKey: number;
   onCall: () => void;
   onResetCallCount: () => void;
+  isPendingCall?: boolean;
 }
 
-const LeadCard: React.FC<LeadCardProps> = ({
-  lead,
-  currentIndex,
-  totalCount,
-  fileName,
-  cardKey,
-  onCall,
-  onResetCallCount
+const LeadCard: React.FC<LeadCardProps> = ({ 
+  lead, 
+  currentIndex, 
+  totalCount, 
+  fileName, 
+  cardKey, 
+  onCall, 
+  onResetCallCount,
+  isPendingCall = false
 }) => {
   return (
-    <Card key={cardKey} className="shadow-2xl border-border/50 rounded-3xl bg-card h-[400px] flex flex-col animate-scale-in">
-      <CardContent className="p-6 space-y-4 flex-1 flex flex-col">
-        {/* Top row with lead count and file name */}
-        <div className="flex items-center justify-between">
-          <p className="text-sm text-muted-foreground opacity-40">
-            {currentIndex + 1}/{totalCount}
-          </p>
-          <p className="text-sm text-muted-foreground opacity-40">
-            {fileName}
-          </p>
+    <Card 
+      key={cardKey} 
+      className="w-full shadow-lg rounded-2xl animate-content-change border-2"
+    >
+      <CardContent className="p-6 text-center">
+        <div className="text-xs text-muted-foreground mb-2 font-medium">
+          {currentIndex + 1} of {totalCount} • {fileName}
+        </div>
+        <div className="text-2xl font-bold mb-1">{lead.name}</div>
+        <div className="text-lg text-muted-foreground mb-4">
+          {formatPhoneNumber(lead.phone)}
+        </div>
+        
+        <div className="flex items-center justify-center gap-2 mb-4 text-sm text-muted-foreground">
+          <span>Called: {lead.called || 0} time{(lead.called || 0) !== 1 ? 's' : ''}</span>
+          {(lead.called || 0) > 0 && (
+            <button
+              onClick={onResetCallCount}
+              className="text-muted-foreground hover:text-foreground transition-colors p-1"
+              title="Reset call count"
+            >
+              <RotateCcw size={14} />
+            </button>
+          )}
         </div>
 
-        {/* Lead info - Main content area with animation */}
-        <div key={`${lead.name}-${lead.phone}`} className="text-center space-y-3 flex-1 flex flex-col justify-center animate-content-change">
-          {/* State and timezone - moved to top with same font size as "Called: times" */}
-          <p className="text-sm text-muted-foreground">
-            {getStateFromAreaCode(lead.phone)}
-          </p>
-          
-          <h2 className="text-3xl font-bold text-foreground">{lead.name}</h2>
-          
-          <p className="text-lg text-muted-foreground text-center">{formatPhoneNumber(lead.phone)}</p>
-          
-          <div className="relative flex flex-col items-center space-y-3">
-            <div className="flex items-center justify-center">
-              <p className="text-sm text-muted-foreground">
-                Called: {lead.called || 0} times
-              </p>
-              {(lead.called || 0) > 0 && (
-                <button
-                  onClick={onResetCallCount}
-                  className="ml-2 p-1 hover:bg-muted rounded transition-colors"
-                  title="Reset call count"
-                >
-                  <X className="h-3 w-3 text-muted-foreground hover:text-foreground" />
-                </button>
-              )}
-            </div>
-            {/* Reserve space for last called text to prevent layout shift */}
-            <div className="h-5 flex items-center justify-center">
-              {lead.lastCalled && (
-                <p className="text-sm text-muted-foreground animate-fade-in whitespace-nowrap">
-                  Last called: {lead.lastCalled}
-                </p>
-              )}
-            </div>
+        {isPendingCall && (
+          <div className="text-xs text-orange-600 mb-2 font-medium">
+            Will be marked as called when you navigate away
           </div>
-        </div>
+        )}
 
-        {/* Main Call Button - ensure it's always green */}
-        <Button onClick={onCall} size="lg" className="w-full h-16 text-lg font-semibold bg-green-600 hover:bg-green-700 text-white rounded-2xl shadow-lg">
-          <Phone className="h-6 w-6 mr-2" />
+        {lead.lastCalled && (
+          <div className="text-xs text-muted-foreground mb-4">
+            Last called: {lead.lastCalled}
+          </div>
+        )}
+        
+        <Button 
+          onClick={onCall} 
+          className="w-full text-lg py-6 rounded-xl font-semibold bg-green-600 hover:bg-green-700"
+        >
+          <Phone className="mr-2 h-5 w-5" />
           Call
         </Button>
       </CardContent>
