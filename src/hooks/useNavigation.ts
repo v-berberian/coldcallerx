@@ -10,7 +10,9 @@ export const useNavigation = (
   callFilter: CallFilter,
   isFilterChanging: boolean,
   isAutoCallInProgress: boolean,
-  markLeadAsCalledOnNavigation: (lead: Lead) => void
+  markLeadAsCalledOnNavigation: (lead: Lead) => void,
+  shownLeadsInShuffle: Set<string>,
+  setShownLeadsInShuffle: (shown: Set<string>) => void
 ) => {
   const { getNextLeadInSequential, getNextLeadInShuffle } = useLeadSelection();
 
@@ -37,9 +39,18 @@ export const useNavigation = (
     
     if (shuffleMode) {
       console.log('Using shuffle mode for navigation');
-      const result = getNextLeadInShuffle(baseLeads, currentIndex, callFilter);
+      const result = getNextLeadInShuffle(baseLeads, currentIndex, callFilter, shownLeadsInShuffle);
       nextIndex = result.index;
       nextLead = result.lead;
+      
+      // Add the new lead to shown leads set
+      if (nextLead) {
+        const leadKey = `${nextLead.name}-${nextLead.phone}`;
+        const newShownLeads = new Set(shownLeadsInShuffle);
+        newShownLeads.add(leadKey);
+        setShownLeadsInShuffle(newShownLeads);
+        console.log('Added to shown leads:', leadKey, 'Total shown:', newShownLeads.size);
+      }
     } else {
       console.log('Using sequential mode for navigation');
       const result = getNextLeadInSequential(baseLeads, currentIndex);
@@ -70,6 +81,15 @@ export const useNavigation = (
     if (leadIndex !== -1) {
       console.log('Selecting lead:', lead.name, 'at filtered array index:', leadIndex);
       updateNavigation(leadIndex);
+      
+      // If in shuffle mode, add this lead to shown leads
+      if (shuffleMode) {
+        const leadKey = `${lead.name}-${lead.phone}`;
+        const newShownLeads = new Set(shownLeadsInShuffle);
+        newShownLeads.add(leadKey);
+        setShownLeadsInShuffle(newShownLeads);
+        console.log('Added selected lead to shown leads:', leadKey);
+      }
     }
   };
 

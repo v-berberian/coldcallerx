@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Lead } from '../types/lead';
 import { useNavigationState } from './useNavigationState';
@@ -11,6 +10,7 @@ import { useFilterChangeEffects } from './useFilterChangeEffects';
 
 export const useLeadNavigation = (initialLeads: Lead[]) => {
   const [shouldAutoCall, setShouldAutoCall] = useState(false);
+  const [shownLeadsInShuffle, setShownLeadsInShuffle] = useState<Set<string>>(new Set());
 
   const {
     currentIndex,
@@ -58,7 +58,9 @@ export const useLeadNavigation = (initialLeads: Lead[]) => {
     callFilter,
     isFilterChanging,
     isAutoCallInProgress,
-    markLeadAsCalledOnNavigation
+    markLeadAsCalledOnNavigation,
+    shownLeadsInShuffle,
+    setShownLeadsInShuffle
   );
 
   useFilterChangeEffects(
@@ -94,6 +96,22 @@ export const useLeadNavigation = (initialLeads: Lead[]) => {
     selectLead(lead, baseLeads, leadsData);
   };
 
+  // Enhanced toggle functions to reset shown leads tracker
+  const toggleShuffleWrapper = () => {
+    toggleShuffle();
+    setShownLeadsInShuffle(new Set()); // Reset when toggling shuffle mode
+  };
+
+  const toggleCallFilterWrapper = () => {
+    toggleCallFilter();
+    setShownLeadsInShuffle(new Set()); // Reset when changing call filter
+  };
+
+  const toggleTimezoneFilterWrapper = () => {
+    toggleTimezoneFilter();
+    setShownLeadsInShuffle(new Set()); // Reset when changing timezone filter
+  };
+
   // Function to reset leads data (for CSV import)
   const resetLeadsData = (newLeads: Lead[]) => {
     const formattedLeads = newLeads.map(lead => ({
@@ -103,6 +121,7 @@ export const useLeadNavigation = (initialLeads: Lead[]) => {
     }));
     setLeadsData(formattedLeads);
     resetNavigation(0);
+    setShownLeadsInShuffle(new Set()); // Reset shown leads on new import
   };
 
   return {
@@ -124,9 +143,9 @@ export const useLeadNavigation = (initialLeads: Lead[]) => {
     resetCallCount,
     resetAllCallCounts,
     selectLead: selectLeadWrapper,
-    toggleTimezoneFilter,
-    toggleCallFilter,
-    toggleShuffle,
+    toggleTimezoneFilter: toggleTimezoneFilterWrapper,
+    toggleCallFilter: toggleCallFilterWrapper,
+    toggleShuffle: toggleShuffleWrapper,
     toggleAutoCall,
     resetLeadsData
   };
