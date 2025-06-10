@@ -35,27 +35,26 @@ export const useNavigation = (
     }
     
     let nextIndex: number;
-    let nextLead: Lead;
     
     if (shuffleMode) {
       console.log('Using shuffle mode for navigation');
       const result = getNextLeadInShuffle(baseLeads, currentIndex, callFilter);
       nextIndex = result.index;
-      nextLead = result.lead;
     } else {
       console.log('Using sequential mode for navigation');
       const result = getNextLeadInSequential(baseLeads, currentIndex);
       nextIndex = result.index;
-      nextLead = result.lead;
     }
     
-    console.log('Navigation to index:', nextIndex, 'lead:', nextLead?.name, nextLead?.phone, 'shuffle:', shuffleMode, 'autoCall:', autoCall);
+    console.log('Navigation to index:', nextIndex, 'shuffle:', shuffleMode, 'autoCall:', autoCall);
     updateNavigation(nextIndex);
 
-    // If auto-call is enabled, call the EXACT same lead that was just navigated to
-    if (autoCall && nextLead) {
-      console.log('Auto-call enabled - calling lead that matches displayed card:', nextLead.name, nextLead.phone);
-      executeAutoCall(nextLead);
+    // If auto-call is enabled, get the lead from the baseLeads array using the nextIndex
+    // This ensures we're calling the exact same lead that will be displayed
+    if (autoCall && nextIndex >= 0 && nextIndex < baseLeads.length) {
+      const leadToCall = baseLeads[nextIndex];
+      console.log('Auto-call enabled - calling lead at index', nextIndex, ':', leadToCall.name, leadToCall.phone);
+      executeAutoCall(leadToCall);
     }
   };
 

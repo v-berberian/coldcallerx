@@ -22,7 +22,7 @@ export const useAutoCall = (
     // Clear the auto-call flag after the call is made
     setTimeout(() => {
       setIsAutoCallInProgress(false);
-    }, 500);
+    }, 100);
   };
 
   return {
