@@ -261,5 +261,3 @@ const CallingScreen: React.FC<CallingScreenProps> = ({
 };
 
 export default CallingScreen;
-
-}
