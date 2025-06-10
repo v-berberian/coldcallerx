@@ -227,8 +227,12 @@ const CallingScreen: React.FC<CallingScreenProps> = ({
           <FilterButtons
             timezoneFilter={timezoneFilter}
             callFilter={callFilter}
+            shuffleMode={shuffleMode}
+            autoCall={autoCall}
             onToggleTimezone={toggleTimezoneFilter}
             onToggleCallFilter={toggleCallFilter}
+            onToggleShuffle={toggleShuffle}
+            onToggleAutoCall={toggleAutoCall}
             onResetAllCalls={resetAllCallCounts}
           />
 
@@ -249,10 +253,6 @@ const CallingScreen: React.FC<CallingScreenProps> = ({
             onNext={handleNext}
             canGoPrevious={historyIndex > 0}
             canGoNext={baseLeads.length > 1}
-            shuffleMode={shuffleMode}
-            autoCall={autoCall}
-            onToggleShuffle={toggleShuffle}
-            onToggleAutoCall={toggleAutoCall}
           />
         </div>
       </div>
