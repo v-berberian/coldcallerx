@@ -6,7 +6,6 @@ import { useLeadsData } from './useLeadsData';
 import { useLeadFiltering } from './useLeadFiltering';
 import { useAutoCall } from './useAutoCall';
 import { useNavigation } from './useNavigation';
-import { useAutoCallNavigation } from './useAutoCallNavigation';
 import { useFilterChangeEffects } from './useFilterChangeEffects';
 
 export const useLeadNavigation = (initialLeads: Lead[]) => {
@@ -36,35 +35,29 @@ export const useLeadNavigation = (initialLeads: Lead[]) => {
 
   const {
     leadsData,
+    setLeadsData,
     makeCall,
     markLeadAsCalled,
+    markLeadAsCalledOnNavigation,
     resetCallCount,
     resetAllCallCounts
   } = useLeadsData(initialLeads);
 
   const { getBaseLeads } = useLeadFiltering(leadsData, timezoneFilter, callFilter);
 
-  const { isAutoCallInProgress, executeAutoCall } = useAutoCall(makeCall, markLeadAsCalled);
+  const { isAutoCallInProgress, executeAutoCall } = useAutoCall(makeCall);
 
-  const { handleNext: navigationHandleNext, handlePrevious, selectLead } = useNavigation(
+  const { handleNext, handlePrevious, selectLead } = useNavigation(
     currentIndex,
     updateNavigation,
     resetNavigation,
     shuffleMode,
     callFilter,
     isFilterChanging,
-    isAutoCallInProgress
-  );
-
-  const { handleNext } = useAutoCallNavigation(
-    autoCall,
-    currentIndex,
-    getBaseLeads,
-    updateNavigation,
-    executeAutoCall,
     isAutoCallInProgress,
-    shuffleMode,
-    callFilter
+    autoCall,
+    executeAutoCall,
+    markLeadAsCalledOnNavigation
   );
 
   useFilterChangeEffects(
@@ -82,14 +75,8 @@ export const useLeadNavigation = (initialLeads: Lead[]) => {
   );
 
   const handleNextWrapper = () => {
-    if (autoCall) {
-      // Use auto-call navigation (which includes shuffle logic)
-      handleNext();
-    } else {
-      // Use manual navigation (which also includes shuffle logic)
-      const baseLeads = getBaseLeads();
-      navigationHandleNext(baseLeads);
-    }
+    const baseLeads = getBaseLeads();
+    handleNext(baseLeads);
   };
 
   const handlePreviousWrapper = () => {
@@ -98,8 +85,18 @@ export const useLeadNavigation = (initialLeads: Lead[]) => {
 
   const selectLeadWrapper = (lead: Lead) => {
     const baseLeads = getBaseLeads();
-    // Pass both baseLeads and full leadsData array
     selectLead(lead, baseLeads, leadsData);
+  };
+
+  // Function to reset leads data (for CSV import)
+  const resetLeadsData = (newLeads: Lead[]) => {
+    const formattedLeads = newLeads.map(lead => ({
+      ...lead,
+      called: lead.called || 0,
+      lastCalled: lead.lastCalled || undefined
+    }));
+    setLeadsData(formattedLeads);
+    resetNavigation(0);
   };
 
   return {
@@ -121,6 +118,7 @@ export const useLeadNavigation = (initialLeads: Lead[]) => {
     toggleTimezoneFilter,
     toggleCallFilter,
     toggleShuffle,
-    toggleAutoCall
+    toggleAutoCall,
+    resetLeadsData
   };
 };

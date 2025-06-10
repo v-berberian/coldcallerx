@@ -50,13 +50,19 @@ const CallingScreen: React.FC<CallingScreenProps> = ({
     toggleTimezoneFilter,
     toggleCallFilter,
     toggleShuffle,
-    toggleAutoCall
+    toggleAutoCall,
+    resetLeadsData
   } = useLeadNavigation(leads);
 
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState(leads);
   const [isSearching, setIsSearching] = useState(false);
   const [showAutocomplete, setShowAutocomplete] = useState(false);
+
+  // Handle new CSV imports by resetting the leads data
+  useEffect(() => {
+    resetLeadsData(leads);
+  }, [leads]);
 
   // Save updated leads data to localStorage whenever leadsData changes
   useEffect(() => {

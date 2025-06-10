@@ -9,7 +9,10 @@ export const useNavigation = (
   shuffleMode: boolean,
   callFilter: CallFilter,
   isFilterChanging: boolean,
-  isAutoCallInProgress: boolean
+  isAutoCallInProgress: boolean,
+  autoCall: boolean,
+  executeAutoCall: (lead: Lead) => void,
+  markLeadAsCalledOnNavigation: (lead: Lead) => void
 ) => {
   const { getNextLeadInSequential, getNextLeadInShuffle } = useLeadSelection();
 
@@ -24,24 +27,36 @@ export const useNavigation = (
       console.log('No leads available for navigation');
       return;
     }
+
+    // Mark current lead as called when navigating away (for uncalled filter behavior)
+    const currentLead = baseLeads[currentIndex];
+    if (currentLead) {
+      markLeadAsCalledOnNavigation(currentLead);
+    }
     
     let nextIndex: number;
-    let leadToCall: Lead;
+    let nextLead: Lead;
     
     if (shuffleMode) {
       console.log('Using shuffle mode for navigation');
       const result = getNextLeadInShuffle(baseLeads, currentIndex, callFilter);
       nextIndex = result.index;
-      leadToCall = result.lead;
+      nextLead = result.lead;
     } else {
       console.log('Using sequential mode for navigation');
       const result = getNextLeadInSequential(baseLeads, currentIndex);
       nextIndex = result.index;
-      leadToCall = result.lead;
+      nextLead = result.lead;
     }
     
-    console.log('Manual navigation to index:', nextIndex, 'lead:', leadToCall?.name, 'shuffle:', shuffleMode);
+    console.log('Navigation to index:', nextIndex, 'lead:', nextLead?.name, 'shuffle:', shuffleMode, 'autoCall:', autoCall);
     updateNavigation(nextIndex);
+
+    // If auto-call is enabled, call the next lead
+    if (autoCall && nextLead) {
+      console.log('Auto-call enabled - calling next lead:', nextLead.name, nextLead.phone);
+      executeAutoCall(nextLead);
+    }
   };
 
   const handlePrevious = (goToPrevious: () => void) => {
@@ -62,7 +77,6 @@ export const useNavigation = (
     const leadIndex = baseLeads.findIndex(l => l.name === lead.name && l.phone === lead.phone);
     if (leadIndex !== -1) {
       console.log('Selecting lead:', lead.name, 'at filtered array index:', leadIndex);
-      // Use updateNavigation to maintain navigation history and enable proper previous functionality
       updateNavigation(leadIndex);
     }
   };
