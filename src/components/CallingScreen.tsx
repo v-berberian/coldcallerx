@@ -248,7 +248,7 @@ const CallingScreen: React.FC<CallingScreenProps> = ({
           />
 
           {/* Navigation Controls */}
-          <div className="pt-6">
+          <div className="pt-2">
             <NavigationControls
               onPrevious={handlePrevious}
               onNext={handleNext}
