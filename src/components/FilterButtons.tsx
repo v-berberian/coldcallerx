@@ -29,10 +29,10 @@ const FilterButtons: React.FC<FilterButtonsProps> = ({
     <div className="space-y-2">
       {/* First row: Timezone and Call filters */}
       <div className="flex">
-        <div className="flex-1 flex justify-center">
+        <div className="flex-1">
           <button 
             onClick={onToggleTimezone} 
-            className={`text-sm font-medium px-4 py-3 rounded transition-all duration-200 ${
+            className={`w-full text-sm font-medium py-4 px-2 rounded transition-all duration-200 ${
               timezoneFilter === 'EST_CST' ? 'text-blue-600 animate-button-switch' : 'text-muted-foreground'
             }`} 
             style={{ WebkitTapHighlightColor: 'transparent' }}
@@ -40,10 +40,10 @@ const FilterButtons: React.FC<FilterButtonsProps> = ({
             {timezoneFilter === 'ALL' ? 'All States' : 'EST, CST & CDT'}
           </button>
         </div>
-        <div className="flex-1 flex justify-center items-center gap-2">
+        <div className="flex-1 flex items-center gap-2">
           <button 
             onClick={onToggleCallFilter} 
-            className={`text-sm font-medium px-4 py-3 rounded transition-all duration-200 ${
+            className={`flex-1 text-sm font-medium py-4 px-2 rounded transition-all duration-200 ${
               callFilter === 'UNCALLED' ? 'text-purple-600 animate-button-switch' : 'text-muted-foreground'
             }`} 
             style={{ WebkitTapHighlightColor: 'transparent' }}
@@ -53,7 +53,7 @@ const FilterButtons: React.FC<FilterButtonsProps> = ({
           {callFilter === 'UNCALLED' && (
             <button
               onClick={onResetAllCalls}
-              className="text-muted-foreground hover:text-foreground transition-colors p-1"
+              className="text-muted-foreground hover:text-foreground transition-colors p-1 min-w-[24px] h-[24px] flex items-center justify-center"
               title="Reset all call counts"
             >
               <RotateCcw size={14} />
@@ -64,10 +64,10 @@ const FilterButtons: React.FC<FilterButtonsProps> = ({
 
       {/* Second row: Shuffle and Auto Call */}
       <div className="flex">
-        <div className="flex-1 flex justify-center">
+        <div className="flex-1">
           <button 
             onClick={onToggleShuffle} 
-            className={`text-sm font-medium px-4 py-3 rounded transition-all duration-200 ${
+            className={`w-full text-sm font-medium py-4 px-2 rounded transition-all duration-200 ${
               shuffleMode ? 'text-orange-600 animate-button-switch' : 'text-muted-foreground'
             }`} 
             style={{ WebkitTapHighlightColor: 'transparent' }}
@@ -75,10 +75,10 @@ const FilterButtons: React.FC<FilterButtonsProps> = ({
             Shuffle
           </button>
         </div>
-        <div className="flex-1 flex justify-center">
+        <div className="flex-1">
           <button 
             onClick={onToggleAutoCall} 
-            className={`text-sm font-medium px-4 py-3 rounded transition-all duration-200 ${
+            className={`w-full text-sm font-medium py-4 px-2 rounded transition-all duration-200 ${
               autoCall ? 'text-green-600 animate-button-switch' : 'text-muted-foreground'
             }`} 
             style={{ WebkitTapHighlightColor: 'transparent' }}
