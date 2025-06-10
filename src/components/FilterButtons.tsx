@@ -32,7 +32,7 @@ const FilterButtons: React.FC<FilterButtonsProps> = ({
         <div className="flex-1 flex justify-center">
           <button 
             onClick={onToggleTimezone} 
-            className={`text-sm font-medium px-3 py-1 rounded transition-all duration-200 ${
+            className={`text-sm font-medium px-4 py-3 rounded transition-all duration-200 ${
               timezoneFilter === 'EST_CST' ? 'text-blue-600 animate-button-switch' : 'text-muted-foreground'
             }`} 
             style={{ WebkitTapHighlightColor: 'transparent' }}
@@ -43,7 +43,7 @@ const FilterButtons: React.FC<FilterButtonsProps> = ({
         <div className="flex-1 flex justify-center items-center gap-2">
           <button 
             onClick={onToggleCallFilter} 
-            className={`text-sm font-medium px-3 py-1 rounded transition-all duration-200 ${
+            className={`text-sm font-medium px-4 py-3 rounded transition-all duration-200 ${
               callFilter === 'UNCALLED' ? 'text-purple-600 animate-button-switch' : 'text-muted-foreground'
             }`} 
             style={{ WebkitTapHighlightColor: 'transparent' }}
@@ -67,7 +67,7 @@ const FilterButtons: React.FC<FilterButtonsProps> = ({
         <div className="flex-1 flex justify-center">
           <button 
             onClick={onToggleShuffle} 
-            className={`text-sm font-medium px-3 py-1 rounded transition-all duration-200 ${
+            className={`text-sm font-medium px-4 py-3 rounded transition-all duration-200 ${
               shuffleMode ? 'text-orange-600 animate-button-switch' : 'text-muted-foreground'
             }`} 
             style={{ WebkitTapHighlightColor: 'transparent' }}
@@ -78,7 +78,7 @@ const FilterButtons: React.FC<FilterButtonsProps> = ({
         <div className="flex-1 flex justify-center">
           <button 
             onClick={onToggleAutoCall} 
-            className={`text-sm font-medium px-3 py-1 rounded transition-all duration-200 ${
+            className={`text-sm font-medium px-4 py-3 rounded transition-all duration-200 ${
               autoCall ? 'text-green-600 animate-button-switch' : 'text-muted-foreground'
             }`} 
             style={{ WebkitTapHighlightColor: 'transparent' }}

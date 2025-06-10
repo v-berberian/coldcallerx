@@ -222,7 +222,7 @@ const CallingScreen: React.FC<CallingScreenProps> = ({
 
       {/* Main Content with consistent spacing */}
       <div className="flex-1 flex items-start justify-center pt-3 p-4 min-h-0 px-6">
-        <div className="w-full max-w-sm space-y-3">
+        <div className="w-full max-w-sm space-y-2">
           {/* Filter Buttons */}
           <FilterButtons
             timezoneFilter={timezoneFilter}
@@ -248,12 +248,14 @@ const CallingScreen: React.FC<CallingScreenProps> = ({
           />
 
           {/* Navigation Controls */}
-          <NavigationControls
-            onPrevious={handlePrevious}
-            onNext={handleNext}
-            canGoPrevious={historyIndex > 0}
-            canGoNext={baseLeads.length > 1}
-          />
+          <div className="pt-2">
+            <NavigationControls
+              onPrevious={handlePrevious}
+              onNext={handleNext}
+              canGoPrevious={historyIndex > 0}
+              canGoNext={baseLeads.length > 1}
+            />
+          </div>
         </div>
       </div>
     </div>
