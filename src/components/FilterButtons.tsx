@@ -26,13 +26,13 @@ const FilterButtons: React.FC<FilterButtonsProps> = ({
   onResetAllCalls
 }) => {
   return (
-    <div className="space-y-1">
+    <div className="space-y-2">
       {/* First row: Timezone and Call filters */}
       <div className="flex">
         <div className="flex-1">
           <button 
             onClick={onToggleTimezone} 
-            className={`w-full text-sm font-medium py-6 px-4 rounded transition-all duration-200 ${
+            className={`w-full text-sm font-medium py-4 px-2 rounded transition-all duration-200 ${
               timezoneFilter === 'EST_CST' ? 'text-blue-600 animate-button-switch' : 'text-muted-foreground'
             }`} 
             style={{ WebkitTapHighlightColor: 'transparent' }}
@@ -43,7 +43,7 @@ const FilterButtons: React.FC<FilterButtonsProps> = ({
         <div className="flex-1 flex items-center gap-2">
           <button 
             onClick={onToggleCallFilter} 
-            className={`flex-1 text-sm font-medium py-6 px-4 rounded transition-all duration-200 ${
+            className={`flex-1 text-sm font-medium py-4 px-2 rounded transition-all duration-200 ${
               callFilter === 'UNCALLED' ? 'text-purple-600 animate-button-switch' : 'text-muted-foreground'
             }`} 
             style={{ WebkitTapHighlightColor: 'transparent' }}
@@ -67,7 +67,7 @@ const FilterButtons: React.FC<FilterButtonsProps> = ({
         <div className="flex-1">
           <button 
             onClick={onToggleShuffle} 
-            className={`w-full text-sm font-medium py-6 px-4 rounded transition-all duration-200 ${
+            className={`w-full text-sm font-medium py-4 px-2 rounded transition-all duration-200 ${
               shuffleMode ? 'text-orange-600 animate-button-switch' : 'text-muted-foreground'
             }`} 
             style={{ WebkitTapHighlightColor: 'transparent' }}
@@ -78,7 +78,7 @@ const FilterButtons: React.FC<FilterButtonsProps> = ({
         <div className="flex-1">
           <button 
             onClick={onToggleAutoCall} 
-            className={`w-full text-sm font-medium py-6 px-4 rounded transition-all duration-200 ${
+            className={`w-full text-sm font-medium py-4 px-2 rounded transition-all duration-200 ${
               autoCall ? 'text-green-600 animate-button-switch' : 'text-muted-foreground'
             }`} 
             style={{ WebkitTapHighlightColor: 'transparent' }}
