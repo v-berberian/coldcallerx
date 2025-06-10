@@ -46,8 +46,7 @@ const CallingScreen: React.FC<CallingScreenProps> = ({
     toggleCallFilter,
     toggleShuffle,
     toggleAutoCall,
-    resetLeadsData,
-    isLeadPendingCall
+    resetLeadsData
   } = useLeadNavigation(leads);
 
   const [searchQuery, setSearchQuery] = useState('');
@@ -171,7 +170,6 @@ const CallingScreen: React.FC<CallingScreenProps> = ({
         historyIndex={historyIndex}
         canGoPrevious={historyIndex > 0}
         canGoNext={baseLeads.length > 1}
-        isLeadPendingCall={isLeadPendingCall}
         onCall={() => makeCall(currentLead)}
         onResetCallCount={() => resetCallCount(currentLead)}
         onToggleTimezone={toggleTimezoneFilter}
