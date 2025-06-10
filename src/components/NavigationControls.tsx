@@ -8,80 +8,41 @@ interface NavigationControlsProps {
   onNext: () => void;
   canGoPrevious: boolean;
   canGoNext: boolean;
-  shuffleMode: boolean;
-  autoCall: boolean;
-  onToggleShuffle: () => void;
-  onToggleAutoCall: () => void;
 }
 
 const NavigationControls: React.FC<NavigationControlsProps> = ({
   onPrevious,
   onNext,
   canGoPrevious,
-  canGoNext,
-  shuffleMode,
-  autoCall,
-  onToggleShuffle,
-  onToggleAutoCall
+  canGoNext
 }) => {
   return (
-    <div className="space-y-4">
-      {/* Previous/Next Navigation - Made bigger for better touch targets */}
-      <div className="flex gap-4">
-        <Button 
-          variant="outline" 
-          onClick={onPrevious} 
-          disabled={!canGoPrevious} 
-          className="flex-1 h-14 rounded-2xl shadow-lg active:scale-95 transition-all duration-100 select-none outline-none focus:outline-none focus-visible:ring-0 focus-visible:ring-offset-0" 
-          style={{ WebkitTapHighlightColor: 'transparent' }} 
-          onTouchStart={() => {}} 
-          onTouchEnd={() => {}}
-        >
-          <ArrowLeft className="h-5 w-5 mr-2" />
-          Previous
-        </Button>
-        
-        <Button 
-          variant="outline" 
-          onClick={onNext} 
-          disabled={!canGoNext} 
-          className="flex-1 h-14 rounded-2xl shadow-lg active:scale-95 transition-all duration-100 select-none outline-none focus:outline-none focus-visible:ring-0 focus-visible:ring-offset-0" 
-          style={{ WebkitTapHighlightColor: 'transparent' }} 
-          onTouchStart={() => {}} 
-          onTouchEnd={() => {}}
-        >
-          Next
-          <ArrowRight className="h-5 w-5 ml-2" />
-        </Button>
-      </div>
-
-      {/* Bottom Controls */}
-      <div className="flex items-center justify-between">
-        <div className="flex flex-col items-center space-y-1 flex-1">
-          <button 
-            onClick={onToggleShuffle} 
-            disabled={!canGoNext} 
-            className={`text-sm font-medium px-3 py-1 rounded transition-colors disabled:opacity-50 ${
-              shuffleMode ? 'text-orange-500' : 'text-muted-foreground'
-            }`} 
-            style={{ WebkitTapHighlightColor: 'transparent' }}
-          >
-            Shuffle
-          </button>
-        </div>
-        
-        <div className="flex flex-col items-center space-y-1 flex-1">
-          <button 
-            onClick={onToggleAutoCall} 
-            className={`text-sm font-medium px-3 py-1 rounded transition-colors ${
-              autoCall ? 'text-green-600' : 'text-muted-foreground'
-            }`} 
-            style={{ WebkitTapHighlightColor: 'transparent' }}
-          >
-            Auto Call
-          </button>
-        </div>
-      </div>
+    <div className="flex gap-4">
+      <Button 
+        variant="outline" 
+        onClick={onPrevious} 
+        disabled={!canGoPrevious} 
+        className="flex-1 h-14 rounded-2xl shadow-lg active:scale-95 transition-all duration-100 select-none outline-none focus:outline-none focus-visible:ring-0 focus-visible:ring-offset-0" 
+        style={{ WebkitTapHighlightColor: 'transparent' }} 
+        onTouchStart={() => {}} 
+        onTouchEnd={() => {}}
+      >
+        <ArrowLeft className="h-5 w-5 mr-2" />
+        Previous
+      </Button>
+      
+      <Button 
+        variant="outline" 
+        onClick={onNext} 
+        disabled={!canGoNext} 
+        className="flex-1 h-14 rounded-2xl shadow-lg active:scale-95 transition-all duration-100 select-none outline-none focus:outline-none focus-visible:ring-0 focus-visible:ring-offset-0" 
+        style={{ WebkitTapHighlightColor: 'transparent' }} 
+        onTouchStart={() => {}} 
+        onTouchEnd={() => {}}
+      >
+        Next
+        <ArrowRight className="h-5 w-5 ml-2" />
+      </Button>
     </div>
   );
 };
