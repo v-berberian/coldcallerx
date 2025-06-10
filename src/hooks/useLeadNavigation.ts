@@ -1,3 +1,4 @@
+
 import { Lead } from '../types/lead';
 import { useNavigationState } from './useNavigationState';
 import { useFilters } from './useFilters';
@@ -97,7 +98,8 @@ export const useLeadNavigation = (initialLeads: Lead[]) => {
 
   const selectLeadWrapper = (lead: Lead) => {
     const baseLeads = getBaseLeads();
-    selectLead(lead, baseLeads);
+    // Pass both baseLeads and full leadsData array
+    selectLead(lead, baseLeads, leadsData);
   };
 
   return {

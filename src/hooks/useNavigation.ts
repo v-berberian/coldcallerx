@@ -52,14 +52,16 @@ export const useNavigation = (
     goToPrevious();
   };
 
-  const selectLead = (lead: Lead, baseLeads: Lead[]) => {
+  const selectLead = (lead: Lead, baseLeads: Lead[], allLeads: Lead[]) => {
     if (isAutoCallInProgress) {
       console.log('Skipping lead selection because auto-call in progress');
       return;
     }
     
-    const leadIndex = baseLeads.findIndex(l => l.name === lead.name && l.phone === lead.phone);
+    // Find the lead's index in the full leads array (allLeads) not just the filtered baseLeads
+    const leadIndex = allLeads.findIndex(l => l.name === lead.name && l.phone === lead.phone);
     if (leadIndex !== -1) {
+      console.log('Selecting lead:', lead.name, 'at full array index:', leadIndex);
       // Use updateNavigation instead of resetNavigation to preserve navigation history
       updateNavigation(leadIndex);
     }
