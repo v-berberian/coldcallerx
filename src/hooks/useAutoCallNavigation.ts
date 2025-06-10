@@ -1,3 +1,4 @@
+
 import { Lead } from '../types/lead';
 
 export const useAutoCallNavigation = (
@@ -24,16 +25,7 @@ export const useAutoCallNavigation = (
       return;
     }
     
-    const currentLead = baseLeads[currentIndex];
-    
-    // If auto-call is enabled and we're on an uncalled lead, call it instead of navigating
-    if (autoCall && currentLead && (!currentLead.called || currentLead.called === 0)) {
-      console.log('Auto-call enabled - calling current lead:', currentLead.name, currentLead.phone);
-      executeAutoCall(currentLead);
-      return;
-    }
-    
-    // Otherwise, navigate to next lead
+    // Navigate to next lead first
     let nextIndex: number;
     let nextLead: Lead;
     
@@ -60,8 +52,14 @@ export const useAutoCallNavigation = (
       shuffleMode
     });
     
-    // Just update navigation, don't auto-dial
+    // Update navigation first
     updateNavigation(nextIndex);
+    
+    // If auto-call is enabled, always call the next lead
+    if (autoCall && nextLead) {
+      console.log('Auto-call enabled - calling next lead:', nextLead.name, nextLead.phone);
+      executeAutoCall(nextLead);
+    }
   };
 
   return { handleNext };
