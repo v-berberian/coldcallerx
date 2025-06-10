@@ -14,7 +14,7 @@ export const useAutoCall = (
       return;
     }
     
-    console.log('AUTO-CALL: Executing call for lead:', {
+    console.log('AUTO-CALL: Starting auto-call process for lead:', {
       name: lead.name,
       phone: lead.phone,
       called: lead.called
@@ -28,8 +28,8 @@ export const useAutoCall = (
     // Clear the auto-call flag after a short delay
     setTimeout(() => {
       setIsAutoCallInProgress(false);
-      console.log('AUTO-CALL: Call completed and flag cleared');
-    }, 500);
+      console.log('AUTO-CALL: Auto-call process completed and flag cleared');
+    }, 1000); // Increased timeout to give more time for filter effects to settle
   };
 
   return {

@@ -103,7 +103,7 @@ export const useFilterChangeEffects = (
     }
     
     setTimeout(() => setFilterChanging(false), 100);
-  }, [timezoneFilter, callFilter]);
+  }, [timezoneFilter, callFilter, leadsData]); // Add leadsData as dependency to react to call count changes
 
   useEffect(() => {
     const baseLeads = getBaseLeads();
