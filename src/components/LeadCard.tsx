@@ -33,7 +33,7 @@ const LeadCard: React.FC<LeadCardProps> = ({
   onResetCallCount
 }) => {
   return (
-    <Card key={cardKey} className="shadow-2xl border-0 rounded-3xl bg-card h-[400px] flex flex-col animate-scale-in">
+    <Card key={cardKey} className="shadow-2xl border-border/50 rounded-3xl bg-card h-[400px] flex flex-col animate-scale-in">
       <CardContent className="p-6 space-y-4 flex-1 flex flex-col">
         {/* Top row with lead count and file name */}
         <div className="flex items-center justify-between">
@@ -82,7 +82,7 @@ const LeadCard: React.FC<LeadCardProps> = ({
           </div>
         </div>
 
-        {/* Main Call Button - ensure it's always green and calls current lead */}
+        {/* Main Call Button - ensure it's always green */}
         <Button onClick={onCall} size="lg" className="w-full h-16 text-lg font-semibold bg-green-600 hover:bg-green-700 text-white rounded-2xl shadow-lg">
           <Phone className="h-6 w-6 mr-2" />
           Call

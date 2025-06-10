@@ -1,92 +1,54 @@
 
 import React from 'react';
-import { RotateCcw, Shuffle } from 'lucide-react';
+import { RotateCcw } from 'lucide-react';
 
 interface FilterButtonsProps {
   timezoneFilter: 'ALL' | 'EST_CST';
   callFilter: 'ALL' | 'UNCALLED';
-  shuffleMode: boolean;
-  autoCall: boolean;
   onToggleTimezone: () => void;
   onToggleCallFilter: () => void;
-  onToggleShuffle: () => void;
-  onToggleAutoCall: () => void;
   onResetAllCalls: () => void;
 }
 
 const FilterButtons: React.FC<FilterButtonsProps> = ({
   timezoneFilter,
   callFilter,
-  shuffleMode,
-  autoCall,
   onToggleTimezone,
   onToggleCallFilter,
-  onToggleShuffle,
-  onToggleAutoCall,
   onResetAllCalls
 }) => {
   return (
-    <div className="space-y-3">
-      {/* First row: State and Call filters */}
-      <div className="flex">
-        <div className="flex-1 flex justify-center">
-          <button 
-            onClick={onToggleTimezone} 
-            className={`text-sm font-medium px-3 py-1 rounded transition-all duration-200 ${
-              timezoneFilter === 'EST_CST' ? 'text-blue-600 animate-button-switch' : 'text-muted-foreground'
-            }`} 
-            style={{ WebkitTapHighlightColor: 'transparent' }}
-          >
-            {timezoneFilter === 'ALL' ? 'All States' : 'EST, CST & CDT'}
-          </button>
-        </div>
-        <div className="flex-1 flex justify-center items-center gap-2">
-          <button 
-            onClick={onToggleCallFilter} 
-            className={`text-sm font-medium px-3 py-1 rounded transition-all duration-200 ${
-              callFilter === 'UNCALLED' ? 'text-purple-600 animate-button-switch' : 'text-muted-foreground'
-            }`} 
-            style={{ WebkitTapHighlightColor: 'transparent' }}
-          >
-            {callFilter === 'ALL' ? 'All Numbers' : 'Uncalled Numbers'}
-          </button>
-          {callFilter === 'UNCALLED' && (
-            <button
-              onClick={onResetAllCalls}
-              className="text-muted-foreground hover:text-foreground transition-colors p-1"
-              title="Reset all call counts"
-            >
-              <RotateCcw size={14} />
-            </button>
-          )}
-        </div>
+    <div className="flex">
+      <div className="flex-1 flex justify-center">
+        <button 
+          onClick={onToggleTimezone} 
+          className={`text-sm font-medium px-3 py-1 rounded transition-all duration-200 ${
+            timezoneFilter === 'EST_CST' ? 'text-blue-600 animate-button-switch' : 'text-muted-foreground'
+          }`} 
+          style={{ WebkitTapHighlightColor: 'transparent' }}
+        >
+          {timezoneFilter === 'ALL' ? 'All States' : 'EST, CST & CDT'}
+        </button>
       </div>
-
-      {/* Second row: Shuffle and AutoCall buttons */}
-      <div className="flex">
-        <div className="flex-1 flex justify-center">
-          <button 
-            onClick={onToggleShuffle} 
-            className={`text-sm font-medium px-3 py-1 rounded transition-all duration-200 flex items-center gap-1 ${
-              shuffleMode ? 'text-orange-600 animate-button-switch' : 'text-muted-foreground'
-            }`} 
-            style={{ WebkitTapHighlightColor: 'transparent' }}
+      <div className="flex-1 flex justify-center items-center gap-2">
+        <button 
+          onClick={onToggleCallFilter} 
+          className={`text-sm font-medium px-3 py-1 rounded transition-all duration-200 ${
+            callFilter === 'UNCALLED' ? 'text-purple-600 animate-button-switch' : 'text-muted-foreground'
+          }`} 
+          style={{ WebkitTapHighlightColor: 'transparent' }}
+        >
+          {callFilter === 'ALL' ? 'All Numbers' : 'Uncalled Numbers'}
+        </button>
+        {callFilter === 'UNCALLED' && (
+          <button
+            onClick={onResetAllCalls}
+            className="text-muted-foreground hover:text-foreground transition-colors p-1"
+            title="Reset all call counts"
           >
-            <Shuffle size={14} />
-            {shuffleMode ? 'Shuffle On' : 'Shuffle Off'}
+            <RotateCcw size={14} />
           </button>
-        </div>
-        <div className="flex-1 flex justify-center">
-          <button 
-            onClick={onToggleAutoCall} 
-            className={`text-sm font-medium px-3 py-1 rounded transition-all duration-200 ${
-              autoCall ? 'text-green-600 animate-button-switch' : 'text-muted-foreground'
-            }`} 
-            style={{ WebkitTapHighlightColor: 'transparent' }}
-          >
-            {autoCall ? 'AutoCall On' : 'AutoCall Off'}
-          </button>
-        </div>
+        )}
       </div>
     </div>
   );
