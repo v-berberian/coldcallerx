@@ -62,8 +62,8 @@ export const useNavigation = (
     const leadIndex = baseLeads.findIndex(l => l.name === lead.name && l.phone === lead.phone);
     if (leadIndex !== -1) {
       console.log('Selecting lead:', lead.name, 'at filtered array index:', leadIndex);
-      // Use resetNavigation to start fresh navigation history from this position
-      resetNavigation(leadIndex);
+      // Use updateNavigation to maintain navigation history and enable proper previous functionality
+      updateNavigation(leadIndex);
     }
   };
 
