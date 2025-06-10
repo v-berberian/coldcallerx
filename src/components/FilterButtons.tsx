@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { RotateCcw, Shuffle, Phone } from 'lucide-react';
+import { RotateCcw } from 'lucide-react';
 
 interface FilterButtonsProps {
   timezoneFilter: 'ALL' | 'EST_CST';
@@ -67,24 +67,22 @@ const FilterButtons: React.FC<FilterButtonsProps> = ({
         <div className="flex-1 flex justify-center">
           <button 
             onClick={onToggleShuffle} 
-            className={`text-sm font-medium px-3 py-1 rounded transition-all duration-200 flex items-center gap-1 ${
+            className={`text-sm font-medium px-3 py-1 rounded transition-all duration-200 ${
               shuffleMode ? 'text-orange-600 animate-button-switch' : 'text-muted-foreground'
             }`} 
             style={{ WebkitTapHighlightColor: 'transparent' }}
           >
-            <Shuffle size={14} />
             Shuffle
           </button>
         </div>
         <div className="flex-1 flex justify-center">
           <button 
             onClick={onToggleAutoCall} 
-            className={`text-sm font-medium px-3 py-1 rounded transition-all duration-200 flex items-center gap-1 ${
+            className={`text-sm font-medium px-3 py-1 rounded transition-all duration-200 ${
               autoCall ? 'text-green-600 animate-button-switch' : 'text-muted-foreground'
             }`} 
             style={{ WebkitTapHighlightColor: 'transparent' }}
           >
-            <Phone size={14} />
             Auto Call
           </button>
         </div>
