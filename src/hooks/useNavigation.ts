@@ -49,12 +49,12 @@ export const useNavigation = (
       nextLead = result.lead;
     }
     
-    console.log('Navigation to index:', nextIndex, 'lead:', nextLead?.name, 'shuffle:', shuffleMode, 'autoCall:', autoCall);
+    console.log('Navigation to index:', nextIndex, 'lead:', nextLead?.name, nextLead?.phone, 'shuffle:', shuffleMode, 'autoCall:', autoCall);
     updateNavigation(nextIndex);
 
-    // If auto-call is enabled, call the next lead
+    // If auto-call is enabled, call the EXACT same lead that was just navigated to
     if (autoCall && nextLead) {
-      console.log('Auto-call enabled - calling next lead:', nextLead.name, nextLead.phone);
+      console.log('Auto-call enabled - calling lead that matches displayed card:', nextLead.name, nextLead.phone);
       executeAutoCall(nextLead);
     }
   };
