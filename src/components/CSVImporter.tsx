@@ -107,11 +107,10 @@ const CSVImporter: React.FC<CSVImporterProps> = ({ onLeadsImported }) => {
   };
 
   return (
-    <Button 
+    <button 
       onClick={handleButtonClick} 
-      variant="outline" 
-      size="sm"
-      className="rounded-xl"
+      className="text-sm font-medium px-3 py-1 rounded transition-all duration-200 text-muted-foreground hover:text-foreground"
+      style={{ WebkitTapHighlightColor: 'transparent' }}
     >
       <Upload className="h-4 w-4" />
       <input
@@ -121,7 +120,7 @@ const CSVImporter: React.FC<CSVImporterProps> = ({ onLeadsImported }) => {
         onChange={handleFileChange}
         className="hidden"
       />
-    </Button>
+    </button>
   );
 };
 

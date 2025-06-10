@@ -2,7 +2,7 @@
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Phone, X } from 'lucide-react';
+import { X } from 'lucide-react';
 import { formatPhoneNumber } from '../utils/phoneUtils';
 import { getStateFromAreaCode } from '../utils/timezoneUtils';
 
@@ -84,7 +84,6 @@ const LeadCard: React.FC<LeadCardProps> = ({
 
         {/* Main Call Button - ensure it's always green */}
         <Button onClick={onCall} size="lg" className="w-full h-16 text-lg font-semibold bg-green-600 hover:bg-green-700 text-white rounded-2xl shadow-lg">
-          <Phone className="h-6 w-6 mr-2" />
           Call
         </Button>
       </CardContent>
