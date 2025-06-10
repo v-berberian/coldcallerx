@@ -60,7 +60,8 @@ export const useNavigation = (
     
     const leadIndex = baseLeads.findIndex(l => l.name === lead.name && l.phone === lead.phone);
     if (leadIndex !== -1) {
-      resetNavigation(leadIndex);
+      // Use updateNavigation instead of resetNavigation to preserve navigation history
+      updateNavigation(leadIndex);
     }
   };
 

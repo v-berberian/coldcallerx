@@ -58,6 +58,13 @@ const CallingScreen: React.FC<CallingScreenProps> = ({
   const [isSearching, setIsSearching] = useState(false);
   const [showAutocomplete, setShowAutocomplete] = useState(false);
 
+  // Save updated leads data to localStorage whenever leadsData changes
+  useEffect(() => {
+    if (leadsData.length > 0) {
+      localStorage.setItem('coldcaller-leads', JSON.stringify(leadsData));
+    }
+  }, [leadsData]);
+
   useEffect(() => {
     const baseLeads = getBaseLeads();
     if (searchQuery.trim()) {
