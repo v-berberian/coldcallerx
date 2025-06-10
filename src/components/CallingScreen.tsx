@@ -179,7 +179,7 @@ const CallingScreen: React.FC<CallingScreenProps> = ({
   return (
     <div className="h-screen h-[100vh] h-[100svh] bg-background flex flex-col overflow-hidden">
       {/* Header */}
-      <div className="bg-background p-4 flex-shrink-0 border-0">
+      <div className="bg-background border-b border-border p-4 flex-shrink-0">
         <div className="flex items-center justify-between mb-4">
           <CSVImporter onLeadsImported={onLeadsImported} />
           
@@ -227,12 +227,8 @@ const CallingScreen: React.FC<CallingScreenProps> = ({
           <FilterButtons
             timezoneFilter={timezoneFilter}
             callFilter={callFilter}
-            shuffleMode={shuffleMode}
-            autoCall={autoCall}
             onToggleTimezone={toggleTimezoneFilter}
             onToggleCallFilter={toggleCallFilter}
-            onToggleShuffle={toggleShuffle}
-            onToggleAutoCall={toggleAutoCall}
             onResetAllCalls={resetAllCallCounts}
           />
 
@@ -253,6 +249,10 @@ const CallingScreen: React.FC<CallingScreenProps> = ({
             onNext={handleNext}
             canGoPrevious={historyIndex > 0}
             canGoNext={baseLeads.length > 1}
+            shuffleMode={shuffleMode}
+            autoCall={autoCall}
+            onToggleShuffle={toggleShuffle}
+            onToggleAutoCall={toggleAutoCall}
           />
         </div>
       </div>
