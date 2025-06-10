@@ -24,7 +24,6 @@ interface CallingScreenMainProps {
   historyIndex: number;
   canGoPrevious: boolean;
   canGoNext: boolean;
-  isLeadPendingCall: (lead: Lead) => boolean;
   onCall: () => void;
   onResetCallCount: () => void;
   onToggleTimezone: () => void;
@@ -49,7 +48,6 @@ const CallingScreenMain: React.FC<CallingScreenMainProps> = ({
   historyIndex,
   canGoPrevious,
   canGoNext,
-  isLeadPendingCall,
   onCall,
   onResetCallCount,
   onToggleTimezone,
@@ -81,7 +79,6 @@ const CallingScreenMain: React.FC<CallingScreenMainProps> = ({
           cardKey={cardKey}
           onCall={onCall}
           onResetCallCount={onResetCallCount}
-          isPendingCall={isLeadPendingCall(currentLead)}
         />
 
         {/* Navigation Controls */}

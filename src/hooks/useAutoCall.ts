@@ -2,10 +2,7 @@
 import { useState } from 'react';
 import { Lead } from '../types/lead';
 
-export const useAutoCall = (
-  makeCall: (lead: Lead) => void,
-  markLeadAsPendingCall?: (lead: Lead) => void
-) => {
+export const useAutoCall = (makeCall: (lead: Lead) => void) => {
   const [isAutoCallInProgress, setIsAutoCallInProgress] = useState(false);
 
   const executeAutoCall = (lead: Lead) => {
@@ -18,10 +15,6 @@ export const useAutoCall = (
     setIsAutoCallInProgress(true);
     
     makeCall(lead);
-    
-    if (markLeadAsPendingCall) {
-      markLeadAsPendingCall(lead);
-    }
     
     setTimeout(() => {
       setIsAutoCallInProgress(false);

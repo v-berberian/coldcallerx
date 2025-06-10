@@ -59,6 +59,8 @@ export const useNavigation = (
       console.log('Skipping previous navigation because auto-call in progress');
       return;
     }
+    // Commit any pending call updates when navigating away
+    commitPendingCalls();
     goToPrevious();
   };
 

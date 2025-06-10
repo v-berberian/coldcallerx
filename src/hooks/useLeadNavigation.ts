@@ -46,8 +46,7 @@ export const useLeadNavigation = (initialLeads: Lead[]) => {
   const {
     markLeadAsPendingCall,
     commitPendingCalls,
-    clearPendingCalls,
-    isLeadPendingCall
+    clearPendingCalls
   } = useUncalledFilter();
 
   const { getBaseLeads } = useLeadFiltering(
@@ -57,7 +56,7 @@ export const useLeadNavigation = (initialLeads: Lead[]) => {
     new Set() // We'll pass the actual pending calls when needed
   );
 
-  const { isAutoCallInProgress, executeAutoCall } = useAutoCall(makeCall, markLeadAsPendingCall);
+  const { isAutoCallInProgress, executeAutoCall } = useAutoCall(makeCall);
 
   const commitPendingCallsWrapper = () => {
     commitPendingCalls(leadsData, setLeadsData);
@@ -143,7 +142,6 @@ export const useLeadNavigation = (initialLeads: Lead[]) => {
     toggleCallFilter,
     toggleShuffle,
     toggleAutoCall,
-    resetLeadsData,
-    isLeadPendingCall
+    resetLeadsData
   };
 };

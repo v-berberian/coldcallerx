@@ -20,7 +20,6 @@ interface LeadCardProps {
   cardKey: number;
   onCall: () => void;
   onResetCallCount: () => void;
-  isPendingCall?: boolean;
 }
 
 const LeadCard: React.FC<LeadCardProps> = ({ 
@@ -30,8 +29,7 @@ const LeadCard: React.FC<LeadCardProps> = ({
   fileName, 
   cardKey, 
   onCall, 
-  onResetCallCount,
-  isPendingCall = false
+  onResetCallCount
 }) => {
   return (
     <Card 
@@ -59,12 +57,6 @@ const LeadCard: React.FC<LeadCardProps> = ({
             </button>
           )}
         </div>
-
-        {isPendingCall && (
-          <div className="text-xs text-orange-600 mb-2 font-medium">
-            Will be marked as called when you navigate away
-          </div>
-        )}
 
         {lead.lastCalled && (
           <div className="text-xs text-muted-foreground mb-4">
