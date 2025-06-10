@@ -221,8 +221,8 @@ const CallingScreen: React.FC<CallingScreenProps> = ({
       </div>
 
       {/* Main Content with consistent spacing */}
-      <div className="flex-1 flex items-start justify-center pt-4 p-4 min-h-0 px-6">
-        <div className="w-full max-w-sm space-y-4">
+      <div className="flex-1 flex items-start justify-center pt-3 p-4 min-h-0 px-6">
+        <div className="w-full max-w-sm space-y-3">
           {/* Filter Buttons */}
           <FilterButtons
             timezoneFilter={timezoneFilter}
