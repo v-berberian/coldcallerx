@@ -1,22 +1,28 @@
 
+import { useState } from 'react';
 import { Lead } from '../types/lead';
 import { useNavigationState } from './useNavigationState';
 import { useFilters } from './useFilters';
 import { useLeadsData } from './useLeadsData';
 import { useLeadFiltering } from './useLeadFiltering';
-import { useFilterChangeEffects } from './useFilterChangeEffects';
-import { useAutoCallManager } from './useAutoCallManager';
-import { useShuffleTracking } from './useShuffleTracking';
-import { useNavigationActions } from './useNavigationActions';
-import { useFilterActions } from './useFilterActions';
+import { useAutoCall } from './useAutoCall';
+import { useCallDelay } from './useCallDelay';
 import { useNavigation } from './useNavigation';
+import { useFilterChangeEffects } from './useFilterChangeEffects';
 
 export const useLeadNavigation = (initialLeads: Lead[]) => {
+  const [shouldAutoCall, setShouldAutoCall] = useState(false);
+  const [shownLeadsInShuffle, setShownLeadsInShuffle] = useState<Set<string>>(new Set());
+  const [callMadeToCurrentLead, setCallMadeToCurrentLead] = useState(false);
+  const [currentLeadForAutoCall, setCurrentLeadForAutoCall] = useState<Lead | null>(null);
+  const [showTimer, setShowTimer] = useState(true);
+
   const {
     currentIndex,
     cardKey,
     historyIndex,
     updateNavigation,
+    goToPrevious,
     resetNavigation,
     setCurrentIndex,
     setCardKey
@@ -35,10 +41,13 @@ export const useLeadNavigation = (initialLeads: Lead[]) => {
     setFilterChanging
   } = useFilters();
 
+  const { callDelay, toggleCallDelay } = useCallDelay();
+
   const {
     leadsData,
     setLeadsData,
     makeCall,
+    markLeadAsCalled,
     markLeadAsCalledOnNavigation,
     resetCallCount,
     resetAllCallCounts
@@ -46,32 +55,16 @@ export const useLeadNavigation = (initialLeads: Lead[]) => {
 
   const { getBaseLeads } = useLeadFiltering(leadsData, timezoneFilter, callFilter);
 
-  const {
-    shouldAutoCall,
-    setShouldAutoCall,
-    callMadeToCurrentLead,
-    setCallMadeToCurrentLead,
-    currentLeadForAutoCall,
-    setCurrentLeadForAutoCall,
-    showTimer,
-    setShowTimer,
-    callDelay,
-    isAutoCallInProgress,
-    isCountdownActive,
-    countdownTime,
-    executeAutoCall,
+  const { 
+    isAutoCallInProgress, 
+    isCountdownActive, 
+    countdownTime, 
+    executeAutoCall, 
     handleCountdownComplete,
-    cancelAutoCall,
-    toggleCallDelay
-  } = useAutoCallManager(makeCall);
+    cancelAutoCall
+  } = useAutoCall(makeCall, callDelay, showTimer);
 
-  const {
-    shownLeadsInShuffle,
-    setShownLeadsInShuffle,
-    resetShownLeads
-  } = useShuffleTracking();
-
-  const { handleNext, selectLead } = useNavigation(
+  const { handleNext, handlePrevious, selectLead } = useNavigation(
     currentIndex,
     updateNavigation,
     resetNavigation,
@@ -89,40 +82,6 @@ export const useLeadNavigation = (initialLeads: Lead[]) => {
     setShownLeadsInShuffle
   );
 
-  const navigationActions = useNavigationActions({
-    currentIndex,
-    updateNavigation,
-    resetNavigation,
-    shuffleMode,
-    callFilter,
-    isFilterChanging,
-    isAutoCallInProgress,
-    isCountdownActive,
-    autoCall,
-    markLeadAsCalledOnNavigation,
-    callMadeToCurrentLead,
-    setCallMadeToCurrentLead,
-    setShouldAutoCall,
-    cancelAutoCall,
-    shownLeadsInShuffle,
-    setShownLeadsInShuffle,
-    getBaseLeads,
-    leadsData,
-    handleNext,
-    selectLead
-  });
-
-  const filterActions = useFilterActions({
-    toggleTimezoneFilter,
-    toggleCallFilter,
-    toggleShuffle,
-    toggleAutoCall,
-    resetShownLeads,
-    isCountdownActive,
-    cancelAutoCall,
-    autoCall
-  });
-
   useFilterChangeEffects(
     leadsData,
     timezoneFilter,
@@ -137,11 +96,101 @@ export const useLeadNavigation = (initialLeads: Lead[]) => {
     resetNavigation
   );
 
+  const handleNextWrapper = () => {
+    const baseLeads = getBaseLeads();
+    
+    // Cancel any ongoing auto-call when switching leads
+    if (isCountdownActive) {
+      cancelAutoCall();
+    }
+    
+    handleNext(baseLeads);
+    
+    // Reset call state when navigating
+    setCallMadeToCurrentLead(false);
+    
+    // Set flag to trigger auto-call after navigation if auto-call is enabled
+    if (autoCall) {
+      setShouldAutoCall(true);
+    }
+  };
+
+  const handlePreviousWrapper = () => {
+    const baseLeads = getBaseLeads();
+    if (baseLeads.length === 0) return;
+    
+    // Cancel any ongoing auto-call when switching leads
+    if (isCountdownActive) {
+      cancelAutoCall();
+    }
+    
+    // Simple list-based previous navigation
+    const prevIndex = currentIndex === 0 ? baseLeads.length - 1 : currentIndex - 1;
+    console.log('Previous navigation: from index', currentIndex, 'to index', prevIndex);
+    updateNavigation(prevIndex);
+    
+    // Reset call state when navigating
+    setCallMadeToCurrentLead(false);
+    
+    // Set flag to trigger auto-call after navigation if auto-call is enabled
+    if (autoCall) {
+      setShouldAutoCall(true);
+    }
+  };
+
+  const selectLeadWrapper = (lead: Lead) => {
+    const baseLeads = getBaseLeads();
+    
+    // Cancel any ongoing auto-call when switching leads
+    if (isCountdownActive) {
+      cancelAutoCall();
+    }
+    
+    selectLead(lead, baseLeads, leadsData);
+    // Reset call state when selecting a new lead
+    setCallMadeToCurrentLead(false);
+    
+    // Set flag to trigger auto-call after navigation if auto-call is enabled
+    if (autoCall) {
+      setShouldAutoCall(true);
+    }
+  };
+
   // Enhanced make call function that tracks call state but doesn't mark as called immediately
   const makeCallWrapper = (lead: Lead) => {
     makeCall(lead, false); // Don't mark as called immediately
     setCallMadeToCurrentLead(true); // Track that a call was made
     console.log('Call made to lead:', lead.name, 'marked for call tracking on navigation');
+  };
+
+  // Enhanced toggle functions to reset shown leads tracker
+  const toggleShuffleWrapper = () => {
+    toggleShuffle();
+    setShownLeadsInShuffle(new Set()); // Reset when toggling shuffle mode
+  };
+
+  const toggleCallFilterWrapper = () => {
+    toggleCallFilter();
+    setShownLeadsInShuffle(new Set()); // Reset when changing call filter
+  };
+
+  const toggleTimezoneFilterWrapper = () => {
+    toggleTimezoneFilter();
+    setShownLeadsInShuffle(new Set()); // Reset when changing timezone filter
+  };
+
+  // Enhanced toggle auto call to cancel countdown if active
+  const toggleAutoCallWrapper = () => {
+    if (isCountdownActive) {
+      // If countdown is active, cancel it and turn off auto-call
+      cancelAutoCall();
+      if (autoCall) {
+        toggleAutoCall(); // Turn off auto-call
+      }
+    } else {
+      // Normal toggle behavior
+      toggleAutoCall();
+    }
   };
 
   // Function to reset leads data (for CSV import)
@@ -153,11 +202,19 @@ export const useLeadNavigation = (initialLeads: Lead[]) => {
     }));
     setLeadsData(formattedLeads);
     resetNavigation(0);
-    resetShownLeads();
-    setCallMadeToCurrentLead(false);
+    setShownLeadsInShuffle(new Set()); // Reset shown leads on new import
+    setCallMadeToCurrentLead(false); // Reset call state on new import
     // Cancel any ongoing auto-call on new import
     if (isCountdownActive) {
       cancelAutoCall();
+    }
+  };
+
+  const handleCountdownCompleteWrapper = () => {
+    // This is no longer needed as countdown auto-completes, but keeping for compatibility
+    if (currentLeadForAutoCall) {
+      handleCountdownComplete(currentLeadForAutoCall);
+      setCurrentLeadForAutoCall(null);
     }
   };
 
@@ -179,18 +236,18 @@ export const useLeadNavigation = (initialLeads: Lead[]) => {
     showTimer,
     setShowTimer,
     getBaseLeads,
-    makeCall: makeCallWrapper,
+    makeCall: makeCallWrapper, // Use the wrapper that tracks call state
     executeAutoCall,
-    handleCountdownComplete,
-    handleNext: navigationActions.handleNext,
-    handlePrevious: navigationActions.handlePrevious,
+    handleCountdownComplete: handleCountdownCompleteWrapper,
+    handleNext: handleNextWrapper,
+    handlePrevious: handlePreviousWrapper,
     resetCallCount,
     resetAllCallCounts,
-    selectLead: navigationActions.selectLead,
-    toggleTimezoneFilter: filterActions.toggleTimezoneFilter,
-    toggleCallFilter: filterActions.toggleCallFilter,
-    toggleShuffle: filterActions.toggleShuffle,
-    toggleAutoCall: filterActions.toggleAutoCall,
+    selectLead: selectLeadWrapper,
+    toggleTimezoneFilter: toggleTimezoneFilterWrapper,
+    toggleCallFilter: toggleCallFilterWrapper,
+    toggleShuffle: toggleShuffleWrapper,
+    toggleAutoCall: toggleAutoCallWrapper, // Use the enhanced version
     toggleCallDelay,
     resetLeadsData,
     countdownTime
