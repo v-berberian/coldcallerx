@@ -13,6 +13,10 @@ export const useCallDelay = () => {
     setCallDelay(delayOptions[nextIndex]);
   };
 
+  const resetCallDelay = () => {
+    setCallDelay(15); // Reset to timer mode
+  };
+
   const getDelayDisplayType = () => {
     if (callDelay === 0) return 'rocket';
     if (callDelay === 5) return '5s';
@@ -22,6 +26,7 @@ export const useCallDelay = () => {
   return {
     callDelay,
     toggleCallDelay,
+    resetCallDelay,
     getDelayDisplayType
   };
 };

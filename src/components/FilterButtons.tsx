@@ -1,5 +1,4 @@
-
-import React, { useState, useEffect } from 'react';
+import React, { useState, useRef } from 'react';
 import { RotateCcw, Timer, Rocket } from 'lucide-react';
 
 interface FilterButtonsProps {
@@ -17,6 +16,7 @@ interface FilterButtonsProps {
   onToggleCallDelay: () => void;
   onResetAllCalls: () => void;
   getDelayDisplayType?: () => 'timer' | 'rocket' | '5s';
+  onResetCallDelay?: () => void;
 }
 
 const FilterButtons: React.FC<FilterButtonsProps> = ({
@@ -33,9 +33,25 @@ const FilterButtons: React.FC<FilterButtonsProps> = ({
   onToggleAutoCall,
   onToggleCallDelay,
   onResetAllCalls,
-  getDelayDisplayType
+  getDelayDisplayType,
+  onResetCallDelay
 }) => {
   const [showTimerIcon, setShowTimerIcon] = useState(autoCall);
+  const longPressTimer = useRef<NodeJS.Timeout | null>(null);
+  const isLongPress = useRef(false);
+
+  const handleAutoCallToggle = () => {
+    const wasAutoCallOff = !autoCall;
+    onToggleAutoCall();
+    
+    // Reset/show timer icon when auto-call is toggled
+    setShowTimerIcon(!autoCall);
+    
+    // If we're turning auto-call back on, reset to timer mode (15)
+    if (wasAutoCallOff && onResetCallDelay) {
+      onResetCallDelay();
+    }
+  };
 
   // Reset/show timer icon when auto-call is toggled
   useEffect(() => {
@@ -114,7 +130,7 @@ const FilterButtons: React.FC<FilterButtonsProps> = ({
         </div>
         <div className="flex-1 relative flex items-center justify-center">
           <button 
-            onClick={onToggleAutoCall} 
+            onClick={handleAutoCallToggle} 
             className={`text-sm font-medium py-2 px-2 rounded transition-all duration-200 ${
               autoCall ? 'text-green-600 animate-button-switch' : 'text-muted-foreground'
             }`} 

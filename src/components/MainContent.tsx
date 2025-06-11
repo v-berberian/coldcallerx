@@ -23,6 +23,7 @@ interface MainContentProps {
   onToggleShuffle: () => void;
   onToggleAutoCall: () => void;
   onToggleCallDelay: () => void;
+  onResetCallDelay: () => void;
   onResetAllCalls: () => void;
   onPrevious: () => void;
   onNext: () => void;
@@ -50,6 +51,7 @@ const MainContent: React.FC<MainContentProps> = ({
   onToggleShuffle,
   onToggleAutoCall,
   onToggleCallDelay,
+  onResetCallDelay,
   onResetAllCalls,
   onPrevious,
   onNext,
@@ -81,6 +83,7 @@ const MainContent: React.FC<MainContentProps> = ({
           onToggleShuffle={onToggleShuffle}
           onToggleAutoCall={onToggleAutoCall}
           onToggleCallDelay={onToggleCallDelay}
+          onResetCallDelay={onResetCallDelay}
           onResetAllCalls={onResetAllCalls}
           getDelayDisplayType={getDelayDisplayType}
         />

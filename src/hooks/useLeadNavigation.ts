@@ -39,7 +39,7 @@ export const useLeadNavigation = (initialLeads: Lead[]) => {
     setFilterChanging
   } = useFilters();
 
-  const { callDelay, toggleCallDelay, getDelayDisplayType } = useCallDelay();
+  const { callDelay, toggleCallDelay, resetCallDelay, getDelayDisplayType } = useCallDelay();
 
   const {
     leadsData,
@@ -195,6 +195,7 @@ export const useLeadNavigation = (initialLeads: Lead[]) => {
     toggleShuffle: toggleShuffleWrapper,
     toggleAutoCall,
     toggleCallDelay,
+    resetCallDelay,
     resetLeadsData,
     countdownTime
   };
