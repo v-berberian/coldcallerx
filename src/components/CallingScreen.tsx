@@ -1,17 +1,11 @@
+
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { Progress } from '@/components/ui/progress';
-import { X } from 'lucide-react';
-import SearchAutocomplete from './SearchAutocomplete';
-import SearchBar from './SearchBar';
-import ThemeToggle from './ThemeToggle';
-import CSVImporter from './CSVImporter';
-import LeadCard from './LeadCard';
-import FilterButtons from './FilterButtons';
-import NavigationControls from './NavigationControls';
+import CallingHeader from './CallingHeader';
+import MainContent from './MainContent';
+import DailyProgress from './DailyProgress';
 import { useLeadNavigation } from '../hooks/useLeadNavigation';
-import { filterLeadsByTimezone } from '../utils/timezoneUtils';
 
 interface Lead {
   name: string;
@@ -272,111 +266,53 @@ const CallingScreen: React.FC<CallingScreenProps> = ({
   }
 
   const totalLeadCount = currentLeads.length;
-  const dailyGoal = 500;
-  const progressPercentage = Math.min((dailyCallCount / dailyGoal) * 100, 100);
 
   return (
     <div className="h-screen h-[100vh] h-[100svh] bg-background flex flex-col overflow-hidden">
       {/* Header */}
-      <div className="bg-background border-b border-border p-4 flex-shrink-0">
-        <div className="flex items-center justify-between mb-4">
-          <CSVImporter onLeadsImported={onLeadsImported} />
-          
-          <div className="flex items-center space-x-3">
-            <h1 className="text-2xl font-bold">
-              <span className="text-blue-500">Cold</span>
-              <span className="text-foreground">Caller </span>
-              <span className="text-blue-500">X</span>
-            </h1>
-          </div>
-          
-          <ThemeToggle />
-        </div>
-        
-        {/* Search Bar */}
-        <div className="relative">
-          <SearchBar 
-            searchQuery={searchQuery} 
-            onSearchChange={setSearchQuery} 
-            onSearchFocus={handleSearchFocus} 
-            onSearchBlur={handleSearchBlur} 
-            onClearSearch={clearSearch} 
-            fileName={fileName} 
-          />
-          
-          {/* Autocomplete Dropdown */}
-          {showAutocomplete && (
-            <SearchAutocomplete 
-              leads={searchResults} 
-              onLeadSelect={handleLeadSelect} 
-              searchQuery={searchQuery} 
-              actualIndices={searchResults.map(lead => 
-                leadsData.findIndex(l => l.name === lead.name && l.phone === lead.phone) + 1
-              )} 
-              totalLeads={leadsData.length} 
-            />
-          )}
-        </div>
-      </div>
+      <CallingHeader
+        searchQuery={searchQuery}
+        showAutocomplete={showAutocomplete}
+        searchResults={searchResults}
+        leadsData={leadsData}
+        fileName={fileName}
+        onSearchChange={setSearchQuery}
+        onSearchFocus={handleSearchFocus}
+        onSearchBlur={handleSearchBlur}
+        onClearSearch={clearSearch}
+        onLeadSelect={handleLeadSelect}
+        onLeadsImported={onLeadsImported}
+      />
 
-      {/* Main Content with reduced top padding */}
-      <div className="flex-1 flex items-start justify-center pt-1 p-4 min-h-0 px-6">
-        <div className="w-full max-w-sm space-y-1">
-          {/* Filter Buttons */}
-          <FilterButtons
-            timezoneFilter={timezoneFilter}
-            callFilter={callFilter}
-            shuffleMode={shuffleMode}
-            autoCall={autoCall}
-            onToggleTimezone={toggleTimezoneFilter}
-            onToggleCallFilter={toggleCallFilter}
-            onToggleShuffle={toggleShuffle}
-            onToggleAutoCall={toggleAutoCall}
-            onResetAllCalls={resetAllCallCounts}
-          />
-
-          {/* Current Lead Card */}
-          <LeadCard
-            lead={currentLead}
-            currentIndex={currentIndex}
-            totalCount={totalLeadCount}
-            fileName={fileName}
-            cardKey={cardKey}
-            onCall={handleCallClick}
-            onResetCallCount={() => resetCallCount(currentLead)}
-          />
-
-          {/* Navigation Controls */}
-          <div className="pt-2">
-            <NavigationControls
-              onPrevious={handlePreviousWrapper}
-              onNext={handleNextWrapper}
-              canGoPrevious={currentLeads.length > 1}
-              canGoNext={currentLeads.length > 1}
-            />
-          </div>
-        </div>
-      </div>
+      {/* Main Content */}
+      <MainContent
+        currentLead={currentLead}
+        currentIndex={currentIndex}
+        totalCount={totalLeadCount}
+        fileName={fileName}
+        cardKey={cardKey}
+        timezoneFilter={timezoneFilter}
+        callFilter={callFilter}
+        shuffleMode={shuffleMode}
+        autoCall={autoCall}
+        onCall={handleCallClick}
+        onResetCallCount={() => resetCallCount(currentLead)}
+        onToggleTimezone={toggleTimezoneFilter}
+        onToggleCallFilter={toggleCallFilter}
+        onToggleShuffle={toggleShuffle}
+        onToggleAutoCall={toggleAutoCall}
+        onResetAllCalls={resetAllCallCounts}
+        onPrevious={handlePreviousWrapper}
+        onNext={handleNextWrapper}
+        canGoPrevious={currentLeads.length > 1}
+        canGoNext={currentLeads.length > 1}
+      />
 
       {/* Daily Progress Bar at Bottom */}
-      <div className="bg-background border-t border-border p-2 flex-shrink-0">
-        <div className="w-full max-w-sm mx-auto space-y-1">
-          <div className="flex items-center justify-between text-sm text-muted-foreground">
-            <span>Daily Goal</span>
-            <div className="flex items-center space-x-2">
-              <span>{dailyCallCount}/{dailyGoal} calls</span>
-              <button
-                onClick={resetDailyCallCount}
-                className="p-1 hover:bg-muted rounded transition-colors"
-                title="Reset daily call count"
-              >
-                <X className="h-3 w-3 text-muted-foreground hover:text-foreground" />
-              </button>
-            </div>
-          </div>
-          <Progress value={progressPercentage} className="w-full h-2" />
-        </div>
-      </div>
+      <DailyProgress
+        dailyCallCount={dailyCallCount}
+        onResetDailyCount={resetDailyCallCount}
+      />
     </div>
   );
 };
