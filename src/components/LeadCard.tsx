@@ -4,7 +4,6 @@ import { Button } from '@/components/ui/button';
 import { X } from 'lucide-react';
 import { formatPhoneNumber } from '../utils/phoneUtils';
 import { getStateFromAreaCode } from '../utils/timezoneUtils';
-import { Browser } from '@capacitor/browser';
 
 interface Lead {
   name: string;
@@ -48,12 +47,8 @@ const LeadCard: React.FC<LeadCardProps> = ({
     const body = `Name: ${lead.name}\nPhone: ${formatPhoneNumber(lead.phone)}`;
     const mailtoUrl = `mailto:inbox@app.trello.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
     
-    try {
-      await Browser.open({ url: mailtoUrl });
-    } catch (error) {
-      // Fallback for web
-      window.location.href = mailtoUrl;
-    }
+    // Simple web-based email opening
+    window.location.href = mailtoUrl;
   };
 
   const handleTouchStart = (e: React.TouchEvent) => {
