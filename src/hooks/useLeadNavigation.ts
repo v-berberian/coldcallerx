@@ -13,6 +13,7 @@ export const useLeadNavigation = (initialLeads: Lead[]) => {
   const [shouldAutoCall, setShouldAutoCall] = useState(false);
   const [shownLeadsInShuffle, setShownLeadsInShuffle] = useState<Set<string>>(new Set());
   const [callMadeToCurrentLead, setCallMadeToCurrentLead] = useState(false);
+  const [currentLeadForAutoCall, setCurrentLeadForAutoCall] = useState<Lead | null>(null);
 
   const {
     currentIndex,
@@ -52,7 +53,7 @@ export const useLeadNavigation = (initialLeads: Lead[]) => {
 
   const { getBaseLeads } = useLeadFiltering(leadsData, timezoneFilter, callFilter);
 
-  const { isAutoCallInProgress, executeAutoCall } = useAutoCall(makeCall, callDelay);
+  const { isAutoCallInProgress, isCountdownActive, executeAutoCall, handleCountdownComplete } = useAutoCall(makeCall, callDelay);
 
   const { handleNext, handlePrevious, selectLead } = useNavigation(
     currentIndex,
@@ -155,6 +156,13 @@ export const useLeadNavigation = (initialLeads: Lead[]) => {
     setCallMadeToCurrentLead(false); // Reset call state on new import
   };
 
+  const handleCountdownCompleteWrapper = () => {
+    if (currentLeadForAutoCall) {
+      handleCountdownComplete(currentLeadForAutoCall);
+      setCurrentLeadForAutoCall(null);
+    }
+  };
+
   return {
     leadsData,
     currentIndex,
@@ -167,9 +175,13 @@ export const useLeadNavigation = (initialLeads: Lead[]) => {
     historyIndex,
     shouldAutoCall,
     setShouldAutoCall,
+    currentLeadForAutoCall,
+    setCurrentLeadForAutoCall,
+    isCountdownActive,
     getBaseLeads,
     makeCall: makeCallWrapper, // Use the wrapper that tracks call state
     executeAutoCall,
+    handleCountdownComplete: handleCountdownCompleteWrapper,
     handleNext: handleNextWrapper,
     handlePrevious: handlePreviousWrapper,
     resetCallCount,

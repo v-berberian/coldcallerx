@@ -1,9 +1,11 @@
+
 import React, { useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import CallingHeader from './CallingHeader';
 import MainContent from './MainContent';
 import DailyProgress from './DailyProgress';
+import AutoCallCountdown from './AutoCallCountdown';
 import { useSearchState } from './SearchState';
 import { useDailyCallState } from './DailyCallState';
 import { useLeadNavigation } from '../hooks/useLeadNavigation';
@@ -34,9 +36,13 @@ const CallingScreenLogic: React.FC<CallingScreenLogicProps> = ({
     historyIndex,
     shouldAutoCall,
     setShouldAutoCall,
+    currentLeadForAutoCall,
+    setCurrentLeadForAutoCall,
+    isCountdownActive,
     getBaseLeads,
     makeCall,
     executeAutoCall,
+    handleCountdownComplete,
     handleNext,
     handlePrevious,
     resetCallCount,
@@ -93,6 +99,7 @@ const CallingScreenLogic: React.FC<CallingScreenLogicProps> = ({
       
       if (currentLead) {
         console.log('Auto-call triggered for displayed lead:', currentLead.name, currentLead.phone);
+        setCurrentLeadForAutoCall(currentLead);
         executeAutoCall(currentLead);
         incrementDailyCallCount();
       }
@@ -221,6 +228,13 @@ const CallingScreenLogic: React.FC<CallingScreenLogicProps> = ({
           canGoNext={currentLeads.length > 1}
         />
       </div>
+
+      {/* Auto Call Countdown Overlay */}
+      <AutoCallCountdown
+        isActive={isCountdownActive}
+        duration={callDelay}
+        onComplete={handleCountdownComplete}
+      />
 
       {/* Daily Progress Bar - Fixed at bottom */}
       <div className="fixed bottom-0 left-0 right-0 z-50">
