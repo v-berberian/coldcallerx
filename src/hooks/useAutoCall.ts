@@ -1,5 +1,5 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Lead } from '../types/lead';
 
 export const useAutoCall = (
@@ -8,6 +8,7 @@ export const useAutoCall = (
 ) => {
   const [isAutoCallInProgress, setIsAutoCallInProgress] = useState(false);
   const [isCountdownActive, setIsCountdownActive] = useState(false);
+  const [countdownTime, setCountdownTime] = useState(callDelay);
 
   const executeAutoCall = (lead: Lead) => {
     if (!lead) {
@@ -28,8 +29,27 @@ export const useAutoCall = (
       // Start countdown
       setIsCountdownActive(true);
       setIsAutoCallInProgress(true);
+      setCountdownTime(callDelay);
     }
   };
+
+  // Handle countdown timer
+  useEffect(() => {
+    if (!isCountdownActive) return;
+
+    const interval = setInterval(() => {
+      setCountdownTime((prev) => {
+        if (prev <= 1) {
+          clearInterval(interval);
+          setIsCountdownActive(false);
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [isCountdownActive]);
 
   const handleCountdownComplete = (lead: Lead) => {
     setIsCountdownActive(false);
@@ -43,6 +63,7 @@ export const useAutoCall = (
   return {
     isAutoCallInProgress,
     isCountdownActive,
+    countdownTime,
     executeAutoCall,
     handleCountdownComplete
   };

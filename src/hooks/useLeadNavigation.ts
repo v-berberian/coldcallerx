@@ -53,7 +53,7 @@ export const useLeadNavigation = (initialLeads: Lead[]) => {
 
   const { getBaseLeads } = useLeadFiltering(leadsData, timezoneFilter, callFilter);
 
-  const { isAutoCallInProgress, isCountdownActive, executeAutoCall, handleCountdownComplete } = useAutoCall(makeCall, callDelay);
+  const { isAutoCallInProgress, isCountdownActive, countdownTime, executeAutoCall, handleCountdownComplete } = useAutoCall(makeCall, callDelay);
 
   const { handleNext, handlePrevious, selectLead } = useNavigation(
     currentIndex,
@@ -192,6 +192,7 @@ export const useLeadNavigation = (initialLeads: Lead[]) => {
     toggleShuffle: toggleShuffleWrapper,
     toggleAutoCall,
     toggleCallDelay,
-    resetLeadsData
+    resetLeadsData,
+    countdownTime
   };
 };

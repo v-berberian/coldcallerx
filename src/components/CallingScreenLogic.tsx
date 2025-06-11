@@ -1,4 +1,3 @@
-
 import React, { useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -39,6 +38,7 @@ const CallingScreenLogic: React.FC<CallingScreenLogicProps> = ({
     currentLeadForAutoCall,
     setCurrentLeadForAutoCall,
     isCountdownActive,
+    countdownTime,
     getBaseLeads,
     makeCall,
     executeAutoCall,
@@ -214,6 +214,8 @@ const CallingScreenLogic: React.FC<CallingScreenLogicProps> = ({
           shuffleMode={shuffleMode}
           autoCall={autoCall}
           callDelay={callDelay}
+          isCountdownActive={isCountdownActive}
+          countdownTime={countdownTime}
           onCall={handleCallClick}
           onResetCallCount={() => resetCallCount(currentLead)}
           onToggleTimezone={toggleTimezoneFilter}
@@ -228,13 +230,6 @@ const CallingScreenLogic: React.FC<CallingScreenLogicProps> = ({
           canGoNext={currentLeads.length > 1}
         />
       </div>
-
-      {/* Auto Call Countdown Overlay */}
-      <AutoCallCountdown
-        isActive={isCountdownActive}
-        duration={callDelay}
-        onComplete={handleCountdownComplete}
-      />
 
       {/* Daily Progress Bar - Fixed at bottom */}
       <div className="fixed bottom-0 left-0 right-0 z-50">

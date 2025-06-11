@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Lead } from '../types/lead';
 import FilterButtons from './FilterButtons';
@@ -28,6 +27,8 @@ interface MainContentProps {
   onNext: () => void;
   canGoPrevious: boolean;
   canGoNext: boolean;
+  isCountdownActive?: boolean;
+  countdownTime?: number;
 }
 
 const MainContent: React.FC<MainContentProps> = ({
@@ -52,7 +53,9 @@ const MainContent: React.FC<MainContentProps> = ({
   onPrevious,
   onNext,
   canGoPrevious,
-  canGoNext
+  canGoNext,
+  isCountdownActive,
+  countdownTime
 }) => {
   return (
     <div className="flex-1 flex items-start justify-center pt-1 p-4 min-h-0 px-6">
@@ -64,6 +67,8 @@ const MainContent: React.FC<MainContentProps> = ({
           shuffleMode={shuffleMode}
           autoCall={autoCall}
           callDelay={callDelay}
+          isCountdownActive={isCountdownActive}
+          countdownTime={countdownTime}
           onToggleTimezone={onToggleTimezone}
           onToggleCallFilter={onToggleCallFilter}
           onToggleShuffle={onToggleShuffle}
