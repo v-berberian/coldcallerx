@@ -188,7 +188,7 @@ export const useLeadNavigation = (initialLeads: Lead[]) => {
         toggleAutoCall(); // Turn off auto-call
       }
     } else {
-      // Normal toggle behavior
+      // Normal toggle behavior - always toggle regardless of current state
       toggleAutoCall();
     }
   };
