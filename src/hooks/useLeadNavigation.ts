@@ -63,7 +63,7 @@ export const useLeadNavigation = (initialLeads: Lead[]) => {
     callFilter,
     isFilterChanging,
     isAutoCallInProgress,
-    shouldBlockNavigation, // Pass the function that checks if navigation should be blocked
+    shouldBlockNavigation(), // Call the function to get the boolean value
     // Only mark as called if a call was made to current lead
     (lead: Lead) => {
       if (callMadeToCurrentLead) {
