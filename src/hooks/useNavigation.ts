@@ -34,9 +34,26 @@ export const useNavigation = (
       markLeadAsCalledOnNavigation(currentLead);
     }
     
-    // Simple list-based navigation - just go to next index
-    const nextIndex = (currentIndex + 1) % baseLeads.length;
-    console.log('Navigation to next index:', nextIndex, 'from current:', currentIndex);
+    let nextIndex: number;
+    
+    if (shuffleMode) {
+      console.log('Using shuffle mode for navigation');
+      const result = getNextLeadInShuffle(baseLeads, currentIndex, callFilter, shownLeadsInShuffle);
+      nextIndex = result.index;
+      
+      // Add the current lead to shown leads in shuffle
+      const leadKey = `${currentLead.name}-${currentLead.phone}`;
+      const newShownLeads = new Set(shownLeadsInShuffle);
+      newShownLeads.add(leadKey);
+      setShownLeadsInShuffle(newShownLeads);
+      console.log('Added lead to shown leads in shuffle:', leadKey);
+    } else {
+      console.log('Using sequential mode for navigation');
+      const result = getNextLeadInSequential(baseLeads, currentIndex);
+      nextIndex = result.index;
+    }
+    
+    console.log('Navigation to next index:', nextIndex, 'from current:', currentIndex, 'shuffle mode:', shuffleMode);
     updateNavigation(nextIndex);
   };
 

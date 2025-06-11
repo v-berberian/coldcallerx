@@ -35,7 +35,8 @@ export const useLeadSelection = () => {
 
     // If we have unshown leads, pick from them
     if (unshownLeads.length > 0) {
-      const randomLead = unshownLeads[Math.floor(Math.random() * unshownLeads.length)];
+      const randomIndex = Math.floor(Math.random() * unshownLeads.length);
+      const randomLead = unshownLeads[randomIndex];
       const nextIndex = baseLeads.findIndex(lead => 
         lead.name === randomLead.name && lead.phone === randomLead.phone
       );
@@ -47,7 +48,8 @@ export const useLeadSelection = () => {
     } else {
       // All leads have been shown, pick any random lead (cycle complete)
       console.log('All leads have been shown, cycling complete - picking any random lead');
-      const randomLead = baseLeads[Math.floor(Math.random() * baseLeads.length)];
+      const randomIndex = Math.floor(Math.random() * baseLeads.length);
+      const randomLead = baseLeads[randomIndex];
       const nextIndex = baseLeads.findIndex(lead => 
         lead.name === randomLead.name && lead.phone === randomLead.phone
       );
