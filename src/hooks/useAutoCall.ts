@@ -29,8 +29,8 @@ export const useAutoCall = (
       // 10 second mode - fixed 10 second delay
       actualDelay = 10;
     } else {
-      // Timer mode (callDelay === 15) - random delay between 15-22 seconds
-      actualDelay = Math.floor(Math.random() * 8) + 15; // 15 to 22 seconds
+      // Timer mode (callDelay === 15) - random delay between 14-32 seconds
+      actualDelay = Math.floor(Math.random() * 19) + 14; // 14 to 32 seconds
     }
     
     console.log(`AUTO-CALL: Starting for ${lead.name} ${lead.phone} with ${actualDelay}s delay (mode: ${callDelay})`);

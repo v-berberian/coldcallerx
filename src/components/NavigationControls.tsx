@@ -22,7 +22,7 @@ const NavigationControls: React.FC<NavigationControlsProps> = ({
         variant="outline" 
         onClick={onPrevious} 
         disabled={!canGoPrevious} 
-        className="flex-1 h-14 rounded-2xl shadow-lg active:scale-95 transition-all duration-100 select-none outline-none focus:outline-none focus-visible:ring-0 focus-visible:ring-offset-0" 
+        className="flex-1 h-14 rounded-2xl shadow-lg active:scale-95 transition-all duration-100 select-none outline-none focus:outline-none focus-visible:ring-0 focus-visible:ring-offset-0 hover:bg-background hover:text-foreground" 
         style={{ WebkitTapHighlightColor: 'transparent' }} 
         onTouchStart={() => {}} 
         onTouchEnd={() => {}}
@@ -35,7 +35,7 @@ const NavigationControls: React.FC<NavigationControlsProps> = ({
         variant="outline" 
         onClick={onNext} 
         disabled={!canGoNext} 
-        className="flex-1 h-14 rounded-2xl shadow-lg active:scale-95 transition-all duration-100 select-none outline-none focus:outline-none focus-visible:ring-0 focus-visible:ring-offset-0" 
+        className="flex-1 h-14 rounded-2xl shadow-lg active:scale-95 transition-all duration-100 select-none outline-none focus:outline-none focus-visible:ring-0 focus-visible:ring-offset-0 hover:bg-background hover:text-foreground" 
         style={{ WebkitTapHighlightColor: 'transparent' }} 
         onTouchStart={() => {}} 
         onTouchEnd={() => {}}

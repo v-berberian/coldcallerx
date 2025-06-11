@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -82,8 +81,12 @@ const LeadCard: React.FC<LeadCardProps> = ({
           </div>
         </div>
 
-        {/* Main Call Button - ensure it's always green */}
-        <Button onClick={onCall} size="lg" className="w-full h-16 text-lg font-semibold bg-green-600 text-white rounded-2xl shadow-lg">
+        {/* Main Call Button - with fixed hover styles */}
+        <Button 
+          onClick={onCall} 
+          size="lg" 
+          className="w-full h-16 text-lg font-semibold bg-green-600 hover:bg-green-600 text-white rounded-2xl shadow-lg"
+        >
           Call
         </Button>
       </CardContent>
