@@ -1,4 +1,3 @@
-
 import React, { useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -54,6 +53,7 @@ const CallingScreenLogic: React.FC<CallingScreenLogicProps> = ({
     setSearchQuery,
     searchResults,
     showAutocomplete,
+    setShowAutocomplete,
     searchBasedNavigation,
     setSearchBasedNavigation,
     searchBaseLeads,
@@ -106,16 +106,18 @@ const CallingScreenLogic: React.FC<CallingScreenLogicProps> = ({
   }, [shouldAutoCall, autoCall, currentIndex, searchCurrentIndex, cardKey, searchBasedNavigation, searchBaseLeads]);
 
   const handleLeadSelect = (lead: Lead) => {
-    const currentSearchResults = searchResults;
-    const leadIndexInSearch = currentSearchResults.findIndex(l => 
+    const baseLeads = getBaseLeads();
+    const leadIndexInBaseLeads = baseLeads.findIndex(l => 
       l.name === lead.name && l.phone === lead.phone
     );
     
-    if (leadIndexInSearch !== -1) {
-      setSearchBasedNavigation(true);
-      setSearchBaseLeads(currentSearchResults);
-      setSearchCurrentIndex(leadIndexInSearch);
+    if (leadIndexInBaseLeads !== -1) {
+      // Clear search-based navigation and use the base leads navigation
+      setSearchBasedNavigation(false);
+      setSearchBaseLeads([]);
+      setSearchCurrentIndex(0);
       selectLead(lead);
+      console.log('Selected lead from autocomplete:', lead.name, 'at base index:', leadIndexInBaseLeads);
     }
     
     setSearchQuery('');
