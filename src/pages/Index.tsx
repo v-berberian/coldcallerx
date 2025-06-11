@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import CallingScreen from '@/components/CallingScreen';
 import ThemeToggle from '@/components/ThemeToggle';
@@ -99,8 +100,8 @@ const Index = () => {
   if (leads.length === 0) {
     return (
       <div className="h-screen h-[100vh] h-[100svh] bg-background overflow-hidden">
-        {/* Header with import icon, logo, and theme toggle */}
-        <div className="flex items-center justify-between p-4 border-b border-border">
+        {/* Header with import icon, logo, and theme toggle - with safe area padding */}
+        <div className="flex items-center justify-between p-4 border-b border-border pt-safe" style={{ paddingTop: 'max(1rem, env(safe-area-inset-top))' }}>
           <CSVImporter onLeadsImported={handleLeadsImported} />
           
           <h1 className="text-2xl font-bold">
