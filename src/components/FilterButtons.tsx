@@ -1,4 +1,5 @@
-import React, { useState, useRef } from 'react';
+
+import React, { useState, useRef, useEffect } from 'react';
 import { RotateCcw, Timer, Rocket } from 'lucide-react';
 
 interface FilterButtonsProps {
