@@ -8,7 +8,7 @@ export const useAutoCall = (
 ) => {
   const [isAutoCallInProgress, setIsAutoCallInProgress] = useState(false);
   const [isCountdownActive, setIsCountdownActive] = useState(false);
-  const [countdownTime, setCountdownTime] = useState(callDelay);
+  const [countdownTime, setCountdownTime] = useState(0);
   const [pendingLead, setPendingLead] = useState<Lead | null>(null);
 
   const executeAutoCall = (lead: Lead) => {
@@ -17,12 +17,22 @@ export const useAutoCall = (
       return;
     }
     
-    // Generate random delay between 15-22 seconds
-    const randomDelay = Math.floor(Math.random() * 8) + 15; // 15 to 22 seconds
+    let actualDelay: number;
     
-    console.log(`AUTO-CALL: Starting countdown for ${lead.name} ${lead.phone} with ${randomDelay}s delay`);
+    if (callDelay === 0) {
+      // Rocket mode - no delay, call immediately
+      actualDelay = 0;
+    } else if (callDelay === 5) {
+      // 5 second mode - fixed 5 second delay
+      actualDelay = 5;
+    } else {
+      // Timer mode (callDelay === 15) - random delay between 15-22 seconds
+      actualDelay = Math.floor(Math.random() * 8) + 15; // 15 to 22 seconds
+    }
     
-    if (randomDelay === 0) {
+    console.log(`AUTO-CALL: Starting for ${lead.name} ${lead.phone} with ${actualDelay}s delay (mode: ${callDelay})`);
+    
+    if (actualDelay === 0) {
       // No delay, make call immediately
       setIsAutoCallInProgress(true);
       makeCall(lead, false);
@@ -30,11 +40,11 @@ export const useAutoCall = (
         setIsAutoCallInProgress(false);
       }, 500);
     } else {
-      // Start countdown with random delay
+      // Start countdown with specified delay
       setPendingLead(lead);
       setIsCountdownActive(true);
       setIsAutoCallInProgress(true);
-      setCountdownTime(randomDelay);
+      setCountdownTime(actualDelay);
     }
   };
 
