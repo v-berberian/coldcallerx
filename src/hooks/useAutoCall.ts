@@ -4,7 +4,8 @@ import { Lead } from '../types/lead';
 
 export const useAutoCall = (
   makeCall: (lead: Lead, markAsCalled?: boolean) => void,
-  callDelay: number = 15
+  callDelay: number = 15,
+  showTimer: boolean = true
 ) => {
   const [isAutoCallInProgress, setIsAutoCallInProgress] = useState(false);
   const [isCountdownActive, setIsCountdownActive] = useState(false);
@@ -17,25 +18,27 @@ export const useAutoCall = (
       return;
     }
     
-    // Generate random delay between 15-22 seconds
-    const randomDelay = Math.floor(Math.random() * 8) + 15; // 15 to 22 seconds
-    
-    console.log(`AUTO-CALL: Starting countdown for ${lead.name} ${lead.phone} with ${randomDelay}s delay`);
-    
-    if (randomDelay === 0) {
-      // No delay, make call immediately
+    if (!showTimer) {
+      // Immediate call when timer is hidden
+      console.log('AUTO-CALL: Making immediate call to:', lead.name, lead.phone);
       setIsAutoCallInProgress(true);
       makeCall(lead, false);
       setTimeout(() => {
         setIsAutoCallInProgress(false);
       }, 500);
-    } else {
-      // Start countdown with random delay
-      setPendingLead(lead);
-      setIsCountdownActive(true);
-      setIsAutoCallInProgress(true);
-      setCountdownTime(randomDelay);
+      return;
     }
+    
+    // Generate random delay between 15-22 seconds when timer is shown
+    const randomDelay = Math.floor(Math.random() * 8) + 15; // 15 to 22 seconds
+    
+    console.log(`AUTO-CALL: Starting countdown for ${lead.name} ${lead.phone} with ${randomDelay}s delay`);
+    
+    // Start countdown with random delay
+    setPendingLead(lead);
+    setIsCountdownActive(true);
+    setIsAutoCallInProgress(true);
+    setCountdownTime(randomDelay);
   };
 
   // Handle countdown timer

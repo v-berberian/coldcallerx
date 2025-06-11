@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState, useRef } from 'react';
 import { RotateCcw, Timer } from 'lucide-react';
 
 interface FilterButtonsProps {
@@ -8,6 +8,8 @@ interface FilterButtonsProps {
   shuffleMode: boolean;
   autoCall: boolean;
   callDelay: number;
+  showTimer: boolean;
+  setShowTimer: (show: boolean) => void;
   isCountdownActive?: boolean;
   countdownTime?: number;
   onToggleTimezone: () => void;
@@ -24,6 +26,8 @@ const FilterButtons: React.FC<FilterButtonsProps> = ({
   shuffleMode,
   autoCall,
   callDelay,
+  showTimer,
+  setShowTimer,
   isCountdownActive = false,
   countdownTime = 0,
   onToggleTimezone,
@@ -33,6 +37,38 @@ const FilterButtons: React.FC<FilterButtonsProps> = ({
   onToggleCallDelay,
   onResetAllCalls
 }) => {
+  const longTapTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const [isLongTapping, setIsLongTapping] = useState(false);
+
+  const handleAutoCallMouseDown = () => {
+    setIsLongTapping(false);
+    longTapTimerRef.current = setTimeout(() => {
+      setIsLongTapping(true);
+      setShowTimer(!showTimer);
+    }, 500); // 500ms for long tap
+  };
+
+  const handleAutoCallMouseUp = () => {
+    if (longTapTimerRef.current) {
+      clearTimeout(longTapTimerRef.current);
+      longTapTimerRef.current = null;
+    }
+    
+    if (!isLongTapping) {
+      // Regular tap - toggle auto call
+      onToggleAutoCall();
+    }
+    setIsLongTapping(false);
+  };
+
+  const handleAutoCallMouseLeave = () => {
+    if (longTapTimerRef.current) {
+      clearTimeout(longTapTimerRef.current);
+      longTapTimerRef.current = null;
+    }
+    setIsLongTapping(false);
+  };
+
   return (
     <div className="space-y-1 my-[11px]">
       {/* First row: Timezone and Call filters */}
@@ -85,7 +121,11 @@ const FilterButtons: React.FC<FilterButtonsProps> = ({
         </div>
         <div className="flex-1 relative flex items-center justify-center">
           <button 
-            onClick={onToggleAutoCall} 
+            onMouseDown={handleAutoCallMouseDown}
+            onMouseUp={handleAutoCallMouseUp}
+            onMouseLeave={handleAutoCallMouseLeave}
+            onTouchStart={handleAutoCallMouseDown}
+            onTouchEnd={handleAutoCallMouseUp}
             className={`text-sm font-medium py-2 px-2 rounded transition-all duration-200 ${
               autoCall ? 'text-green-600 animate-button-switch' : 'text-muted-foreground'
             }`} 
@@ -93,7 +133,7 @@ const FilterButtons: React.FC<FilterButtonsProps> = ({
           >
             Auto Call
           </button>
-          {autoCall && (
+          {autoCall && showTimer && (
             <button 
               onClick={onToggleCallDelay} 
               className={`absolute right-0 text-green-600 text-xs font-medium px-2 py-1 rounded min-w-[32px] flex items-center justify-center ${

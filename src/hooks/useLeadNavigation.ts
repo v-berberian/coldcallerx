@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { Lead } from '../types/lead';
 import { useNavigationState } from './useNavigationState';
@@ -14,6 +15,7 @@ export const useLeadNavigation = (initialLeads: Lead[]) => {
   const [shownLeadsInShuffle, setShownLeadsInShuffle] = useState<Set<string>>(new Set());
   const [callMadeToCurrentLead, setCallMadeToCurrentLead] = useState(false);
   const [currentLeadForAutoCall, setCurrentLeadForAutoCall] = useState<Lead | null>(null);
+  const [showTimer, setShowTimer] = useState(true);
 
   const {
     currentIndex,
@@ -53,7 +55,7 @@ export const useLeadNavigation = (initialLeads: Lead[]) => {
 
   const { getBaseLeads } = useLeadFiltering(leadsData, timezoneFilter, callFilter);
 
-  const { isAutoCallInProgress, isCountdownActive, countdownTime, executeAutoCall, handleCountdownComplete } = useAutoCall(makeCall, callDelay);
+  const { isAutoCallInProgress, isCountdownActive, countdownTime, executeAutoCall, handleCountdownComplete } = useAutoCall(makeCall, callDelay, showTimer);
 
   const { handleNext, handlePrevious, selectLead } = useNavigation(
     currentIndex,
@@ -179,6 +181,8 @@ export const useLeadNavigation = (initialLeads: Lead[]) => {
     currentLeadForAutoCall,
     setCurrentLeadForAutoCall,
     isCountdownActive,
+    showTimer,
+    setShowTimer,
     getBaseLeads,
     makeCall: makeCallWrapper, // Use the wrapper that tracks call state
     executeAutoCall,
