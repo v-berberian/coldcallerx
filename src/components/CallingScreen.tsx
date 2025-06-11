@@ -1,7 +1,7 @@
-
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
+import { Progress } from '@/components/ui/progress';
 import SearchAutocomplete from './SearchAutocomplete';
 import SearchBar from './SearchBar';
 import ThemeToggle from './ThemeToggle';
@@ -243,6 +243,21 @@ const CallingScreen: React.FC<CallingScreenProps> = ({
 
   const totalLeadCount = currentLeads.length;
   
+  // Calculate daily calls
+  const getTodaysCalls = () => {
+    const today = new Date().toLocaleDateString();
+    return leadsData.reduce((total, lead) => {
+      if (lead.lastCalled && lead.lastCalled.includes(today)) {
+        return total + (lead.called || 0);
+      }
+      return total;
+    }, 0);
+  };
+
+  const dailyGoal = 500;
+  const todaysCalls = getTodaysCalls();
+  const progressPercentage = Math.min((todaysCalls / dailyGoal) * 100, 100);
+
   return (
     <div className="h-screen h-[100vh] h-[100svh] bg-background flex flex-col overflow-hidden">
       {/* Header */}
@@ -323,6 +338,17 @@ const CallingScreen: React.FC<CallingScreenProps> = ({
               canGoNext={currentLeads.length > 1}
             />
           </div>
+        </div>
+      </div>
+
+      {/* Daily Progress Bar at Bottom */}
+      <div className="bg-background border-t border-border p-4 flex-shrink-0">
+        <div className="w-full max-w-sm mx-auto space-y-2">
+          <div className="flex items-center justify-between text-sm text-muted-foreground">
+            <span>Daily Goal</span>
+            <span>{todaysCalls}/{dailyGoal} calls</span>
+          </div>
+          <Progress value={progressPercentage} className="w-full h-2" />
         </div>
       </div>
     </div>
