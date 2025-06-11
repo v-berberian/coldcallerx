@@ -117,7 +117,7 @@ const CallingScreenLogic: React.FC<CallingScreenLogicProps> = ({
     );
     
     if (leadIndexInBaseLeads !== -1) {
-      selectLead(lead, baseLeads, leadsData);
+      selectLead(lead);
       console.log('Selected lead from autocomplete:', lead.name, 'at base index:', leadIndexInBaseLeads);
     }
     
@@ -131,17 +131,6 @@ const CallingScreenLogic: React.FC<CallingScreenLogicProps> = ({
     const currentLead = currentLeads[currentIndex];
     makeCall(currentLead);
     incrementDailyCallCount();
-  };
-
-  // Create wrapper functions for navigation that pass the required baseLeads parameter
-  const handleNextWrapper = () => {
-    const currentLeads = getBaseLeads();
-    handleNext(currentLeads);
-  };
-
-  const handlePreviousWrapper = () => {
-    const currentLeads = getBaseLeads();
-    handlePrevious(currentLeads);
   };
 
   const currentLeads = getBaseLeads();
@@ -238,8 +227,8 @@ const CallingScreenLogic: React.FC<CallingScreenLogicProps> = ({
           onToggleCallDelay={toggleCallDelay}
           onResetCallDelay={resetCallDelay}
           onResetAllCalls={resetAllCallCounts}
-          onPrevious={handlePreviousWrapper}
-          onNext={handleNextWrapper}
+          onPrevious={handlePrevious}
+          onNext={handleNext}
           canGoPrevious={currentLeads.length > 1}
           canGoNext={currentLeads.length > 1}
         />
