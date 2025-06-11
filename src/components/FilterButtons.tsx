@@ -79,10 +79,10 @@ const FilterButtons: React.FC<FilterButtonsProps> = ({
             Shuffle
           </button>
         </div>
-        <div className="flex-1 flex items-center gap-1">
+        <div className="flex-1 relative flex items-center justify-center">
           <button 
             onClick={onToggleAutoCall} 
-            className={`flex-1 text-sm font-medium py-2 px-2 rounded transition-all duration-200 ${
+            className={`text-sm font-medium py-2 px-2 rounded transition-all duration-200 ${
               autoCall ? 'text-green-600 animate-button-switch' : 'text-muted-foreground'
             }`} 
             style={{ WebkitTapHighlightColor: 'transparent' }}
@@ -92,7 +92,7 @@ const FilterButtons: React.FC<FilterButtonsProps> = ({
           {autoCall && (
             <button 
               onClick={onToggleCallDelay} 
-              className="text-green-600 text-xs font-medium px-2 py-1 rounded border border-green-600/30 min-w-[32px]" 
+              className="absolute right-1 text-green-600 text-xs font-medium px-2 py-1 rounded border border-green-600/30 min-w-[32px]" 
               style={{ WebkitTapHighlightColor: 'transparent' }}
               title="Call delay in seconds"
             >
