@@ -12,6 +12,7 @@ import { useFilterChangeEffects } from './useFilterChangeEffects';
 export const useLeadNavigation = (initialLeads: Lead[]) => {
   const [shouldAutoCall, setShouldAutoCall] = useState(false);
   const [shownLeadsInShuffle, setShownLeadsInShuffle] = useState<Set<string>>(new Set());
+  const [callMadeToCurrentLead, setCallMadeToCurrentLead] = useState(false);
 
   const {
     currentIndex,
@@ -59,7 +60,12 @@ export const useLeadNavigation = (initialLeads: Lead[]) => {
     callFilter,
     isFilterChanging,
     isAutoCallInProgress,
-    markLeadAsCalledOnNavigation,
+    // Only mark as called if a call was made to current lead
+    (lead: Lead) => {
+      if (callMadeToCurrentLead) {
+        markLeadAsCalledOnNavigation(lead);
+      }
+    },
     shownLeadsInShuffle,
     setShownLeadsInShuffle
   );
@@ -82,6 +88,9 @@ export const useLeadNavigation = (initialLeads: Lead[]) => {
     const baseLeads = getBaseLeads();
     handleNext(baseLeads);
     
+    // Reset call state when navigating
+    setCallMadeToCurrentLead(false);
+    
     // Set flag to trigger auto-call after navigation
     if (autoCall) {
       setShouldAutoCall(true);
@@ -96,11 +105,23 @@ export const useLeadNavigation = (initialLeads: Lead[]) => {
     const prevIndex = currentIndex === 0 ? baseLeads.length - 1 : currentIndex - 1;
     console.log('Previous navigation: from index', currentIndex, 'to index', prevIndex);
     updateNavigation(prevIndex);
+    
+    // Reset call state when navigating
+    setCallMadeToCurrentLead(false);
   };
 
   const selectLeadWrapper = (lead: Lead) => {
     const baseLeads = getBaseLeads();
     selectLead(lead, baseLeads, leadsData);
+    // Reset call state when selecting a new lead
+    setCallMadeToCurrentLead(false);
+  };
+
+  // Enhanced make call function that tracks call state
+  const makeCallWrapper = (lead: Lead) => {
+    makeCall(lead);
+    setCallMadeToCurrentLead(true);
+    console.log('Call made to lead:', lead.name, 'marked for call tracking');
   };
 
   // Enhanced toggle functions to reset shown leads tracker
@@ -129,6 +150,7 @@ export const useLeadNavigation = (initialLeads: Lead[]) => {
     setLeadsData(formattedLeads);
     resetNavigation(0);
     setShownLeadsInShuffle(new Set()); // Reset shown leads on new import
+    setCallMadeToCurrentLead(false); // Reset call state on new import
   };
 
   return {
@@ -143,7 +165,7 @@ export const useLeadNavigation = (initialLeads: Lead[]) => {
     shouldAutoCall,
     setShouldAutoCall,
     getBaseLeads,
-    makeCall,
+    makeCall: makeCallWrapper, // Use the wrapper that tracks call state
     executeAutoCall,
     handleNext: handleNextWrapper,
     handlePrevious: handlePreviousWrapper,
