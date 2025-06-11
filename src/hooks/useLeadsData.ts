@@ -1,5 +1,5 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Lead } from '../types/lead';
 import { getPhoneDigits } from '../utils/phoneUtils';
 
@@ -11,6 +11,14 @@ export const useLeadsData = (initialLeads: Lead[]) => {
       lastCalled: lead.lastCalled || undefined
     }))
   );
+
+  // Save to localStorage whenever leadsData changes
+  useEffect(() => {
+    if (leadsData.length > 0) {
+      localStorage.setItem('coldcaller-leads', JSON.stringify(leadsData));
+      console.log('Saved leads data to localStorage:', leadsData.length, 'leads');
+    }
+  }, [leadsData]);
 
   const makeCall = (lead: Lead, markAsCalled: boolean = true) => {
     const phoneNumber = getPhoneDigits(lead.phone);
@@ -39,7 +47,9 @@ export const useLeadsData = (initialLeads: Lead[]) => {
         lastCalled: lastCalledString
       } : l
     );
+    
     setLeadsData(updatedLeads);
+    console.log('Marked lead as called:', lead.name, 'New count:', (lead.called || 0) + 1);
   };
 
   const resetCallCount = (lead: Lead) => {
@@ -49,6 +59,7 @@ export const useLeadsData = (initialLeads: Lead[]) => {
         : l
     );
     setLeadsData(updatedLeads);
+    console.log('Reset call count for lead:', lead.name);
   };
 
   const resetAllCallCounts = () => {
@@ -58,6 +69,7 @@ export const useLeadsData = (initialLeads: Lead[]) => {
       lastCalled: undefined
     }));
     setLeadsData(updatedLeads);
+    console.log('Reset all call counts');
   };
 
   // New function to mark a lead as called when navigating away

@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import CallingScreen from '@/components/CallingScreen';
 import ThemeToggle from '@/components/ThemeToggle';
@@ -20,17 +19,31 @@ const Index = () => {
     const savedLeads = localStorage.getItem('coldcaller-leads');
     const savedFileName = localStorage.getItem('coldcaller-filename');
     
+    console.log('Loading data from localStorage...');
+    
     if (savedLeads && savedFileName) {
       try {
         const parsedLeads = JSON.parse(savedLeads);
-        setLeads(parsedLeads);
+        console.log('Loaded', parsedLeads.length, 'leads from localStorage');
+        
+        // Ensure all leads have the required properties
+        const formattedLeads = parsedLeads.map((lead: Lead) => ({
+          ...lead,
+          called: lead.called || 0,
+          lastCalled: lead.lastCalled || undefined
+        }));
+        
+        setLeads(formattedLeads);
         setFileName(savedFileName);
+        console.log('Successfully restored leads with call tracking data');
       } catch (error) {
         console.error('Error parsing saved leads:', error);
         // Clear corrupted data
         localStorage.removeItem('coldcaller-leads');
         localStorage.removeItem('coldcaller-filename');
       }
+    } else {
+      console.log('No saved data found in localStorage');
     }
   }, []);
 
@@ -38,18 +51,48 @@ const Index = () => {
     // Clear saved data when going back
     localStorage.removeItem('coldcaller-leads');
     localStorage.removeItem('coldcaller-filename');
+    console.log('Cleared localStorage data');
     
     setLeads([]);
     setFileName('');
   };
 
   const handleLeadsImported = (importedLeads: Lead[], importedFileName: string) => {
-    setLeads(importedLeads);
+    // Check if we have existing data for these leads in localStorage
+    const savedLeads = localStorage.getItem('coldcaller-leads');
+    let mergedLeads = importedLeads;
+    
+    if (savedLeads) {
+      try {
+        const existingLeads = JSON.parse(savedLeads);
+        console.log('Merging new import with existing call tracking data...');
+        
+        // Merge call tracking data from existing leads
+        mergedLeads = importedLeads.map(newLead => {
+          const existingLead = existingLeads.find((l: Lead) => 
+            l.name === newLead.name && l.phone === newLead.phone
+          );
+          
+          return {
+            ...newLead,
+            called: existingLead?.called || 0,
+            lastCalled: existingLead?.lastCalled || undefined
+          };
+        });
+        
+        console.log('Merged call tracking data for', mergedLeads.length, 'leads');
+      } catch (error) {
+        console.error('Error merging with existing data:', error);
+      }
+    }
+    
+    setLeads(mergedLeads);
     setFileName(importedFileName);
     
-    // Save to localStorage
-    localStorage.setItem('coldcaller-leads', JSON.stringify(importedLeads));
+    // Save to localStorage immediately
+    localStorage.setItem('coldcaller-leads', JSON.stringify(mergedLeads));
     localStorage.setItem('coldcaller-filename', importedFileName);
+    console.log('Saved imported leads to localStorage');
   };
 
   // If no leads, show empty state with proper header
