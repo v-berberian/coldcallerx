@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Lead } from '../types/lead';
 import FilterButtons from './FilterButtons';
@@ -95,6 +96,7 @@ const MainContent: React.FC<MainContentProps> = ({
             onNext={onNext}
             canGoPrevious={canGoPrevious}
             canGoNext={canGoNext}
+            isCountdownActive={isCountdownActive}
           />
         </div>
       </div>

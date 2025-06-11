@@ -10,6 +10,7 @@ export const useNavigation = (
   callFilter: CallFilter,
   isFilterChanging: boolean,
   isAutoCallInProgress: boolean,
+  isCountdownActive: boolean, // Add this parameter to differentiate countdown vs just enabled
   markLeadAsCalledOnNavigation: (lead: Lead) => void,
   shownLeadsInShuffle: Set<string>,
   setShownLeadsInShuffle: (shown: Set<string>) => void
@@ -17,9 +18,9 @@ export const useNavigation = (
   const { getNextLeadInSequential, getNextLeadInShuffle } = useLeadSelection();
 
   const handleNext = (baseLeads: Lead[]) => {
-    // Prevent navigation if filters are currently changing
-    if (isFilterChanging || isAutoCallInProgress) {
-      console.log('Skipping navigation because filters are changing or auto-call in progress');
+    // Only prevent navigation during active countdown, not when auto-call is just enabled
+    if (isFilterChanging || isCountdownActive) {
+      console.log('Skipping navigation because filters are changing or countdown is active');
       return;
     }
     
@@ -58,8 +59,9 @@ export const useNavigation = (
   };
 
   const handlePrevious = () => {
-    if (isAutoCallInProgress) {
-      console.log('Skipping previous navigation because auto-call in progress');
+    // Only prevent navigation during active countdown, not when auto-call is just enabled
+    if (isCountdownActive) {
+      console.log('Skipping previous navigation because countdown is active');
       return;
     }
     
@@ -68,8 +70,9 @@ export const useNavigation = (
   };
 
   const selectLead = (lead: Lead, baseLeads: Lead[], allLeads: Lead[]) => {
-    if (isAutoCallInProgress) {
-      console.log('Skipping lead selection because auto-call in progress');
+    // Only prevent selection during active countdown, not when auto-call is just enabled
+    if (isCountdownActive) {
+      console.log('Skipping lead selection because countdown is active');
       return;
     }
     

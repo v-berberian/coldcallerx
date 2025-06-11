@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { Lead } from '../types/lead';
 import { useNavigationState } from './useNavigationState';
@@ -63,6 +64,7 @@ export const useLeadNavigation = (initialLeads: Lead[]) => {
     callFilter,
     isFilterChanging,
     isAutoCallInProgress,
+    isCountdownActive, // Pass countdown state separately
     // Only mark as called if a call was made to current lead
     (lead: Lead) => {
       if (callMadeToCurrentLead) {
