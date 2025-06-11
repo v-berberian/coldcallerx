@@ -1,11 +1,10 @@
-
 import React, { useState, useRef, useEffect } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { X } from 'lucide-react';
 import { formatPhoneNumber } from '../utils/phoneUtils';
 import { getStateFromAreaCode } from '../utils/timezoneUtils';
-import { App } from '@capacitor/app';
+import { Browser } from '@capacitor/browser';
 
 interface Lead {
   name: string;
@@ -50,7 +49,7 @@ const LeadCard: React.FC<LeadCardProps> = ({
     const mailtoUrl = `mailto:inbox@app.trello.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
     
     try {
-      await App.openUrl({ url: mailtoUrl });
+      await Browser.open({ url: mailtoUrl });
     } catch (error) {
       // Fallback for web
       window.location.href = mailtoUrl;
