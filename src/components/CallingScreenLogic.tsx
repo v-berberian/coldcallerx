@@ -1,4 +1,3 @@
-
 import React, { useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -115,7 +114,13 @@ const CallingScreenLogic: React.FC<CallingScreenLogicProps> = ({
     setShowAutocomplete(false);
   };
 
+  // Simple list-based navigation functions
   const handleNextWrapper = () => {
+    const currentLeads = getBaseLeads();
+    if (currentLeads.length === 0) return;
+    
+    const nextIndex = (currentIndex + 1) % currentLeads.length;
+    console.log('Next navigation: from index', currentIndex, 'to index', nextIndex);
     handleNext();
     
     if (autoCall) {
@@ -124,6 +129,11 @@ const CallingScreenLogic: React.FC<CallingScreenLogicProps> = ({
   };
 
   const handlePreviousWrapper = () => {
+    const currentLeads = getBaseLeads();
+    if (currentLeads.length === 0) return;
+    
+    const prevIndex = currentIndex === 0 ? currentLeads.length - 1 : currentIndex - 1;
+    console.log('Previous navigation: from index', currentIndex, 'to index', prevIndex);
     handlePrevious();
   };
 

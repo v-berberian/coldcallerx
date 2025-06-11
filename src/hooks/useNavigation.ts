@@ -34,40 +34,20 @@ export const useNavigation = (
       markLeadAsCalledOnNavigation(currentLead);
     }
     
-    let nextIndex: number;
-    let nextLead: Lead;
-    
-    if (shuffleMode) {
-      console.log('Using shuffle mode for navigation');
-      const result = getNextLeadInShuffle(baseLeads, currentIndex, callFilter, shownLeadsInShuffle);
-      nextIndex = result.index;
-      nextLead = result.lead;
-      
-      // Add the new lead to shown leads set
-      if (nextLead) {
-        const leadKey = `${nextLead.name}-${nextLead.phone}`;
-        const newShownLeads = new Set(shownLeadsInShuffle);
-        newShownLeads.add(leadKey);
-        setShownLeadsInShuffle(newShownLeads);
-        console.log('Added to shown leads:', leadKey, 'Total shown:', newShownLeads.size);
-      }
-    } else {
-      console.log('Using sequential mode for navigation');
-      const result = getNextLeadInSequential(baseLeads, currentIndex);
-      nextIndex = result.index;
-      nextLead = result.lead;
-    }
-    
-    console.log('Navigation to index:', nextIndex, 'lead:', nextLead?.name, 'shuffle:', shuffleMode);
+    // Simple list-based navigation - just go to next index
+    const nextIndex = (currentIndex + 1) % baseLeads.length;
+    console.log('Navigation to next index:', nextIndex, 'from current:', currentIndex);
     updateNavigation(nextIndex);
   };
 
-  const handlePrevious = (goToPrevious: () => void) => {
+  const handlePrevious = () => {
     if (isAutoCallInProgress) {
       console.log('Skipping previous navigation because auto-call in progress');
       return;
     }
-    goToPrevious();
+    
+    // Simple list-based navigation - just go to previous index
+    // This will be handled by the calling component which knows the baseLeads length
   };
 
   const selectLead = (lead: Lead, baseLeads: Lead[], allLeads: Lead[]) => {

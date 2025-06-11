@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { Lead } from '../types/lead';
 import { useNavigationState } from './useNavigationState';
@@ -88,7 +89,13 @@ export const useLeadNavigation = (initialLeads: Lead[]) => {
   };
 
   const handlePreviousWrapper = () => {
-    handlePrevious(goToPrevious);
+    const baseLeads = getBaseLeads();
+    if (baseLeads.length === 0) return;
+    
+    // Simple list-based previous navigation
+    const prevIndex = currentIndex === 0 ? baseLeads.length - 1 : currentIndex - 1;
+    console.log('Previous navigation: from index', currentIndex, 'to index', prevIndex);
+    updateNavigation(prevIndex);
   };
 
   const selectLeadWrapper = (lead: Lead) => {
