@@ -122,4 +122,15 @@
     position: fixed;
     width: 100%;
   }
+
+  /* iOS safe area support */
+  @supports (padding: max(0px)) {
+    .pt-safe {
+      padding-top: max(1rem, env(safe-area-inset-top));
+    }
+    
+    .pb-safe {
+      padding-bottom: max(1rem, env(safe-area-inset-bottom));
+    }
+  }
 }

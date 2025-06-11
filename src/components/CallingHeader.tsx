@@ -34,7 +34,7 @@ const CallingHeader: React.FC<CallingHeaderProps> = ({
   onLeadsImported
 }) => {
   return (
-    <div className="bg-background border-b border-border p-4 flex-shrink-0">
+    <div className="bg-background border-b border-border p-4 pt-safe flex-shrink-0" style={{ paddingTop: 'max(1rem, env(safe-area-inset-top))' }}>
       <div className="flex items-center justify-between mb-4">
         <CSVImporter onLeadsImported={onLeadsImported} />
         
