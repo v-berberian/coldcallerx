@@ -38,7 +38,8 @@ const CallingScreenLogic: React.FC<CallingScreenLogicProps> = ({
     currentLeadForAutoCall,
     setCurrentLeadForAutoCall,
     isCountdownActive,
-    countdownTime,
+    showTimer,
+    setShowTimer,
     getBaseLeads,
     makeCall,
     executeAutoCall,
@@ -53,7 +54,8 @@ const CallingScreenLogic: React.FC<CallingScreenLogicProps> = ({
     toggleShuffle,
     toggleAutoCall,
     toggleCallDelay,
-    resetLeadsData
+    resetLeadsData,
+    countdownTime
   } = useLeadNavigation(leads);
 
   const {
@@ -214,6 +216,8 @@ const CallingScreenLogic: React.FC<CallingScreenLogicProps> = ({
           shuffleMode={shuffleMode}
           autoCall={autoCall}
           callDelay={callDelay}
+          showTimer={showTimer}
+          setShowTimer={setShowTimer}
           isCountdownActive={isCountdownActive}
           countdownTime={countdownTime}
           onCall={handleCallClick}
