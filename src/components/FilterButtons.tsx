@@ -26,7 +26,7 @@ const FilterButtons: React.FC<FilterButtonsProps> = ({
   onResetAllCalls
 }) => {
   return (
-    <div className="space-y-2">
+    <div className="space-y-1">
       {/* First row: Timezone and Call filters */}
       <div className="flex">
         <div className="flex-1">
