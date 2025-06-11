@@ -1,4 +1,3 @@
-
 import React, { useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -31,6 +30,7 @@ const CallingScreenLogic: React.FC<CallingScreenLogicProps> = ({
     callFilter,
     shuffleMode,
     autoCall,
+    callDelay,
     historyIndex,
     shouldAutoCall,
     setShouldAutoCall,
@@ -46,6 +46,7 @@ const CallingScreenLogic: React.FC<CallingScreenLogicProps> = ({
     toggleCallFilter,
     toggleShuffle,
     toggleAutoCall,
+    toggleCallDelay,
     resetLeadsData
   } = useLeadNavigation(leads);
 
@@ -205,12 +206,14 @@ const CallingScreenLogic: React.FC<CallingScreenLogicProps> = ({
           callFilter={callFilter}
           shuffleMode={shuffleMode}
           autoCall={autoCall}
+          callDelay={callDelay}
           onCall={handleCallClick}
           onResetCallCount={() => resetCallCount(currentLead)}
           onToggleTimezone={toggleTimezoneFilter}
           onToggleCallFilter={toggleCallFilter}
           onToggleShuffle={toggleShuffle}
           onToggleAutoCall={toggleAutoCall}
+          onToggleCallDelay={toggleCallDelay}
           onResetAllCalls={resetAllCallCounts}
           onPrevious={handlePrevious}
           onNext={handleNext}

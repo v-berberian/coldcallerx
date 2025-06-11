@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Lead } from '../types/lead';
 import { useNavigationState } from './useNavigationState';
@@ -6,6 +5,7 @@ import { useFilters } from './useFilters';
 import { useLeadsData } from './useLeadsData';
 import { useLeadFiltering } from './useLeadFiltering';
 import { useAutoCall } from './useAutoCall';
+import { useCallDelay } from './useCallDelay';
 import { useNavigation } from './useNavigation';
 import { useFilterChangeEffects } from './useFilterChangeEffects';
 
@@ -38,6 +38,8 @@ export const useLeadNavigation = (initialLeads: Lead[]) => {
     setFilterChanging
   } = useFilters();
 
+  const { callDelay, toggleCallDelay } = useCallDelay();
+
   const {
     leadsData,
     setLeadsData,
@@ -50,7 +52,7 @@ export const useLeadNavigation = (initialLeads: Lead[]) => {
 
   const { getBaseLeads } = useLeadFiltering(leadsData, timezoneFilter, callFilter);
 
-  const { isAutoCallInProgress, executeAutoCall } = useAutoCall(makeCall);
+  const { isAutoCallInProgress, executeAutoCall } = useAutoCall(makeCall, callDelay);
 
   const { handleNext, handlePrevious, selectLead } = useNavigation(
     currentIndex,
@@ -117,11 +119,11 @@ export const useLeadNavigation = (initialLeads: Lead[]) => {
     setCallMadeToCurrentLead(false);
   };
 
-  // Enhanced make call function that tracks call state
+  // Enhanced make call function that tracks call state but doesn't mark as called immediately
   const makeCallWrapper = (lead: Lead) => {
-    makeCall(lead);
-    setCallMadeToCurrentLead(true);
-    console.log('Call made to lead:', lead.name, 'marked for call tracking');
+    makeCall(lead, false); // Don't mark as called immediately
+    setCallMadeToCurrentLead(true); // Track that a call was made
+    console.log('Call made to lead:', lead.name, 'marked for call tracking on navigation');
   };
 
   // Enhanced toggle functions to reset shown leads tracker
@@ -161,6 +163,7 @@ export const useLeadNavigation = (initialLeads: Lead[]) => {
     callFilter,
     shuffleMode,
     autoCall,
+    callDelay,
     historyIndex,
     shouldAutoCall,
     setShouldAutoCall,
@@ -176,6 +179,7 @@ export const useLeadNavigation = (initialLeads: Lead[]) => {
     toggleCallFilter: toggleCallFilterWrapper,
     toggleShuffle: toggleShuffleWrapper,
     toggleAutoCall,
+    toggleCallDelay,
     resetLeadsData
   };
 };

@@ -15,12 +15,14 @@ interface MainContentProps {
   callFilter: 'ALL' | 'UNCALLED';
   shuffleMode: boolean;
   autoCall: boolean;
+  callDelay: number;
   onCall: () => void;
   onResetCallCount: () => void;
   onToggleTimezone: () => void;
   onToggleCallFilter: () => void;
   onToggleShuffle: () => void;
   onToggleAutoCall: () => void;
+  onToggleCallDelay: () => void;
   onResetAllCalls: () => void;
   onPrevious: () => void;
   onNext: () => void;
@@ -38,12 +40,14 @@ const MainContent: React.FC<MainContentProps> = ({
   callFilter,
   shuffleMode,
   autoCall,
+  callDelay,
   onCall,
   onResetCallCount,
   onToggleTimezone,
   onToggleCallFilter,
   onToggleShuffle,
   onToggleAutoCall,
+  onToggleCallDelay,
   onResetAllCalls,
   onPrevious,
   onNext,
@@ -59,10 +63,12 @@ const MainContent: React.FC<MainContentProps> = ({
           callFilter={callFilter}
           shuffleMode={shuffleMode}
           autoCall={autoCall}
+          callDelay={callDelay}
           onToggleTimezone={onToggleTimezone}
           onToggleCallFilter={onToggleCallFilter}
           onToggleShuffle={onToggleShuffle}
           onToggleAutoCall={onToggleAutoCall}
+          onToggleCallDelay={onToggleCallDelay}
           onResetAllCalls={onResetAllCalls}
         />
 
