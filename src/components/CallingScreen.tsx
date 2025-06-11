@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
+import { X } from 'lucide-react';
 import SearchAutocomplete from './SearchAutocomplete';
 import SearchBar from './SearchBar';
 import ThemeToggle from './ThemeToggle';
@@ -64,6 +65,22 @@ const CallingScreen: React.FC<CallingScreenProps> = ({
   const [showAutocomplete, setShowAutocomplete] = useState(false);
   const [searchBasedNavigation, setSearchBasedNavigation] = useState(false);
   const [searchBaseLeads, setSearchBaseLeads] = useState<Lead[]>([]);
+  const [dailyCallCount, setDailyCallCount] = useState(0);
+
+  // Load daily call count from localStorage
+  useEffect(() => {
+    const today = new Date().toDateString();
+    const savedCount = localStorage.getItem(`daily-calls-${today}`);
+    if (savedCount) {
+      setDailyCallCount(parseInt(savedCount, 10));
+    }
+  }, []);
+
+  // Save daily call count to localStorage
+  useEffect(() => {
+    const today = new Date().toDateString();
+    localStorage.setItem(`daily-calls-${today}`, dailyCallCount.toString());
+  }, [dailyCallCount]);
 
   // Handle new CSV imports by resetting the leads data
   useEffect(() => {
@@ -86,6 +103,8 @@ const CallingScreen: React.FC<CallingScreenProps> = ({
       if (currentLead) {
         console.log('Auto-call triggered for displayed lead:', currentLead.name, currentLead.phone);
         executeAutoCall(currentLead);
+        // Increment daily call count
+        setDailyCallCount(prev => prev + 1);
       }
       
       setShouldAutoCall(false);
@@ -183,6 +202,17 @@ const CallingScreen: React.FC<CallingScreenProps> = ({
     }
   };
 
+  // Handle manual call button click
+  const handleCallClick = () => {
+    makeCall(currentLead);
+    setDailyCallCount(prev => prev + 1);
+  };
+
+  // Reset daily call count
+  const resetDailyCallCount = () => {
+    setDailyCallCount(0);
+  };
+
   // Get the current navigation context
   const getCurrentLeads = () => {
     return searchBasedNavigation ? searchBaseLeads : getBaseLeads();
@@ -242,21 +272,8 @@ const CallingScreen: React.FC<CallingScreenProps> = ({
   }
 
   const totalLeadCount = currentLeads.length;
-  
-  // Calculate daily calls
-  const getTodaysCalls = () => {
-    const today = new Date().toLocaleDateString();
-    return leadsData.reduce((total, lead) => {
-      if (lead.lastCalled && lead.lastCalled.includes(today)) {
-        return total + (lead.called || 0);
-      }
-      return total;
-    }, 0);
-  };
-
   const dailyGoal = 500;
-  const todaysCalls = getTodaysCalls();
-  const progressPercentage = Math.min((todaysCalls / dailyGoal) * 100, 100);
+  const progressPercentage = Math.min((dailyCallCount / dailyGoal) * 100, 100);
 
   return (
     <div className="h-screen h-[100vh] h-[100svh] bg-background flex flex-col overflow-hidden">
@@ -325,7 +342,7 @@ const CallingScreen: React.FC<CallingScreenProps> = ({
             totalCount={totalLeadCount}
             fileName={fileName}
             cardKey={cardKey}
-            onCall={() => makeCall(currentLead)}
+            onCall={handleCallClick}
             onResetCallCount={() => resetCallCount(currentLead)}
           />
 
@@ -346,7 +363,16 @@ const CallingScreen: React.FC<CallingScreenProps> = ({
         <div className="w-full max-w-sm mx-auto space-y-1">
           <div className="flex items-center justify-between text-sm text-muted-foreground">
             <span>Daily Goal</span>
-            <span>{todaysCalls}/{dailyGoal} calls</span>
+            <div className="flex items-center space-x-2">
+              <span>{dailyCallCount}/{dailyGoal} calls</span>
+              <button
+                onClick={resetDailyCallCount}
+                className="p-1 hover:bg-muted rounded transition-colors"
+                title="Reset daily call count"
+              >
+                <X className="h-3 w-3 text-muted-foreground hover:text-foreground" />
+              </button>
+            </div>
           </div>
           <Progress value={progressPercentage} className="w-full h-2" />
         </div>
