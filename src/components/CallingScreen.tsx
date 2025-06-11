@@ -212,7 +212,7 @@ const CallingScreen: React.FC<CallingScreenProps> = ({
   
   if (leadsData.length === 0) {
     return (
-      <div className="h-screen h-[100vh] h-[100dvh] bg-background overflow-hidden fixed inset-0">
+      <div className="h-[100dvh] bg-background overflow-hidden fixed inset-0">
         <div className="bg-background border-b border-border p-4">
           <div className="flex items-center justify-center">
             <div className="flex items-center space-x-3">
@@ -233,7 +233,7 @@ const CallingScreen: React.FC<CallingScreenProps> = ({
   
   if (!currentLead) {
     return (
-      <div className="h-screen h-[100vh] h-[100dvh] bg-background flex items-center justify-center p-4 overflow-hidden fixed inset-0">
+      <div className="h-[100dvh] bg-background flex items-center justify-center p-4 overflow-hidden fixed inset-0">
         <Card className="w-full max-w-md shadow-lg rounded-2xl">
           <CardContent className="p-8 text-center">
             <p className="text-lg">No leads found with current filters</p>
@@ -264,7 +264,7 @@ const CallingScreen: React.FC<CallingScreenProps> = ({
   const totalLeadCount = currentLeads.length;
 
   return (
-    <div className="h-screen h-[100vh] h-[100dvh] bg-background flex flex-col overflow-hidden fixed inset-0">
+    <div className="h-[100dvh] bg-background flex flex-col overflow-hidden fixed inset-0">
       {/* Header */}
       <CallingHeader
         searchQuery={searchQuery}
@@ -280,34 +280,36 @@ const CallingScreen: React.FC<CallingScreenProps> = ({
         onLeadsImported={onLeadsImported}
       />
 
-      {/* Daily Progress Bar - Moved up after header */}
+      {/* Main Content - takes remaining space */}
+      <div className="flex-1 overflow-hidden">
+        <MainContent
+          currentLead={currentLead}
+          currentIndex={displayIndex}
+          totalCount={totalLeadCount}
+          fileName={fileName}
+          cardKey={cardKey}
+          timezoneFilter={timezoneFilter}
+          callFilter={callFilter}
+          shuffleMode={shuffleMode}
+          autoCall={autoCall}
+          onCall={handleCallClick}
+          onResetCallCount={() => resetCallCount(currentLead)}
+          onToggleTimezone={toggleTimezoneFilter}
+          onToggleCallFilter={toggleCallFilter}
+          onToggleShuffle={toggleShuffle}
+          onToggleAutoCall={toggleAutoCall}
+          onResetAllCalls={resetAllCallCounts}
+          onPrevious={handlePreviousWrapper}
+          onNext={handleNextWrapper}
+          canGoPrevious={currentLeads.length > 1}
+          canGoNext={currentLeads.length > 1}
+        />
+      </div>
+
+      {/* Daily Progress Bar - Fixed at bottom */}
       <DailyProgress
         dailyCallCount={dailyCallCount}
         onResetDailyCount={resetDailyCallCount}
-      />
-
-      {/* Main Content */}
-      <MainContent
-        currentLead={currentLead}
-        currentIndex={displayIndex}
-        totalCount={totalLeadCount}
-        fileName={fileName}
-        cardKey={cardKey}
-        timezoneFilter={timezoneFilter}
-        callFilter={callFilter}
-        shuffleMode={shuffleMode}
-        autoCall={autoCall}
-        onCall={handleCallClick}
-        onResetCallCount={() => resetCallCount(currentLead)}
-        onToggleTimezone={toggleTimezoneFilter}
-        onToggleCallFilter={toggleCallFilter}
-        onToggleShuffle={toggleShuffle}
-        onToggleAutoCall={toggleAutoCall}
-        onResetAllCalls={resetAllCallCounts}
-        onPrevious={handlePreviousWrapper}
-        onNext={handleNextWrapper}
-        canGoPrevious={currentLeads.length > 1}
-        canGoNext={currentLeads.length > 1}
       />
     </div>
   );
