@@ -58,6 +58,7 @@ const CallingScreen: React.FC<CallingScreenProps> = ({
   const [showAutocomplete, setShowAutocomplete] = useState(false);
   const [searchBasedNavigation, setSearchBasedNavigation] = useState(false);
   const [searchBaseLeads, setSearchBaseLeads] = useState<Lead[]>([]);
+  const [searchCurrentIndex, setSearchCurrentIndex] = useState(0);
   const [dailyCallCount, setDailyCallCount] = useState(0);
 
   // Load daily call count from localStorage
@@ -91,18 +92,17 @@ const CallingScreen: React.FC<CallingScreenProps> = ({
   useEffect(() => {
     if (shouldAutoCall && autoCall) {
       const currentLeads = searchBasedNavigation ? searchBaseLeads : getBaseLeads();
-      const currentLead = currentLeads[currentIndex];
+      const currentLead = currentLeads[searchBasedNavigation ? searchCurrentIndex : currentIndex];
       
       if (currentLead) {
         console.log('Auto-call triggered for displayed lead:', currentLead.name, currentLead.phone);
         executeAutoCall(currentLead);
-        // Increment daily call count
         setDailyCallCount(prev => prev + 1);
       }
       
       setShouldAutoCall(false);
     }
-  }, [shouldAutoCall, autoCall, currentIndex, cardKey, searchBasedNavigation, searchBaseLeads]);
+  }, [shouldAutoCall, autoCall, currentIndex, searchCurrentIndex, cardKey, searchBasedNavigation, searchBaseLeads]);
 
   useEffect(() => {
     const baseLeads = getBaseLeads();
@@ -116,10 +116,10 @@ const CallingScreen: React.FC<CallingScreenProps> = ({
     } else {
       setSearchResults(baseLeads);
       setIsSearching(false);
-      // Clear search-based navigation when search is cleared
       if (searchBasedNavigation) {
         setSearchBasedNavigation(false);
         setSearchBaseLeads([]);
+        setSearchCurrentIndex(0);
       }
     }
   }, [searchQuery, leadsData, timezoneFilter, callFilter]);
@@ -129,6 +129,7 @@ const CallingScreen: React.FC<CallingScreenProps> = ({
     setShowAutocomplete(false);
     setSearchBasedNavigation(false);
     setSearchBaseLeads([]);
+    setSearchCurrentIndex(0);
   };
 
   const handleSearchFocus = () => {
@@ -140,7 +141,6 @@ const CallingScreen: React.FC<CallingScreenProps> = ({
   };
 
   const handleLeadSelect = (lead: Lead) => {
-    // Set up search-based navigation
     const currentSearchResults = searchResults;
     const leadIndexInSearch = currentSearchResults.findIndex(l => 
       l.name === lead.name && l.phone === lead.phone
@@ -149,10 +149,8 @@ const CallingScreen: React.FC<CallingScreenProps> = ({
     if (leadIndexInSearch !== -1) {
       setSearchBasedNavigation(true);
       setSearchBaseLeads(currentSearchResults);
+      setSearchCurrentIndex(leadIndexInSearch);
       selectLead(lead);
-      // Update current index to match position in search results
-      // The selectLead function will handle finding the lead in the full filtered list
-      // but we need to track which search result we're at for navigation
     }
     
     setSearchQuery('');
@@ -161,20 +159,17 @@ const CallingScreen: React.FC<CallingScreenProps> = ({
 
   const handleNextWrapper = () => {
     if (searchBasedNavigation && searchBaseLeads.length > 0) {
-      // Navigate within search results
-      const currentLeads = searchBaseLeads;
-      const currentLead = currentLeads[currentIndex];
-      const nextIndex = (currentIndex + 1) % currentLeads.length;
-      const nextLead = currentLeads[nextIndex];
+      const nextIndex = (searchCurrentIndex + 1) % searchBaseLeads.length;
+      const nextLead = searchBaseLeads[nextIndex];
       
       if (nextLead) {
+        setSearchCurrentIndex(nextIndex);
         selectLead(nextLead);
       }
     } else {
       handleNext();
     }
     
-    // Set flag to trigger auto-call after navigation
     if (autoCall) {
       setShouldAutoCall(true);
     }
@@ -182,12 +177,11 @@ const CallingScreen: React.FC<CallingScreenProps> = ({
 
   const handlePreviousWrapper = () => {
     if (searchBasedNavigation && searchBaseLeads.length > 0) {
-      // Navigate within search results
-      const currentLeads = searchBaseLeads;
-      const prevIndex = currentIndex === 0 ? currentLeads.length - 1 : currentIndex - 1;
-      const prevLead = currentLeads[prevIndex];
+      const prevIndex = searchCurrentIndex === 0 ? searchBaseLeads.length - 1 : searchCurrentIndex - 1;
+      const prevLead = searchBaseLeads[prevIndex];
       
       if (prevLead) {
+        setSearchCurrentIndex(prevIndex);
         selectLead(prevLead);
       }
     } else {
@@ -197,6 +191,7 @@ const CallingScreen: React.FC<CallingScreenProps> = ({
 
   // Handle manual call button click
   const handleCallClick = () => {
+    const currentLead = getCurrentLeads()[searchBasedNavigation ? searchCurrentIndex : currentIndex];
     makeCall(currentLead);
     setDailyCallCount(prev => prev + 1);
   };
@@ -212,7 +207,8 @@ const CallingScreen: React.FC<CallingScreenProps> = ({
   };
 
   const currentLeads = getCurrentLeads();
-  const currentLead = currentLeads[currentIndex];
+  const displayIndex = searchBasedNavigation ? searchCurrentIndex : currentIndex;
+  const currentLead = currentLeads[displayIndex];
   
   if (leadsData.length === 0) {
     return (
@@ -249,6 +245,7 @@ const CallingScreen: React.FC<CallingScreenProps> = ({
                   setSearchQuery('');
                   setSearchBasedNavigation(false);
                   setSearchBaseLeads([]);
+                  setSearchCurrentIndex(0);
                 }} 
                 className="w-full rounded-xl"
               >
@@ -283,10 +280,16 @@ const CallingScreen: React.FC<CallingScreenProps> = ({
         onLeadsImported={onLeadsImported}
       />
 
+      {/* Daily Progress Bar - Moved up after header */}
+      <DailyProgress
+        dailyCallCount={dailyCallCount}
+        onResetDailyCount={resetDailyCallCount}
+      />
+
       {/* Main Content */}
       <MainContent
         currentLead={currentLead}
-        currentIndex={currentIndex}
+        currentIndex={displayIndex}
         totalCount={totalLeadCount}
         fileName={fileName}
         cardKey={cardKey}
@@ -305,12 +308,6 @@ const CallingScreen: React.FC<CallingScreenProps> = ({
         onNext={handleNextWrapper}
         canGoPrevious={currentLeads.length > 1}
         canGoNext={currentLeads.length > 1}
-      />
-
-      {/* Daily Progress Bar at Bottom */}
-      <DailyProgress
-        dailyCallCount={dailyCallCount}
-        onResetDailyCount={resetDailyCallCount}
       />
     </div>
   );
