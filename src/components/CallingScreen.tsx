@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -217,7 +216,7 @@ const CallingScreen: React.FC<CallingScreenProps> = ({
   
   if (leadsData.length === 0) {
     return (
-      <div className="h-screen h-[100vh] h-[100svh] bg-background overflow-hidden">
+      <div className="h-screen h-[100vh] h-[100dvh] bg-background overflow-hidden fixed inset-0">
         <div className="bg-background border-b border-border p-4">
           <div className="flex items-center justify-center">
             <div className="flex items-center space-x-3">
@@ -238,7 +237,7 @@ const CallingScreen: React.FC<CallingScreenProps> = ({
   
   if (!currentLead) {
     return (
-      <div className="h-screen h-[100vh] h-[100svh] bg-background flex items-center justify-center p-4 overflow-hidden">
+      <div className="h-screen h-[100vh] h-[100dvh] bg-background flex items-center justify-center p-4 overflow-hidden fixed inset-0">
         <Card className="w-full max-w-md shadow-lg rounded-2xl">
           <CardContent className="p-8 text-center">
             <p className="text-lg">No leads found with current filters</p>
@@ -268,7 +267,7 @@ const CallingScreen: React.FC<CallingScreenProps> = ({
   const totalLeadCount = currentLeads.length;
 
   return (
-    <div className="h-screen h-[100vh] h-[100svh] bg-background flex flex-col overflow-hidden">
+    <div className="h-screen h-[100vh] h-[100dvh] bg-background flex flex-col overflow-hidden fixed inset-0">
       {/* Header */}
       <CallingHeader
         searchQuery={searchQuery}
