@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -61,6 +62,8 @@ const CallingScreen: React.FC<CallingScreenProps> = ({
   const [searchResults, setSearchResults] = useState(leads);
   const [isSearching, setIsSearching] = useState(false);
   const [showAutocomplete, setShowAutocomplete] = useState(false);
+  const [searchBasedNavigation, setSearchBasedNavigation] = useState(false);
+  const [searchBaseLeads, setSearchBaseLeads] = useState<Lead[]>([]);
 
   // Handle new CSV imports by resetting the leads data
   useEffect(() => {
@@ -77,8 +80,8 @@ const CallingScreen: React.FC<CallingScreenProps> = ({
   // Handle auto-call using the currently displayed lead
   useEffect(() => {
     if (shouldAutoCall && autoCall) {
-      const baseLeads = getBaseLeads();
-      const currentLead = baseLeads[currentIndex];
+      const currentLeads = searchBasedNavigation ? searchBaseLeads : getBaseLeads();
+      const currentLead = currentLeads[currentIndex];
       
       if (currentLead) {
         console.log('Auto-call triggered for displayed lead:', currentLead.name, currentLead.phone);
@@ -87,7 +90,7 @@ const CallingScreen: React.FC<CallingScreenProps> = ({
       
       setShouldAutoCall(false);
     }
-  }, [shouldAutoCall, autoCall, currentIndex, cardKey]);
+  }, [shouldAutoCall, autoCall, currentIndex, cardKey, searchBasedNavigation, searchBaseLeads]);
 
   useEffect(() => {
     const baseLeads = getBaseLeads();
@@ -101,12 +104,19 @@ const CallingScreen: React.FC<CallingScreenProps> = ({
     } else {
       setSearchResults(baseLeads);
       setIsSearching(false);
+      // Clear search-based navigation when search is cleared
+      if (searchBasedNavigation) {
+        setSearchBasedNavigation(false);
+        setSearchBaseLeads([]);
+      }
     }
   }, [searchQuery, leadsData, timezoneFilter, callFilter]);
 
   const clearSearch = () => {
     setSearchQuery('');
     setShowAutocomplete(false);
+    setSearchBasedNavigation(false);
+    setSearchBaseLeads([]);
   };
 
   const handleSearchFocus = () => {
@@ -118,13 +128,68 @@ const CallingScreen: React.FC<CallingScreenProps> = ({
   };
 
   const handleLeadSelect = (lead: Lead) => {
-    selectLead(lead);
+    // Set up search-based navigation
+    const currentSearchResults = searchResults;
+    const leadIndexInSearch = currentSearchResults.findIndex(l => 
+      l.name === lead.name && l.phone === lead.phone
+    );
+    
+    if (leadIndexInSearch !== -1) {
+      setSearchBasedNavigation(true);
+      setSearchBaseLeads(currentSearchResults);
+      selectLead(lead);
+      // Update current index to match position in search results
+      // The selectLead function will handle finding the lead in the full filtered list
+      // but we need to track which search result we're at for navigation
+    }
+    
     setSearchQuery('');
     setShowAutocomplete(false);
   };
 
-  const baseLeads = getBaseLeads();
-  const currentLead = baseLeads[currentIndex];
+  const handleNextWrapper = () => {
+    if (searchBasedNavigation && searchBaseLeads.length > 0) {
+      // Navigate within search results
+      const currentLeads = searchBaseLeads;
+      const currentLead = currentLeads[currentIndex];
+      const nextIndex = (currentIndex + 1) % currentLeads.length;
+      const nextLead = currentLeads[nextIndex];
+      
+      if (nextLead) {
+        selectLead(nextLead);
+      }
+    } else {
+      handleNext();
+    }
+    
+    // Set flag to trigger auto-call after navigation
+    if (autoCall) {
+      setShouldAutoCall(true);
+    }
+  };
+
+  const handlePreviousWrapper = () => {
+    if (searchBasedNavigation && searchBaseLeads.length > 0) {
+      // Navigate within search results
+      const currentLeads = searchBaseLeads;
+      const prevIndex = currentIndex === 0 ? currentLeads.length - 1 : currentIndex - 1;
+      const prevLead = currentLeads[prevIndex];
+      
+      if (prevLead) {
+        selectLead(prevLead);
+      }
+    } else {
+      handlePrevious();
+    }
+  };
+
+  // Get the current navigation context
+  const getCurrentLeads = () => {
+    return searchBasedNavigation ? searchBaseLeads : getBaseLeads();
+  };
+
+  const currentLeads = getCurrentLeads();
+  const currentLead = currentLeads[currentIndex];
   
   if (leadsData.length === 0) {
     return (
@@ -159,6 +224,8 @@ const CallingScreen: React.FC<CallingScreenProps> = ({
                   toggleTimezoneFilter();
                   toggleCallFilter();
                   setSearchQuery('');
+                  setSearchBasedNavigation(false);
+                  setSearchBaseLeads([]);
                 }} 
                 className="w-full rounded-xl"
               >
@@ -174,7 +241,7 @@ const CallingScreen: React.FC<CallingScreenProps> = ({
     );
   }
 
-  const totalLeadCount = baseLeads.length;
+  const totalLeadCount = currentLeads.length;
   
   return (
     <div className="h-screen h-[100vh] h-[100svh] bg-background flex flex-col overflow-hidden">
@@ -222,7 +289,7 @@ const CallingScreen: React.FC<CallingScreenProps> = ({
 
       {/* Main Content with consistent spacing */}
       <div className="flex-1 flex items-start justify-center pt-3 p-4 min-h-0 px-6">
-        <div className="w-full max-w-sm space-y-2">
+        <div className="w-full max-w-sm space-y-1">
           {/* Filter Buttons */}
           <FilterButtons
             timezoneFilter={timezoneFilter}
@@ -250,10 +317,10 @@ const CallingScreen: React.FC<CallingScreenProps> = ({
           {/* Navigation Controls */}
           <div className="pt-4">
             <NavigationControls
-              onPrevious={handlePrevious}
-              onNext={handleNext}
-              canGoPrevious={historyIndex > 0}
-              canGoNext={baseLeads.length > 1}
+              onPrevious={handlePreviousWrapper}
+              onNext={handleNextWrapper}
+              canGoPrevious={currentLeads.length > 1}
+              canGoNext={currentLeads.length > 1}
             />
           </div>
         </div>
