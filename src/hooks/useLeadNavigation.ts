@@ -157,6 +157,7 @@ export const useLeadNavigation = (initialLeads: Lead[]) => {
   };
 
   const handleCountdownCompleteWrapper = () => {
+    // This is no longer needed as countdown auto-completes, but keeping for compatibility
     if (currentLeadForAutoCall) {
       handleCountdownComplete(currentLeadForAutoCall);
       setCurrentLeadForAutoCall(null);

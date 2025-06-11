@@ -102,7 +102,7 @@ const FilterButtons: React.FC<FilterButtonsProps> = ({
               style={{ WebkitTapHighlightColor: 'transparent' }}
               title="Call delay in seconds"
             >
-              {isCountdownActive ? countdownTime : `${callDelay}s`}
+              {isCountdownActive ? countdownTime : callDelay}
             </button>
           )}
         </div>
