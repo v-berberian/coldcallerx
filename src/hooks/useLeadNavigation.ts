@@ -53,7 +53,7 @@ export const useLeadNavigation = (initialLeads: Lead[]) => {
 
   const { getBaseLeads } = useLeadFiltering(leadsData, timezoneFilter, callFilter);
 
-  const { isAutoCallInProgress, isCountdownActive, countdownTime, executeAutoCall, handleCountdownComplete } = useAutoCall(makeCall, callDelay);
+  const { isAutoCallInProgress, isCountdownActive, countdownTime, executeAutoCall, handleCountdownComplete, resetAutoCall } = useAutoCall(makeCall, callDelay);
 
   const { handleNext, handlePrevious, selectLead } = useNavigation(
     currentIndex,
@@ -144,10 +144,16 @@ export const useLeadNavigation = (initialLeads: Lead[]) => {
     setShownLeadsInShuffle(new Set()); // Reset when changing timezone filter
   };
 
-  // Enhanced toggle auto-call to NOT trigger auto-call immediately
+  // Enhanced toggle auto-call to reset countdown when disabled
   const toggleAutoCallWrapper = () => {
+    const wasAutoCallOn = autoCall;
     toggleAutoCall();
-    // Do NOT set shouldAutoCall to true here - only on navigation
+    
+    // If turning auto-call OFF, reset any active countdown
+    if (wasAutoCallOn) {
+      resetAutoCall();
+      console.log('Auto-call disabled, resetting countdown');
+    }
   };
 
   // Function to reset leads data (for CSV import)

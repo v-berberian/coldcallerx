@@ -48,6 +48,14 @@ export const useAutoCall = (
     }
   };
 
+  const resetAutoCall = () => {
+    console.log('AUTO-CALL: Resetting countdown and stopping auto-call');
+    setIsCountdownActive(false);
+    setIsAutoCallInProgress(false);
+    setCountdownTime(0);
+    setPendingLead(null);
+  };
+
   // Handle countdown timer
   useEffect(() => {
     if (!isCountdownActive || !pendingLead) return;
@@ -92,6 +100,7 @@ export const useAutoCall = (
     isCountdownActive,
     countdownTime,
     executeAutoCall,
-    handleCountdownComplete
+    handleCountdownComplete,
+    resetAutoCall
   };
 };
