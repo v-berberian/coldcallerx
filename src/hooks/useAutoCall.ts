@@ -17,9 +17,12 @@ export const useAutoCall = (
       return;
     }
     
-    console.log(`AUTO-CALL: Starting countdown for ${lead.name} ${lead.phone} with ${callDelay}s delay`);
+    // Generate random delay between 15-22 seconds
+    const randomDelay = Math.floor(Math.random() * 8) + 15; // 15 to 22 seconds
     
-    if (callDelay === 0) {
+    console.log(`AUTO-CALL: Starting countdown for ${lead.name} ${lead.phone} with ${randomDelay}s delay`);
+    
+    if (randomDelay === 0) {
       // No delay, make call immediately
       setIsAutoCallInProgress(true);
       makeCall(lead, false);
@@ -27,11 +30,11 @@ export const useAutoCall = (
         setIsAutoCallInProgress(false);
       }, 500);
     } else {
-      // Start countdown
+      // Start countdown with random delay
       setPendingLead(lead);
       setIsCountdownActive(true);
       setIsAutoCallInProgress(true);
-      setCountdownTime(callDelay);
+      setCountdownTime(randomDelay);
     }
   };
 
