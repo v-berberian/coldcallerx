@@ -39,9 +39,18 @@ const FilterButtons: React.FC<FilterButtonsProps> = ({
 }) => {
   const longTapTimerRef = useRef<NodeJS.Timeout | null>(null);
   const [isLongTapping, setIsLongTapping] = useState(false);
+  const touchStartTimeRef = useRef<number>(0);
 
-  const handleAutoCallMouseDown = () => {
+  const clearLongTapTimer = () => {
+    if (longTapTimerRef.current) {
+      clearTimeout(longTapTimerRef.current);
+      longTapTimerRef.current = null;
+    }
+  };
+
+  const handleAutoCallStart = () => {
     setIsLongTapping(false);
+    touchStartTimeRef.current = Date.now();
     
     // Only start long tap timer if auto call is enabled and countdown is not active
     if (autoCall && !isCountdownActive) {
@@ -52,25 +61,20 @@ const FilterButtons: React.FC<FilterButtonsProps> = ({
     }
   };
 
-  const handleAutoCallMouseUp = () => {
-    if (longTapTimerRef.current) {
-      clearTimeout(longTapTimerRef.current);
-      longTapTimerRef.current = null;
-    }
+  const handleAutoCallEnd = () => {
+    const touchDuration = Date.now() - touchStartTimeRef.current;
+    clearLongTapTimer();
     
-    // If it was a long tap, don't toggle auto call
-    if (!isLongTapping) {
+    // If it was a short tap (less than 500ms) and not a long tap, toggle auto call
+    if (touchDuration < 500 && !isLongTapping) {
       onToggleAutoCall();
     }
     
     setIsLongTapping(false);
   };
 
-  const handleAutoCallMouseLeave = () => {
-    if (longTapTimerRef.current) {
-      clearTimeout(longTapTimerRef.current);
-      longTapTimerRef.current = null;
-    }
+  const handleAutoCallLeave = () => {
+    clearLongTapTimer();
     setIsLongTapping(false);
   };
 
@@ -147,11 +151,12 @@ const FilterButtons: React.FC<FilterButtonsProps> = ({
         </div>
         <div className="flex-1 relative flex items-center justify-center">
           <button 
-            onMouseDown={handleAutoCallMouseDown}
-            onMouseUp={handleAutoCallMouseUp}
-            onMouseLeave={handleAutoCallMouseLeave}
-            onTouchStart={handleAutoCallMouseDown}
-            onTouchEnd={handleAutoCallMouseUp}
+            onMouseDown={handleAutoCallStart}
+            onMouseUp={handleAutoCallEnd}
+            onMouseLeave={handleAutoCallLeave}
+            onTouchStart={handleAutoCallStart}
+            onTouchEnd={handleAutoCallEnd}
+            onTouchCancel={handleAutoCallLeave}
             className={`text-sm font-medium py-2 px-2 rounded transition-all duration-200 select-none ${
               autoCall ? 'text-green-600 animate-button-switch' : 'text-muted-foreground'
             }`} 
