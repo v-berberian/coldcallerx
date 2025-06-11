@@ -64,10 +64,10 @@ const LeadCard: React.FC<LeadCardProps> = ({
               {(lead.called || 0) > 0 && (
                 <button
                   onClick={onResetCallCount}
-                  className="ml-2 p-1 hover:bg-muted rounded transition-colors"
+                  className="ml-2 p-1 bg-muted rounded transition-colors"
                   title="Reset call count"
                 >
-                  <X className="h-3 w-3 text-muted-foreground hover:text-foreground" />
+                  <X className="h-3 w-3 text-muted-foreground" />
                 </button>
               )}
             </div>
@@ -83,7 +83,7 @@ const LeadCard: React.FC<LeadCardProps> = ({
         </div>
 
         {/* Main Call Button - ensure it's always green */}
-        <Button onClick={onCall} size="lg" className="w-full h-16 text-lg font-semibold bg-green-600 hover:bg-green-700 text-white rounded-2xl shadow-lg">
+        <Button onClick={onCall} size="lg" className="w-full h-16 text-lg font-semibold bg-green-600 text-white rounded-2xl shadow-lg">
           Call
         </Button>
       </CardContent>

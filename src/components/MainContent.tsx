@@ -60,9 +60,10 @@ const MainContent: React.FC<MainContentProps> = ({
   isCountdownActive,
   countdownTime
 }) => {
-  const getDelayDisplayType = (): 'timer' | 'rocket' | '5s' => {
+  const getDelayDisplayType = (): 'timer' | 'rocket' | '5s' | '10s' => {
     if (callDelay === 0) return 'rocket';
     if (callDelay === 5) return '5s';
+    if (callDelay === 10) return '10s';
     return 'timer';
   };
 

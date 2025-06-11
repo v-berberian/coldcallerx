@@ -4,8 +4,8 @@ import { useState } from 'react';
 export const useCallDelay = () => {
   const [callDelay, setCallDelay] = useState(15); // Start with random delay (15 represents random)
   
-  // Delay options: 15 = random (15-22s), 0 = no delay, 5 = 5 seconds
-  const delayOptions = [15, 0, 5];
+  // Delay options: 15 = random (15-22s), 0 = no delay, 5 = 5 seconds, 10 = 10 seconds
+  const delayOptions = [15, 0, 5, 10];
   
   const toggleCallDelay = () => {
     const currentIndex = delayOptions.indexOf(callDelay);
@@ -20,6 +20,7 @@ export const useCallDelay = () => {
   const getDelayDisplayType = () => {
     if (callDelay === 0) return 'rocket';
     if (callDelay === 5) return '5s';
+    if (callDelay === 10) return '10s';
     return 'timer';
   };
 

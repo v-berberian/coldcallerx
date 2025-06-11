@@ -53,7 +53,7 @@ export const useLeadNavigation = (initialLeads: Lead[]) => {
 
   const { getBaseLeads } = useLeadFiltering(leadsData, timezoneFilter, callFilter);
 
-  const { isAutoCallInProgress, isCountdownActive, countdownTime, executeAutoCall, handleCountdownComplete, resetAutoCall } = useAutoCall(makeCall, callDelay);
+  const { isAutoCallInProgress, isCountdownActive, countdownTime, executeAutoCall, handleCountdownComplete, resetAutoCall, shouldBlockNavigation } = useAutoCall(makeCall, callDelay);
 
   const { handleNext, handlePrevious, selectLead } = useNavigation(
     currentIndex,
@@ -63,7 +63,7 @@ export const useLeadNavigation = (initialLeads: Lead[]) => {
     callFilter,
     isFilterChanging,
     isAutoCallInProgress,
-    isCountdownActive, // Pass countdown state separately
+    shouldBlockNavigation, // Pass the function that checks if navigation should be blocked
     // Only mark as called if a call was made to current lead
     (lead: Lead) => {
       if (callMadeToCurrentLead) {
@@ -104,6 +104,12 @@ export const useLeadNavigation = (initialLeads: Lead[]) => {
   const handlePreviousWrapper = () => {
     const baseLeads = getBaseLeads();
     if (baseLeads.length === 0) return;
+    
+    // Check if navigation should be blocked
+    if (shouldBlockNavigation()) {
+      console.log('Previous navigation blocked due to countdown');
+      return;
+    }
     
     // Simple list-based previous navigation
     const prevIndex = currentIndex === 0 ? baseLeads.length - 1 : currentIndex - 1;

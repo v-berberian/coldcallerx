@@ -16,7 +16,7 @@ interface FilterButtonsProps {
   onToggleAutoCall: () => void;
   onToggleCallDelay: () => void;
   onResetAllCalls: () => void;
-  getDelayDisplayType?: () => 'timer' | 'rocket' | '5s';
+  getDelayDisplayType?: () => 'timer' | 'rocket' | '5s' | '10s';
   onResetCallDelay?: () => void;
 }
 
@@ -72,6 +72,8 @@ const FilterButtons: React.FC<FilterButtonsProps> = ({
         return <Rocket size={14} />;
       case '5s':
         return '5s';
+      case '10s':
+        return '10s';
       default:
         return <Timer size={14} />;
     }
@@ -105,7 +107,7 @@ const FilterButtons: React.FC<FilterButtonsProps> = ({
           {callFilter === 'UNCALLED' && (
             <button 
               onClick={onResetAllCalls} 
-              className="text-muted-foreground hover:text-foreground transition-colors p-1 min-w-[24px] h-[24px] flex items-center justify-center" 
+              className="text-muted-foreground transition-colors p-1 min-w-[24px] h-[24px] flex items-center justify-center" 
               title="Reset all call counts"
             >
               <RotateCcw size={14} />

@@ -25,6 +25,9 @@ export const useAutoCall = (
     } else if (callDelay === 5) {
       // 5 second mode - fixed 5 second delay
       actualDelay = 5;
+    } else if (callDelay === 10) {
+      // 10 second mode - fixed 10 second delay
+      actualDelay = 10;
     } else {
       // Timer mode (callDelay === 15) - random delay between 15-22 seconds
       actualDelay = Math.floor(Math.random() * 8) + 15; // 15 to 22 seconds
@@ -54,6 +57,11 @@ export const useAutoCall = (
     setIsAutoCallInProgress(false);
     setCountdownTime(0);
     setPendingLead(null);
+  };
+
+  // Check if navigation should be blocked (when countdown is 1 second or less)
+  const shouldBlockNavigation = () => {
+    return isCountdownActive && countdownTime <= 1;
   };
 
   // Handle countdown timer
@@ -101,6 +109,7 @@ export const useAutoCall = (
     countdownTime,
     executeAutoCall,
     handleCountdownComplete,
-    resetAutoCall
+    resetAutoCall,
+    shouldBlockNavigation
   };
 };

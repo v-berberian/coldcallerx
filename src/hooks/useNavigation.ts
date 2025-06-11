@@ -10,7 +10,7 @@ export const useNavigation = (
   callFilter: CallFilter,
   isFilterChanging: boolean,
   isAutoCallInProgress: boolean,
-  isCountdownActive: boolean,
+  shouldBlockNavigation: boolean,
   markLeadAsCalledOnNavigation: (lead: Lead) => void,
   shownLeadsInShuffle: Set<string>,
   setShownLeadsInShuffle: (shown: Set<string>) => void
@@ -18,9 +18,14 @@ export const useNavigation = (
   const { getNextLeadInSequential, getNextLeadInShuffle } = useLeadSelection();
 
   const handleNext = (baseLeads: Lead[]) => {
-    // Only prevent navigation during filter changes, allow navigation during countdown
+    // Block navigation during filter changes or when countdown is 1 second or less
     if (isFilterChanging) {
       console.log('Skipping navigation because filters are changing');
+      return;
+    }
+    
+    if (shouldBlockNavigation) {
+      console.log('Skipping navigation because countdown is less than 1 second');
       return;
     }
     
@@ -59,9 +64,14 @@ export const useNavigation = (
   };
 
   const handlePrevious = () => {
-    // Only prevent navigation during filter changes, allow navigation during countdown
+    // Block navigation during filter changes or when countdown is 1 second or less
     if (isFilterChanging) {
       console.log('Skipping previous navigation because filters are changing');
+      return;
+    }
+    
+    if (shouldBlockNavigation) {
+      console.log('Skipping previous navigation because countdown is less than 1 second');
       return;
     }
     
@@ -70,9 +80,14 @@ export const useNavigation = (
   };
 
   const selectLead = (lead: Lead, baseLeads: Lead[], allLeads: Lead[]) => {
-    // Only prevent selection during filter changes, allow selection during countdown
+    // Block selection during filter changes or when countdown is 1 second or less
     if (isFilterChanging) {
       console.log('Skipping lead selection because filters are changing');
+      return;
+    }
+    
+    if (shouldBlockNavigation) {
+      console.log('Skipping lead selection because countdown is less than 1 second');
       return;
     }
     
