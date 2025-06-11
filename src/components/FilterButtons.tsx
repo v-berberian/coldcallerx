@@ -1,6 +1,6 @@
 
-import React from 'react';
-import { RotateCcw, Timer } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { RotateCcw, Timer, Rocket } from 'lucide-react';
 
 interface FilterButtonsProps {
   timezoneFilter: 'ALL' | 'EST_CST';
@@ -16,6 +16,7 @@ interface FilterButtonsProps {
   onToggleAutoCall: () => void;
   onToggleCallDelay: () => void;
   onResetAllCalls: () => void;
+  getDelayDisplayType?: () => 'timer' | 'rocket' | '5s';
 }
 
 const FilterButtons: React.FC<FilterButtonsProps> = ({
@@ -31,8 +32,36 @@ const FilterButtons: React.FC<FilterButtonsProps> = ({
   onToggleShuffle,
   onToggleAutoCall,
   onToggleCallDelay,
-  onResetAllCalls
+  onResetAllCalls,
+  getDelayDisplayType
 }) => {
+  const [showTimerIcon, setShowTimerIcon] = useState(autoCall);
+
+  // Reset/show timer icon when auto-call is toggled
+  useEffect(() => {
+    setShowTimerIcon(autoCall);
+  }, [autoCall]);
+
+  const renderTimerContent = () => {
+    if (isCountdownActive) {
+      return countdownTime;
+    }
+
+    if (!getDelayDisplayType) {
+      return <Timer size={14} />;
+    }
+
+    const displayType = getDelayDisplayType();
+    switch (displayType) {
+      case 'rocket':
+        return <Rocket size={14} />;
+      case '5s':
+        return '5s';
+      default:
+        return <Timer size={14} />;
+    }
+  };
+
   return (
     <div className="space-y-1 my-[11px]">
       {/* First row: Timezone and Call filters */}
@@ -93,16 +122,14 @@ const FilterButtons: React.FC<FilterButtonsProps> = ({
           >
             Auto Call
           </button>
-          {autoCall && (
+          {autoCall && showTimerIcon && (
             <button 
-              onClick={onToggleCallDelay} 
-              className={`absolute right-0 text-green-600 text-xs font-medium px-2 py-1 rounded min-w-[32px] flex items-center justify-center ${
-                isCountdownActive ? 'bg-green-600/10 border border-green-600/30' : ''
-              }`}
+              onClick={onToggleCallDelay}
+              className="absolute right-0 text-green-600 text-xs font-medium px-2 py-1 rounded min-w-[32px] flex items-center justify-center select-none"
               style={{ WebkitTapHighlightColor: 'transparent' }}
-              title="Auto call timer"
+              title="Click to change delay mode"
             >
-              {isCountdownActive ? countdownTime : <Timer size={14} />}
+              {renderTimerContent()}
             </button>
           )}
         </div>

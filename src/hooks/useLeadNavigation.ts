@@ -39,7 +39,7 @@ export const useLeadNavigation = (initialLeads: Lead[]) => {
     setFilterChanging
   } = useFilters();
 
-  const { callDelay, toggleCallDelay } = useCallDelay();
+  const { callDelay, toggleCallDelay, getDelayDisplayType } = useCallDelay();
 
   const {
     leadsData,
@@ -181,6 +181,7 @@ export const useLeadNavigation = (initialLeads: Lead[]) => {
     setCurrentLeadForAutoCall,
     isCountdownActive,
     getBaseLeads,
+    getDelayDisplayType,
     makeCall: makeCallWrapper, // Use the wrapper that tracks call state
     executeAutoCall,
     handleCountdownComplete: handleCountdownCompleteWrapper,
