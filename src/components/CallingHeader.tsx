@@ -34,15 +34,23 @@ const CallingHeader: React.FC<CallingHeaderProps> = ({
   onLeadsImported
 }) => {
   return (
-    <div className="bg-background border-b border-border p-4 pt-safe flex-shrink-0" style={{ paddingTop: 'max(1rem, env(safe-area-inset-top))' }}>
+    <div 
+      className="bg-white/10 backdrop-blur-xl border-b border-white/20 p-4 pt-safe flex-shrink-0" 
+      style={{ 
+        paddingTop: 'max(1rem, env(safe-area-inset-top))',
+        background: 'rgba(255, 255, 255, 0.1)',
+        backdropFilter: 'blur(20px)',
+        WebkitBackdropFilter: 'blur(20px)'
+      }}
+    >
       <div className="flex items-center justify-between mb-4">
         <CSVImporter onLeadsImported={onLeadsImported} />
         
         <div className="flex items-center space-x-3">
           <h1 className="text-2xl font-bold">
-            <span className="text-blue-500">Cold</span>
-            <span className="text-foreground">Caller </span>
-            <span className="text-blue-500">X</span>
+            <span className="text-blue-400 drop-shadow-lg">Cold</span>
+            <span className="text-white drop-shadow-lg">Caller </span>
+            <span className="text-blue-400 drop-shadow-lg">X</span>
           </h1>
         </div>
         
