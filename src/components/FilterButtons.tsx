@@ -41,6 +41,11 @@ const FilterButtons: React.FC<FilterButtonsProps> = ({
   const [isLongTapping, setIsLongTapping] = useState(false);
 
   const handleAutoCallMouseDown = () => {
+    // If countdown is active, allow immediate toggle without long tap
+    if (isCountdownActive) {
+      return;
+    }
+    
     setIsLongTapping(false);
     longTapTimerRef.current = setTimeout(() => {
       setIsLongTapping(true);
@@ -54,8 +59,8 @@ const FilterButtons: React.FC<FilterButtonsProps> = ({
       longTapTimerRef.current = null;
     }
     
-    if (!isLongTapping) {
-      // Regular tap - toggle auto call
+    if (isCountdownActive || !isLongTapping) {
+      // If countdown is active or it's a regular tap, toggle auto call
       onToggleAutoCall();
     }
     setIsLongTapping(false);
@@ -137,7 +142,7 @@ const FilterButtons: React.FC<FilterButtonsProps> = ({
             <button 
               onClick={onToggleCallDelay} 
               className={`absolute right-0 text-green-600 text-xs font-medium px-2 py-1 rounded min-w-[32px] flex items-center justify-center ${
-                isCountdownActive ? 'bg-green-600/10 border border-green-600/30' : ''
+                isCountdownActive ? 'bg-green-600/10' : ''
               }`}
               style={{ WebkitTapHighlightColor: 'transparent' }}
               title="Auto call timer"

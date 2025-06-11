@@ -11,6 +11,7 @@ export const useAutoCall = (
   const [isCountdownActive, setIsCountdownActive] = useState(false);
   const [countdownTime, setCountdownTime] = useState(callDelay);
   const [pendingLead, setPendingLead] = useState<Lead | null>(null);
+  const [intervalRef, setIntervalRef] = useState<NodeJS.Timeout | null>(null);
 
   const executeAutoCall = (lead: Lead) => {
     if (!lead) {
@@ -41,14 +42,33 @@ export const useAutoCall = (
     setCountdownTime(randomDelay);
   };
 
+  const cancelAutoCall = () => {
+    console.log('AUTO-CALL: Canceling auto-call');
+    if (intervalRef) {
+      clearInterval(intervalRef);
+      setIntervalRef(null);
+    }
+    setIsCountdownActive(false);
+    setIsAutoCallInProgress(false);
+    setPendingLead(null);
+    setCountdownTime(callDelay);
+  };
+
   // Handle countdown timer
   useEffect(() => {
-    if (!isCountdownActive || !pendingLead) return;
+    if (!isCountdownActive || !pendingLead) {
+      if (intervalRef) {
+        clearInterval(intervalRef);
+        setIntervalRef(null);
+      }
+      return;
+    }
 
     const interval = setInterval(() => {
       setCountdownTime((prev) => {
         if (prev <= 1) {
           clearInterval(interval);
+          setIntervalRef(null);
           setIsCountdownActive(false);
           
           // Make the call when countdown reaches 0
@@ -67,7 +87,11 @@ export const useAutoCall = (
       });
     }, 1000);
 
-    return () => clearInterval(interval);
+    setIntervalRef(interval);
+
+    return () => {
+      clearInterval(interval);
+    };
   }, [isCountdownActive, pendingLead, makeCall]);
 
   const handleCountdownComplete = (lead: Lead) => {
@@ -85,6 +109,7 @@ export const useAutoCall = (
     isCountdownActive,
     countdownTime,
     executeAutoCall,
-    handleCountdownComplete
+    handleCountdownComplete,
+    cancelAutoCall
   };
 };

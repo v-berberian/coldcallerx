@@ -55,7 +55,14 @@ export const useLeadNavigation = (initialLeads: Lead[]) => {
 
   const { getBaseLeads } = useLeadFiltering(leadsData, timezoneFilter, callFilter);
 
-  const { isAutoCallInProgress, isCountdownActive, countdownTime, executeAutoCall, handleCountdownComplete } = useAutoCall(makeCall, callDelay, showTimer);
+  const { 
+    isAutoCallInProgress, 
+    isCountdownActive, 
+    countdownTime, 
+    executeAutoCall, 
+    handleCountdownComplete,
+    cancelAutoCall
+  } = useAutoCall(makeCall, callDelay, showTimer);
 
   const { handleNext, handlePrevious, selectLead } = useNavigation(
     currentIndex,
@@ -91,12 +98,18 @@ export const useLeadNavigation = (initialLeads: Lead[]) => {
 
   const handleNextWrapper = () => {
     const baseLeads = getBaseLeads();
+    
+    // Cancel any ongoing auto-call when switching leads
+    if (isCountdownActive) {
+      cancelAutoCall();
+    }
+    
     handleNext(baseLeads);
     
     // Reset call state when navigating
     setCallMadeToCurrentLead(false);
     
-    // Set flag to trigger auto-call after navigation
+    // Set flag to trigger auto-call after navigation if auto-call is enabled
     if (autoCall) {
       setShouldAutoCall(true);
     }
@@ -106,6 +119,11 @@ export const useLeadNavigation = (initialLeads: Lead[]) => {
     const baseLeads = getBaseLeads();
     if (baseLeads.length === 0) return;
     
+    // Cancel any ongoing auto-call when switching leads
+    if (isCountdownActive) {
+      cancelAutoCall();
+    }
+    
     // Simple list-based previous navigation
     const prevIndex = currentIndex === 0 ? baseLeads.length - 1 : currentIndex - 1;
     console.log('Previous navigation: from index', currentIndex, 'to index', prevIndex);
@@ -113,13 +131,29 @@ export const useLeadNavigation = (initialLeads: Lead[]) => {
     
     // Reset call state when navigating
     setCallMadeToCurrentLead(false);
+    
+    // Set flag to trigger auto-call after navigation if auto-call is enabled
+    if (autoCall) {
+      setShouldAutoCall(true);
+    }
   };
 
   const selectLeadWrapper = (lead: Lead) => {
     const baseLeads = getBaseLeads();
+    
+    // Cancel any ongoing auto-call when switching leads
+    if (isCountdownActive) {
+      cancelAutoCall();
+    }
+    
     selectLead(lead, baseLeads, leadsData);
     // Reset call state when selecting a new lead
     setCallMadeToCurrentLead(false);
+    
+    // Set flag to trigger auto-call after navigation if auto-call is enabled
+    if (autoCall) {
+      setShouldAutoCall(true);
+    }
   };
 
   // Enhanced make call function that tracks call state but doesn't mark as called immediately
@@ -145,6 +179,20 @@ export const useLeadNavigation = (initialLeads: Lead[]) => {
     setShownLeadsInShuffle(new Set()); // Reset when changing timezone filter
   };
 
+  // Enhanced toggle auto call to cancel countdown if active
+  const toggleAutoCallWrapper = () => {
+    if (isCountdownActive) {
+      // If countdown is active, cancel it and turn off auto-call
+      cancelAutoCall();
+      if (autoCall) {
+        toggleAutoCall(); // Turn off auto-call
+      }
+    } else {
+      // Normal toggle behavior
+      toggleAutoCall();
+    }
+  };
+
   // Function to reset leads data (for CSV import)
   const resetLeadsData = (newLeads: Lead[]) => {
     const formattedLeads = newLeads.map(lead => ({
@@ -156,6 +204,10 @@ export const useLeadNavigation = (initialLeads: Lead[]) => {
     resetNavigation(0);
     setShownLeadsInShuffle(new Set()); // Reset shown leads on new import
     setCallMadeToCurrentLead(false); // Reset call state on new import
+    // Cancel any ongoing auto-call on new import
+    if (isCountdownActive) {
+      cancelAutoCall();
+    }
   };
 
   const handleCountdownCompleteWrapper = () => {
@@ -195,7 +247,7 @@ export const useLeadNavigation = (initialLeads: Lead[]) => {
     toggleTimezoneFilter: toggleTimezoneFilterWrapper,
     toggleCallFilter: toggleCallFilterWrapper,
     toggleShuffle: toggleShuffleWrapper,
-    toggleAutoCall,
+    toggleAutoCall: toggleAutoCallWrapper, // Use the enhanced version
     toggleCallDelay,
     resetLeadsData,
     countdownTime
