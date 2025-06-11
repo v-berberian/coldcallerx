@@ -1,4 +1,4 @@
-import { useState } from 'react';
+
 import { Lead } from '../types/lead';
 import { useNavigationState } from './useNavigationState';
 import { useFilters } from './useFilters';
@@ -8,12 +8,23 @@ import { useAutoCall } from './useAutoCall';
 import { useCallDelay } from './useCallDelay';
 import { useNavigation } from './useNavigation';
 import { useFilterChangeEffects } from './useFilterChangeEffects';
+import { useLeadNavigationState } from './useLeadNavigationState';
+import { useLeadNavigationActions } from './useLeadNavigationActions';
+import { useLeadNavigationEffects } from './useLeadNavigationEffects';
 
 export const useLeadNavigation = (initialLeads: Lead[]) => {
-  const [shouldAutoCall, setShouldAutoCall] = useState(false);
-  const [shownLeadsInShuffle, setShownLeadsInShuffle] = useState<Set<string>>(new Set());
-  const [callMadeToCurrentLead, setCallMadeToCurrentLead] = useState(false);
-  const [currentLeadForAutoCall, setCurrentLeadForAutoCall] = useState<Lead | null>(null);
+  const {
+    shouldAutoCall,
+    setShouldAutoCall,
+    shownLeadsInShuffle,
+    setShownLeadsInShuffle,
+    callMadeToCurrentLead,
+    setCallMadeToCurrentLead,
+    currentLeadForAutoCall,
+    setCurrentLeadForAutoCall,
+    resetShownLeads,
+    resetCallState
+  } = useLeadNavigationState();
 
   const {
     currentIndex,
@@ -63,7 +74,7 @@ export const useLeadNavigation = (initialLeads: Lead[]) => {
     callFilter,
     isFilterChanging,
     isAutoCallInProgress,
-    shouldBlockNavigation, // Pass the function that checks if navigation should be blocked
+    shouldBlockNavigation(),
     // Only mark as called if a call was made to current lead
     (lead: Lead) => {
       if (callMadeToCurrentLead) {
@@ -73,6 +84,37 @@ export const useLeadNavigation = (initialLeads: Lead[]) => {
     shownLeadsInShuffle,
     setShownLeadsInShuffle
   );
+
+  const { handleNextWrapper, handlePreviousWrapper, selectLeadWrapper } = useLeadNavigationActions({
+    currentIndex,
+    updateNavigation,
+    resetNavigation,
+    shuffleMode,
+    callFilter,
+    isFilterChanging,
+    isAutoCallInProgress,
+    shouldBlockNavigation: shouldBlockNavigation(),
+    markLeadAsCalledOnNavigation,
+    shownLeadsInShuffle,
+    setShownLeadsInShuffle,
+    handleNext,
+    handlePrevious,
+    selectLead,
+    setCallMadeToCurrentLead,
+    autoCall,
+    setShouldAutoCall
+  });
+
+  const { makeCallWrapper, handleCountdownCompleteWrapper } = useLeadNavigationEffects({
+    makeCall,
+    markLeadAsCalledOnNavigation,
+    setCallMadeToCurrentLead,
+    executeAutoCall,
+    handleCountdownComplete,
+    resetAutoCall,
+    currentLeadForAutoCall,
+    setCurrentLeadForAutoCall
+  });
 
   useFilterChangeEffects(
     leadsData,
@@ -88,66 +130,20 @@ export const useLeadNavigation = (initialLeads: Lead[]) => {
     resetNavigation
   );
 
-  const handleNextWrapper = () => {
-    const baseLeads = getBaseLeads();
-    handleNext(baseLeads);
-    
-    // Reset call state when navigating
-    setCallMadeToCurrentLead(false);
-    
-    // Set flag to trigger auto-call after navigation
-    if (autoCall) {
-      setShouldAutoCall(true);
-    }
-  };
-
-  const handlePreviousWrapper = () => {
-    const baseLeads = getBaseLeads();
-    if (baseLeads.length === 0) return;
-    
-    // Check if navigation should be blocked
-    if (shouldBlockNavigation()) {
-      console.log('Previous navigation blocked due to countdown');
-      return;
-    }
-    
-    // Simple list-based previous navigation
-    const prevIndex = currentIndex === 0 ? baseLeads.length - 1 : currentIndex - 1;
-    console.log('Previous navigation: from index', currentIndex, 'to index', prevIndex);
-    updateNavigation(prevIndex);
-    
-    // Reset call state when navigating
-    setCallMadeToCurrentLead(false);
-  };
-
-  const selectLeadWrapper = (lead: Lead) => {
-    const baseLeads = getBaseLeads();
-    selectLead(lead, baseLeads, leadsData);
-    // Reset call state when selecting a new lead
-    setCallMadeToCurrentLead(false);
-  };
-
-  // Enhanced make call function that tracks call state but doesn't mark as called immediately
-  const makeCallWrapper = (lead: Lead) => {
-    makeCall(lead, false); // Don't mark as called immediately
-    setCallMadeToCurrentLead(true); // Track that a call was made
-    console.log('Call made to lead:', lead.name, 'marked for call tracking on navigation');
-  };
-
   // Enhanced toggle functions to reset shown leads tracker
   const toggleShuffleWrapper = () => {
     toggleShuffle();
-    setShownLeadsInShuffle(new Set()); // Reset when toggling shuffle mode
+    resetShownLeads();
   };
 
   const toggleCallFilterWrapper = () => {
     toggleCallFilter();
-    setShownLeadsInShuffle(new Set()); // Reset when changing call filter
+    resetShownLeads();
   };
 
   const toggleTimezoneFilterWrapper = () => {
     toggleTimezoneFilter();
-    setShownLeadsInShuffle(new Set()); // Reset when changing timezone filter
+    resetShownLeads();
   };
 
   // Enhanced toggle auto-call to reset countdown when disabled
@@ -171,16 +167,8 @@ export const useLeadNavigation = (initialLeads: Lead[]) => {
     }));
     setLeadsData(formattedLeads);
     resetNavigation(0);
-    setShownLeadsInShuffle(new Set()); // Reset shown leads on new import
-    setCallMadeToCurrentLead(false); // Reset call state on new import
-  };
-
-  const handleCountdownCompleteWrapper = () => {
-    // This is no longer needed as countdown auto-completes, but keeping for compatibility
-    if (currentLeadForAutoCall) {
-      handleCountdownComplete(currentLeadForAutoCall);
-      setCurrentLeadForAutoCall(null);
-    }
+    resetShownLeads();
+    resetCallState();
   };
 
   return {
@@ -200,7 +188,7 @@ export const useLeadNavigation = (initialLeads: Lead[]) => {
     isCountdownActive,
     getBaseLeads,
     getDelayDisplayType,
-    makeCall: makeCallWrapper, // Use the wrapper that tracks call state
+    makeCall: makeCallWrapper,
     executeAutoCall,
     handleCountdownComplete: handleCountdownCompleteWrapper,
     handleNext: handleNextWrapper,
