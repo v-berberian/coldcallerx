@@ -144,6 +144,12 @@ export const useLeadNavigation = (initialLeads: Lead[]) => {
     setShownLeadsInShuffle(new Set()); // Reset when changing timezone filter
   };
 
+  // Enhanced toggle auto-call to NOT trigger auto-call immediately
+  const toggleAutoCallWrapper = () => {
+    toggleAutoCall();
+    // Do NOT set shouldAutoCall to true here - only on navigation
+  };
+
   // Function to reset leads data (for CSV import)
   const resetLeadsData = (newLeads: Lead[]) => {
     const formattedLeads = newLeads.map(lead => ({
@@ -193,7 +199,7 @@ export const useLeadNavigation = (initialLeads: Lead[]) => {
     toggleTimezoneFilter: toggleTimezoneFilterWrapper,
     toggleCallFilter: toggleCallFilterWrapper,
     toggleShuffle: toggleShuffleWrapper,
-    toggleAutoCall,
+    toggleAutoCall: toggleAutoCallWrapper,
     toggleCallDelay,
     resetCallDelay,
     resetLeadsData,

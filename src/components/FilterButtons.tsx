@@ -38,8 +38,6 @@ const FilterButtons: React.FC<FilterButtonsProps> = ({
   onResetCallDelay
 }) => {
   const [showTimerIcon, setShowTimerIcon] = useState(autoCall);
-  const longPressTimer = useRef<NodeJS.Timeout | null>(null);
-  const isLongPress = useRef(false);
 
   const handleAutoCallToggle = () => {
     const wasAutoCallOff = !autoCall;
