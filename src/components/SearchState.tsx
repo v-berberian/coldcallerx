@@ -15,9 +15,6 @@ export const useSearchState = ({ leads, getBaseLeads, leadsData, timezoneFilter,
   const [searchResults, setSearchResults] = useState(leads);
   const [isSearching, setIsSearching] = useState(false);
   const [showAutocomplete, setShowAutocomplete] = useState(false);
-  const [searchBasedNavigation, setSearchBasedNavigation] = useState(false);
-  const [searchBaseLeads, setSearchBaseLeads] = useState<Lead[]>([]);
-  const [searchCurrentIndex, setSearchCurrentIndex] = useState(0);
 
   useEffect(() => {
     const baseLeads = getBaseLeads();
@@ -31,20 +28,12 @@ export const useSearchState = ({ leads, getBaseLeads, leadsData, timezoneFilter,
     } else {
       setSearchResults(baseLeads);
       setIsSearching(false);
-      if (searchBasedNavigation) {
-        setSearchBasedNavigation(false);
-        setSearchBaseLeads([]);
-        setSearchCurrentIndex(0);
-      }
     }
   }, [searchQuery, leadsData, timezoneFilter, callFilter]);
 
   const clearSearch = () => {
     setSearchQuery('');
     setShowAutocomplete(false);
-    setSearchBasedNavigation(false);
-    setSearchBaseLeads([]);
-    setSearchCurrentIndex(0);
   };
 
   const handleSearchFocus = () => {
@@ -62,12 +51,6 @@ export const useSearchState = ({ leads, getBaseLeads, leadsData, timezoneFilter,
     isSearching,
     showAutocomplete,
     setShowAutocomplete,
-    searchBasedNavigation,
-    setSearchBasedNavigation,
-    searchBaseLeads,
-    setSearchBaseLeads,
-    searchCurrentIndex,
-    setSearchCurrentIndex,
     clearSearch,
     handleSearchFocus,
     handleSearchBlur

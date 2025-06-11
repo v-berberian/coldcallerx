@@ -1,3 +1,4 @@
+
 import React, { useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -54,12 +55,6 @@ const CallingScreenLogic: React.FC<CallingScreenLogicProps> = ({
     searchResults,
     showAutocomplete,
     setShowAutocomplete,
-    searchBasedNavigation,
-    setSearchBasedNavigation,
-    searchBaseLeads,
-    setSearchBaseLeads,
-    searchCurrentIndex,
-    setSearchCurrentIndex,
     clearSearch,
     handleSearchFocus,
     handleSearchBlur
@@ -92,8 +87,8 @@ const CallingScreenLogic: React.FC<CallingScreenLogicProps> = ({
   // Handle auto-call using the currently displayed lead
   useEffect(() => {
     if (shouldAutoCall && autoCall) {
-      const currentLeads = searchBasedNavigation ? searchBaseLeads : getBaseLeads();
-      const currentLead = currentLeads[searchBasedNavigation ? searchCurrentIndex : currentIndex];
+      const currentLeads = getBaseLeads();
+      const currentLead = currentLeads[currentIndex];
       
       if (currentLead) {
         console.log('Auto-call triggered for displayed lead:', currentLead.name, currentLead.phone);
@@ -103,7 +98,7 @@ const CallingScreenLogic: React.FC<CallingScreenLogicProps> = ({
       
       setShouldAutoCall(false);
     }
-  }, [shouldAutoCall, autoCall, currentIndex, searchCurrentIndex, cardKey, searchBasedNavigation, searchBaseLeads]);
+  }, [shouldAutoCall, autoCall, currentIndex, cardKey]);
 
   const handleLeadSelect = (lead: Lead) => {
     const baseLeads = getBaseLeads();
@@ -112,10 +107,6 @@ const CallingScreenLogic: React.FC<CallingScreenLogicProps> = ({
     );
     
     if (leadIndexInBaseLeads !== -1) {
-      // Clear search-based navigation and use the base leads navigation
-      setSearchBasedNavigation(false);
-      setSearchBaseLeads([]);
-      setSearchCurrentIndex(0);
       selectLead(lead);
       console.log('Selected lead from autocomplete:', lead.name, 'at base index:', leadIndexInBaseLeads);
     }
@@ -125,17 +116,7 @@ const CallingScreenLogic: React.FC<CallingScreenLogicProps> = ({
   };
 
   const handleNextWrapper = () => {
-    if (searchBasedNavigation && searchBaseLeads.length > 0) {
-      const nextIndex = (searchCurrentIndex + 1) % searchBaseLeads.length;
-      const nextLead = searchBaseLeads[nextIndex];
-      
-      if (nextLead) {
-        setSearchCurrentIndex(nextIndex);
-        selectLead(nextLead);
-      }
-    } else {
-      handleNext();
-    }
+    handleNext();
     
     if (autoCall) {
       setShouldAutoCall(true);
@@ -143,34 +124,19 @@ const CallingScreenLogic: React.FC<CallingScreenLogicProps> = ({
   };
 
   const handlePreviousWrapper = () => {
-    if (searchBasedNavigation && searchBaseLeads.length > 0) {
-      const prevIndex = searchCurrentIndex === 0 ? searchBaseLeads.length - 1 : searchCurrentIndex - 1;
-      const prevLead = searchBaseLeads[prevIndex];
-      
-      if (prevLead) {
-        setSearchCurrentIndex(prevIndex);
-        selectLead(prevLead);
-      }
-    } else {
-      handlePrevious();
-    }
+    handlePrevious();
   };
 
   // Handle manual call button click
   const handleCallClick = () => {
-    const currentLead = getCurrentLeads()[searchBasedNavigation ? searchCurrentIndex : currentIndex];
+    const currentLeads = getBaseLeads();
+    const currentLead = currentLeads[currentIndex];
     makeCall(currentLead);
     incrementDailyCallCount();
   };
 
-  // Get the current navigation context
-  const getCurrentLeads = () => {
-    return searchBasedNavigation ? searchBaseLeads : getBaseLeads();
-  };
-
-  const currentLeads = getCurrentLeads();
-  const displayIndex = searchBasedNavigation ? searchCurrentIndex : currentIndex;
-  const currentLead = currentLeads[displayIndex];
+  const currentLeads = getBaseLeads();
+  const currentLead = currentLeads[currentIndex];
   
   if (leadsData.length === 0) {
     return (
@@ -205,9 +171,6 @@ const CallingScreenLogic: React.FC<CallingScreenLogicProps> = ({
                   toggleTimezoneFilter();
                   toggleCallFilter();
                   setSearchQuery('');
-                  setSearchBasedNavigation(false);
-                  setSearchBaseLeads([]);
-                  setSearchCurrentIndex(0);
                 }} 
                 className="w-full rounded-xl"
               >
@@ -246,7 +209,7 @@ const CallingScreenLogic: React.FC<CallingScreenLogicProps> = ({
       <div className="flex-1 overflow-hidden">
         <MainContent
           currentLead={currentLead}
-          currentIndex={displayIndex}
+          currentIndex={currentIndex}
           totalCount={totalLeadCount}
           fileName={fileName}
           cardKey={cardKey}
