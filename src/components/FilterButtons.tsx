@@ -41,15 +41,16 @@ const FilterButtons: React.FC<FilterButtonsProps> = ({
   const [isLongTapping, setIsLongTapping] = useState(false);
 
   const handleAutoCallMouseDown = () => {
-    setIsLongTapping(false);
-    
-    // Only start long tap timer if auto call is enabled and countdown is not active
-    if (autoCall && !isCountdownActive) {
-      longTapTimerRef.current = setTimeout(() => {
-        setIsLongTapping(true);
-        setShowTimer(!showTimer);
-      }, 500); // 500ms for long tap
+    // If countdown is active, allow immediate toggle without long tap
+    if (isCountdownActive) {
+      return;
     }
+    
+    setIsLongTapping(false);
+    longTapTimerRef.current = setTimeout(() => {
+      setIsLongTapping(true);
+      setShowTimer(!showTimer);
+    }, 500); // 500ms for long tap
   };
 
   const handleAutoCallMouseUp = () => {
@@ -58,11 +59,10 @@ const FilterButtons: React.FC<FilterButtonsProps> = ({
       longTapTimerRef.current = null;
     }
     
-    // If it was a long tap, don't toggle auto call
-    if (!isLongTapping) {
+    if (isCountdownActive || !isLongTapping) {
+      // If countdown is active or it's a regular tap, toggle auto call
       onToggleAutoCall();
     }
-    
     setIsLongTapping(false);
   };
 
