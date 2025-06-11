@@ -92,7 +92,7 @@ const FilterButtons: React.FC<FilterButtonsProps> = ({
           {autoCall && (
             <button 
               onClick={onToggleCallDelay} 
-              className="absolute right-1 text-green-600 text-xs font-medium px-2 py-1 rounded border border-green-600/30 min-w-[32px]" 
+              className="absolute right-0 text-green-600 text-xs font-medium px-2 py-1 rounded border border-green-600/30 min-w-[32px]" 
               style={{ WebkitTapHighlightColor: 'transparent' }}
               title="Call delay in seconds"
             >
