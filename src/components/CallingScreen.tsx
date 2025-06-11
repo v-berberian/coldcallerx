@@ -342,8 +342,8 @@ const CallingScreen: React.FC<CallingScreenProps> = ({
       </div>
 
       {/* Daily Progress Bar at Bottom */}
-      <div className="bg-background border-t border-border p-4 flex-shrink-0">
-        <div className="w-full max-w-sm mx-auto space-y-2">
+      <div className="bg-background border-t border-border p-2 flex-shrink-0">
+        <div className="w-full max-w-sm mx-auto space-y-1">
           <div className="flex items-center justify-between text-sm text-muted-foreground">
             <span>Daily Goal</span>
             <span>{todaysCalls}/{dailyGoal} calls</span>
