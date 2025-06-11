@@ -319,8 +319,8 @@ const CallingScreen: React.FC<CallingScreenProps> = ({
         </div>
       </div>
 
-      {/* Main Content with consistent spacing */}
-      <div className="flex-1 flex items-start justify-center pt-3 p-4 min-h-0 px-6">
+      {/* Main Content with reduced top padding */}
+      <div className="flex-1 flex items-start justify-center pt-1 p-4 min-h-0 px-6">
         <div className="w-full max-w-sm space-y-1">
           {/* Filter Buttons */}
           <FilterButtons
@@ -347,7 +347,7 @@ const CallingScreen: React.FC<CallingScreenProps> = ({
           />
 
           {/* Navigation Controls */}
-          <div className="pt-4">
+          <div className="pt-2">
             <NavigationControls
               onPrevious={handlePreviousWrapper}
               onNext={handleNextWrapper}
