@@ -87,7 +87,8 @@ const FilterButtons: React.FC<FilterButtonsProps> = ({
             style={{ 
               WebkitTapHighlightColor: 'transparent',
               WebkitUserSelect: 'none',
-              userSelect: 'none'
+              userSelect: 'none',
+              WebkitTouchCallout: 'none'
             }}
           >
             {timezoneFilter === 'ALL' ? 'All States' : 'EST, CST & CDT'}
@@ -102,7 +103,8 @@ const FilterButtons: React.FC<FilterButtonsProps> = ({
             style={{ 
               WebkitTapHighlightColor: 'transparent',
               WebkitUserSelect: 'none',
-              userSelect: 'none'
+              userSelect: 'none',
+              WebkitTouchCallout: 'none'
             }}
           >
             {callFilter === 'ALL' ? 'All Numbers' : 'Uncalled Numbers'}
@@ -115,7 +117,8 @@ const FilterButtons: React.FC<FilterButtonsProps> = ({
               style={{ 
                 WebkitTapHighlightColor: 'transparent',
                 WebkitUserSelect: 'none',
-                userSelect: 'none'
+                userSelect: 'none',
+                WebkitTouchCallout: 'none'
               }}
             >
               <RotateCcw size={14} />
@@ -135,7 +138,8 @@ const FilterButtons: React.FC<FilterButtonsProps> = ({
             style={{ 
               WebkitTapHighlightColor: 'transparent',
               WebkitUserSelect: 'none',
-              userSelect: 'none'
+              userSelect: 'none',
+              WebkitTouchCallout: 'none'
             }}
           >
             Shuffle
@@ -154,7 +158,8 @@ const FilterButtons: React.FC<FilterButtonsProps> = ({
             style={{ 
               WebkitTapHighlightColor: 'transparent',
               WebkitUserSelect: 'none',
-              userSelect: 'none'
+              userSelect: 'none',
+              WebkitTouchCallout: 'none'
             }}
           >
             Auto Call
@@ -168,7 +173,8 @@ const FilterButtons: React.FC<FilterButtonsProps> = ({
               style={{ 
                 WebkitTapHighlightColor: 'transparent',
                 WebkitUserSelect: 'none',
-                userSelect: 'none'
+                userSelect: 'none',
+                WebkitTouchCallout: 'none'
               }}
               title="Auto call timer"
             >
