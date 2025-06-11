@@ -106,7 +106,7 @@
   }
 
   body {
-    @apply text-foreground;
+    @apply bg-background text-foreground;
     height: 100%;
     overflow: hidden;
     position: fixed;
@@ -114,8 +114,6 @@
     margin: 0;
     padding: 0;
     -webkit-overflow-scrolling: touch;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    background-attachment: fixed;
   }
 
   #root {

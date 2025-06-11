@@ -22,13 +22,8 @@ const NavigationControls: React.FC<NavigationControlsProps> = ({
         variant="outline" 
         onClick={onPrevious} 
         disabled={!canGoPrevious} 
-        className="flex-1 h-14 rounded-2xl shadow-xl active:scale-95 transition-all duration-200 select-none outline-none focus:outline-none focus-visible:ring-0 focus-visible:ring-offset-0 bg-white/10 backdrop-blur-xl border border-white/20 text-white hover:bg-white/20 hover:border-white/30" 
-        style={{ 
-          WebkitTapHighlightColor: 'transparent',
-          background: 'rgba(255, 255, 255, 0.1)',
-          backdropFilter: 'blur(20px)',
-          WebkitBackdropFilter: 'blur(20px)'
-        }} 
+        className="flex-1 h-14 rounded-2xl shadow-lg active:scale-95 transition-all duration-100 select-none outline-none focus:outline-none focus-visible:ring-0 focus-visible:ring-offset-0 hover:bg-background hover:text-foreground" 
+        style={{ WebkitTapHighlightColor: 'transparent' }} 
         onTouchStart={() => {}} 
         onTouchEnd={() => {}}
       >
@@ -40,13 +35,8 @@ const NavigationControls: React.FC<NavigationControlsProps> = ({
         variant="outline" 
         onClick={onNext} 
         disabled={!canGoNext} 
-        className="flex-1 h-14 rounded-2xl shadow-xl active:scale-95 transition-all duration-200 select-none outline-none focus:outline-none focus-visible:ring-0 focus-visible:ring-offset-0 bg-white/10 backdrop-blur-xl border border-white/20 text-white hover:bg-white/20 hover:border-white/30" 
-        style={{ 
-          WebkitTapHighlightColor: 'transparent',
-          background: 'rgba(255, 255, 255, 0.1)',
-          backdropFilter: 'blur(20px)',
-          WebkitBackdropFilter: 'blur(20px)'
-        }} 
+        className="flex-1 h-14 rounded-2xl shadow-lg active:scale-95 transition-all duration-100 select-none outline-none focus:outline-none focus-visible:ring-0 focus-visible:ring-offset-0 hover:bg-background hover:text-foreground" 
+        style={{ WebkitTapHighlightColor: 'transparent' }} 
         onTouchStart={() => {}} 
         onTouchEnd={() => {}}
       >
