@@ -10,7 +10,7 @@ export const useNavigation = (
   callFilter: CallFilter,
   isFilterChanging: boolean,
   isAutoCallInProgress: boolean,
-  isCountdownActive: boolean, // Add this parameter to differentiate countdown vs just enabled
+  isCountdownActive: boolean,
   markLeadAsCalledOnNavigation: (lead: Lead) => void,
   shownLeadsInShuffle: Set<string>,
   setShownLeadsInShuffle: (shown: Set<string>) => void
@@ -18,9 +18,9 @@ export const useNavigation = (
   const { getNextLeadInSequential, getNextLeadInShuffle } = useLeadSelection();
 
   const handleNext = (baseLeads: Lead[]) => {
-    // Only prevent navigation during active countdown, not when auto-call is just enabled
-    if (isFilterChanging || isCountdownActive) {
-      console.log('Skipping navigation because filters are changing or countdown is active');
+    // Only prevent navigation during filter changes, allow navigation during countdown
+    if (isFilterChanging) {
+      console.log('Skipping navigation because filters are changing');
       return;
     }
     
@@ -59,9 +59,9 @@ export const useNavigation = (
   };
 
   const handlePrevious = () => {
-    // Only prevent navigation during active countdown, not when auto-call is just enabled
-    if (isCountdownActive) {
-      console.log('Skipping previous navigation because countdown is active');
+    // Only prevent navigation during filter changes, allow navigation during countdown
+    if (isFilterChanging) {
+      console.log('Skipping previous navigation because filters are changing');
       return;
     }
     
@@ -70,9 +70,9 @@ export const useNavigation = (
   };
 
   const selectLead = (lead: Lead, baseLeads: Lead[], allLeads: Lead[]) => {
-    // Only prevent selection during active countdown, not when auto-call is just enabled
-    if (isCountdownActive) {
-      console.log('Skipping lead selection because countdown is active');
+    // Only prevent selection during filter changes, allow selection during countdown
+    if (isFilterChanging) {
+      console.log('Skipping lead selection because filters are changing');
       return;
     }
     

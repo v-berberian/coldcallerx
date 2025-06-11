@@ -8,22 +8,20 @@ interface NavigationControlsProps {
   onNext: () => void;
   canGoPrevious: boolean;
   canGoNext: boolean;
-  isCountdownActive?: boolean;
 }
 
 const NavigationControls: React.FC<NavigationControlsProps> = ({
   onPrevious,
   onNext,
   canGoPrevious,
-  canGoNext,
-  isCountdownActive = false
+  canGoNext
 }) => {
   return (
     <div className="flex gap-4">
       <Button 
         variant="outline" 
         onClick={onPrevious} 
-        disabled={!canGoPrevious || isCountdownActive} 
+        disabled={!canGoPrevious} 
         className="flex-1 h-14 rounded-2xl shadow-lg active:scale-95 transition-all duration-100 select-none outline-none focus:outline-none focus-visible:ring-0 focus-visible:ring-offset-0" 
         style={{ WebkitTapHighlightColor: 'transparent' }} 
         onTouchStart={() => {}} 
@@ -36,7 +34,7 @@ const NavigationControls: React.FC<NavigationControlsProps> = ({
       <Button 
         variant="outline" 
         onClick={onNext} 
-        disabled={!canGoNext || isCountdownActive} 
+        disabled={!canGoNext} 
         className="flex-1 h-14 rounded-2xl shadow-lg active:scale-95 transition-all duration-100 select-none outline-none focus:outline-none focus-visible:ring-0 focus-visible:ring-offset-0" 
         style={{ WebkitTapHighlightColor: 'transparent' }} 
         onTouchStart={() => {}} 

@@ -96,7 +96,6 @@ const MainContent: React.FC<MainContentProps> = ({
             onNext={onNext}
             canGoPrevious={canGoPrevious}
             canGoNext={canGoNext}
-            isCountdownActive={isCountdownActive}
           />
         </div>
       </div>
