@@ -37,7 +37,7 @@ export const useLeadNavigationActions = ({
   const handleNextWrapper = (baseLeads: Lead[]) => {
     handleNext(baseLeads);
     
-    // Don't automatically mark as called - only mark when actual call is made
+    // Reset call state when navigating
     setCallMadeToCurrentLead(false);
     
     // Set flag to trigger auto-call after navigation
@@ -60,13 +60,13 @@ export const useLeadNavigationActions = ({
     console.log('Previous navigation: from index', currentIndex, 'to index', prevIndex);
     updateNavigation(prevIndex);
     
-    // Don't automatically mark as called - only mark when actual call is made
+    // Reset call state when navigating
     setCallMadeToCurrentLead(false);
   };
 
   const selectLeadWrapper = (lead: Lead, baseLeads: Lead[], leadsData: Lead[]) => {
     selectLead(lead, baseLeads, leadsData);
-    // Don't automatically mark as called - only mark when actual call is made
+    // Reset call state when selecting a new lead
     setCallMadeToCurrentLead(false);
   };
 

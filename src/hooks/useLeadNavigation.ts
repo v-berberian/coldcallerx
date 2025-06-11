@@ -1,3 +1,4 @@
+
 import { Lead } from '../types/lead';
 import { useNavigationState } from './useNavigationState';
 import { useFilters } from './useFilters';
@@ -74,10 +75,11 @@ export const useLeadNavigation = (initialLeads: Lead[]) => {
     isFilterChanging,
     isAutoCallInProgress,
     shouldBlockNavigation(),
-    // Remove the automatic marking on navigation for auto-calls
-    () => {
-      // Don't automatically mark as called on navigation
-      console.log('Navigation completed without marking as called');
+    // Only mark as called if a call was made to current lead
+    (lead: Lead) => {
+      if (callMadeToCurrentLead) {
+        markLeadAsCalledOnNavigation(lead);
+      }
     },
     shownLeadsInShuffle,
     setShownLeadsInShuffle

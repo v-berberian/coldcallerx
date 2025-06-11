@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { Lead } from '../types/lead';
 import { getPhoneDigits } from '../utils/phoneUtils';
@@ -23,9 +24,10 @@ export const useLeadsData = (initialLeads: Lead[]) => {
     const phoneNumber = getPhoneDigits(lead.phone);
     window.location.href = `tel:${phoneNumber}`;
     
-    // Always mark as called when actual call is made, regardless of the markAsCalled parameter
-    console.log('Call executed for lead:', lead.name, 'marking as called');
-    markLeadAsCalled(lead);
+    // Only update the lead data if we should mark it as called
+    if (markAsCalled) {
+      markLeadAsCalled(lead);
+    }
   };
 
   const markLeadAsCalled = (lead: Lead) => {
@@ -70,7 +72,7 @@ export const useLeadsData = (initialLeads: Lead[]) => {
     console.log('Reset all call counts');
   };
 
-  // Function to mark a lead as called when navigating away (kept for compatibility but not used for auto-calls)
+  // New function to mark a lead as called when navigating away
   const markLeadAsCalledOnNavigation = (lead: Lead) => {
     markLeadAsCalled(lead);
   };
