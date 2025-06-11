@@ -67,11 +67,6 @@ const MainContent: React.FC<MainContentProps> = ({
     return 'timer';
   };
 
-  const handleSwipeRight = () => {
-    // Advance to next lead when swiped right
-    onNext();
-  };
-
   return (
     <div className="flex-1 flex items-start justify-center pt-1 p-4 min-h-0 px-6">
       <div className="w-full max-w-sm space-y-1">
@@ -103,7 +98,6 @@ const MainContent: React.FC<MainContentProps> = ({
           cardKey={cardKey}
           onCall={onCall}
           onResetCallCount={onResetCallCount}
-          onSwipeRight={handleSwipeRight}
         />
 
         {/* Navigation Controls */}
