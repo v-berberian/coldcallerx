@@ -1,3 +1,4 @@
+
 import React, { useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -211,8 +212,8 @@ const CallingScreenLogic: React.FC<CallingScreenLogicProps> = ({
           onToggleShuffle={toggleShuffle}
           onToggleAutoCall={toggleAutoCall}
           onResetAllCalls={resetAllCallCounts}
-          onPrevious={handlePreviousWrapper}
-          onNext={handleNextWrapper}
+          onPrevious={handlePrevious}
+          onNext={handleNext}
           canGoPrevious={currentLeads.length > 1}
           canGoNext={currentLeads.length > 1}
         />
