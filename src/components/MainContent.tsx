@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Lead } from '../types/lead';
 import FilterButtons from './FilterButtons';
@@ -16,8 +15,6 @@ interface MainContentProps {
   shuffleMode: boolean;
   autoCall: boolean;
   callDelay: number;
-  showTimer: boolean;
-  setShowTimer: (show: boolean) => void;
   onCall: () => void;
   onResetCallCount: () => void;
   onToggleTimezone: () => void;
@@ -45,8 +42,6 @@ const MainContent: React.FC<MainContentProps> = ({
   shuffleMode,
   autoCall,
   callDelay,
-  showTimer,
-  setShowTimer,
   onCall,
   onResetCallCount,
   onToggleTimezone,
@@ -72,8 +67,6 @@ const MainContent: React.FC<MainContentProps> = ({
           shuffleMode={shuffleMode}
           autoCall={autoCall}
           callDelay={callDelay}
-          showTimer={showTimer}
-          setShowTimer={setShowTimer}
           isCountdownActive={isCountdownActive}
           countdownTime={countdownTime}
           onToggleTimezone={onToggleTimezone}
