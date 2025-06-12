@@ -2,10 +2,8 @@
 import { useState, useEffect } from 'react';
 import { Lead } from '../types/lead';
 import { getPhoneDigits } from '../utils/phoneUtils';
-import { useCloudLeadsData } from './useCloudLeadsData';
 
 export const useLeadsData = (initialLeads: Lead[]) => {
-  const { markLeadAsCalled, resetCallCount, resetAllCallCounts } = useCloudLeadsData();
   const [leadsData, setLeadsData] = useState<Lead[]>(
     initialLeads.map(lead => ({
       ...lead,
@@ -14,14 +12,13 @@ export const useLeadsData = (initialLeads: Lead[]) => {
     }))
   );
 
-  // Update local state when initialLeads change
+  // Save to localStorage whenever leadsData changes
   useEffect(() => {
-    setLeadsData(initialLeads.map(lead => ({
-      ...lead,
-      called: lead.called || 0,
-      lastCalled: lead.lastCalled || undefined
-    })));
-  }, [initialLeads]);
+    if (leadsData.length > 0) {
+      localStorage.setItem('coldcaller-leads', JSON.stringify(leadsData));
+      console.log('Saved leads data to localStorage:', leadsData.length, 'leads');
+    }
+  }, [leadsData]);
 
   const makeCall = (lead: Lead, markAsCalled: boolean = true) => {
     const phoneNumber = getPhoneDigits(lead.phone);
@@ -29,15 +26,11 @@ export const useLeadsData = (initialLeads: Lead[]) => {
     
     // Only update the lead data if we should mark it as called
     if (markAsCalled) {
-      markLeadAsCalledWrapper(lead);
+      markLeadAsCalled(lead);
     }
   };
 
-  const markLeadAsCalledWrapper = async (lead: Lead) => {
-    // Update cloud data
-    await markLeadAsCalled(lead);
-    
-    // Update local state for immediate UI feedback
+  const markLeadAsCalled = (lead: Lead) => {
     const now = new Date();
     const dateString = now.toLocaleDateString();
     const timeString = now.toLocaleTimeString('en-US', {
@@ -56,44 +49,41 @@ export const useLeadsData = (initialLeads: Lead[]) => {
     );
     
     setLeadsData(updatedLeads);
+    console.log('Marked lead as called:', lead.name, 'New count:', (lead.called || 0) + 1);
   };
 
-  const resetCallCountWrapper = async (lead: Lead) => {
-    await resetCallCount(lead);
-    
-    // Update local state
+  const resetCallCount = (lead: Lead) => {
     const updatedLeads = leadsData.map(l => 
       l.name === lead.name && l.phone === lead.phone 
         ? { ...l, called: 0, lastCalled: undefined }
         : l
     );
     setLeadsData(updatedLeads);
+    console.log('Reset call count for lead:', lead.name);
   };
 
-  const resetAllCallCountsWrapper = async () => {
-    await resetAllCallCounts();
-    
-    // Update local state
+  const resetAllCallCounts = () => {
     const updatedLeads = leadsData.map(l => ({
       ...l,
       called: 0,
       lastCalled: undefined
     }));
     setLeadsData(updatedLeads);
+    console.log('Reset all call counts');
   };
 
-  // Function to mark a lead as called when navigating away
+  // New function to mark a lead as called when navigating away
   const markLeadAsCalledOnNavigation = (lead: Lead) => {
-    markLeadAsCalledWrapper(lead);
+    markLeadAsCalled(lead);
   };
 
   return {
     leadsData,
     setLeadsData,
     makeCall,
-    markLeadAsCalled: markLeadAsCalledWrapper,
+    markLeadAsCalled,
     markLeadAsCalledOnNavigation,
-    resetCallCount: resetCallCountWrapper,
-    resetAllCallCounts: resetAllCallCountsWrapper
+    resetCallCount,
+    resetAllCallCounts
   };
 };

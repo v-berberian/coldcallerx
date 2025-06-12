@@ -1,3 +1,4 @@
+
 import React, { useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -15,21 +16,13 @@ interface CallingScreenLogicProps {
   fileName: string;
   onBack: () => void;
   onLeadsImported: (leads: Lead[], fileName: string) => void;
-  sessionState?: any;
-  onSessionUpdate?: (updates: any) => void;
-  syncStatus?: 'idle' | 'syncing' | 'success' | 'error';
-  onSync?: () => void;
 }
 
 const CallingScreenLogic: React.FC<CallingScreenLogicProps> = ({
   leads,
   fileName,
   onBack,
-  onLeadsImported,
-  sessionState,
-  onSessionUpdate,
-  syncStatus = 'idle',
-  onSync
+  onLeadsImported
 }) => {
   const {
     leadsData,
@@ -62,9 +55,8 @@ const CallingScreenLogic: React.FC<CallingScreenLogicProps> = ({
     toggleAutoCall,
     toggleCallDelay,
     resetCallDelay,
-    resetLeadsData,
-    initializeFromSessionState
-  } = useLeadNavigation(leads, sessionState);
+    resetLeadsData
+  } = useLeadNavigation(leads);
 
   const {
     searchQuery,
@@ -88,32 +80,6 @@ const CallingScreenLogic: React.FC<CallingScreenLogicProps> = ({
     incrementDailyCallCount,
     resetDailyCallCount
   } = useDailyCallState();
-
-  // Initialize from session state
-  useEffect(() => {
-    if (sessionState && onSessionUpdate) {
-      const { saveCurrentIndex } = initializeFromSessionState(sessionState, onSessionUpdate);
-      
-      // Save session when navigation changes
-      const handleNavigationChange = async (index: number) => {
-        if (onSync) {
-          onSync(); // Start sync status
-        }
-        
-        const success = await saveCurrentIndex(index);
-        
-        if (onSync && success) {
-          // Simulate successful sync after a short delay
-          setTimeout(() => {
-            if (onSync) onSync();
-          }, 500);
-        }
-      };
-
-      // Store the handler for use in navigation
-      (window as any).saveCurrentIndex = handleNavigationChange;
-    }
-  }, [sessionState, onSessionUpdate, onSync]);
 
   // Handle new CSV imports by resetting the leads data
   useEffect(() => {
@@ -144,7 +110,7 @@ const CallingScreenLogic: React.FC<CallingScreenLogicProps> = ({
     }
   }, [shouldAutoCall, autoCall, currentIndex, cardKey]);
 
-  const handleLeadSelect = async (lead: Lead) => {
+  const handleLeadSelect = (lead: Lead) => {
     const baseLeads = getBaseLeads();
     const leadIndexInBaseLeads = baseLeads.findIndex(l => 
       l.name === lead.name && l.phone === lead.phone
@@ -153,11 +119,6 @@ const CallingScreenLogic: React.FC<CallingScreenLogicProps> = ({
     if (leadIndexInBaseLeads !== -1) {
       selectLead(lead, baseLeads, leadsData);
       console.log('Selected lead from autocomplete:', lead.name, 'at base index:', leadIndexInBaseLeads);
-      
-      // Save the new index to session with sync
-      if ((window as any).saveCurrentIndex) {
-        await (window as any).saveCurrentIndex(leadIndexInBaseLeads);
-      }
     }
     
     setSearchQuery('');
@@ -173,26 +134,14 @@ const CallingScreenLogic: React.FC<CallingScreenLogicProps> = ({
   };
 
   // Create wrapper functions for navigation that pass the required baseLeads parameter
-  const handleNextWrapper = async () => {
+  const handleNextWrapper = () => {
     const currentLeads = getBaseLeads();
     handleNext(currentLeads);
-    
-    // Save new index to session with sync
-    if ((window as any).saveCurrentIndex) {
-      const newIndex = (currentIndex + 1) % currentLeads.length;
-      await (window as any).saveCurrentIndex(newIndex);
-    }
   };
 
-  const handlePreviousWrapper = async () => {
+  const handlePreviousWrapper = () => {
     const currentLeads = getBaseLeads();
     handlePrevious(currentLeads);
-    
-    // Save new index to session with sync
-    if ((window as any).saveCurrentIndex) {
-      const newIndex = currentIndex > 0 ? currentIndex - 1 : currentLeads.length - 1;
-      await (window as any).saveCurrentIndex(newIndex);
-    }
   };
 
   const currentLeads = getBaseLeads();
@@ -257,14 +206,12 @@ const CallingScreenLogic: React.FC<CallingScreenLogicProps> = ({
         searchResults={searchResults}
         leadsData={leadsData}
         fileName={fileName}
-        syncStatus={syncStatus}
         onSearchChange={setSearchQuery}
         onSearchFocus={handleSearchFocus}
         onSearchBlur={handleSearchBlur}
         onClearSearch={clearSearch}
         onLeadSelect={handleLeadSelect}
         onLeadsImported={onLeadsImported}
-        onSync={onSync}
       />
 
       {/* Main Content - takes remaining space */}
