@@ -1,4 +1,3 @@
-
 import { Lead } from '../types/lead';
 import { useNavigationState } from './useNavigationState';
 import { useFilters } from './useFilters';
@@ -91,7 +90,7 @@ export const useLeadNavigation = (initialLeads: Lead[], onSessionUpdate?: (updat
     callFilter,
     isFilterChanging,
     isAutoCallInProgress,
-    shouldBlockNavigation,
+    shouldBlockNavigation, // This should be a boolean value, not a function
     // Only mark as called if a call was made to current lead
     (lead: Lead) => {
       if (callMadeToCurrentLead) {
@@ -110,7 +109,7 @@ export const useLeadNavigation = (initialLeads: Lead[], onSessionUpdate?: (updat
     callFilter,
     isFilterChanging,
     isAutoCallInProgress,
-    shouldBlockNavigation,
+    shouldBlockNavigation: shouldBlockNavigation, // This should be a boolean value, not a function
     markLeadAsCalledOnNavigation,
     shownLeadsInShuffle,
     setShownLeadsInShuffle,
