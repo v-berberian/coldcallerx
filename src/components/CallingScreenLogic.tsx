@@ -10,7 +10,6 @@ import { useDailyCallState } from './DailyCallState';
 import { useLeadNavigation } from '../hooks/useLeadNavigation';
 import { useSessionManagement } from '../hooks/useSessionManagement';
 import { useLeadSelectionHandlers } from '../hooks/useLeadSelection';
-import { useNavigationHandlers } from '../hooks/useNavigationHandlers';
 import { useAutoCallEffects } from '../hooks/useAutoCallEffects';
 import { Lead } from '../types/lead';
 
@@ -110,14 +109,6 @@ const CallingScreenLogic: React.FC<CallingScreenLogicProps> = ({
     setShowAutocomplete
   });
 
-  // Navigation handlers
-  const { handleNextWrapper, handlePreviousWrapper } = useNavigationHandlers({
-    handleNext,
-    handlePrevious,
-    getBaseLeads,
-    currentIndex
-  });
-
   // Auto-call effects
   useAutoCallEffects({
     shouldAutoCall,
@@ -149,6 +140,17 @@ const CallingScreenLogic: React.FC<CallingScreenLogicProps> = ({
     const currentLead = currentLeads[currentIndex];
     makeCall(currentLead);
     incrementDailyCallCount();
+  };
+
+  // Simple navigation handlers - directly use the base leads for navigation
+  const handleNextClick = () => {
+    const currentLeads = getBaseLeads();
+    handleNext(currentLeads);
+  };
+
+  const handlePreviousClick = () => {
+    const currentLeads = getBaseLeads();
+    handlePrevious(currentLeads);
   };
 
   const currentLeads = getBaseLeads();
@@ -247,8 +249,8 @@ const CallingScreenLogic: React.FC<CallingScreenLogicProps> = ({
           onToggleCallDelay={toggleCallDelay}
           onResetCallDelay={resetCallDelay}
           onResetAllCalls={resetAllCallCounts}
-          onPrevious={handlePreviousWrapper}
-          onNext={handleNextWrapper}
+          onPrevious={handlePreviousClick}
+          onNext={handleNextClick}
           canGoPrevious={currentLeads.length > 1}
           canGoNext={currentLeads.length > 1}
         />

@@ -1,5 +1,5 @@
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { User } from 'lucide-react';
 import {
   DropdownMenu,
@@ -23,6 +23,9 @@ const UserProfile: React.FC = () => {
     }
   }, [signOut]);
 
+  // Memoize user email to prevent unnecessary re-renders
+  const userEmail = useMemo(() => user?.email || '', [user?.email]);
+
   if (!user) {
     return null;
   }
@@ -39,7 +42,7 @@ const UserProfile: React.FC = () => {
           <div className="flex flex-col space-y-1">
             <p className="text-sm font-medium leading-none">Account</p>
             <p className="text-xs leading-none text-muted-foreground">
-              {user.email}
+              {userEmail}
             </p>
           </div>
         </DropdownMenuLabel>

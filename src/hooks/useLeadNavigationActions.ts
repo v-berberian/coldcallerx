@@ -35,6 +35,13 @@ export const useLeadNavigationActions = ({
 }: UseLeadNavigationActionsProps) => {
 
   const handleNextWrapper = (baseLeads: Lead[]) => {
+    console.log('Navigation: Next clicked, current index:', currentIndex);
+    
+    if (shouldBlockNavigation) {
+      console.log('Navigation blocked due to countdown');
+      return;
+    }
+    
     handleNext(baseLeads);
     
     // Reset call state when navigating
@@ -47,6 +54,8 @@ export const useLeadNavigationActions = ({
   };
 
   const handlePreviousWrapper = (baseLeads: Lead[]) => {
+    console.log('Navigation: Previous clicked, current index:', currentIndex);
+    
     if (baseLeads.length === 0) return;
     
     // Check if navigation should be blocked
@@ -65,6 +74,7 @@ export const useLeadNavigationActions = ({
   };
 
   const selectLeadWrapper = (lead: Lead, baseLeads: Lead[], leadsData: Lead[]) => {
+    console.log('Navigation: Lead selected:', lead.name);
     selectLead(lead, baseLeads, leadsData);
     // Reset call state when selecting a new lead
     setCallMadeToCurrentLead(false);
