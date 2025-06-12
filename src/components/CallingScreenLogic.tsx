@@ -1,5 +1,5 @@
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import CallingHeader from './CallingHeader';
@@ -11,6 +11,11 @@ import { useDailyCallState } from './DailyCallState';
 import { useLeadNavigation } from '../hooks/useLeadNavigation';
 import { Lead } from '../types/lead';
 
+interface CloudSyncProps {
+  isLoading: boolean;
+  lastSyncTime?: Date;
+}
+
 interface CallingScreenLogicProps {
   leads: Lead[];
   fileName: string;
@@ -18,6 +23,7 @@ interface CallingScreenLogicProps {
   onLeadsImported: (leads: Lead[], fileName: string) => void;
   sessionState?: any;
   onSessionUpdate?: (updates: any) => void;
+  cloudSyncProps?: CloudSyncProps;
 }
 
 const CallingScreenLogic: React.FC<CallingScreenLogicProps> = ({
@@ -26,9 +32,11 @@ const CallingScreenLogic: React.FC<CallingScreenLogicProps> = ({
   onBack,
   onLeadsImported,
   sessionState,
-  onSessionUpdate
+  onSessionUpdate,
+  cloudSyncProps
 }) => {
   console.log('CallingScreenLogic rendering with sessionState:', sessionState);
+  const [isNavigating, setIsNavigating] = useState(false);
   
   const {
     leadsData,
@@ -88,7 +96,7 @@ const CallingScreenLogic: React.FC<CallingScreenLogicProps> = ({
     resetDailyCallCount
   } = useDailyCallState();
 
-  // Initialize from session state - wait for valid session data
+  // Initialize from session state
   useEffect(() => {
     console.log('Session initialization effect triggered:', { sessionState, onSessionUpdate });
     
@@ -96,14 +104,8 @@ const CallingScreenLogic: React.FC<CallingScreenLogicProps> = ({
       console.log('Initializing from session state:', sessionState);
       const { saveCurrentIndex } = initializeFromSessionState(sessionState, onSessionUpdate);
       
-      // Save session when navigation changes
-      const handleNavigationChange = (index: number) => {
-        console.log('Saving current index to session:', index);
-        saveCurrentIndex(index);
-      };
-
-      // Store the handler for use in navigation
-      (window as any).saveCurrentIndex = handleNavigationChange;
+      // Store the handler for navigation sync
+      (window as any).saveCurrentIndex = saveCurrentIndex;
     }
   }, [sessionState, onSessionUpdate, initializeFromSessionState]);
 
@@ -165,8 +167,9 @@ const CallingScreenLogic: React.FC<CallingScreenLogicProps> = ({
     incrementDailyCallCount();
   };
 
-  // Create wrapper functions for navigation that pass the required baseLeads parameter
-  const handleNextWrapper = () => {
+  // Create wrapper functions for navigation with cloud sync
+  const handleNextWrapper = async () => {
+    setIsNavigating(true);
     const currentLeads = getBaseLeads();
     handleNext(currentLeads);
     
@@ -174,11 +177,13 @@ const CallingScreenLogic: React.FC<CallingScreenLogicProps> = ({
     if ((window as any).saveCurrentIndex) {
       const newIndex = (currentIndex + 1) % currentLeads.length;
       console.log('Navigating to next lead, saving index:', newIndex);
-      (window as any).saveCurrentIndex(newIndex);
+      await (window as any).saveCurrentIndex(newIndex);
     }
+    setIsNavigating(false);
   };
 
-  const handlePreviousWrapper = () => {
+  const handlePreviousWrapper = async () => {
+    setIsNavigating(true);
     const currentLeads = getBaseLeads();
     handlePrevious(currentLeads);
     
@@ -186,8 +191,9 @@ const CallingScreenLogic: React.FC<CallingScreenLogicProps> = ({
     if ((window as any).saveCurrentIndex) {
       const newIndex = currentIndex > 0 ? currentIndex - 1 : currentLeads.length - 1;
       console.log('Navigating to previous lead, saving index:', newIndex);
-      (window as any).saveCurrentIndex(newIndex);
+      await (window as any).saveCurrentIndex(newIndex);
     }
+    setIsNavigating(false);
   };
 
   const currentLeads = getBaseLeads();
@@ -265,6 +271,7 @@ const CallingScreenLogic: React.FC<CallingScreenLogicProps> = ({
         onClearSearch={clearSearch}
         onLeadSelect={handleLeadSelect}
         onLeadsImported={onLeadsImported}
+        cloudSyncProps={cloudSyncProps}
       />
 
       {/* Main Content - takes remaining space */}

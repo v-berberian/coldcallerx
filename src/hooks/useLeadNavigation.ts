@@ -77,7 +77,7 @@ export const useLeadNavigation = (initialLeads: Lead[], initialSessionState?: an
     callFilter,
     isFilterChanging,
     isAutoCallInProgress,
-    shouldBlockNavigation(),
+    false, // Remove navigation blocking
     // Only mark as called if a call was made to current lead
     (lead: Lead) => {
       if (callMadeToCurrentLead) {
@@ -96,7 +96,7 @@ export const useLeadNavigation = (initialLeads: Lead[], initialSessionState?: an
     callFilter,
     isFilterChanging,
     isAutoCallInProgress,
-    shouldBlockNavigation: shouldBlockNavigation(),
+    shouldBlockNavigation: false, // Remove navigation blocking
     markLeadAsCalledOnNavigation,
     shownLeadsInShuffle,
     setShownLeadsInShuffle,
@@ -179,7 +179,7 @@ export const useLeadNavigation = (initialLeads: Lead[], initialSessionState?: an
   const initializeFromSessionState = useCallback((sessionState: any, onSessionUpdate: (updates: any) => void) => {
     console.log('Initializing from session state:', sessionState);
     
-    // Only set initial index if we have valid session data and haven't initialized yet
+    // Set initial index if we have valid session data
     if (sessionState?.currentLeadIndex !== undefined && sessionState.currentLeadIndex !== currentIndex) {
       console.log('Setting initial index from session:', sessionState.currentLeadIndex, 'current:', currentIndex);
       setCurrentIndex(sessionState.currentLeadIndex);
@@ -188,9 +188,9 @@ export const useLeadNavigation = (initialLeads: Lead[], initialSessionState?: an
 
     // Return functions to save session state when navigation changes
     return {
-      saveCurrentIndex: (index: number) => {
+      saveCurrentIndex: async (index: number) => {
         console.log('Saving current index to session:', index);
-        onSessionUpdate({ currentLeadIndex: index });
+        await onSessionUpdate({ currentLeadIndex: index });
       }
     };
   }, [currentIndex, setCurrentIndex, setCardKey]);

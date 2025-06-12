@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { Loader2 } from 'lucide-react';
 import CallingScreen from '@/components/CallingScreen';
-import ThemeToggle from '@/components/ThemeToggle';
+import CloudSyncIndicator from '@/components/CloudSyncIndicator';
 import UserProfile from '@/components/UserProfile';
 import CSVImporter from '@/components/CSVImporter';
 import { useCloudLeadsData } from '@/hooks/useCloudLeadsData';
@@ -14,6 +14,8 @@ const Index = () => {
   const { user, loading: authLoading, signOut } = useAuth();
   const navigate = useNavigate();
   const [initializationComplete, setInitializationComplete] = useState(false);
+  const [lastSyncTime, setLastSyncTime] = useState<Date | undefined>();
+  const [isSyncing, setIsSyncing] = useState(false);
   
   const {
     currentLeadList,
@@ -42,14 +44,27 @@ const Index = () => {
         sessionState 
       });
       setInitializationComplete(true);
+      if (!leadsLoading) {
+        setLastSyncTime(new Date());
+      }
     }
   }, [leadsLoading, currentLeadList, leadsData.length, sessionState]);
 
   const handleLeadsImported = async (importedLeads: Lead[], importedFileName: string) => {
+    setIsSyncing(true);
     const success = await importLeadsFromCSV(importedLeads, importedFileName);
     if (!success) {
       console.error('Failed to import leads to cloud');
     }
+    setLastSyncTime(new Date());
+    setIsSyncing(false);
+  };
+
+  const handleSessionUpdate = async (updates: any) => {
+    setIsSyncing(true);
+    await updateSessionState(updates);
+    setLastSyncTime(new Date());
+    setIsSyncing(false);
   };
 
   const handleBack = async () => {
@@ -84,7 +99,7 @@ const Index = () => {
           </h1>
           
           <div className="flex items-center space-x-2">
-            <ThemeToggle />
+            <CloudSyncIndicator isLoading={isSyncing} lastSyncTime={lastSyncTime} />
             <UserProfile />
           </div>
         </div>
@@ -108,7 +123,8 @@ const Index = () => {
       onBack={handleBack}
       onLeadsImported={handleLeadsImported}
       sessionState={sessionState}
-      onSessionUpdate={updateSessionState}
+      onSessionUpdate={handleSessionUpdate}
+      cloudSyncProps={{ isLoading: isSyncing, lastSyncTime }}
     />
   );
 };
