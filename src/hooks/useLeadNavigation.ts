@@ -90,7 +90,7 @@ export const useLeadNavigation = (initialLeads: Lead[], onSessionUpdate?: (updat
     callFilter,
     isFilterChanging,
     isAutoCallInProgress,
-    shouldBlockNavigation, // This should be a boolean value, not a function
+    shouldBlockNavigation(), // Call the function to get boolean value
     // Only mark as called if a call was made to current lead
     (lead: Lead) => {
       if (callMadeToCurrentLead) {
@@ -109,7 +109,7 @@ export const useLeadNavigation = (initialLeads: Lead[], onSessionUpdate?: (updat
     callFilter,
     isFilterChanging,
     isAutoCallInProgress,
-    shouldBlockNavigation: shouldBlockNavigation, // This should be a boolean value, not a function
+    shouldBlockNavigation: shouldBlockNavigation(), // Call the function to get boolean value
     markLeadAsCalledOnNavigation,
     shownLeadsInShuffle,
     setShownLeadsInShuffle,
@@ -147,7 +147,6 @@ export const useLeadNavigation = (initialLeads: Lead[], onSessionUpdate?: (updat
     resetNavigation
   );
 
-  // Enhanced toggle functions to reset shown leads tracker
   const toggleShuffleWrapper = () => {
     toggleShuffle();
     resetShownLeads();
@@ -163,19 +162,16 @@ export const useLeadNavigation = (initialLeads: Lead[], onSessionUpdate?: (updat
     resetShownLeads();
   };
 
-  // Enhanced toggle auto-call to reset countdown when disabled
   const toggleAutoCallWrapper = () => {
     const wasAutoCallOn = autoCall;
     toggleAutoCall();
     
-    // If turning auto-call OFF, reset any active countdown
     if (wasAutoCallOn) {
       resetAutoCall();
       console.log('Auto-call disabled, resetting countdown');
     }
   };
 
-  // Function to reset leads data (for CSV import)
   const resetLeadsData = useCallback((newLeads: Lead[]) => {
     console.log('Resetting leads data with new leads:', newLeads.length);
     const formattedLeads = newLeads.map(lead => ({
