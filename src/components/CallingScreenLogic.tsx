@@ -1,13 +1,17 @@
+
 import React, { useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import CallingHeader from './CallingHeader';
 import MainContent from './MainContent';
 import DailyProgress from './DailyProgress';
-import AutoCallCountdown from './AutoCallCountdown';
 import { useSearchState } from './SearchState';
 import { useDailyCallState } from './DailyCallState';
 import { useLeadNavigation } from '../hooks/useLeadNavigation';
+import { useSessionManagement } from '../hooks/useSessionManagement';
+import { useLeadSelectionHandlers } from '../hooks/useLeadSelection';
+import { useNavigationHandlers } from '../hooks/useNavigationHandlers';
+import { useAutoCallEffects } from '../hooks/useAutoCallEffects';
 import { Lead } from '../types/lead';
 
 interface CallingScreenLogicProps {
@@ -89,29 +93,48 @@ const CallingScreenLogic: React.FC<CallingScreenLogicProps> = ({
     resetDailyCallCount
   } = useDailyCallState();
 
-  // Initialize from session state
-  useEffect(() => {
-    if (sessionState && onSessionUpdate) {
-      const { saveCurrentIndex } = initializeFromSessionState(sessionState, onSessionUpdate);
-      
-      // Save session when navigation changes
-      const handleNavigationChange = async (index: number) => {
-        if (onSync) {
-          onSync(); // Start sync status
-        }
-        
-        await saveCurrentIndex(index);
-      };
+  // Session management
+  useSessionManagement({
+    sessionState,
+    onSessionUpdate,
+    onSync,
+    initializeFromSessionState
+  });
 
-      // Store the handler for use in navigation
-      (window as any).saveCurrentIndex = handleNavigationChange;
-    }
-  }, [sessionState, onSessionUpdate, onSync, initializeFromSessionState]);
+  // Lead selection handlers
+  const { handleLeadSelect } = useLeadSelectionHandlers({
+    getBaseLeads,
+    leadsData,
+    selectLead,
+    setSearchQuery,
+    setShowAutocomplete
+  });
+
+  // Navigation handlers
+  const { handleNextWrapper, handlePreviousWrapper } = useNavigationHandlers({
+    handleNext,
+    handlePrevious,
+    getBaseLeads,
+    currentIndex
+  });
+
+  // Auto-call effects
+  useAutoCallEffects({
+    shouldAutoCall,
+    autoCall,
+    currentIndex,
+    cardKey,
+    getBaseLeads,
+    setCurrentLeadForAutoCall,
+    executeAutoCall,
+    incrementDailyCallCount,
+    setShouldAutoCall
+  });
 
   // Handle new CSV imports by resetting the leads data
   useEffect(() => {
     resetLeadsData(leads);
-  }, [leads]);
+  }, [leads, resetLeadsData]);
 
   // Save updated leads data to localStorage whenever leadsData changes
   useEffect(() => {
@@ -120,72 +143,12 @@ const CallingScreenLogic: React.FC<CallingScreenLogicProps> = ({
     }
   }, [leadsData]);
 
-  // Handle auto-call using the currently displayed lead
-  useEffect(() => {
-    if (shouldAutoCall && autoCall) {
-      const currentLeads = getBaseLeads();
-      const currentLead = currentLeads[currentIndex];
-      
-      if (currentLead) {
-        console.log('Auto-call triggered for displayed lead:', currentLead.name, currentLead.phone);
-        setCurrentLeadForAutoCall(currentLead);
-        executeAutoCall(currentLead);
-        incrementDailyCallCount();
-      }
-      
-      setShouldAutoCall(false);
-    }
-  }, [shouldAutoCall, autoCall, currentIndex, cardKey, getBaseLeads, setCurrentLeadForAutoCall, executeAutoCall, incrementDailyCallCount, setShouldAutoCall]);
-
-  const handleLeadSelect = async (lead: Lead) => {
-    const baseLeads = getBaseLeads();
-    const leadIndexInBaseLeads = baseLeads.findIndex(l => 
-      l.name === lead.name && l.phone === lead.phone
-    );
-    
-    if (leadIndexInBaseLeads !== -1) {
-      selectLead(lead, baseLeads, leadsData);
-      console.log('Selected lead from autocomplete:', lead.name, 'at base index:', leadIndexInBaseLeads);
-      
-      // Save the new index to session with sync
-      if ((window as any).saveCurrentIndex) {
-        await (window as any).saveCurrentIndex(leadIndexInBaseLeads);
-      }
-    }
-    
-    setSearchQuery('');
-    setShowAutocomplete(false);
-  };
-
   // Handle manual call button click
   const handleCallClick = () => {
     const currentLeads = getBaseLeads();
     const currentLead = currentLeads[currentIndex];
     makeCall(currentLead);
     incrementDailyCallCount();
-  };
-
-  // Create wrapper functions for navigation that pass the required baseLeads parameter
-  const handleNextWrapper = async () => {
-    const currentLeads = getBaseLeads();
-    handleNext(currentLeads);
-    
-    // Save new index to session with sync
-    if ((window as any).saveCurrentIndex) {
-      const newIndex = (currentIndex + 1) % currentLeads.length;
-      await (window as any).saveCurrentIndex(newIndex);
-    }
-  };
-
-  const handlePreviousWrapper = async () => {
-    const currentLeads = getBaseLeads();
-    handlePrevious(currentLeads);
-    
-    // Save new index to session with sync
-    if ((window as any).saveCurrentIndex) {
-      const newIndex = currentIndex > 0 ? currentIndex - 1 : currentLeads.length - 1;
-      await (window as any).saveCurrentIndex(newIndex);
-    }
   };
 
   const currentLeads = getBaseLeads();

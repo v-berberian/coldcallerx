@@ -1,0 +1,38 @@
+
+import { useEffect } from 'react';
+import { Lead } from '../types/lead';
+
+interface UseSessionManagementProps {
+  sessionState?: any;
+  onSessionUpdate?: (updates: any) => void;
+  onSync?: () => void;
+  initializeFromSessionState: (sessionState: any, onSessionUpdate: (updates: any) => void) => {
+    saveCurrentIndex: (index: number) => Promise<void>;
+  };
+}
+
+export const useSessionManagement = ({
+  sessionState,
+  onSessionUpdate,
+  onSync,
+  initializeFromSessionState
+}: UseSessionManagementProps) => {
+  // Initialize from session state
+  useEffect(() => {
+    if (sessionState && onSessionUpdate) {
+      const { saveCurrentIndex } = initializeFromSessionState(sessionState, onSessionUpdate);
+      
+      // Save session when navigation changes
+      const handleNavigationChange = async (index: number) => {
+        if (onSync) {
+          onSync(); // Start sync status
+        }
+        
+        await saveCurrentIndex(index);
+      };
+
+      // Store the handler for use in navigation
+      (window as any).saveCurrentIndex = handleNavigationChange;
+    }
+  }, [sessionState, onSessionUpdate, onSync, initializeFromSessionState]);
+};

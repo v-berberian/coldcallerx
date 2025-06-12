@@ -1,67 +1,42 @@
 
-import { Lead, CallFilter } from '../types/lead';
+import { Lead } from '../types/lead';
 
-export const useLeadSelection = () => {
-  const getNextLeadInSequential = (baseLeads: Lead[], currentIndex: number) => {
-    const nextIndex = (currentIndex + 1) % baseLeads.length;
-    return {
-      index: nextIndex,
-      lead: baseLeads[nextIndex]
-    };
-  };
+interface UseLeadSelectionProps {
+  getBaseLeads: () => Lead[];
+  leadsData: Lead[];
+  selectLead: (lead: Lead, baseLeads: Lead[], leadsData: Lead[]) => void;
+  setSearchQuery: (query: string) => void;
+  setShowAutocomplete: (show: boolean) => void;
+}
 
-  const getNextLeadInShuffle = (
-    baseLeads: Lead[], 
-    currentIndex: number, 
-    callFilter: CallFilter,
-    shownLeadsInShuffle: Set<string>
-  ) => {
-    if (baseLeads.length === 0) {
-      return {
-        index: currentIndex,
-        lead: baseLeads[currentIndex]
-      };
-    }
-
-    // Create a key for each lead to track if it's been shown
-    const createLeadKey = (lead: Lead) => `${lead.name}-${lead.phone}`;
-    
-    // Filter out leads that have already been shown in this shuffle session
-    const unshownLeads = baseLeads.filter(lead => 
-      !shownLeadsInShuffle.has(createLeadKey(lead))
+export const useLeadSelectionHandlers = ({
+  getBaseLeads,
+  leadsData,
+  selectLead,
+  setSearchQuery,
+  setShowAutocomplete
+}: UseLeadSelectionProps) => {
+  const handleLeadSelect = async (lead: Lead) => {
+    const baseLeads = getBaseLeads();
+    const leadIndexInBaseLeads = baseLeads.findIndex(l => 
+      l.name === lead.name && l.phone === lead.phone
     );
-
-    console.log('Shuffle selection - Total leads:', baseLeads.length, 'Unshown leads:', unshownLeads.length, 'Shown leads:', shownLeadsInShuffle.size);
-
-    // If we have unshown leads, pick from them
-    if (unshownLeads.length > 0) {
-      const randomIndex = Math.floor(Math.random() * unshownLeads.length);
-      const randomLead = unshownLeads[randomIndex];
-      const nextIndex = baseLeads.findIndex(lead => 
-        lead.name === randomLead.name && lead.phone === randomLead.phone
-      );
-      console.log('Selected unshown lead:', randomLead.name, 'at index:', nextIndex);
-      return {
-        index: nextIndex,
-        lead: randomLead
-      };
-    } else {
-      // All leads have been shown, pick any random lead (cycle complete)
-      console.log('All leads have been shown, cycling complete - picking any random lead');
-      const randomIndex = Math.floor(Math.random() * baseLeads.length);
-      const randomLead = baseLeads[randomIndex];
-      const nextIndex = baseLeads.findIndex(lead => 
-        lead.name === randomLead.name && lead.phone === randomLead.phone
-      );
-      return {
-        index: nextIndex,
-        lead: randomLead
-      };
+    
+    if (leadIndexInBaseLeads !== -1) {
+      selectLead(lead, baseLeads, leadsData);
+      console.log('Selected lead from autocomplete:', lead.name, 'at base index:', leadIndexInBaseLeads);
+      
+      // Save the new index to session with sync
+      if ((window as any).saveCurrentIndex) {
+        await (window as any).saveCurrentIndex(leadIndexInBaseLeads);
+      }
     }
+    
+    setSearchQuery('');
+    setShowAutocomplete(false);
   };
 
   return {
-    getNextLeadInSequential,
-    getNextLeadInShuffle
+    handleLeadSelect
   };
 };
