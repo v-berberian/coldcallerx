@@ -1,4 +1,3 @@
-
 import React, { useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -18,6 +17,8 @@ interface CallingScreenLogicProps {
   onLeadsImported: (leads: Lead[], fileName: string) => void;
   sessionState?: any;
   onSessionUpdate?: (updates: any) => void;
+  syncStatus?: 'idle' | 'syncing' | 'success' | 'error';
+  onSync?: () => void;
 }
 
 const CallingScreenLogic: React.FC<CallingScreenLogicProps> = ({
@@ -26,7 +27,9 @@ const CallingScreenLogic: React.FC<CallingScreenLogicProps> = ({
   onBack,
   onLeadsImported,
   sessionState,
-  onSessionUpdate
+  onSessionUpdate,
+  syncStatus = 'idle',
+  onSync
 }) => {
   const {
     leadsData,
@@ -243,12 +246,14 @@ const CallingScreenLogic: React.FC<CallingScreenLogicProps> = ({
         searchResults={searchResults}
         leadsData={leadsData}
         fileName={fileName}
+        syncStatus={syncStatus}
         onSearchChange={setSearchQuery}
         onSearchFocus={handleSearchFocus}
         onSearchBlur={handleSearchBlur}
         onClearSearch={clearSearch}
         onLeadSelect={handleLeadSelect}
         onLeadsImported={onLeadsImported}
+        onSync={onSync}
       />
 
       {/* Main Content - takes remaining space */}
