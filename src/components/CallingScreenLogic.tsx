@@ -1,4 +1,3 @@
-
 import React, { useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -28,7 +27,8 @@ const CallingScreenLogic: React.FC<CallingScreenLogicProps> = ({
 }) => {
   const {
     leadLists,
-    switchToLeadList
+    switchToLeadList,
+    deleteLeadList
   } = useCloudLeadsData();
 
   const {
@@ -133,9 +133,16 @@ const CallingScreenLogic: React.FC<CallingScreenLogicProps> = ({
   };
 
   const handleLeadListSelect = async (leadList: LeadList) => {
-    const success = await switchToLeadList(leadList.id);
+    const success = await switchToLeadList(leadList);
     if (success) {
       console.log('Switched to lead list:', leadList.name);
+    }
+  };
+
+  const handleLeadListDelete = async (leadListId: string) => {
+    const success = await deleteLeadList(leadListId);
+    if (success) {
+      console.log('Deleted lead list:', leadListId);
     }
   };
 
@@ -247,6 +254,7 @@ const CallingScreenLogic: React.FC<CallingScreenLogicProps> = ({
           onCall={handleCallClick}
           onResetCallCount={() => resetCallCount(currentLead)}
           onLeadListSelect={handleLeadListSelect}
+          onLeadListDelete={handleLeadListDelete}
           onToggleTimezone={toggleTimezoneFilter}
           onToggleCallFilter={toggleCallFilter}
           onToggleShuffle={toggleShuffle}
