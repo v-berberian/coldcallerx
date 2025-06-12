@@ -1,108 +1,67 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '@/contexts/AuthContext';
+import { Button } from '@/components/ui/button';
+import { Loader2 } from 'lucide-react';
 import CallingScreen from '@/components/CallingScreen';
 import ThemeToggle from '@/components/ThemeToggle';
-import CSVImporter from '@/components/CSVImporter';
-
-interface Lead {
-  name: string;
-  phone: string;
-  called?: number;
-  lastCalled?: string;
-}
+import { useCloudLeadsData } from '@/hooks/useCloudLeadsData';
+import { Lead } from '@/types/lead';
 
 const Index = () => {
-  const [leads, setLeads] = useState<Lead[]>([]);
-  const [fileName, setFileName] = useState<string>('');
+  const { user, loading: authLoading, signOut } = useAuth();
+  const navigate = useNavigate();
+  const {
+    currentLeadList,
+    leadsData,
+    dailyCallCount,
+    loading: leadsLoading,
+    importLeadsFromCSV,
+    resetDailyCallCount
+  } = useCloudLeadsData();
 
-  // Load saved data on component mount
   useEffect(() => {
-    const savedLeads = localStorage.getItem('coldcaller-leads');
-    const savedFileName = localStorage.getItem('coldcaller-filename');
-    
-    console.log('Loading data from localStorage...');
-    
-    if (savedLeads && savedFileName) {
-      try {
-        const parsedLeads = JSON.parse(savedLeads);
-        console.log('Loaded', parsedLeads.length, 'leads from localStorage');
-        
-        // Ensure all leads have the required properties
-        const formattedLeads = parsedLeads.map((lead: Lead) => ({
-          ...lead,
-          called: lead.called || 0,
-          lastCalled: lead.lastCalled || undefined
-        }));
-        
-        setLeads(formattedLeads);
-        setFileName(savedFileName);
-        console.log('Successfully restored leads with call tracking data');
-      } catch (error) {
-        console.error('Error parsing saved leads:', error);
-        // Clear corrupted data
-        localStorage.removeItem('coldcaller-leads');
-        localStorage.removeItem('coldcaller-filename');
-      }
-    } else {
-      console.log('No saved data found in localStorage');
+    if (!authLoading && !user) {
+      navigate('/auth');
     }
-  }, []);
+  }, [user, authLoading, navigate]);
 
-  const handleBack = () => {
-    // Clear saved data when going back
-    localStorage.removeItem('coldcaller-leads');
-    localStorage.removeItem('coldcaller-filename');
-    console.log('Cleared localStorage data');
-    
-    setLeads([]);
-    setFileName('');
+  const handleLeadsImported = async (importedLeads: Lead[], importedFileName: string) => {
+    const success = await importLeadsFromCSV(importedLeads, importedFileName);
+    if (!success) {
+      console.error('Failed to import leads to cloud');
+    }
   };
 
-  const handleLeadsImported = (importedLeads: Lead[], importedFileName: string) => {
-    // Check if we have existing data for these leads in localStorage
-    const savedLeads = localStorage.getItem('coldcaller-leads');
-    let mergedLeads = importedLeads;
-    
-    if (savedLeads) {
-      try {
-        const existingLeads = JSON.parse(savedLeads);
-        console.log('Merging new import with existing call tracking data...');
-        
-        // Merge call tracking data from existing leads
-        mergedLeads = importedLeads.map(newLead => {
-          const existingLead = existingLeads.find((l: Lead) => 
-            l.name === newLead.name && l.phone === newLead.phone
-          );
-          
-          return {
-            ...newLead,
-            called: existingLead?.called || 0,
-            lastCalled: existingLead?.lastCalled || undefined
-          };
-        });
-        
-        console.log('Merged call tracking data for', mergedLeads.length, 'leads');
-      } catch (error) {
-        console.error('Error merging with existing data:', error);
-      }
-    }
-    
-    setLeads(mergedLeads);
-    setFileName(importedFileName);
-    
-    // Save to localStorage immediately
-    localStorage.setItem('coldcaller-leads', JSON.stringify(mergedLeads));
-    localStorage.setItem('coldcaller-filename', importedFileName);
-    console.log('Saved imported leads to localStorage');
+  const handleBack = async () => {
+    await signOut();
   };
 
-  // If no leads, show empty state with proper header
-  if (leads.length === 0) {
+  if (authLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin" />
+      </div>
+    );
+  }
+
+  if (!user) {
+    return null; // Will redirect to auth
+  }
+
+  // If no current lead list, show empty state with proper header
+  if (!currentLeadList || leadsData.length === 0) {
     return (
       <div className="h-screen h-[100vh] h-[100svh] bg-background overflow-hidden">
-        {/* Header with import icon, logo, and theme toggle - with safe area padding */}
+        {/* Header with user info and sign out */}
         <div className="flex items-center justify-between p-4 border-b border-border pt-safe" style={{ paddingTop: 'max(1rem, env(safe-area-inset-top))' }}>
-          <CSVImporter onLeadsImported={handleLeadsImported} />
+          <div className="flex items-center space-x-2">
+            <span className="text-sm text-muted-foreground">{user.email}</span>
+            <Button variant="outline" size="sm" onClick={handleBack}>
+              Sign Out
+            </Button>
+          </div>
           
           <h1 className="text-2xl font-bold">
             <span className="text-blue-500">Cold</span>
@@ -115,7 +74,14 @@ const Index = () => {
         
         <div className="flex items-center justify-center h-full">
           <div className="text-center space-y-4">
-            <p className="text-lg text-muted-foreground">No Leads Imported</p>
+            {leadsLoading ? (
+              <>
+                <Loader2 className="h-8 w-8 animate-spin mx-auto" />
+                <p className="text-lg text-muted-foreground">Loading leads...</p>
+              </>
+            ) : (
+              <p className="text-lg text-muted-foreground">No Leads Imported</p>
+            )}
           </div>
         </div>
       </div>
@@ -124,8 +90,8 @@ const Index = () => {
 
   return (
     <CallingScreen 
-      leads={leads} 
-      fileName={fileName} 
+      leads={leadsData} 
+      fileName={currentLeadList.name} 
       onBack={handleBack}
       onLeadsImported={handleLeadsImported}
     />
