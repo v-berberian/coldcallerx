@@ -5,6 +5,7 @@ import SearchAutocomplete from './SearchAutocomplete';
 import SearchBar from './SearchBar';
 import ThemeToggle from './ThemeToggle';
 import CSVImporter from './CSVImporter';
+import UserProfile from './UserProfile';
 
 interface CallingHeaderProps {
   searchQuery: string;
@@ -46,7 +47,10 @@ const CallingHeader: React.FC<CallingHeaderProps> = ({
           </h1>
         </div>
         
-        <ThemeToggle />
+        <div className="flex items-center space-x-2">
+          <ThemeToggle />
+          <UserProfile />
+        </div>
       </div>
       
       {/* Search Bar */}

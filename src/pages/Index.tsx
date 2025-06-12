@@ -2,10 +2,11 @@
 import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
-import { Button } from '@/components/ui/button';
 import { Loader2 } from 'lucide-react';
 import CallingScreen from '@/components/CallingScreen';
 import ThemeToggle from '@/components/ThemeToggle';
+import UserProfile from '@/components/UserProfile';
+import CSVImporter from '@/components/CSVImporter';
 import { useCloudLeadsData } from '@/hooks/useCloudLeadsData';
 import { Lead } from '@/types/lead';
 
@@ -56,12 +57,7 @@ const Index = () => {
       <div className="h-screen h-[100vh] h-[100svh] bg-background overflow-hidden">
         {/* Header with user info and sign out */}
         <div className="flex items-center justify-between p-4 border-b border-border pt-safe" style={{ paddingTop: 'max(1rem, env(safe-area-inset-top))' }}>
-          <div className="flex items-center space-x-2">
-            <span className="text-sm text-muted-foreground">{user.email}</span>
-            <Button variant="outline" size="sm" onClick={handleBack}>
-              Sign Out
-            </Button>
-          </div>
+          <CSVImporter onLeadsImported={handleLeadsImported} />
           
           <h1 className="text-2xl font-bold">
             <span className="text-blue-500">Cold</span>
@@ -69,7 +65,10 @@ const Index = () => {
             <span className="text-blue-500">X</span>
           </h1>
           
-          <ThemeToggle />
+          <div className="flex items-center space-x-2">
+            <ThemeToggle />
+            <UserProfile />
+          </div>
         </div>
         
         <div className="flex items-center justify-center h-full">
@@ -80,7 +79,10 @@ const Index = () => {
                 <p className="text-lg text-muted-foreground">Loading leads...</p>
               </>
             ) : (
-              <p className="text-lg text-muted-foreground">No Leads Imported</p>
+              <>
+                <p className="text-lg text-muted-foreground">No Leads Imported</p>
+                <p className="text-sm text-muted-foreground">Click the upload icon above to import a CSV file</p>
+              </>
             )}
           </div>
         </div>
