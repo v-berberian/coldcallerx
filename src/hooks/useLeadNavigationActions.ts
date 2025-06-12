@@ -22,9 +22,6 @@ interface UseLeadNavigationActionsProps {
 }
 
 export const useLeadNavigationActions = ({
-  currentIndex,
-  updateNavigation,
-  shuffleMode,
   shouldBlockNavigation,
   handleNext,
   handlePrevious,
@@ -35,7 +32,7 @@ export const useLeadNavigationActions = ({
 }: UseLeadNavigationActionsProps) => {
 
   const handleNextWrapper = (baseLeads: Lead[]) => {
-    console.log('useLeadNavigationActions: Next clicked, current index:', currentIndex);
+    console.log('useLeadNavigationActions: Next clicked');
     
     if (shouldBlockNavigation) {
       console.log('Navigation blocked due to countdown');
@@ -55,7 +52,7 @@ export const useLeadNavigationActions = ({
   };
 
   const handlePreviousWrapper = () => {
-    console.log('useLeadNavigationActions: Previous clicked, current index:', currentIndex);
+    console.log('useLeadNavigationActions: Previous clicked');
     
     // Check if navigation should be blocked
     if (shouldBlockNavigation) {

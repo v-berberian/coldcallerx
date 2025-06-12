@@ -15,6 +15,7 @@ import { useAuth } from '@/contexts/AuthContext';
 const UserProfile: React.FC = () => {
   const { user, signOut } = useAuth();
 
+  // Memoize the sign out handler to prevent re-renders
   const handleSignOut = useCallback(async () => {
     try {
       await signOut();
@@ -28,6 +29,7 @@ const UserProfile: React.FC = () => {
     return user?.email || '';
   }, [user?.email]);
 
+  // Early return to prevent hook issues
   if (!user) {
     return null;
   }

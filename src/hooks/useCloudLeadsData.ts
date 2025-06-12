@@ -1,5 +1,4 @@
-
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { Lead } from '../types/lead';
 import { leadService, LeadList } from '../services/leadService';
 import { dailyStatsService } from '../services/dailyStatsService';
@@ -21,6 +20,7 @@ export const useCloudLeadsData = () => {
     callDelay: 0
   });
   const { user } = useAuth();
+  const updateTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   // Load user's session, lead list and daily stats on mount
   useEffect(() => {
@@ -84,14 +84,6 @@ export const useCloudLeadsData = () => {
         // Load leads for this list
         const leads = await leadService.getLeads(targetLeadList.id);
         setLeadsData(leads);
-
-        // Save the initial session state (debounced)
-        try {
-          await sessionService.saveUserSession(initialSessionState);
-        } catch (sessionSaveError) {
-          console.log('Failed to save initial session state:', sessionSaveError);
-          // Continue without saving session
-        }
       }
     } catch (error) {
       console.error('Error loading user data:', error);
@@ -130,25 +122,32 @@ export const useCloudLeadsData = () => {
     }
   };
 
+  // Debounced session update to prevent rapid saves
   const updateSessionState = useCallback(async (updates: Partial<SessionState>): Promise<boolean> => {
     try {
       const newSessionState = { ...sessionState, ...updates };
       setSessionState(newSessionState);
       
-      // Use debounced save from sessionService
-      const success = await sessionService.saveUserSession(newSessionState);
-      
-      if (!success) {
-        console.warn('Session save failed, but continuing with local state');
-        // Don't fail the operation if session save fails
-        return true;
+      // Clear existing timeout
+      if (updateTimeoutRef.current) {
+        clearTimeout(updateTimeoutRef.current);
       }
       
-      return true;
+      // Debounce the save operation
+      return new Promise((resolve) => {
+        updateTimeoutRef.current = setTimeout(async () => {
+          try {
+            const success = await sessionService.saveUserSession(newSessionState);
+            resolve(success);
+          } catch (error) {
+            console.error('Error updating session state:', error);
+            resolve(true); // Don't fail the operation if session update fails
+          }
+        }, 500); // 500ms debounce
+      });
     } catch (error) {
       console.error('Error updating session state:', error);
-      // Don't fail the operation if session update fails
-      return true;
+      return true; // Don't fail the operation if session update fails
     }
   }, [sessionState]);
 
@@ -312,152 +311,14 @@ export const useCloudLeadsData = () => {
     dailyCallCount,
     loading,
     sessionState,
-    importLeadsFromCSV: async (leads: Lead[], fileName: string): Promise<boolean> => {
-      if (!user) return false;
-
-      setLoading(true);
-      try {
-        // Create lead list
-        const leadList = await leadService.createLeadList(fileName, fileName);
-        if (!leadList) {
-          setLoading(false);
-          return false;
-        }
-
-        // Save leads to database
-        const success = await leadService.saveLeads(leadList.id, leads);
-        if (success) {
-          setCurrentLeadList(leadList);
-          setLeadsData(leads);
-
-          // Update session state for new lead list
-          await updateSessionState({
-            currentLeadListId: leadList.id,
-            currentLeadIndex: 0
-          });
-
-          return true;
-        }
-      } catch (error) {
-        console.error('Error importing leads:', error);
-      } finally {
-        setLoading(false);
-      }
-      return false;
-    },
-    switchToLeadList: async (leadList: LeadList) => {
-      setLoading(true);
-      try {
-        const leads = await leadService.getLeads(leadList.id);
-        setCurrentLeadList(leadList);
-        setLeadsData(leads);
-
-        // Update session state for new lead list
-        await updateSessionState({
-          currentLeadListId: leadList.id,
-          currentLeadIndex: 0
-        });
-      } catch (error) {
-        console.error('Error switching lead list:', error);
-      } finally {
-        setLoading(false);
-      }
-    },
-    deleteLeadList: async (leadListId: string): Promise<boolean> => {
-      try {
-        const success = await leadService.deleteLeadList(leadListId);
-        if (success) {
-          // If we deleted the current list, clear it and reload
-          if (currentLeadList?.id === leadListId) {
-            await loadUserData();
-          }
-          return true;
-        }
-      } catch (error) {
-        console.error('Error deleting lead list:', error);
-      }
-      return false;
-    },
-    uploadCSVFile: async (file: File): Promise<string | null> => {
-      if (!user) return null;
-      return await leadService.uploadCSVFile(file, user.id);
-    },
-    markLeadAsCalled: async (lead: Lead): Promise<boolean> => {
-      if (!currentLeadList) return false;
-
-      try {
-        const now = new Date();
-        const dateString = now.toLocaleDateString();
-        const timeString = now.toLocaleTimeString('en-US', {
-          hour: 'numeric',
-          minute: '2-digit',
-          hour12: true
-        });
-        const lastCalledString = `${dateString} at ${timeString}`;
-
-        const newCallCount = (lead.called || 0) + 1;
-
-        // Update local state
-        const updatedLeads = leadsData.map(l => 
-          l.name === lead.name && l.phone === lead.phone ? {
-            ...l,
-            called: newCallCount,
-            lastCalled: lastCalledString
-          } : l
-        );
-        setLeadsData(updatedLeads);
-
-        // Update database
-        await leadService.updateLeadCallCount(
-          currentLeadList.id,
-          lead.name,
-          lead.phone,
-          newCallCount,
-          lastCalledString
-        );
-
-        // Increment daily call count
-        await dailyStatsService.incrementDailyCallCount();
-        await loadDailyStats();
-
-        return true;
-      } catch (error) {
-        console.error('Error marking lead as called:', error);
-        return false;
-      }
-    },
-    resetCallCount: async (lead: Lead) => {
-      if (!currentLeadList) return;
-
-      // Update local state
-      const updatedLeads = leadsData.map(l => 
-        l.name === lead.name && l.phone === lead.phone 
-          ? { ...l, called: 0, lastCalled: undefined }
-          : l
-      );
-      setLeadsData(updatedLeads);
-
-      // Update database
-      await leadService.resetLeadCallCount(currentLeadList.id, lead.name, lead.phone);
-    },
-    resetAllCallCounts: async () => {
-      if (!currentLeadList) return;
-
-      // Update local state
-      const updatedLeads = leadsData.map(l => ({
-        ...l,
-        called: 0,
-        lastCalled: undefined
-      }));
-      setLeadsData(updatedLeads);
-
-      // Update database
-      await leadService.resetAllCallCounts(currentLeadList.id);
-    },
-    resetDailyCallCount: async () => {
-      await dailyStatsService.resetDailyCallCount();
-      setDailyCallCount(0);
-    },
+    importLeadsFromCSV,
+    switchToLeadList,
+    deleteLeadList,
+    uploadCSVFile,
+    markLeadAsCalled,
+    resetCallCount,
+    resetAllCallCounts,
+    resetDailyCallCount,
     loadDailyStats,
     updateSessionState
   };

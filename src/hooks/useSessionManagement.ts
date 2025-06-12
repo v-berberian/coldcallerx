@@ -17,12 +17,19 @@ export const useSessionManagement = ({
   initializeFromSessionState
 }: UseSessionManagementProps) => {
   const isInitializedRef = useRef(false);
+  const lastSavedIndexRef = useRef<number | null>(null);
 
-  // Memoized session update function to prevent re-render loops
+  // Debounced session update function to prevent rapid updates
   const updateSession = useCallback(async (index: number) => {
+    // Prevent duplicate saves
+    if (lastSavedIndexRef.current === index) {
+      return;
+    }
+    
     if (!onSessionUpdate || !onSync) return;
     
     console.log('Saving session index:', index);
+    lastSavedIndexRef.current = index;
     onSync(); // Start sync status
     
     try {
@@ -30,26 +37,32 @@ export const useSessionManagement = ({
       console.log('Session saved successfully');
     } catch (error) {
       console.error('Failed to save session:', error);
-      // Don't block the UI if session save fails
+      // Reset on error so it can be retried
+      lastSavedIndexRef.current = null;
     }
   }, [onSessionUpdate, onSync]);
 
-  // Initialize from session state
+  // Initialize from session state - only once
   useEffect(() => {
     if (sessionState && onSessionUpdate && !isInitializedRef.current) {
       isInitializedRef.current = true;
       
       try {
         console.log('Initializing session management with state:', sessionState);
-        initializeFromSessionState(sessionState, onSessionUpdate);
+        const result = initializeFromSessionState(sessionState, onSessionUpdate);
         console.log('Session management initialized successfully');
+        
+        // Set the last saved index to prevent immediate re-save
+        if (sessionState.currentLeadIndex !== undefined) {
+          lastSavedIndexRef.current = sessionState.currentLeadIndex;
+        }
       } catch (error) {
         console.error('Failed to initialize session management:', error);
         // Reset initialization flag on error
         isInitializedRef.current = false;
       }
     }
-  }, [sessionState, onSessionUpdate, initializeFromSessionState]);
+  }, [sessionState?.currentLeadListId, onSessionUpdate, initializeFromSessionState]); // Only depend on lead list ID
 
   // Return the update function for use by navigation
   return {
