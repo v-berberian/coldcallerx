@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { Loader2 } from 'lucide-react';
 import CallingScreen from '@/components/CallingScreen';
+import ThemeToggle from '@/components/ThemeToggle';
 import UserProfile from '@/components/UserProfile';
 import CSVImporter from '@/components/CSVImporter';
 import { useCloudLeadsData } from '@/hooks/useCloudLeadsData';
@@ -64,7 +65,10 @@ const Index = () => {
             <span className="text-blue-500">X</span>
           </h1>
           
-          <UserProfile />
+          <div className="flex items-center space-x-2">
+            <ThemeToggle />
+            <UserProfile />
+          </div>
         </div>
         
         <div className="flex items-center justify-center h-full">

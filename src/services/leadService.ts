@@ -1,3 +1,4 @@
+
 import { supabase } from '@/integrations/supabase/client';
 import { Lead } from '@/types/lead';
 
@@ -182,41 +183,6 @@ export const leadService = {
 
     if (error) {
       console.error('Error resetting all call counts:', error);
-      return false;
-    }
-
-    return true;
-  },
-
-  async deleteLeadList(leadListId: string): Promise<boolean> {
-    const user = await supabase.auth.getUser();
-    
-    if (!user.data.user) {
-      console.error('User not authenticated');
-      return false;
-    }
-
-    // First delete all leads in the list
-    const { error: leadsError } = await supabase
-      .from('leads')
-      .delete()
-      .eq('lead_list_id', leadListId)
-      .eq('user_id', user.data.user.id);
-
-    if (leadsError) {
-      console.error('Error deleting leads:', leadsError);
-      return false;
-    }
-
-    // Then delete the lead list
-    const { error: listError } = await supabase
-      .from('lead_lists')
-      .delete()
-      .eq('id', leadListId)
-      .eq('user_id', user.data.user.id);
-
-    if (listError) {
-      console.error('Error deleting lead list:', listError);
       return false;
     }
 
