@@ -95,14 +95,25 @@ const CallingScreenLogic: React.FC<CallingScreenLogicProps> = ({
       const { saveCurrentIndex } = initializeFromSessionState(sessionState, onSessionUpdate);
       
       // Save session when navigation changes
-      const handleNavigationChange = (index: number) => {
-        saveCurrentIndex(index);
+      const handleNavigationChange = async (index: number) => {
+        if (onSync) {
+          onSync(); // Start sync status
+        }
+        
+        const success = await saveCurrentIndex(index);
+        
+        if (onSync && success) {
+          // Simulate successful sync after a short delay
+          setTimeout(() => {
+            if (onSync) onSync();
+          }, 500);
+        }
       };
 
       // Store the handler for use in navigation
       (window as any).saveCurrentIndex = handleNavigationChange;
     }
-  }, [sessionState, onSessionUpdate]);
+  }, [sessionState, onSessionUpdate, onSync]);
 
   // Handle new CSV imports by resetting the leads data
   useEffect(() => {
@@ -133,7 +144,7 @@ const CallingScreenLogic: React.FC<CallingScreenLogicProps> = ({
     }
   }, [shouldAutoCall, autoCall, currentIndex, cardKey]);
 
-  const handleLeadSelect = (lead: Lead) => {
+  const handleLeadSelect = async (lead: Lead) => {
     const baseLeads = getBaseLeads();
     const leadIndexInBaseLeads = baseLeads.findIndex(l => 
       l.name === lead.name && l.phone === lead.phone
@@ -143,9 +154,9 @@ const CallingScreenLogic: React.FC<CallingScreenLogicProps> = ({
       selectLead(lead, baseLeads, leadsData);
       console.log('Selected lead from autocomplete:', lead.name, 'at base index:', leadIndexInBaseLeads);
       
-      // Save the new index to session
+      // Save the new index to session with sync
       if ((window as any).saveCurrentIndex) {
-        (window as any).saveCurrentIndex(leadIndexInBaseLeads);
+        await (window as any).saveCurrentIndex(leadIndexInBaseLeads);
       }
     }
     
@@ -162,25 +173,25 @@ const CallingScreenLogic: React.FC<CallingScreenLogicProps> = ({
   };
 
   // Create wrapper functions for navigation that pass the required baseLeads parameter
-  const handleNextWrapper = () => {
+  const handleNextWrapper = async () => {
     const currentLeads = getBaseLeads();
     handleNext(currentLeads);
     
-    // Save new index to session
+    // Save new index to session with sync
     if ((window as any).saveCurrentIndex) {
       const newIndex = (currentIndex + 1) % currentLeads.length;
-      (window as any).saveCurrentIndex(newIndex);
+      await (window as any).saveCurrentIndex(newIndex);
     }
   };
 
-  const handlePreviousWrapper = () => {
+  const handlePreviousWrapper = async () => {
     const currentLeads = getBaseLeads();
     handlePrevious(currentLeads);
     
-    // Save new index to session
+    // Save new index to session with sync
     if ((window as any).saveCurrentIndex) {
       const newIndex = currentIndex > 0 ? currentIndex - 1 : currentLeads.length - 1;
-      (window as any).saveCurrentIndex(newIndex);
+      await (window as any).saveCurrentIndex(newIndex);
     }
   };
 

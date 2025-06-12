@@ -44,13 +44,25 @@ const Index = () => {
     }
   };
 
+  const handleSessionUpdate = async (updates: any) => {
+    startSync();
+    const success = await updateSessionState(updates);
+    if (success) {
+      syncSuccess();
+    } else {
+      syncError();
+    }
+  };
+
   const handleManualSync = async () => {
     startSync();
-    // Add manual sync logic here if needed
-    // For now, just simulate a sync
-    setTimeout(() => {
+    // Trigger a session save to test sync
+    const success = await updateSessionState({});
+    if (success) {
       syncSuccess();
-    }, 1000);
+    } else {
+      syncError();
+    }
   };
 
   const handleBack = async () => {
@@ -106,7 +118,7 @@ const Index = () => {
       onBack={handleBack}
       onLeadsImported={handleLeadsImported}
       sessionState={sessionState}
-      onSessionUpdate={updateSessionState}
+      onSessionUpdate={handleSessionUpdate}
       syncStatus={syncStatus}
       onSync={handleManualSync}
     />
