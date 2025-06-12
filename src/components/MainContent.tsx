@@ -1,6 +1,7 @@
 
 import React from 'react';
 import { Lead } from '../types/lead';
+import { LeadList } from '../services/leadService';
 import FilterButtons from './FilterButtons';
 import LeadCard from './LeadCard';
 import NavigationControls from './NavigationControls';
@@ -11,6 +12,7 @@ interface MainContentProps {
   totalCount: number;
   fileName: string;
   cardKey: number;
+  leadLists: LeadList[];
   timezoneFilter: 'ALL' | 'EST_CST';
   callFilter: 'ALL' | 'UNCALLED';
   shuffleMode: boolean;
@@ -18,6 +20,7 @@ interface MainContentProps {
   callDelay: number;
   onCall: () => void;
   onResetCallCount: () => void;
+  onLeadListSelect: (leadList: LeadList) => void;
   onToggleTimezone: () => void;
   onToggleCallFilter: () => void;
   onToggleShuffle: () => void;
@@ -39,6 +42,7 @@ const MainContent: React.FC<MainContentProps> = ({
   totalCount,
   fileName,
   cardKey,
+  leadLists,
   timezoneFilter,
   callFilter,
   shuffleMode,
@@ -46,6 +50,7 @@ const MainContent: React.FC<MainContentProps> = ({
   callDelay,
   onCall,
   onResetCallCount,
+  onLeadListSelect,
   onToggleTimezone,
   onToggleCallFilter,
   onToggleShuffle,
@@ -96,8 +101,10 @@ const MainContent: React.FC<MainContentProps> = ({
           totalCount={totalCount}
           fileName={fileName}
           cardKey={cardKey}
+          leadLists={leadLists}
           onCall={onCall}
           onResetCallCount={onResetCallCount}
+          onLeadListSelect={onLeadListSelect}
         />
 
         {/* Navigation Controls */}

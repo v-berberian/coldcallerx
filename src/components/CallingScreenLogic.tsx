@@ -9,7 +9,9 @@ import AutoCallCountdown from './AutoCallCountdown';
 import { useSearchState } from './SearchState';
 import { useDailyCallState } from './DailyCallState';
 import { useLeadNavigation } from '../hooks/useLeadNavigation';
+import { useCloudLeadsData } from '@/hooks/useCloudLeadsData';
 import { Lead } from '../types/lead';
+import { LeadList } from '../services/leadService';
 
 interface CallingScreenLogicProps {
   leads: Lead[];
@@ -24,6 +26,11 @@ const CallingScreenLogic: React.FC<CallingScreenLogicProps> = ({
   onBack,
   onLeadsImported
 }) => {
+  const {
+    leadLists,
+    switchToLeadList
+  } = useCloudLeadsData();
+
   const {
     leadsData,
     currentIndex,
@@ -125,6 +132,13 @@ const CallingScreenLogic: React.FC<CallingScreenLogicProps> = ({
     setShowAutocomplete(false);
   };
 
+  const handleLeadListSelect = async (leadList: LeadList) => {
+    const success = await switchToLeadList(leadList.id);
+    if (success) {
+      console.log('Switched to lead list:', leadList.name);
+    }
+  };
+
   // Handle manual call button click
   const handleCallClick = () => {
     const currentLeads = getBaseLeads();
@@ -222,6 +236,7 @@ const CallingScreenLogic: React.FC<CallingScreenLogicProps> = ({
           totalCount={totalLeadCount}
           fileName={fileName}
           cardKey={cardKey}
+          leadLists={leadLists}
           timezoneFilter={timezoneFilter}
           callFilter={callFilter}
           shuffleMode={shuffleMode}
@@ -231,6 +246,7 @@ const CallingScreenLogic: React.FC<CallingScreenLogicProps> = ({
           countdownTime={countdownTime}
           onCall={handleCallClick}
           onResetCallCount={() => resetCallCount(currentLead)}
+          onLeadListSelect={handleLeadListSelect}
           onToggleTimezone={toggleTimezoneFilter}
           onToggleCallFilter={toggleCallFilter}
           onToggleShuffle={toggleShuffle}
