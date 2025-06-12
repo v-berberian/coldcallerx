@@ -1,3 +1,4 @@
+
 import { Lead } from '../types/lead';
 import { useNavigationState } from './useNavigationState';
 import { useFilters } from './useFilters';
@@ -10,8 +11,11 @@ import { useFilterChangeEffects } from './useFilterChangeEffects';
 import { useLeadNavigationState } from './useLeadNavigationState';
 import { useLeadNavigationActions } from './useLeadNavigationActions';
 import { useLeadNavigationEffects } from './useLeadNavigationEffects';
+import { useCallback } from 'react';
 
 export const useLeadNavigation = (initialLeads: Lead[], initialSessionState?: any) => {
+  console.log('useLeadNavigation called with session:', initialSessionState);
+  
   const {
     shouldAutoCall,
     setShouldAutoCall,
@@ -158,7 +162,8 @@ export const useLeadNavigation = (initialLeads: Lead[], initialSessionState?: an
   };
 
   // Function to reset leads data (for CSV import)
-  const resetLeadsData = (newLeads: Lead[]) => {
+  const resetLeadsData = useCallback((newLeads: Lead[]) => {
+    console.log('Resetting leads data with new leads:', newLeads.length);
     const formattedLeads = newLeads.map(lead => ({
       ...lead,
       called: lead.called || 0,
@@ -168,12 +173,15 @@ export const useLeadNavigation = (initialLeads: Lead[], initialSessionState?: an
     resetNavigation(0);
     resetShownLeads();
     resetCallState();
-  };
+  }, [setLeadsData, resetNavigation, resetShownLeads, resetCallState]);
 
   // Initialize from session state if provided
-  const initializeFromSessionState = (sessionState: any, onSessionUpdate: (updates: any) => void) => {
-    // Set initial index from session state
-    if (sessionState?.currentLeadIndex !== undefined) {
+  const initializeFromSessionState = useCallback((sessionState: any, onSessionUpdate: (updates: any) => void) => {
+    console.log('Initializing from session state:', sessionState);
+    
+    // Only set initial index if we have valid session data and haven't initialized yet
+    if (sessionState?.currentLeadIndex !== undefined && sessionState.currentLeadIndex !== currentIndex) {
+      console.log('Setting initial index from session:', sessionState.currentLeadIndex, 'current:', currentIndex);
       setCurrentIndex(sessionState.currentLeadIndex);
       setCardKey(prev => prev + 1);
     }
@@ -181,10 +189,11 @@ export const useLeadNavigation = (initialLeads: Lead[], initialSessionState?: an
     // Return functions to save session state when navigation changes
     return {
       saveCurrentIndex: (index: number) => {
+        console.log('Saving current index to session:', index);
         onSessionUpdate({ currentLeadIndex: index });
       }
     };
-  };
+  }, [currentIndex, setCurrentIndex, setCardKey]);
 
   return {
     leadsData,

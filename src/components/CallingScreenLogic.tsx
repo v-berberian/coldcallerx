@@ -28,6 +28,8 @@ const CallingScreenLogic: React.FC<CallingScreenLogicProps> = ({
   sessionState,
   onSessionUpdate
 }) => {
+  console.log('CallingScreenLogic rendering with sessionState:', sessionState);
+  
   const {
     leadsData,
     currentIndex,
@@ -86,25 +88,30 @@ const CallingScreenLogic: React.FC<CallingScreenLogicProps> = ({
     resetDailyCallCount
   } = useDailyCallState();
 
-  // Initialize from session state
+  // Initialize from session state - wait for valid session data
   useEffect(() => {
+    console.log('Session initialization effect triggered:', { sessionState, onSessionUpdate });
+    
     if (sessionState && onSessionUpdate) {
+      console.log('Initializing from session state:', sessionState);
       const { saveCurrentIndex } = initializeFromSessionState(sessionState, onSessionUpdate);
       
       // Save session when navigation changes
       const handleNavigationChange = (index: number) => {
+        console.log('Saving current index to session:', index);
         saveCurrentIndex(index);
       };
 
       // Store the handler for use in navigation
       (window as any).saveCurrentIndex = handleNavigationChange;
     }
-  }, [sessionState, onSessionUpdate]);
+  }, [sessionState, onSessionUpdate, initializeFromSessionState]);
 
   // Handle new CSV imports by resetting the leads data
   useEffect(() => {
+    console.log('Resetting leads data for new CSV import');
     resetLeadsData(leads);
-  }, [leads]);
+  }, [leads, resetLeadsData]);
 
   // Save updated leads data to localStorage whenever leadsData changes
   useEffect(() => {
@@ -128,7 +135,7 @@ const CallingScreenLogic: React.FC<CallingScreenLogicProps> = ({
       
       setShouldAutoCall(false);
     }
-  }, [shouldAutoCall, autoCall, currentIndex, cardKey]);
+  }, [shouldAutoCall, autoCall, currentIndex, cardKey, getBaseLeads, setCurrentLeadForAutoCall, executeAutoCall, incrementDailyCallCount, setShouldAutoCall]);
 
   const handleLeadSelect = (lead: Lead) => {
     const baseLeads = getBaseLeads();
@@ -166,6 +173,7 @@ const CallingScreenLogic: React.FC<CallingScreenLogicProps> = ({
     // Save new index to session
     if ((window as any).saveCurrentIndex) {
       const newIndex = (currentIndex + 1) % currentLeads.length;
+      console.log('Navigating to next lead, saving index:', newIndex);
       (window as any).saveCurrentIndex(newIndex);
     }
   };
@@ -177,12 +185,20 @@ const CallingScreenLogic: React.FC<CallingScreenLogicProps> = ({
     // Save new index to session
     if ((window as any).saveCurrentIndex) {
       const newIndex = currentIndex > 0 ? currentIndex - 1 : currentLeads.length - 1;
+      console.log('Navigating to previous lead, saving index:', newIndex);
       (window as any).saveCurrentIndex(newIndex);
     }
   };
 
   const currentLeads = getBaseLeads();
   const currentLead = currentLeads[currentIndex];
+  
+  console.log('Current state:', { 
+    currentIndex, 
+    currentLeadName: currentLead?.name, 
+    totalLeads: currentLeads.length,
+    sessionCurrentIndex: sessionState?.currentLeadIndex 
+  });
   
   if (leadsData.length === 0) {
     return (

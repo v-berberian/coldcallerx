@@ -1,5 +1,5 @@
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { Loader2 } from 'lucide-react';
@@ -13,6 +13,8 @@ import { Lead } from '@/types/lead';
 const Index = () => {
   const { user, loading: authLoading, signOut } = useAuth();
   const navigate = useNavigate();
+  const [initializationComplete, setInitializationComplete] = useState(false);
+  
   const {
     currentLeadList,
     leadsData,
@@ -30,6 +32,19 @@ const Index = () => {
     }
   }, [user, authLoading, navigate]);
 
+  // Mark initialization as complete when we have either leads data or confirmed no leads
+  useEffect(() => {
+    if (!leadsLoading && (!currentLeadList || leadsData.length > 0 || currentLeadList)) {
+      console.log('Initialization complete:', { 
+        leadsLoading, 
+        currentLeadList: !!currentLeadList, 
+        leadsDataLength: leadsData.length,
+        sessionState 
+      });
+      setInitializationComplete(true);
+    }
+  }, [leadsLoading, currentLeadList, leadsData.length, sessionState]);
+
   const handleLeadsImported = async (importedLeads: Lead[], importedFileName: string) => {
     const success = await importLeadsFromCSV(importedLeads, importedFileName);
     if (!success) {
@@ -41,7 +56,8 @@ const Index = () => {
     await signOut();
   };
 
-  if (authLoading || leadsLoading) {
+  if (authLoading || leadsLoading || !initializationComplete) {
+    console.log('Loading state:', { authLoading, leadsLoading, initializationComplete });
     return (
       <div className="min-h-screen flex items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin" />
@@ -82,6 +98,8 @@ const Index = () => {
       </div>
     );
   }
+
+  console.log('Rendering CallingScreen with session state:', sessionState);
 
   return (
     <CallingScreen 
