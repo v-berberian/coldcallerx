@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -33,7 +32,7 @@ const LeadCard: React.FC<LeadCardProps> = ({
   onResetCallCount
 }) => {
   return (
-    <Card key={cardKey} className="shadow-2xl border-border/50 rounded-3xl bg-card h-[400px] flex flex-col animate-scale-in duration-150">
+    <Card key={cardKey} className="shadow-2xl border-border/50 rounded-3xl bg-card h-[400px] flex flex-col animate-scale-in">
       <CardContent className="p-6 space-y-4 flex-1 flex flex-col">
         {/* Top row with lead count and file name */}
         <div className="flex items-center justify-between">
@@ -45,8 +44,8 @@ const LeadCard: React.FC<LeadCardProps> = ({
           </p>
         </div>
 
-        {/* Lead info - Main content area with faster animation */}
-        <div key={`${lead.name}-${lead.phone}`} className="text-center space-y-3 flex-1 flex flex-col justify-center animate-content-change duration-100">
+        {/* Lead info - Main content area with animation */}
+        <div key={`${lead.name}-${lead.phone}`} className="text-center space-y-3 flex-1 flex flex-col justify-center animate-content-change">
           {/* State and timezone - moved to top with same font size as "Called: times" */}
           <p className="text-sm text-muted-foreground">
             {getStateFromAreaCode(lead.phone)}
@@ -74,7 +73,7 @@ const LeadCard: React.FC<LeadCardProps> = ({
             {/* Reserve space for last called text to prevent layout shift */}
             <div className="h-5 flex items-center justify-center">
               {lead.lastCalled && (
-                <p className="text-sm text-muted-foreground animate-fade-in duration-100 whitespace-nowrap">
+                <p className="text-sm text-muted-foreground animate-fade-in whitespace-nowrap">
                   Last called: {lead.lastCalled}
                 </p>
               )}

@@ -16,21 +16,13 @@ interface CallingScreenLogicProps {
   fileName: string;
   onBack: () => void;
   onLeadsImported: (leads: Lead[], fileName: string) => void;
-  sessionState?: any;
-  onSessionUpdate?: (updates: any) => void;
-  syncStatus?: 'idle' | 'syncing' | 'success' | 'error';
-  onSync?: () => void;
 }
 
 const CallingScreenLogic: React.FC<CallingScreenLogicProps> = ({
   leads,
   fileName,
   onBack,
-  onLeadsImported,
-  sessionState,
-  onSessionUpdate,
-  syncStatus = 'idle',
-  onSync
+  onLeadsImported
 }) => {
   const {
     leadsData,
@@ -63,9 +55,8 @@ const CallingScreenLogic: React.FC<CallingScreenLogicProps> = ({
     toggleAutoCall,
     toggleCallDelay,
     resetCallDelay,
-    resetLeadsData,
-    initializeFromSessionState
-  } = useLeadNavigation(leads, sessionState);
+    resetLeadsData
+  } = useLeadNavigation(leads);
 
   const {
     searchQuery,
@@ -90,49 +81,6 @@ const CallingScreenLogic: React.FC<CallingScreenLogicProps> = ({
     resetDailyCallCount
   } = useDailyCallState();
 
-  // Initialize from session state
-  useEffect(() => {
-    if (sessionState && onSessionUpdate) {
-      const { saveCurrentIndex } = initializeFromSessionState(sessionState, onSessionUpdate);
-      
-      // Enhanced session save function that includes more data
-      const handleSessionSave = async (updates: any) => {
-        if (onSync) {
-          onSync(); // Start sync status
-        }
-        
-        // Add current leads data and daily stats to the session update
-        const enhancedUpdates = {
-          ...updates,
-          leadsData: leadsData,
-          dailyCallCount: dailyCallCount,
-          lastSyncedAt: new Date().toISOString()
-        };
-        
-        try {
-          await saveCurrentIndex(updates.currentLeadIndex || currentIndex);
-          
-          if (onSync) {
-            // Delay the success animation to let card animation complete first
-            setTimeout(() => {
-              onSync();
-            }, 200);
-          }
-        } catch (error) {
-          console.error('Session save failed:', error);
-          if (onSync) {
-            setTimeout(() => {
-              onSync();
-            }, 200);
-          }
-        }
-      };
-
-      // Store the enhanced handler for use in navigation
-      (window as any).saveCurrentIndex = handleSessionSave;
-    }
-  }, [sessionState, onSessionUpdate, onSync, leadsData, dailyCallCount, currentIndex]);
-
   // Handle new CSV imports by resetting the leads data
   useEffect(() => {
     resetLeadsData(leads);
@@ -142,17 +90,8 @@ const CallingScreenLogic: React.FC<CallingScreenLogicProps> = ({
   useEffect(() => {
     if (leadsData.length > 0) {
       localStorage.setItem('coldcaller-leads', JSON.stringify(leadsData));
-      
-      // Also sync leads data changes to cloud
-      if ((window as any).saveCurrentIndex) {
-        (window as any).saveCurrentIndex({
-          currentLeadIndex: currentIndex,
-          leadsData: leadsData,
-          dailyCallCount: dailyCallCount
-        });
-      }
     }
-  }, [leadsData, currentIndex, dailyCallCount]);
+  }, [leadsData]);
 
   // Handle auto-call using the currently displayed lead
   useEffect(() => {
@@ -171,7 +110,7 @@ const CallingScreenLogic: React.FC<CallingScreenLogicProps> = ({
     }
   }, [shouldAutoCall, autoCall, currentIndex, cardKey]);
 
-  const handleLeadSelect = async (lead: Lead) => {
+  const handleLeadSelect = (lead: Lead) => {
     const baseLeads = getBaseLeads();
     const leadIndexInBaseLeads = baseLeads.findIndex(l => 
       l.name === lead.name && l.phone === lead.phone
@@ -180,15 +119,6 @@ const CallingScreenLogic: React.FC<CallingScreenLogicProps> = ({
     if (leadIndexInBaseLeads !== -1) {
       selectLead(lead, baseLeads, leadsData);
       console.log('Selected lead from autocomplete:', lead.name, 'at base index:', leadIndexInBaseLeads);
-      
-      // Save the new index to session with enhanced sync
-      if ((window as any).saveCurrentIndex) {
-        (window as any).saveCurrentIndex({
-          currentLeadIndex: leadIndexInBaseLeads,
-          leadsData: leadsData,
-          dailyCallCount: dailyCallCount
-        });
-      }
     }
     
     setSearchQuery('');
@@ -201,46 +131,17 @@ const CallingScreenLogic: React.FC<CallingScreenLogicProps> = ({
     const currentLead = currentLeads[currentIndex];
     makeCall(currentLead);
     incrementDailyCallCount();
-    
-    // Sync the call update to cloud
-    if ((window as any).saveCurrentIndex) {
-      (window as any).saveCurrentIndex({
-        currentLeadIndex: currentIndex,
-        leadsData: leadsData,
-        dailyCallCount: dailyCallCount + 1
-      });
-    }
   };
 
   // Create wrapper functions for navigation that pass the required baseLeads parameter
-  const handleNextWrapper = async () => {
+  const handleNextWrapper = () => {
     const currentLeads = getBaseLeads();
     handleNext(currentLeads);
-    
-    // Save new index to session with enhanced sync
-    if ((window as any).saveCurrentIndex) {
-      const newIndex = (currentIndex + 1) % currentLeads.length;
-      (window as any).saveCurrentIndex({
-        currentLeadIndex: newIndex,
-        leadsData: leadsData,
-        dailyCallCount: dailyCallCount
-      });
-    }
   };
 
-  const handlePreviousWrapper = async () => {
+  const handlePreviousWrapper = () => {
     const currentLeads = getBaseLeads();
     handlePrevious(currentLeads);
-    
-    // Save new index to session with enhanced sync
-    if ((window as any).saveCurrentIndex) {
-      const newIndex = currentIndex > 0 ? currentIndex - 1 : currentLeads.length - 1;
-      (window as any).saveCurrentIndex({
-        currentLeadIndex: newIndex,
-        leadsData: leadsData,
-        dailyCallCount: dailyCallCount
-      });
-    }
   };
 
   const currentLeads = getBaseLeads();
@@ -305,14 +206,12 @@ const CallingScreenLogic: React.FC<CallingScreenLogicProps> = ({
         searchResults={searchResults}
         leadsData={leadsData}
         fileName={fileName}
-        syncStatus={syncStatus}
         onSearchChange={setSearchQuery}
         onSearchFocus={handleSearchFocus}
         onSearchBlur={handleSearchBlur}
         onClearSearch={clearSearch}
         onLeadSelect={handleLeadSelect}
         onLeadsImported={onLeadsImported}
-        onSync={onSync}
       />
 
       {/* Main Content - takes remaining space */}

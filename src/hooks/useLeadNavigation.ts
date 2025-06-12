@@ -1,3 +1,4 @@
+
 import { Lead } from '../types/lead';
 import { useNavigationState } from './useNavigationState';
 import { useFilters } from './useFilters';
@@ -11,7 +12,7 @@ import { useLeadNavigationState } from './useLeadNavigationState';
 import { useLeadNavigationActions } from './useLeadNavigationActions';
 import { useLeadNavigationEffects } from './useLeadNavigationEffects';
 
-export const useLeadNavigation = (initialLeads: Lead[], initialSessionState?: any) => {
+export const useLeadNavigation = (initialLeads: Lead[]) => {
   const {
     shouldAutoCall,
     setShouldAutoCall,
@@ -170,22 +171,6 @@ export const useLeadNavigation = (initialLeads: Lead[], initialSessionState?: an
     resetCallState();
   };
 
-  // Initialize from session state if provided
-  const initializeFromSessionState = (sessionState: any, onSessionUpdate: (updates: any) => void) => {
-    // Set initial index from session state
-    if (sessionState?.currentLeadIndex !== undefined) {
-      setCurrentIndex(sessionState.currentLeadIndex);
-      setCardKey(prev => prev + 1);
-    }
-
-    // Return functions to save session state when navigation changes
-    return {
-      saveCurrentIndex: (index: number) => {
-        onSessionUpdate({ currentLeadIndex: index });
-      }
-    };
-  };
-
   return {
     leadsData,
     currentIndex,
@@ -218,7 +203,6 @@ export const useLeadNavigation = (initialLeads: Lead[], initialSessionState?: an
     toggleCallDelay,
     resetCallDelay,
     resetLeadsData,
-    countdownTime,
-    initializeFromSessionState
+    countdownTime
   };
 };
