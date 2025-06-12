@@ -1,3 +1,4 @@
+
 import React, { useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -5,6 +6,7 @@ import CallingHeader from './CallingHeader';
 import MainContent from './MainContent';
 import DailyProgress from './DailyProgress';
 import AutoCallCountdown from './AutoCallCountdown';
+import SessionConflictAlert from './SessionConflictAlert';
 import { useSearchState } from './SearchState';
 import { useDailyCallState } from './DailyCallState';
 import { useLeadNavigation } from '../hooks/useLeadNavigation';
@@ -19,6 +21,10 @@ interface CallingScreenLogicProps {
   onSessionUpdate?: (updates: any) => void;
   syncStatus?: 'idle' | 'syncing' | 'success' | 'error';
   onSync?: () => void;
+  isSessionConflict?: boolean;
+  lastRemoteUpdate?: string | null;
+  onSyncFromRemote?: () => void;
+  onClearSessionConflict?: () => void;
 }
 
 const CallingScreenLogic: React.FC<CallingScreenLogicProps> = ({
@@ -29,7 +35,11 @@ const CallingScreenLogic: React.FC<CallingScreenLogicProps> = ({
   sessionState,
   onSessionUpdate,
   syncStatus = 'idle',
-  onSync
+  onSync,
+  isSessionConflict = false,
+  lastRemoteUpdate,
+  onSyncFromRemote,
+  onClearSessionConflict
 }) => {
   const {
     leadsData,
@@ -102,10 +112,10 @@ const CallingScreenLogic: React.FC<CallingScreenLogicProps> = ({
         
         const success = await saveCurrentIndex(index);
         
-        if (onSync && success) {
+        if (success && onSync) {
           // Simulate successful sync after a short delay
           setTimeout(() => {
-            if (onSync) onSync();
+            onSync();
           }, 500);
         }
       };
@@ -113,12 +123,12 @@ const CallingScreenLogic: React.FC<CallingScreenLogicProps> = ({
       // Store the handler for use in navigation
       (window as any).saveCurrentIndex = handleNavigationChange;
     }
-  }, [sessionState, onSessionUpdate, onSync]);
+  }, [sessionState, onSessionUpdate, onSync, initializeFromSessionState]);
 
   // Handle new CSV imports by resetting the leads data
   useEffect(() => {
     resetLeadsData(leads);
-  }, [leads]);
+  }, [leads, resetLeadsData]);
 
   // Save updated leads data to localStorage whenever leadsData changes
   useEffect(() => {
@@ -142,7 +152,7 @@ const CallingScreenLogic: React.FC<CallingScreenLogicProps> = ({
       
       setShouldAutoCall(false);
     }
-  }, [shouldAutoCall, autoCall, currentIndex, cardKey]);
+  }, [shouldAutoCall, autoCall, currentIndex, cardKey, getBaseLeads, setCurrentLeadForAutoCall, executeAutoCall, incrementDailyCallCount, setShouldAutoCall]);
 
   const handleLeadSelect = async (lead: Lead) => {
     const baseLeads = getBaseLeads();
@@ -192,6 +202,18 @@ const CallingScreenLogic: React.FC<CallingScreenLogicProps> = ({
     if ((window as any).saveCurrentIndex) {
       const newIndex = currentIndex > 0 ? currentIndex - 1 : currentLeads.length - 1;
       await (window as any).saveCurrentIndex(newIndex);
+    }
+  };
+
+  const handleSyncFromRemote = () => {
+    if (onSyncFromRemote) {
+      onSyncFromRemote();
+    }
+  };
+
+  const handleClearSessionConflict = () => {
+    if (onClearSessionConflict) {
+      onClearSessionConflict();
     }
   };
 
@@ -250,6 +272,14 @@ const CallingScreenLogic: React.FC<CallingScreenLogicProps> = ({
 
   return (
     <div className="h-[100dvh] bg-background flex flex-col overflow-hidden fixed inset-0">
+      {/* Session Conflict Alert */}
+      <SessionConflictAlert
+        isVisible={isSessionConflict}
+        lastRemoteUpdate={lastRemoteUpdate}
+        onSyncFromRemote={handleSyncFromRemote}
+        onDismiss={handleClearSessionConflict}
+      />
+
       {/* Header */}
       <CallingHeader
         searchQuery={searchQuery}

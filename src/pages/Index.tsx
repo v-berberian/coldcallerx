@@ -20,9 +20,13 @@ const Index = () => {
     dailyCallCount,
     loading: leadsLoading,
     sessionState,
+    isSessionConflict,
+    lastRemoteUpdate,
     importLeadsFromCSV,
     resetDailyCallCount,
-    updateSessionState
+    updateSessionState,
+    syncFromRemoteSession,
+    clearSessionConflict
   } = useCloudLeadsData();
 
   const { syncStatus, startSync, syncSuccess, syncError } = useSyncStatus();
@@ -62,6 +66,14 @@ const Index = () => {
       syncSuccess();
     } else {
       syncError();
+    }
+  };
+
+  const handleSyncFromRemote = async () => {
+    const remoteState = await syncFromRemoteSession();
+    if (remoteState) {
+      // Update the current session state with the remote state
+      await updateSessionState(remoteState);
     }
   };
 
@@ -121,6 +133,10 @@ const Index = () => {
       onSessionUpdate={handleSessionUpdate}
       syncStatus={syncStatus}
       onSync={handleManualSync}
+      isSessionConflict={isSessionConflict}
+      lastRemoteUpdate={lastRemoteUpdate}
+      onSyncFromRemote={handleSyncFromRemote}
+      onClearSessionConflict={clearSessionConflict}
     />
   );
 };
