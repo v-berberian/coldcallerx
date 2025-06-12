@@ -5,7 +5,6 @@ import { Card, CardContent } from '@/components/ui/card';
 import CallingHeader from './CallingHeader';
 import MainContent from './MainContent';
 import DailyProgress from './DailyProgress';
-import AutoCallCountdown from './AutoCallCountdown';
 import { useSearchState } from './SearchState';
 import { useDailyCallState } from './DailyCallState';
 import { useLeadNavigation } from '../hooks/useLeadNavigation';
@@ -38,41 +37,8 @@ const CallingScreenLogic: React.FC<CallingScreenLogicProps> = ({
   console.log('CallingScreenLogic rendering with sessionState:', sessionState);
   const [isNavigating, setIsNavigating] = useState(false);
   
-  const {
-    leadsData,
-    currentIndex,
-    cardKey,
-    timezoneFilter,
-    callFilter,
-    shuffleMode,
-    autoCall,
-    callDelay,
-    historyIndex,
-    shouldAutoCall,
-    setShouldAutoCall,
-    currentLeadForAutoCall,
-    setCurrentLeadForAutoCall,
-    isCountdownActive,
-    countdownTime,
-    getBaseLeads,
-    makeCall,
-    executeAutoCall,
-    handleCountdownComplete,
-    handleNext,
-    handlePrevious,
-    resetCallCount,
-    resetAllCallCounts,
-    selectLead,
-    toggleTimezoneFilter,
-    toggleCallFilter,
-    toggleShuffle,
-    toggleAutoCall,
-    toggleCallDelay,
-    resetCallDelay,
-    resetLeadsData,
-    initializeFromSessionState
-  } = useLeadNavigation(leads, sessionState);
-
+  const leadNavigation = useLeadNavigation(leads, sessionState);
+  
   const {
     searchQuery,
     setSearchQuery,
@@ -84,10 +50,10 @@ const CallingScreenLogic: React.FC<CallingScreenLogicProps> = ({
     handleSearchBlur
   } = useSearchState({ 
     leads, 
-    getBaseLeads, 
-    leadsData, 
-    timezoneFilter, 
-    callFilter 
+    getBaseLeads: leadNavigation.getBaseLeads, 
+    leadsData: leadNavigation.leadsData, 
+    timezoneFilter: leadNavigation.timezoneFilter, 
+    callFilter: leadNavigation.callFilter 
   });
 
   const {
@@ -102,51 +68,51 @@ const CallingScreenLogic: React.FC<CallingScreenLogicProps> = ({
     
     if (sessionState && onSessionUpdate) {
       console.log('Initializing from session state:', sessionState);
-      const { saveCurrentIndex } = initializeFromSessionState(sessionState, onSessionUpdate);
+      const { saveCurrentIndex } = leadNavigation.initializeFromSessionState(sessionState, onSessionUpdate);
       
       // Store the handler for navigation sync
       (window as any).saveCurrentIndex = saveCurrentIndex;
     }
-  }, [sessionState, onSessionUpdate, initializeFromSessionState]);
+  }, [sessionState, onSessionUpdate, leadNavigation.initializeFromSessionState]);
 
   // Handle new CSV imports by resetting the leads data
   useEffect(() => {
     console.log('Resetting leads data for new CSV import');
-    resetLeadsData(leads);
-  }, [leads, resetLeadsData]);
+    leadNavigation.resetLeadsData(leads);
+  }, [leads, leadNavigation.resetLeadsData]);
 
   // Save updated leads data to localStorage whenever leadsData changes
   useEffect(() => {
-    if (leadsData.length > 0) {
-      localStorage.setItem('coldcaller-leads', JSON.stringify(leadsData));
+    if (leadNavigation.leadsData.length > 0) {
+      localStorage.setItem('coldcaller-leads', JSON.stringify(leadNavigation.leadsData));
     }
-  }, [leadsData]);
+  }, [leadNavigation.leadsData]);
 
   // Handle auto-call using the currently displayed lead
   useEffect(() => {
-    if (shouldAutoCall && autoCall) {
-      const currentLeads = getBaseLeads();
-      const currentLead = currentLeads[currentIndex];
+    if (leadNavigation.shouldAutoCall && leadNavigation.autoCall) {
+      const currentLeads = leadNavigation.getBaseLeads();
+      const currentLead = currentLeads[leadNavigation.currentIndex];
       
       if (currentLead) {
         console.log('Auto-call triggered for displayed lead:', currentLead.name, currentLead.phone);
-        setCurrentLeadForAutoCall(currentLead);
-        executeAutoCall(currentLead);
+        leadNavigation.setCurrentLeadForAutoCall(currentLead);
+        leadNavigation.executeAutoCall(currentLead);
         incrementDailyCallCount();
       }
       
-      setShouldAutoCall(false);
+      leadNavigation.setShouldAutoCall(false);
     }
-  }, [shouldAutoCall, autoCall, currentIndex, cardKey, getBaseLeads, setCurrentLeadForAutoCall, executeAutoCall, incrementDailyCallCount, setShouldAutoCall]);
+  }, [leadNavigation.shouldAutoCall, leadNavigation.autoCall, leadNavigation.currentIndex, leadNavigation.cardKey, leadNavigation.getBaseLeads, leadNavigation.setCurrentLeadForAutoCall, leadNavigation.executeAutoCall, incrementDailyCallCount, leadNavigation.setShouldAutoCall]);
 
   const handleLeadSelect = (lead: Lead) => {
-    const baseLeads = getBaseLeads();
+    const baseLeads = leadNavigation.getBaseLeads();
     const leadIndexInBaseLeads = baseLeads.findIndex(l => 
       l.name === lead.name && l.phone === lead.phone
     );
     
     if (leadIndexInBaseLeads !== -1) {
-      selectLead(lead, baseLeads, leadsData);
+      leadNavigation.selectLead(lead, baseLeads, leadNavigation.leadsData);
       console.log('Selected lead from autocomplete:', lead.name, 'at base index:', leadIndexInBaseLeads);
       
       // Save the new index to session
@@ -161,21 +127,21 @@ const CallingScreenLogic: React.FC<CallingScreenLogicProps> = ({
 
   // Handle manual call button click
   const handleCallClick = () => {
-    const currentLeads = getBaseLeads();
-    const currentLead = currentLeads[currentIndex];
-    makeCall(currentLead);
+    const currentLeads = leadNavigation.getBaseLeads();
+    const currentLead = currentLeads[leadNavigation.currentIndex];
+    leadNavigation.makeCall(currentLead);
     incrementDailyCallCount();
   };
 
   // Create wrapper functions for navigation with cloud sync
   const handleNextWrapper = async () => {
     setIsNavigating(true);
-    const currentLeads = getBaseLeads();
-    handleNext(currentLeads);
+    const currentLeads = leadNavigation.getBaseLeads();
+    leadNavigation.handleNext(currentLeads);
     
     // Save new index to session
     if ((window as any).saveCurrentIndex) {
-      const newIndex = (currentIndex + 1) % currentLeads.length;
+      const newIndex = (leadNavigation.currentIndex + 1) % currentLeads.length;
       console.log('Navigating to next lead, saving index:', newIndex);
       await (window as any).saveCurrentIndex(newIndex);
     }
@@ -184,29 +150,29 @@ const CallingScreenLogic: React.FC<CallingScreenLogicProps> = ({
 
   const handlePreviousWrapper = async () => {
     setIsNavigating(true);
-    const currentLeads = getBaseLeads();
-    handlePrevious(currentLeads);
+    const currentLeads = leadNavigation.getBaseLeads();
+    leadNavigation.handlePrevious(currentLeads);
     
     // Save new index to session
     if ((window as any).saveCurrentIndex) {
-      const newIndex = currentIndex > 0 ? currentIndex - 1 : currentLeads.length - 1;
+      const newIndex = leadNavigation.currentIndex > 0 ? leadNavigation.currentIndex - 1 : currentLeads.length - 1;
       console.log('Navigating to previous lead, saving index:', newIndex);
       await (window as any).saveCurrentIndex(newIndex);
     }
     setIsNavigating(false);
   };
 
-  const currentLeads = getBaseLeads();
-  const currentLead = currentLeads[currentIndex];
+  const currentLeads = leadNavigation.getBaseLeads();
+  const currentLead = currentLeads[leadNavigation.currentIndex];
   
   console.log('Current state:', { 
-    currentIndex, 
+    currentIndex: leadNavigation.currentIndex, 
     currentLeadName: currentLead?.name, 
     totalLeads: currentLeads.length,
     sessionCurrentIndex: sessionState?.currentLeadIndex 
   });
   
-  if (leadsData.length === 0) {
+  if (leadNavigation.leadsData.length === 0) {
     return (
       <div className="h-[100dvh] bg-background overflow-hidden fixed inset-0">
         <div className="bg-background border-b border-border p-4">
@@ -236,8 +202,8 @@ const CallingScreenLogic: React.FC<CallingScreenLogicProps> = ({
             <div className="mt-4 space-y-2">
               <Button 
                 onClick={() => {
-                  toggleTimezoneFilter();
-                  toggleCallFilter();
+                  leadNavigation.toggleTimezoneFilter();
+                  leadNavigation.toggleCallFilter();
                   setSearchQuery('');
                 }} 
                 className="w-full rounded-xl"
@@ -263,7 +229,7 @@ const CallingScreenLogic: React.FC<CallingScreenLogicProps> = ({
         searchQuery={searchQuery}
         showAutocomplete={showAutocomplete}
         searchResults={searchResults}
-        leadsData={leadsData}
+        leadsData={leadNavigation.leadsData}
         fileName={fileName}
         onSearchChange={setSearchQuery}
         onSearchFocus={handleSearchFocus}
@@ -278,26 +244,26 @@ const CallingScreenLogic: React.FC<CallingScreenLogicProps> = ({
       <div className="flex-1 overflow-hidden">
         <MainContent
           currentLead={currentLead}
-          currentIndex={currentIndex}
+          currentIndex={leadNavigation.currentIndex}
           totalCount={totalLeadCount}
           fileName={fileName}
-          cardKey={cardKey}
-          timezoneFilter={timezoneFilter}
-          callFilter={callFilter}
-          shuffleMode={shuffleMode}
-          autoCall={autoCall}
-          callDelay={callDelay}
-          isCountdownActive={isCountdownActive}
-          countdownTime={countdownTime}
+          cardKey={leadNavigation.cardKey}
+          timezoneFilter={leadNavigation.timezoneFilter}
+          callFilter={leadNavigation.callFilter}
+          shuffleMode={leadNavigation.shuffleMode}
+          autoCall={leadNavigation.autoCall}
+          callDelay={leadNavigation.callDelay}
+          isCountdownActive={leadNavigation.isCountdownActive}
+          countdownTime={leadNavigation.countdownTime}
           onCall={handleCallClick}
-          onResetCallCount={() => resetCallCount(currentLead)}
-          onToggleTimezone={toggleTimezoneFilter}
-          onToggleCallFilter={toggleCallFilter}
-          onToggleShuffle={toggleShuffle}
-          onToggleAutoCall={toggleAutoCall}
-          onToggleCallDelay={toggleCallDelay}
-          onResetCallDelay={resetCallDelay}
-          onResetAllCalls={resetAllCallCounts}
+          onResetCallCount={() => leadNavigation.resetCallCount(currentLead)}
+          onToggleTimezone={leadNavigation.toggleTimezoneFilter}
+          onToggleCallFilter={leadNavigation.toggleCallFilter}
+          onToggleShuffle={leadNavigation.toggleShuffle}
+          onToggleAutoCall={leadNavigation.toggleAutoCall}
+          onToggleCallDelay={leadNavigation.toggleCallDelay}
+          onResetCallDelay={leadNavigation.resetCallDelay}
+          onResetAllCalls={leadNavigation.resetAllCallCounts}
           onPrevious={handlePreviousWrapper}
           onNext={handleNextWrapper}
           canGoPrevious={currentLeads.length > 1}

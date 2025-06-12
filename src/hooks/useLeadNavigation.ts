@@ -11,6 +11,7 @@ import { useFilterChangeEffects } from './useFilterChangeEffects';
 import { useLeadNavigationState } from './useLeadNavigationState';
 import { useLeadNavigationActions } from './useLeadNavigationActions';
 import { useLeadNavigationEffects } from './useLeadNavigationEffects';
+import { useSessionNavigation } from './useSessionNavigation';
 import { useCallback } from 'react';
 
 export const useLeadNavigation = (initialLeads: Lead[], initialSessionState?: any) => {
@@ -68,6 +69,8 @@ export const useLeadNavigation = (initialLeads: Lead[], initialSessionState?: an
   const { getBaseLeads } = useLeadFiltering(leadsData, timezoneFilter, callFilter);
 
   const { isAutoCallInProgress, isCountdownActive, countdownTime, executeAutoCall, handleCountdownComplete, resetAutoCall, shouldBlockNavigation } = useAutoCall(makeCall, callDelay);
+
+  const { initializeFromSessionState } = useSessionNavigation(initialSessionState);
 
   const { handleNext, handlePrevious, selectLead } = useNavigation(
     currentIndex,
@@ -175,25 +178,10 @@ export const useLeadNavigation = (initialLeads: Lead[], initialSessionState?: an
     resetCallState();
   }, [setLeadsData, resetNavigation, resetShownLeads, resetCallState]);
 
-  // Initialize from session state if provided
-  const initializeFromSessionState = useCallback((sessionState: any, onSessionUpdate: (updates: any) => void) => {
-    console.log('Initializing from session state:', sessionState);
-    
-    // Set initial index if we have valid session data
-    if (sessionState?.currentLeadIndex !== undefined && sessionState.currentLeadIndex !== currentIndex) {
-      console.log('Setting initial index from session:', sessionState.currentLeadIndex, 'current:', currentIndex);
-      setCurrentIndex(sessionState.currentLeadIndex);
-      setCardKey(prev => prev + 1);
-    }
-
-    // Return functions to save session state when navigation changes
-    return {
-      saveCurrentIndex: async (index: number) => {
-        console.log('Saving current index to session:', index);
-        await onSessionUpdate({ currentLeadIndex: index });
-      }
-    };
-  }, [currentIndex, setCurrentIndex, setCardKey]);
+  // Initialize session state wrapper
+  const initializeFromSessionStateWrapper = useCallback((sessionState: any, onSessionUpdate: (updates: any) => void) => {
+    return initializeFromSessionState(currentIndex, setCurrentIndex, setCardKey);
+  }, [initializeFromSessionState, currentIndex, setCurrentIndex, setCardKey]);
 
   return {
     leadsData,
@@ -228,6 +216,6 @@ export const useLeadNavigation = (initialLeads: Lead[], initialSessionState?: an
     resetCallDelay,
     resetLeadsData,
     countdownTime,
-    initializeFromSessionState
+    initializeFromSessionState: initializeFromSessionStateWrapper
   };
 };
