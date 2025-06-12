@@ -16,13 +16,17 @@ interface CallingScreenLogicProps {
   fileName: string;
   onBack: () => void;
   onLeadsImported: (leads: Lead[], fileName: string) => void;
+  sessionState?: any;
+  onSessionUpdate?: (updates: any) => void;
 }
 
 const CallingScreenLogic: React.FC<CallingScreenLogicProps> = ({
   leads,
   fileName,
   onBack,
-  onLeadsImported
+  onLeadsImported,
+  sessionState,
+  onSessionUpdate
 }) => {
   const {
     leadsData,
@@ -55,8 +59,9 @@ const CallingScreenLogic: React.FC<CallingScreenLogicProps> = ({
     toggleAutoCall,
     toggleCallDelay,
     resetCallDelay,
-    resetLeadsData
-  } = useLeadNavigation(leads);
+    resetLeadsData,
+    initializeFromSessionState
+  } = useLeadNavigation(leads, sessionState);
 
   const {
     searchQuery,
@@ -80,6 +85,21 @@ const CallingScreenLogic: React.FC<CallingScreenLogicProps> = ({
     incrementDailyCallCount,
     resetDailyCallCount
   } = useDailyCallState();
+
+  // Initialize from session state
+  useEffect(() => {
+    if (sessionState && onSessionUpdate) {
+      const { saveCurrentIndex } = initializeFromSessionState(sessionState, onSessionUpdate);
+      
+      // Save session when navigation changes
+      const handleNavigationChange = (index: number) => {
+        saveCurrentIndex(index);
+      };
+
+      // Store the handler for use in navigation
+      (window as any).saveCurrentIndex = handleNavigationChange;
+    }
+  }, [sessionState, onSessionUpdate]);
 
   // Handle new CSV imports by resetting the leads data
   useEffect(() => {
@@ -119,6 +139,11 @@ const CallingScreenLogic: React.FC<CallingScreenLogicProps> = ({
     if (leadIndexInBaseLeads !== -1) {
       selectLead(lead, baseLeads, leadsData);
       console.log('Selected lead from autocomplete:', lead.name, 'at base index:', leadIndexInBaseLeads);
+      
+      // Save the new index to session
+      if ((window as any).saveCurrentIndex) {
+        (window as any).saveCurrentIndex(leadIndexInBaseLeads);
+      }
     }
     
     setSearchQuery('');
@@ -137,11 +162,23 @@ const CallingScreenLogic: React.FC<CallingScreenLogicProps> = ({
   const handleNextWrapper = () => {
     const currentLeads = getBaseLeads();
     handleNext(currentLeads);
+    
+    // Save new index to session
+    if ((window as any).saveCurrentIndex) {
+      const newIndex = (currentIndex + 1) % currentLeads.length;
+      (window as any).saveCurrentIndex(newIndex);
+    }
   };
 
   const handlePreviousWrapper = () => {
     const currentLeads = getBaseLeads();
     handlePrevious(currentLeads);
+    
+    // Save new index to session
+    if ((window as any).saveCurrentIndex) {
+      const newIndex = currentIndex > 0 ? currentIndex - 1 : currentLeads.length - 1;
+      (window as any).saveCurrentIndex(newIndex);
+    }
   };
 
   const currentLeads = getBaseLeads();

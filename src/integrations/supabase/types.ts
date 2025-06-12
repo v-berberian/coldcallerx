@@ -137,6 +137,59 @@ export type Database = {
         }
         Relationships: []
       }
+      user_sessions: {
+        Row: {
+          auto_call: boolean | null
+          call_delay: number | null
+          call_filter: string | null
+          created_at: string | null
+          current_lead_index: number | null
+          current_lead_list_id: string | null
+          id: string
+          last_accessed_at: string | null
+          shuffle_mode: boolean | null
+          timezone_filter: string | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          auto_call?: boolean | null
+          call_delay?: number | null
+          call_filter?: string | null
+          created_at?: string | null
+          current_lead_index?: number | null
+          current_lead_list_id?: string | null
+          id?: string
+          last_accessed_at?: string | null
+          shuffle_mode?: boolean | null
+          timezone_filter?: string | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          auto_call?: boolean | null
+          call_delay?: number | null
+          call_filter?: string | null
+          created_at?: string | null
+          current_lead_index?: number | null
+          current_lead_list_id?: string | null
+          id?: string
+          last_accessed_at?: string | null
+          shuffle_mode?: boolean | null
+          timezone_filter?: string | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_sessions_current_lead_list_id_fkey"
+            columns: ["current_lead_list_id"]
+            isOneToOne: false
+            referencedRelation: "lead_lists"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never

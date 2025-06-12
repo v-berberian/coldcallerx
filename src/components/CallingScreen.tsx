@@ -14,6 +14,8 @@ interface CallingScreenProps {
   fileName: string;
   onBack: () => void;
   onLeadsImported: (leads: Lead[], fileName: string) => void;
+  sessionState?: any;
+  onSessionUpdate?: (updates: any) => void;
 }
 
 const CallingScreen: React.FC<CallingScreenProps> = (props) => {

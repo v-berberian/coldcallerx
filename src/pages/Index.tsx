@@ -18,8 +18,10 @@ const Index = () => {
     leadsData,
     dailyCallCount,
     loading: leadsLoading,
+    sessionState,
     importLeadsFromCSV,
-    resetDailyCallCount
+    resetDailyCallCount,
+    updateSessionState
   } = useCloudLeadsData();
 
   useEffect(() => {
@@ -87,6 +89,8 @@ const Index = () => {
       fileName={currentLeadList.name} 
       onBack={handleBack}
       onLeadsImported={handleLeadsImported}
+      sessionState={sessionState}
+      onSessionUpdate={updateSessionState}
     />
   );
 };
