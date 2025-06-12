@@ -1,124 +1,126 @@
 
-import React, { useRef } from 'react';
-import { Upload } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
+import React, { useState, useRef } from 'react';
 import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Upload, FileText, Phone } from 'lucide-react';
 
 interface Lead {
   name: string;
   phone: string;
-  called?: number;
-  lastCalled?: string;
 }
 
 interface CSVImporterProps {
   onLeadsImported: (leads: Lead[], fileName: string) => void;
-  showAsButton?: boolean;
-  buttonText?: string;
-  buttonIcon?: React.ReactNode;
 }
 
-const CSVImporter: React.FC<CSVImporterProps> = ({ 
-  onLeadsImported, 
-  showAsButton = false,
-  buttonText = "Import CSV",
-  buttonIcon = <Upload className="h-5 w-5" />
-}) => {
+const CSVImporter: React.FC<CSVImporterProps> = ({ onLeadsImported }) => {
+  const [isDragOver, setIsDragOver] = useState(false);
+  const [error, setError] = useState<string>('');
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const { toast } = useToast();
 
-  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (!file) return;
+  const formatPhoneNumber = (phone: string): string => {
+    // Remove all non-digit characters
+    const digits = phone.replace(/\D/g, '');
+    
+    // Format as (xxx) xxx-xxxx
+    if (digits.length === 10) {
+      return `(${digits.slice(0, 3)}) ${digits.slice(3, 6)}-${digits.slice(6)}`;
+    }
+    
+    return phone; // Return original if not 10 digits
+  };
 
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      const csv = e.target?.result as string;
-      const lines = csv.split('\n');
-      const leads: Lead[] = [];
-
-      // Skip header row and process data
-      for (let i = 1; i < lines.length; i++) {
-        const columns = lines[i].split(',').map(col => col.trim().replace(/"/g, ''));
-        
-        if (columns.length >= 2 && columns[0] && columns[1]) {
+  const parseCSV = (text: string): Lead[] => {
+    const lines = text.split('\n');
+    const leads: Lead[] = [];
+    
+    // Skip header row and process data
+    for (let i = 1; i < lines.length; i++) {
+      const line = lines[i].trim();
+      if (line) {
+        const [name, phone] = line.split(',').map(cell => cell.trim().replace(/"/g, ''));
+        if (name && phone) {
           leads.push({
-            name: columns[0],
-            phone: columns[1],
-            called: 0,
-            lastCalled: undefined
+            name,
+            phone: formatPhoneNumber(phone)
           });
         }
       }
-
-      if (leads.length > 0) {
-        const fileName = file.name.replace('.csv', '');
-        onLeadsImported(leads, fileName);
-        
-        toast({
-          title: "CSV Imported",
-          description: `Successfully imported ${leads.length} leads`,
-        });
-      } else {
-        toast({
-          title: "Import Failed",
-          description: "No valid lead data found in the CSV file",
-          variant: "destructive",
-        });
-      }
-    };
-
-    reader.readAsText(file);
+    }
     
-    // Reset the input so the same file can be selected again
-    if (fileInputRef.current) {
-      fileInputRef.current.value = '';
+    return leads;
+  };
+
+  const handleFileProcess = (file: File) => {
+    if (file.type !== 'text/csv' && !file.name.endsWith('.csv')) {
+      setError('Please select a valid CSV file');
+      return;
+    }
+
+    setError('');
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const text = e.target?.result as string;
+      const leads = parseCSV(text);
+      if (leads.length === 0) {
+        setError('No valid leads found in the CSV file');
+        return;
+      }
+      const fileName = file.name.replace('.csv', '');
+      onLeadsImported(leads, fileName);
+    };
+    reader.onerror = () => {
+      setError('Error reading file');
+    };
+    reader.readAsText(file);
+  };
+
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      handleFileProcess(file);
     }
   };
 
-  const handleClick = () => {
+  const handleButtonClick = () => {
     fileInputRef.current?.click();
   };
 
-  if (showAsButton) {
-    return (
-      <>
-        <input
-          ref={fileInputRef}
-          type="file"
-          accept=".csv"
-          onChange={handleFileUpload}
-          className="hidden"
-        />
-        <Button 
-          onClick={handleClick}
-          variant="outline"
-          className="w-full flex items-center space-x-2"
-        >
-          {buttonIcon}
-          <span>{buttonText}</span>
-        </Button>
-      </>
-    );
-  }
+  const handleDrop = (event: React.DragEvent) => {
+    event.preventDefault();
+    setIsDragOver(false);
+    
+    const file = event.dataTransfer.files[0];
+    if (file) {
+      handleFileProcess(file);
+    }
+  };
+
+  const handleDragOver = (event: React.DragEvent) => {
+    event.preventDefault();
+    setIsDragOver(true);
+  };
+
+  const handleDragLeave = (event: React.DragEvent) => {
+    event.preventDefault();
+    setIsDragOver(false);
+  };
 
   return (
-    <>
+    <button 
+      onClick={handleButtonClick} 
+      className="text-sm font-medium px-3 py-1 rounded transition-all duration-200 text-muted-foreground hover:text-foreground"
+      style={{ WebkitTapHighlightColor: 'transparent' }}
+    >
+      <Upload className="h-4 w-4" />
       <input
         ref={fileInputRef}
         type="file"
-        accept=".csv"
-        onChange={handleFileUpload}
+        accept=".csv,text/csv"
+        onChange={handleFileChange}
         className="hidden"
       />
-      <button
-        onClick={handleClick}
-        className="p-2 rounded-lg transition-none text-muted-foreground hover:text-foreground"
-        title="Import CSV"
-      >
-        {buttonIcon}
-      </button>
-    </>
+    </button>
   );
 };
 

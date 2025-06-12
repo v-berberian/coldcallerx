@@ -1,27 +1,16 @@
 
-import React, { useState } from 'react';
-import { Settings } from 'lucide-react';
+import React from 'react';
 import { Lead } from '../types/lead';
 import SearchAutocomplete from './SearchAutocomplete';
 import SearchBar from './SearchBar';
-import SettingsModal from './SettingsModal';
-import ListSelector from './ListSelector';
-import { useAuth } from '@/hooks/useAuth';
-
-interface LeadList {
-  id: string;
-  name: string;
-  created_at: string;
-  updated_at: string;
-}
+import ThemeToggle from './ThemeToggle';
+import CSVImporter from './CSVImporter';
 
 interface CallingHeaderProps {
   searchQuery: string;
   showAutocomplete: boolean;
   searchResults: Lead[];
   leadsData: Lead[];
-  leadLists: LeadList[];
-  currentListId: string | null;
   fileName: string;
   onSearchChange: (query: string) => void;
   onSearchFocus: () => void;
@@ -29,9 +18,6 @@ interface CallingHeaderProps {
   onClearSearch: () => void;
   onLeadSelect: (lead: Lead) => void;
   onLeadsImported: (leads: Lead[], fileName: string) => void;
-  onSelectList: (listId: string) => void;
-  onCreateList: (name: string, leads: Lead[]) => void;
-  onDeleteList: (listId: string) => void;
 }
 
 const CallingHeader: React.FC<CallingHeaderProps> = ({
@@ -39,27 +25,18 @@ const CallingHeader: React.FC<CallingHeaderProps> = ({
   showAutocomplete,
   searchResults,
   leadsData,
-  leadLists,
-  currentListId,
   fileName,
   onSearchChange,
   onSearchFocus,
   onSearchBlur,
   onClearSearch,
   onLeadSelect,
-  onLeadsImported,
-  onSelectList,
-  onCreateList,
-  onDeleteList
+  onLeadsImported
 }) => {
-  const [showSettings, setShowSettings] = useState(false);
-  const [showListSelector, setShowListSelector] = useState(false);
-  const { user } = useAuth();
-
   return (
     <div className="bg-background border-b border-border p-4 pt-safe flex-shrink-0" style={{ paddingTop: 'max(1rem, env(safe-area-inset-top))' }}>
       <div className="flex items-center justify-between mb-4">
-        <div className="w-12" /> {/* Spacer for alignment */}
+        <CSVImporter onLeadsImported={onLeadsImported} />
         
         <div className="flex items-center space-x-3">
           <h1 className="text-2xl font-bold">
@@ -69,13 +46,7 @@ const CallingHeader: React.FC<CallingHeaderProps> = ({
           </h1>
         </div>
         
-        <button
-          onClick={() => setShowSettings(true)}
-          className="p-2 rounded-lg transition-none text-muted-foreground hover:text-foreground"
-          title="Settings"
-        >
-          <Settings className="h-5 w-5" />
-        </button>
+        <ThemeToggle />
       </div>
       
       {/* Search Bar */}
@@ -85,8 +56,8 @@ const CallingHeader: React.FC<CallingHeaderProps> = ({
           onSearchChange={onSearchChange} 
           onSearchFocus={onSearchFocus} 
           onSearchBlur={onSearchBlur} 
-          onClearSearch={onClearSearch}
-          fileName={fileName}
+          onClearSearch={onClearSearch} 
+          fileName={fileName} 
         />
         
         {/* Autocomplete Dropdown */}
@@ -102,23 +73,6 @@ const CallingHeader: React.FC<CallingHeaderProps> = ({
           />
         )}
       </div>
-
-      <SettingsModal 
-        isOpen={showSettings} 
-        onClose={() => setShowSettings(false)} 
-        userEmail={user?.email}
-        onManageLeadLists={() => setShowListSelector(true)}
-      />
-
-      <ListSelector
-        isOpen={showListSelector}
-        onClose={() => setShowListSelector(false)}
-        leadLists={leadLists}
-        currentListId={currentListId}
-        onSelectList={onSelectList}
-        onCreateList={onCreateList}
-        onDeleteList={onDeleteList}
-      />
     </div>
   );
 };

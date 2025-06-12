@@ -1,17 +1,15 @@
-import React, { useEffect, useState } from 'react';
+
+import React, { useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import CallingHeader from './CallingHeader';
 import MainContent from './MainContent';
 import DailyProgress from './DailyProgress';
-import ListSelector from './ListSelector';
+import AutoCallCountdown from './AutoCallCountdown';
 import { useSearchState } from './SearchState';
 import { useDailyCallState } from './DailyCallState';
 import { useLeadNavigation } from '../hooks/useLeadNavigation';
-import { useSupabaseLeads } from '../hooks/useSupabaseLeads';
-import { useAuth } from '@/hooks/useAuth';
 import { Lead } from '../types/lead';
-import { useToast } from '@/hooks/use-toast';
 
 interface CallingScreenLogicProps {
   leads: Lead[];
@@ -26,23 +24,8 @@ const CallingScreenLogic: React.FC<CallingScreenLogicProps> = ({
   onBack,
   onLeadsImported
 }) => {
-  const { user } = useAuth();
-  const { toast } = useToast();
-  
   const {
-    leadLists,
-    currentListId,
     leadsData,
-    loading,
-    createLeadList,
-    updateLeadCallStatus,
-    switchToList,
-    getCurrentListName,
-    refreshLists,
-    deleteLeadList
-  } = useSupabaseLeads(user?.id);
-
-  const {
     currentIndex,
     cardKey,
     timezoneFilter,
@@ -73,7 +56,7 @@ const CallingScreenLogic: React.FC<CallingScreenLogicProps> = ({
     toggleCallDelay,
     resetCallDelay,
     resetLeadsData
-  } = useLeadNavigation(leadsData);
+  } = useLeadNavigation(leads);
 
   const {
     searchQuery,
@@ -85,7 +68,7 @@ const CallingScreenLogic: React.FC<CallingScreenLogicProps> = ({
     handleSearchFocus,
     handleSearchBlur
   } = useSearchState({ 
-    leads: leadsData, 
+    leads, 
     getBaseLeads, 
     leadsData, 
     timezoneFilter, 
@@ -98,75 +81,19 @@ const CallingScreenLogic: React.FC<CallingScreenLogicProps> = ({
     resetDailyCallCount
   } = useDailyCallState();
 
-  // Handle CSV imports from props (legacy support for non-authenticated users)
+  // Handle new CSV imports by resetting the leads data
   useEffect(() => {
-    if (leads.length > 0 && fileName && !user) {
-      // For non-authenticated users, use the legacy local storage approach
-      console.log('Legacy CSV import for non-authenticated user');
-      resetLeadsData(leads);
-    }
-  }, [leads, fileName, user]);
+    resetLeadsData(leads);
+  }, [leads]);
 
-  // Simplified import handler for authenticated users
-  const handleLeadsImported = async (importedLeads: Lead[], importedFileName: string) => {
-    if (!user?.id) {
-      console.error('No authenticated user found for import');
-      toast({
-        title: "Authentication Required",
-        description: "Please log in to import lead lists",
-        variant: "destructive",
-      });
-      return;
+  // Save updated leads data to localStorage whenever leadsData changes
+  useEffect(() => {
+    if (leadsData.length > 0) {
+      localStorage.setItem('coldcaller-leads', JSON.stringify(leadsData));
     }
+  }, [leadsData]);
 
-    console.log('Creating lead list for user:', user.id, 'with', importedLeads.length, 'leads');
-    
-    try {
-      const listId = await createLeadList(importedFileName, importedLeads);
-      if (listId) {
-        console.log('Lead list created successfully:', listId);
-        toast({
-          title: "Success",
-          description: `Lead list "${importedFileName}" imported successfully`,
-        });
-      } else {
-        console.error('Failed to create lead list - no ID returned');
-        toast({
-          title: "Import Failed",
-          description: "Failed to create lead list",
-          variant: "destructive",
-        });
-      }
-    } catch (error) {
-      console.error('Error importing leads:', error);
-      toast({
-        title: "Import Failed",
-        description: "Failed to create lead list. Please try again.",
-        variant: "destructive",
-      });
-    }
-  };
-
-  // Handle call click with server sync
-  const handleCallClick = async () => {
-    const currentLeads = getBaseLeads();
-    const currentLead = currentLeads[currentIndex];
-    
-    makeCall(currentLead);
-    incrementDailyCallCount();
-    
-    if (user?.id && currentLead) {
-      const updatedLead = {
-        ...currentLead,
-        called: (currentLead.called || 0) + 1,
-        lastCalled: new Date().toLocaleString()
-      };
-      
-      await updateLeadCallStatus(updatedLead);
-    }
-  };
-
-  // Handle auto-call with server sync
+  // Handle auto-call using the currently displayed lead
   useEffect(() => {
     if (shouldAutoCall && autoCall) {
       const currentLeads = getBaseLeads();
@@ -177,15 +104,6 @@ const CallingScreenLogic: React.FC<CallingScreenLogicProps> = ({
         setCurrentLeadForAutoCall(currentLead);
         executeAutoCall(currentLead);
         incrementDailyCallCount();
-        
-        if (user?.id) {
-          const updatedLead = {
-            ...currentLead,
-            called: (currentLead.called || 0) + 1,
-            lastCalled: new Date().toLocaleString()
-          };
-          updateLeadCallStatus(updatedLead);
-        }
       }
       
       setShouldAutoCall(false);
@@ -207,6 +125,15 @@ const CallingScreenLogic: React.FC<CallingScreenLogicProps> = ({
     setShowAutocomplete(false);
   };
 
+  // Handle manual call button click
+  const handleCallClick = () => {
+    const currentLeads = getBaseLeads();
+    const currentLead = currentLeads[currentIndex];
+    makeCall(currentLead);
+    incrementDailyCallCount();
+  };
+
+  // Create wrapper functions for navigation that pass the required baseLeads parameter
   const handleNextWrapper = () => {
     const currentLeads = getBaseLeads();
     handleNext(currentLeads);
@@ -217,48 +144,58 @@ const CallingScreenLogic: React.FC<CallingScreenLogicProps> = ({
     handlePrevious(currentLeads);
   };
 
-  const handleResetCallCount = async () => {
-    const currentLeads = getBaseLeads();
-    const currentLead = currentLeads[currentIndex];
-    
-    resetCallCount(currentLead);
-    
-    if (user?.id && currentLead) {
-      const updatedLead = {
-        ...currentLead,
-        called: 0,
-        lastCalled: undefined
-      };
-      await updateLeadCallStatus(updatedLead);
-    }
-  };
-
-  const handleListNameClick = () => {
-    setShowListSelector(true);
-  };
-
-  // Add state for list selector
-  const [showListSelector, setShowListSelector] = useState(false);
-
-  if (loading) {
+  const currentLeads = getBaseLeads();
+  const currentLead = currentLeads[currentIndex];
+  
+  if (leadsData.length === 0) {
     return (
-      <div className="h-[100dvh] bg-background overflow-hidden fixed inset-0 flex items-center justify-center">
-        <div className="text-center">
-          <h1 className="text-3xl font-bold mb-4">
-            <span className="text-blue-500">Cold</span>
-            <span className="text-foreground">Caller </span>
-            <span className="text-blue-500">X</span>
-          </h1>
-          <p className="text-muted-foreground">Loading your lead lists...</p>
+      <div className="h-[100dvh] bg-background overflow-hidden fixed inset-0">
+        <div className="bg-background border-b border-border p-4">
+          <div className="flex items-center justify-center">
+            <div className="flex items-center space-x-3">
+              <h1 className="text-2xl font-bold">
+                <span className="text-blue-500">Cold</span>
+                <span className="text-foreground">Caller </span> 
+                <span className="text-blue-500">X</span>
+              </h1>
+            </div>
+          </div>
+        </div>
+        <div className="p-6 text-center">
+          <p className="text-lg text-muted-foreground">No leads imported</p>
         </div>
       </div>
     );
   }
+  
+  if (!currentLead) {
+    return (
+      <div className="h-[100dvh] bg-background flex items-center justify-center p-4 overflow-hidden fixed inset-0">
+        <Card className="w-full max-w-md shadow-lg rounded-2xl">
+          <CardContent className="p-8 text-center">
+            <p className="text-lg">No leads found with current filters</p>
+            <div className="mt-4 space-y-2">
+              <Button 
+                onClick={() => {
+                  toggleTimezoneFilter();
+                  toggleCallFilter();
+                  setSearchQuery('');
+                }} 
+                className="w-full rounded-xl"
+              >
+                Clear All Filters
+              </Button>
+              <Button onClick={onBack} variant="outline" className="w-full rounded-xl">
+                Back to Import
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
-  const currentLeads = getBaseLeads();
-  const currentLead = currentLeads[currentIndex];
   const totalLeadCount = currentLeads.length;
-  const currentListName = getCurrentListName();
 
   return (
     <div className="h-[100dvh] bg-background flex flex-col overflow-hidden fixed inset-0">
@@ -268,87 +205,44 @@ const CallingScreenLogic: React.FC<CallingScreenLogicProps> = ({
         showAutocomplete={showAutocomplete}
         searchResults={searchResults}
         leadsData={leadsData}
-        leadLists={leadLists}
-        currentListId={currentListId}
+        fileName={fileName}
         onSearchChange={setSearchQuery}
         onSearchFocus={handleSearchFocus}
         onSearchBlur={handleSearchBlur}
         onClearSearch={clearSearch}
         onLeadSelect={handleLeadSelect}
-        onLeadsImported={handleLeadsImported}
-        onSelectList={switchToList}
-        onCreateList={createLeadList}
-        onDeleteList={deleteLeadList}
+        onLeadsImported={onLeadsImported}
       />
 
       {/* Main Content - takes remaining space */}
       <div className="flex-1 overflow-hidden">
-        {currentLead ? (
-          <MainContent
-            currentLead={currentLead}
-            currentIndex={currentIndex}
-            totalCount={totalLeadCount}
-            fileName={currentListName}
-            cardKey={cardKey}
-            timezoneFilter={timezoneFilter}
-            callFilter={callFilter}
-            shuffleMode={shuffleMode}
-            autoCall={autoCall}
-            callDelay={callDelay}
-            isCountdownActive={isCountdownActive}
-            countdownTime={countdownTime}
-            onCall={handleCallClick}
-            onResetCallCount={handleResetCallCount}
-            onToggleTimezone={toggleTimezoneFilter}
-            onToggleCallFilter={toggleCallFilter}
-            onToggleShuffle={toggleShuffle}
-            onToggleAutoCall={toggleAutoCall}
-            onToggleCallDelay={toggleCallDelay}
-            onResetCallDelay={resetCallDelay}
-            onResetAllCalls={resetAllCallCounts}
-            onPrevious={handlePreviousWrapper}
-            onNext={handleNextWrapper}
-            canGoPrevious={currentLeads.length > 1}
-            canGoNext={currentLeads.length > 1}
-            onListNameClick={handleListNameClick}
-          />
-        ) : (
-          <div className="flex-1 flex items-center justify-center p-4">
-            <Card className="w-full max-w-md shadow-lg rounded-2xl">
-              <CardContent className="p-8 text-center">
-                <h2 className="text-xl font-semibold mb-4">Ready to Start Calling</h2>
-                <p className="text-muted-foreground mb-6">
-                  {!user 
-                    ? "Please log in to import and manage your lead lists"
-                    : leadLists.length === 0 
-                      ? "Import your first lead list to get started"
-                      : leadsData.length === 0 
-                        ? "No leads found with current filters"
-                        : "No leads found"
-                  }
-                </p>
-                {user && (leadLists.length === 0 || leadsData.length === 0) ? (
-                  <div className="space-y-3">
-                    <p className="text-sm text-muted-foreground">
-                      Use the import options in the header to add leads
-                    </p>
-                  </div>
-                ) : user && leadsData.length === 0 ? (
-                  <Button 
-                    onClick={() => {
-                      toggleTimezoneFilter();
-                      toggleCallFilter();
-                      setSearchQuery('');
-                    }} 
-                    className="w-full rounded-xl"
-                  >
-                    Clear All Filters
-                  </Button>
-                ) : null}
-              </CardContent>
-            </Card>
-          </div>
-        )}
+        <MainContent
+          currentLead={currentLead}
+          currentIndex={currentIndex}
+          totalCount={totalLeadCount}
+          fileName={fileName}
+          cardKey={cardKey}
+          timezoneFilter={timezoneFilter}
+          callFilter={callFilter}
+          shuffleMode={shuffleMode}
+          autoCall={autoCall}
+          callDelay={callDelay}
+          isCountdownActive={isCountdownActive}
+          countdownTime={countdownTime}
+          onCall={handleCallClick}
+          onResetCallCount={() => resetCallCount(currentLead)}
+          onToggleTimezone={toggleTimezoneFilter}
+          onToggleCallFilter={toggleCallFilter}
+          onToggleShuffle={toggleShuffle}
+          onToggleAutoCall={toggleAutoCall}
+          onToggleCallDelay={toggleCallDelay}
+          onResetCallDelay={resetCallDelay}
+          onResetAllCalls={resetAllCallCounts}
+          onPrevious={handlePreviousWrapper}
+          onNext={handleNextWrapper}
+          canGoPrevious={currentLeads.length > 1}
+          canGoNext={currentLeads.length > 1}
+        />
       </div>
 
       {/* Daily Progress Bar - Fixed at bottom */}
@@ -358,17 +252,6 @@ const CallingScreenLogic: React.FC<CallingScreenLogicProps> = ({
           onResetDailyCount={resetDailyCallCount}
         />
       </div>
-
-      {/* List Selector Modal */}
-      <ListSelector
-        isOpen={showListSelector}
-        onClose={() => setShowListSelector(false)}
-        leadLists={leadLists}
-        currentListId={currentListId}
-        onSelectList={switchToList}
-        onCreateList={createLeadList}
-        onDeleteList={deleteLeadList}
-      />
     </div>
   );
 };

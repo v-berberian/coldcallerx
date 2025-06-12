@@ -31,7 +31,6 @@ interface MainContentProps {
   canGoNext: boolean;
   isCountdownActive?: boolean;
   countdownTime?: number;
-  onListNameClick?: () => void;
 }
 
 const MainContent: React.FC<MainContentProps> = ({
@@ -59,8 +58,7 @@ const MainContent: React.FC<MainContentProps> = ({
   canGoPrevious,
   canGoNext,
   isCountdownActive,
-  countdownTime,
-  onListNameClick
+  countdownTime
 }) => {
   const getDelayDisplayType = (): 'timer' | 'rocket' | '5s' | '10s' => {
     if (callDelay === 0) return 'rocket';
@@ -100,7 +98,6 @@ const MainContent: React.FC<MainContentProps> = ({
           cardKey={cardKey}
           onCall={onCall}
           onResetCallCount={onResetCallCount}
-          onListNameClick={onListNameClick}
         />
 
         {/* Navigation Controls */}
