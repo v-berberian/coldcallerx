@@ -23,6 +23,9 @@ const LeadListSelector: React.FC<LeadListSelectorProps> = ({
   leadLists,
   onLeadListSelect
 }) => {
+  // Ensure leadLists is always an array
+  const safeLeadLists = leadLists || [];
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -34,20 +37,26 @@ const LeadListSelector: React.FC<LeadListSelectorProps> = ({
       <DropdownMenuContent align="end" className="w-56">
         <DropdownMenuLabel>Switch Lead List</DropdownMenuLabel>
         <DropdownMenuSeparator />
-        {leadLists.map((leadList) => (
-          <DropdownMenuItem
-            key={leadList.id}
-            onClick={() => onLeadListSelect(leadList)}
-            className={leadList.name === currentFileName ? 'bg-accent' : ''}
-          >
-            <div className="flex flex-col">
-              <span className="font-medium">{leadList.name}</span>
-              <span className="text-xs text-muted-foreground">
-                {leadList.total_leads} leads
-              </span>
-            </div>
+        {safeLeadLists.length === 0 ? (
+          <DropdownMenuItem disabled>
+            No other lists available
           </DropdownMenuItem>
-        ))}
+        ) : (
+          safeLeadLists.map((leadList) => (
+            <DropdownMenuItem
+              key={leadList.id}
+              onClick={() => onLeadListSelect(leadList)}
+              className={leadList.name === currentFileName ? 'bg-accent' : ''}
+            >
+              <div className="flex flex-col">
+                <span className="font-medium">{leadList.name}</span>
+                <span className="text-xs text-muted-foreground">
+                  {leadList.total_leads} leads
+                </span>
+              </div>
+            </DropdownMenuItem>
+          ))
+        )}
       </DropdownMenuContent>
     </DropdownMenu>
   );
