@@ -11,6 +11,8 @@ export interface UserSession {
   shuffle_mode: boolean;
   auto_call: boolean;
   call_delay: number;
+  daily_call_count?: number;
+  leads_data?: any;
   last_accessed_at: string;
   created_at: string;
   updated_at: string;
@@ -24,6 +26,9 @@ export interface SessionState {
   shuffleMode: boolean;
   autoCall: boolean;
   callDelay: number;
+  dailyCallCount?: number;
+  leadsData?: any;
+  lastSyncedAt?: string;
 }
 
 export const sessionService = {
@@ -66,6 +71,8 @@ export const sessionService = {
       shuffle_mode: sessionState.shuffleMode,
       auto_call: sessionState.autoCall,
       call_delay: sessionState.callDelay,
+      daily_call_count: sessionState.dailyCallCount || 0,
+      leads_data: sessionState.leadsData ? JSON.stringify(sessionState.leadsData) : null,
       last_accessed_at: new Date().toISOString()
     };
 

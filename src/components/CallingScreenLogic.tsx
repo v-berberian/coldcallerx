@@ -1,4 +1,3 @@
-
 import React, { useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -95,26 +94,34 @@ const CallingScreenLogic: React.FC<CallingScreenLogicProps> = ({
     if (sessionState && onSessionUpdate) {
       const { saveCurrentIndex } = initializeFromSessionState(sessionState, onSessionUpdate);
       
-      // Save session when navigation changes
-      const handleNavigationChange = async (index: number) => {
+      // Enhanced session save function that includes more data
+      const handleSessionSave = async (updates: any) => {
         if (onSync) {
           onSync(); // Start sync status
         }
         
-        const success = await saveCurrentIndex(index);
+        // Add current leads data and daily stats to the session update
+        const enhancedUpdates = {
+          ...updates,
+          leadsData: leadsData,
+          dailyCallCount: dailyCallCount,
+          lastSyncedAt: new Date().toISOString()
+        };
+        
+        const success = await saveCurrentIndex(updates.currentLeadIndex || currentIndex);
         
         if (onSync && success) {
-          // Simulate successful sync after a short delay
+          // Delay the success animation to let card animation complete first
           setTimeout(() => {
             onSync();
-          }, 500);
+          }, 200); // Reduced from 500ms to 200ms to complete before card animation
         }
       };
 
-      // Store the handler for use in navigation
-      (window as any).saveCurrentIndex = handleNavigationChange;
+      // Store the enhanced handler for use in navigation
+      (window as any).saveCurrentIndex = handleSessionSave;
     }
-  }, [sessionState, onSessionUpdate, onSync]);
+  }, [sessionState, onSessionUpdate, onSync, leadsData, dailyCallCount, currentIndex]);
 
   // Handle new CSV imports by resetting the leads data
   useEffect(() => {
@@ -125,8 +132,17 @@ const CallingScreenLogic: React.FC<CallingScreenLogicProps> = ({
   useEffect(() => {
     if (leadsData.length > 0) {
       localStorage.setItem('coldcaller-leads', JSON.stringify(leadsData));
+      
+      // Also sync leads data changes to cloud
+      if ((window as any).saveCurrentIndex) {
+        (window as any).saveCurrentIndex({
+          currentLeadIndex: currentIndex,
+          leadsData: leadsData,
+          dailyCallCount: dailyCallCount
+        });
+      }
     }
-  }, [leadsData]);
+  }, [leadsData, currentIndex, dailyCallCount]);
 
   // Handle auto-call using the currently displayed lead
   useEffect(() => {
@@ -155,9 +171,13 @@ const CallingScreenLogic: React.FC<CallingScreenLogicProps> = ({
       selectLead(lead, baseLeads, leadsData);
       console.log('Selected lead from autocomplete:', lead.name, 'at base index:', leadIndexInBaseLeads);
       
-      // Save the new index to session with sync
+      // Save the new index to session with enhanced sync
       if ((window as any).saveCurrentIndex) {
-        (window as any).saveCurrentIndex(leadIndexInBaseLeads);
+        (window as any).saveCurrentIndex({
+          currentLeadIndex: leadIndexInBaseLeads,
+          leadsData: leadsData,
+          dailyCallCount: dailyCallCount
+        });
       }
     }
     
@@ -171,6 +191,15 @@ const CallingScreenLogic: React.FC<CallingScreenLogicProps> = ({
     const currentLead = currentLeads[currentIndex];
     makeCall(currentLead);
     incrementDailyCallCount();
+    
+    // Sync the call update to cloud
+    if ((window as any).saveCurrentIndex) {
+      (window as any).saveCurrentIndex({
+        currentLeadIndex: currentIndex,
+        leadsData: leadsData,
+        dailyCallCount: dailyCallCount + 1
+      });
+    }
   };
 
   // Create wrapper functions for navigation that pass the required baseLeads parameter
@@ -178,10 +207,14 @@ const CallingScreenLogic: React.FC<CallingScreenLogicProps> = ({
     const currentLeads = getBaseLeads();
     handleNext(currentLeads);
     
-    // Save new index to session with sync
+    // Save new index to session with enhanced sync
     if ((window as any).saveCurrentIndex) {
       const newIndex = (currentIndex + 1) % currentLeads.length;
-      (window as any).saveCurrentIndex(newIndex);
+      (window as any).saveCurrentIndex({
+        currentLeadIndex: newIndex,
+        leadsData: leadsData,
+        dailyCallCount: dailyCallCount
+      });
     }
   };
 
@@ -189,10 +222,14 @@ const CallingScreenLogic: React.FC<CallingScreenLogicProps> = ({
     const currentLeads = getBaseLeads();
     handlePrevious(currentLeads);
     
-    // Save new index to session with sync
+    // Save new index to session with enhanced sync
     if ((window as any).saveCurrentIndex) {
       const newIndex = currentIndex > 0 ? currentIndex - 1 : currentLeads.length - 1;
-      (window as any).saveCurrentIndex(newIndex);
+      (window as any).saveCurrentIndex({
+        currentLeadIndex: newIndex,
+        leadsData: leadsData,
+        dailyCallCount: dailyCallCount
+      });
     }
   };
 
