@@ -1,10 +1,10 @@
+
 import React, { useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import CallingHeader from './CallingHeader';
 import MainContent from './MainContent';
 import DailyProgress from './DailyProgress';
-import WelcomeScreen from './WelcomeScreen';
 import { useSearchState } from './SearchState';
 import { useDailyCallState } from './DailyCallState';
 import { useLeadNavigation } from '../hooks/useLeadNavigation';
@@ -208,63 +208,8 @@ const CallingScreenLogic: React.FC<CallingScreenLogicProps> = ({
     );
   }
 
-  // Show welcome screen if user has no lead lists
-  if (leadLists.length === 0) {
-    return <WelcomeScreen onLeadsImported={handleLeadsImported} />;
-  }
-
   const currentLeads = getBaseLeads();
   const currentLead = currentLeads[currentIndex];
-  
-  if (leadsData.length === 0) {
-    return (
-      <div className="h-[100dvh] bg-background overflow-hidden fixed inset-0">
-        <div className="bg-background border-b border-border p-4">
-          <div className="flex items-center justify-center">
-            <div className="flex items-center space-x-3">
-              <h1 className="text-2xl font-bold">
-                <span className="text-blue-500">Cold</span>
-                <span className="text-foreground">Caller </span> 
-                <span className="text-blue-500">X</span>
-              </h1>
-            </div>
-          </div>
-        </div>
-        <div className="p-6 text-center">
-          <p className="text-lg text-muted-foreground">No leads found</p>
-          <p className="text-sm text-muted-foreground mt-2">Import a lead list to get started</p>
-        </div>
-      </div>
-    );
-  }
-  
-  if (!currentLead) {
-    return (
-      <div className="h-[100dvh] bg-background flex items-center justify-center p-4 overflow-hidden fixed inset-0">
-        <Card className="w-full max-w-md shadow-lg rounded-2xl">
-          <CardContent className="p-8 text-center">
-            <p className="text-lg">No leads found with current filters</p>
-            <div className="mt-4 space-y-2">
-              <Button 
-                onClick={() => {
-                  toggleTimezoneFilter();
-                  toggleCallFilter();
-                  setSearchQuery('');
-                }} 
-                className="w-full rounded-xl"
-              >
-                Clear All Filters
-              </Button>
-              <Button onClick={onBack} variant="outline" className="w-full rounded-xl">
-                Back
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-    );
-  }
-
   const totalLeadCount = currentLeads.length;
   const currentListName = getCurrentListName();
 
@@ -291,33 +236,69 @@ const CallingScreenLogic: React.FC<CallingScreenLogicProps> = ({
 
       {/* Main Content - takes remaining space */}
       <div className="flex-1 overflow-hidden">
-        <MainContent
-          currentLead={currentLead}
-          currentIndex={currentIndex}
-          totalCount={totalLeadCount}
-          fileName={currentListName}
-          cardKey={cardKey}
-          timezoneFilter={timezoneFilter}
-          callFilter={callFilter}
-          shuffleMode={shuffleMode}
-          autoCall={autoCall}
-          callDelay={callDelay}
-          isCountdownActive={isCountdownActive}
-          countdownTime={countdownTime}
-          onCall={handleCallClick}
-          onResetCallCount={handleResetCallCount}
-          onToggleTimezone={toggleTimezoneFilter}
-          onToggleCallFilter={toggleCallFilter}
-          onToggleShuffle={toggleShuffle}
-          onToggleAutoCall={toggleAutoCall}
-          onToggleCallDelay={toggleCallDelay}
-          onResetCallDelay={resetCallDelay}
-          onResetAllCalls={resetAllCallCounts}
-          onPrevious={handlePreviousWrapper}
-          onNext={handleNextWrapper}
-          canGoPrevious={currentLeads.length > 1}
-          canGoNext={currentLeads.length > 1}
-        />
+        {currentLead ? (
+          <MainContent
+            currentLead={currentLead}
+            currentIndex={currentIndex}
+            totalCount={totalLeadCount}
+            fileName={currentListName}
+            cardKey={cardKey}
+            timezoneFilter={timezoneFilter}
+            callFilter={callFilter}
+            shuffleMode={shuffleMode}
+            autoCall={autoCall}
+            callDelay={callDelay}
+            isCountdownActive={isCountdownActive}
+            countdownTime={countdownTime}
+            onCall={handleCallClick}
+            onResetCallCount={handleResetCallCount}
+            onToggleTimezone={toggleTimezoneFilter}
+            onToggleCallFilter={toggleCallFilter}
+            onToggleShuffle={toggleShuffle}
+            onToggleAutoCall={toggleAutoCall}
+            onToggleCallDelay={toggleCallDelay}
+            onResetCallDelay={resetCallDelay}
+            onResetAllCalls={resetAllCallCounts}
+            onPrevious={handlePreviousWrapper}
+            onNext={handleNextWrapper}
+            canGoPrevious={currentLeads.length > 1}
+            canGoNext={currentLeads.length > 1}
+          />
+        ) : (
+          <div className="flex-1 flex items-center justify-center p-4">
+            <Card className="w-full max-w-md shadow-lg rounded-2xl">
+              <CardContent className="p-8 text-center">
+                <h2 className="text-xl font-semibold mb-4">Ready to Start Calling</h2>
+                <p className="text-muted-foreground mb-6">
+                  {leadLists.length === 0 
+                    ? "Import your first lead list to get started"
+                    : leadsData.length === 0 
+                      ? "No leads found with current filters"
+                      : "No leads found"
+                  }
+                </p>
+                {leadLists.length === 0 || leadsData.length === 0 ? (
+                  <div className="space-y-3">
+                    <p className="text-sm text-muted-foreground">
+                      Use the import options in the header to add leads
+                    </p>
+                  </div>
+                ) : (
+                  <Button 
+                    onClick={() => {
+                      toggleTimezoneFilter();
+                      toggleCallFilter();
+                      setSearchQuery('');
+                    }} 
+                    className="w-full rounded-xl"
+                  >
+                    Clear All Filters
+                  </Button>
+                )}
+              </CardContent>
+            </Card>
+          </div>
+        )}
       </div>
 
       {/* Daily Progress Bar - Fixed at bottom */}
