@@ -1,5 +1,5 @@
 
-import React, { useCallback, useMemo } from 'react';
+import React from 'react';
 import { User } from 'lucide-react';
 import {
   DropdownMenu,
@@ -15,24 +15,9 @@ import { useAuth } from '@/contexts/AuthContext';
 const UserProfile: React.FC = () => {
   const { user, signOut } = useAuth();
 
-  // Memoize the sign out handler to prevent re-renders
-  const handleSignOut = useCallback(async () => {
-    try {
-      await signOut();
-    } catch (error) {
-      console.error('Sign out error:', error);
-    }
-  }, [signOut]);
-
-  // Memoize user email to prevent unnecessary re-renders
-  const userEmail = useMemo(() => {
-    return user?.email || '';
-  }, [user?.email]);
-
-  // Early return to prevent hook issues
-  if (!user) {
-    return null;
-  }
+  const handleSignOut = async () => {
+    await signOut();
+  };
 
   return (
     <DropdownMenu>
@@ -46,7 +31,7 @@ const UserProfile: React.FC = () => {
           <div className="flex flex-col space-y-1">
             <p className="text-sm font-medium leading-none">Account</p>
             <p className="text-xs leading-none text-muted-foreground">
-              {userEmail}
+              {user?.email}
             </p>
           </div>
         </DropdownMenuLabel>

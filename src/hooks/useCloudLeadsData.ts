@@ -1,4 +1,5 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
+
+import { useState, useEffect } from 'react';
 import { Lead } from '../types/lead';
 import { leadService, LeadList } from '../services/leadService';
 import { dailyStatsService } from '../services/dailyStatsService';
@@ -20,7 +21,6 @@ export const useCloudLeadsData = () => {
     callDelay: 0
   });
   const { user } = useAuth();
-  const updateTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   // Load user's session, lead list and daily stats on mount
   useEffect(() => {
@@ -32,18 +32,13 @@ export const useCloudLeadsData = () => {
   const loadUserData = async () => {
     setLoading(true);
     try {
-      // Load saved session state with retry logic
-      const savedSession = await loadSessionWithRetry();
+      // Load saved session state
+      const savedSession = await sessionService.getUserSession();
       
       // Load daily stats
-      try {
-        const stats = await dailyStatsService.getTodaysStats();
-        if (stats) {
-          setDailyCallCount(stats.call_count);
-        }
-      } catch (statsError) {
-        console.log('Failed to load daily stats:', statsError);
-        // Continue without daily stats
+      const stats = await dailyStatsService.getTodaysStats();
+      if (stats) {
+        setDailyCallCount(stats.call_count);
       }
 
       // Load lead lists
@@ -84,72 +79,29 @@ export const useCloudLeadsData = () => {
         // Load leads for this list
         const leads = await leadService.getLeads(targetLeadList.id);
         setLeadsData(leads);
+
+        // Save the initial session state
+        await sessionService.saveUserSession(initialSessionState);
       }
     } catch (error) {
       console.error('Error loading user data:', error);
-      // Don't block the UI if session loading fails
     } finally {
       setLoading(false);
     }
   };
 
-  const loadSessionWithRetry = async (maxRetries = 3): Promise<any> => {
-    for (let i = 0; i < maxRetries; i++) {
-      try {
-        const session = await sessionService.getUserSession();
-        return session;
-      } catch (error) {
-        console.error(`Session load attempt ${i + 1} failed:`, error);
-        if (i === maxRetries - 1) {
-          // On final failure, return null to use defaults
-          return null;
-        }
-        // Wait before retry
-        await new Promise(resolve => setTimeout(resolve, 1000 * (i + 1)));
-      }
-    }
-    return null;
-  };
-
   const loadDailyStats = async () => {
-    try {
-      const stats = await dailyStatsService.getTodaysStats();
-      if (stats) {
-        setDailyCallCount(stats.call_count);
-      }
-    } catch (error) {
-      console.error('Error loading daily stats:', error);
+    const stats = await dailyStatsService.getTodaysStats();
+    if (stats) {
+      setDailyCallCount(stats.call_count);
     }
   };
 
-  // Debounced session update to prevent rapid saves
-  const updateSessionState = useCallback(async (updates: Partial<SessionState>): Promise<boolean> => {
-    try {
-      const newSessionState = { ...sessionState, ...updates };
-      setSessionState(newSessionState);
-      
-      // Clear existing timeout
-      if (updateTimeoutRef.current) {
-        clearTimeout(updateTimeoutRef.current);
-      }
-      
-      // Debounce the save operation
-      return new Promise((resolve) => {
-        updateTimeoutRef.current = setTimeout(async () => {
-          try {
-            const success = await sessionService.saveUserSession(newSessionState);
-            resolve(success);
-          } catch (error) {
-            console.error('Error updating session state:', error);
-            resolve(true); // Don't fail the operation if session update fails
-          }
-        }, 500); // 500ms debounce
-      });
-    } catch (error) {
-      console.error('Error updating session state:', error);
-      return true; // Don't fail the operation if session update fails
-    }
-  }, [sessionState]);
+  const updateSessionState = async (updates: Partial<SessionState>) => {
+    const newSessionState = { ...sessionState, ...updates };
+    setSessionState(newSessionState);
+    await sessionService.saveUserSession(newSessionState);
+  };
 
   const importLeadsFromCSV = async (leads: Lead[], fileName: string): Promise<boolean> => {
     if (!user) return false;
@@ -225,49 +177,42 @@ export const useCloudLeadsData = () => {
     return await leadService.uploadCSVFile(file, user.id);
   };
 
-  const markLeadAsCalled = async (lead: Lead): Promise<boolean> => {
-    if (!currentLeadList) return false;
+  const markLeadAsCalled = async (lead: Lead) => {
+    if (!currentLeadList) return;
 
-    try {
-      const now = new Date();
-      const dateString = now.toLocaleDateString();
-      const timeString = now.toLocaleTimeString('en-US', {
-        hour: 'numeric',
-        minute: '2-digit',
-        hour12: true
-      });
-      const lastCalledString = `${dateString} at ${timeString}`;
+    const now = new Date();
+    const dateString = now.toLocaleDateString();
+    const timeString = now.toLocaleTimeString('en-US', {
+      hour: 'numeric',
+      minute: '2-digit',
+      hour12: true
+    });
+    const lastCalledString = `${dateString} at ${timeString}`;
 
-      const newCallCount = (lead.called || 0) + 1;
+    const newCallCount = (lead.called || 0) + 1;
 
-      // Update local state
-      const updatedLeads = leadsData.map(l => 
-        l.name === lead.name && l.phone === lead.phone ? {
-          ...l,
-          called: newCallCount,
-          lastCalled: lastCalledString
-        } : l
-      );
-      setLeadsData(updatedLeads);
+    // Update local state
+    const updatedLeads = leadsData.map(l => 
+      l.name === lead.name && l.phone === lead.phone ? {
+        ...l,
+        called: newCallCount,
+        lastCalled: lastCalledString
+      } : l
+    );
+    setLeadsData(updatedLeads);
 
-      // Update database
-      await leadService.updateLeadCallCount(
-        currentLeadList.id,
-        lead.name,
-        lead.phone,
-        newCallCount,
-        lastCalledString
-      );
+    // Update database
+    await leadService.updateLeadCallCount(
+      currentLeadList.id,
+      lead.name,
+      lead.phone,
+      newCallCount,
+      lastCalledString
+    );
 
-      // Increment daily call count
-      await dailyStatsService.incrementDailyCallCount();
-      await loadDailyStats();
-
-      return true;
-    } catch (error) {
-      console.error('Error marking lead as called:', error);
-      return false;
-    }
+    // Increment daily call count
+    await dailyStatsService.incrementDailyCallCount();
+    await loadDailyStats();
   };
 
   const resetCallCount = async (lead: Lead) => {

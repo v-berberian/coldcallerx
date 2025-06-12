@@ -1,15 +1,14 @@
+
 import React, { useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import CallingHeader from './CallingHeader';
 import MainContent from './MainContent';
 import DailyProgress from './DailyProgress';
+import AutoCallCountdown from './AutoCallCountdown';
 import { useSearchState } from './SearchState';
 import { useDailyCallState } from './DailyCallState';
 import { useLeadNavigation } from '../hooks/useLeadNavigation';
-import { useSessionManagement } from '../hooks/useSessionManagement';
-import { useLeadSelectionHandlers } from '../hooks/useLeadSelection';
-import { useAutoCallEffects } from '../hooks/useAutoCallEffects';
 import { Lead } from '../types/lead';
 
 interface CallingScreenLogicProps {
@@ -19,8 +18,6 @@ interface CallingScreenLogicProps {
   onLeadsImported: (leads: Lead[], fileName: string) => void;
   sessionState?: any;
   onSessionUpdate?: (updates: any) => void;
-  syncStatus?: 'idle' | 'syncing' | 'success' | 'error';
-  onSync?: () => void;
 }
 
 const CallingScreenLogic: React.FC<CallingScreenLogicProps> = ({
@@ -29,9 +26,7 @@ const CallingScreenLogic: React.FC<CallingScreenLogicProps> = ({
   onBack,
   onLeadsImported,
   sessionState,
-  onSessionUpdate,
-  syncStatus = 'idle',
-  onSync
+  onSessionUpdate
 }) => {
   const {
     leadsData,
@@ -91,40 +86,25 @@ const CallingScreenLogic: React.FC<CallingScreenLogicProps> = ({
     resetDailyCallCount
   } = useDailyCallState();
 
-  // Session management - simplified
-  useSessionManagement({
-    sessionState,
-    onSessionUpdate,
-    onSync,
-    initializeFromSessionState
-  });
+  // Initialize from session state
+  useEffect(() => {
+    if (sessionState && onSessionUpdate) {
+      const { saveCurrentIndex } = initializeFromSessionState(sessionState, onSessionUpdate);
+      
+      // Save session when navigation changes
+      const handleNavigationChange = (index: number) => {
+        saveCurrentIndex(index);
+      };
 
-  // Lead selection handlers
-  const { handleLeadSelect } = useLeadSelectionHandlers({
-    getBaseLeads,
-    leadsData,
-    selectLead,
-    setSearchQuery,
-    setShowAutocomplete
-  });
-
-  // Auto-call effects
-  useAutoCallEffects({
-    shouldAutoCall,
-    autoCall,
-    currentIndex,
-    cardKey,
-    getBaseLeads,
-    setCurrentLeadForAutoCall,
-    executeAutoCall,
-    incrementDailyCallCount,
-    setShouldAutoCall
-  });
+      // Store the handler for use in navigation
+      (window as any).saveCurrentIndex = handleNavigationChange;
+    }
+  }, [sessionState, onSessionUpdate]);
 
   // Handle new CSV imports by resetting the leads data
   useEffect(() => {
     resetLeadsData(leads);
-  }, [leads, resetLeadsData]);
+  }, [leads]);
 
   // Save updated leads data to localStorage whenever leadsData changes
   useEffect(() => {
@@ -132,6 +112,43 @@ const CallingScreenLogic: React.FC<CallingScreenLogicProps> = ({
       localStorage.setItem('coldcaller-leads', JSON.stringify(leadsData));
     }
   }, [leadsData]);
+
+  // Handle auto-call using the currently displayed lead
+  useEffect(() => {
+    if (shouldAutoCall && autoCall) {
+      const currentLeads = getBaseLeads();
+      const currentLead = currentLeads[currentIndex];
+      
+      if (currentLead) {
+        console.log('Auto-call triggered for displayed lead:', currentLead.name, currentLead.phone);
+        setCurrentLeadForAutoCall(currentLead);
+        executeAutoCall(currentLead);
+        incrementDailyCallCount();
+      }
+      
+      setShouldAutoCall(false);
+    }
+  }, [shouldAutoCall, autoCall, currentIndex, cardKey]);
+
+  const handleLeadSelect = (lead: Lead) => {
+    const baseLeads = getBaseLeads();
+    const leadIndexInBaseLeads = baseLeads.findIndex(l => 
+      l.name === lead.name && l.phone === lead.phone
+    );
+    
+    if (leadIndexInBaseLeads !== -1) {
+      selectLead(lead, baseLeads, leadsData);
+      console.log('Selected lead from autocomplete:', lead.name, 'at base index:', leadIndexInBaseLeads);
+      
+      // Save the new index to session
+      if ((window as any).saveCurrentIndex) {
+        (window as any).saveCurrentIndex(leadIndexInBaseLeads);
+      }
+    }
+    
+    setSearchQuery('');
+    setShowAutocomplete(false);
+  };
 
   // Handle manual call button click
   const handleCallClick = () => {
@@ -141,16 +158,27 @@ const CallingScreenLogic: React.FC<CallingScreenLogicProps> = ({
     incrementDailyCallCount();
   };
 
-  // Direct navigation handlers - no double wrapping
-  const handleNextClick = () => {
-    console.log('CallingScreenLogic: Next button clicked');
+  // Create wrapper functions for navigation that pass the required baseLeads parameter
+  const handleNextWrapper = () => {
     const currentLeads = getBaseLeads();
     handleNext(currentLeads);
+    
+    // Save new index to session
+    if ((window as any).saveCurrentIndex) {
+      const newIndex = (currentIndex + 1) % currentLeads.length;
+      (window as any).saveCurrentIndex(newIndex);
+    }
   };
 
-  const handlePreviousClick = () => {
-    console.log('CallingScreenLogic: Previous button clicked');
-    handlePrevious();
+  const handlePreviousWrapper = () => {
+    const currentLeads = getBaseLeads();
+    handlePrevious(currentLeads);
+    
+    // Save new index to session
+    if ((window as any).saveCurrentIndex) {
+      const newIndex = currentIndex > 0 ? currentIndex - 1 : currentLeads.length - 1;
+      (window as any).saveCurrentIndex(newIndex);
+    }
   };
 
   const currentLeads = getBaseLeads();
@@ -215,14 +243,12 @@ const CallingScreenLogic: React.FC<CallingScreenLogicProps> = ({
         searchResults={searchResults}
         leadsData={leadsData}
         fileName={fileName}
-        syncStatus={syncStatus}
         onSearchChange={setSearchQuery}
         onSearchFocus={handleSearchFocus}
         onSearchBlur={handleSearchBlur}
         onClearSearch={clearSearch}
         onLeadSelect={handleLeadSelect}
         onLeadsImported={onLeadsImported}
-        onSync={onSync}
       />
 
       {/* Main Content - takes remaining space */}
@@ -249,8 +275,8 @@ const CallingScreenLogic: React.FC<CallingScreenLogicProps> = ({
           onToggleCallDelay={toggleCallDelay}
           onResetCallDelay={resetCallDelay}
           onResetAllCalls={resetAllCallCounts}
-          onPrevious={handlePreviousClick}
-          onNext={handleNextClick}
+          onPrevious={handlePreviousWrapper}
+          onNext={handleNextWrapper}
           canGoPrevious={currentLeads.length > 1}
           canGoNext={currentLeads.length > 1}
         />

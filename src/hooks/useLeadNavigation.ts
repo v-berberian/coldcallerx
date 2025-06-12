@@ -180,8 +180,8 @@ export const useLeadNavigation = (initialLeads: Lead[], initialSessionState?: an
 
     // Return functions to save session state when navigation changes
     return {
-      saveCurrentIndex: async (index: number) => {
-        return onSessionUpdate({ currentLeadIndex: index });
+      saveCurrentIndex: (index: number) => {
+        onSessionUpdate({ currentLeadIndex: index });
       }
     };
   };
