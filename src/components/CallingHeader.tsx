@@ -1,10 +1,12 @@
 
-import React from 'react';
+import React, { useState } from 'react';
+import { Settings } from 'lucide-react';
 import { Lead } from '../types/lead';
 import SearchAutocomplete from './SearchAutocomplete';
 import SearchBar from './SearchBar';
-import ThemeToggle from './ThemeToggle';
 import CSVImporter from './CSVImporter';
+import SettingsModal from './SettingsModal';
+import { useAuth } from '@/hooks/useAuth';
 
 interface CallingHeaderProps {
   searchQuery: string;
@@ -33,6 +35,9 @@ const CallingHeader: React.FC<CallingHeaderProps> = ({
   onLeadSelect,
   onLeadsImported
 }) => {
+  const [showSettings, setShowSettings] = useState(false);
+  const { user } = useAuth();
+
   return (
     <div className="bg-background border-b border-border p-4 pt-safe flex-shrink-0" style={{ paddingTop: 'max(1rem, env(safe-area-inset-top))' }}>
       <div className="flex items-center justify-between mb-4">
@@ -46,7 +51,13 @@ const CallingHeader: React.FC<CallingHeaderProps> = ({
           </h1>
         </div>
         
-        <ThemeToggle />
+        <button
+          onClick={() => setShowSettings(true)}
+          className="p-2 rounded-lg transition-none text-muted-foreground hover:text-foreground"
+          title="Settings"
+        >
+          <Settings className="h-5 w-5" />
+        </button>
       </div>
       
       {/* Search Bar */}
@@ -73,6 +84,12 @@ const CallingHeader: React.FC<CallingHeaderProps> = ({
           />
         )}
       </div>
+
+      <SettingsModal 
+        isOpen={showSettings} 
+        onClose={() => setShowSettings(false)} 
+        userEmail={user?.email} 
+      />
     </div>
   );
 };
