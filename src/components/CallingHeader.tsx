@@ -76,18 +76,6 @@ const CallingHeader: React.FC<CallingHeaderProps> = ({
         </button>
       </div>
       
-      {/* Clickable List Name */}
-      {fileName && (
-        <div className="mb-3 text-center">
-          <button
-            onClick={() => setShowListSelector(true)}
-            className="text-sm text-muted-foreground hover:text-foreground transition-colors underline"
-          >
-            {fileName}
-          </button>
-        </div>
-      )}
-      
       {/* Search Bar */}
       <div className="relative">
         <SearchBar 

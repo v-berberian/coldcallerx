@@ -1,5 +1,4 @@
-
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import CallingHeader from './CallingHeader';
@@ -232,6 +231,13 @@ const CallingScreenLogic: React.FC<CallingScreenLogicProps> = ({
     }
   };
 
+  const handleListNameClick = () => {
+    setShowListSelector(true);
+  };
+
+  // Add state for list selector
+  const [showListSelector, setShowListSelector] = useState(false);
+
   if (loading) {
     return (
       <div className="h-[100dvh] bg-background overflow-hidden fixed inset-0 flex items-center justify-center">
@@ -302,6 +308,7 @@ const CallingScreenLogic: React.FC<CallingScreenLogicProps> = ({
             onNext={handleNextWrapper}
             canGoPrevious={currentLeads.length > 1}
             canGoNext={currentLeads.length > 1}
+            onListNameClick={handleListNameClick}
           />
         ) : (
           <div className="flex-1 flex items-center justify-center p-4">
@@ -349,6 +356,16 @@ const CallingScreenLogic: React.FC<CallingScreenLogicProps> = ({
           onResetDailyCount={resetDailyCallCount}
         />
       </div>
+
+      {/* List Selector Modal */}
+      <ListSelector
+        isOpen={showListSelector}
+        onClose={() => setShowListSelector(false)}
+        leadLists={leadLists}
+        currentListId={currentListId}
+        onSelectList={switchToList}
+        onCreateList={createLeadList}
+      />
     </div>
   );
 };

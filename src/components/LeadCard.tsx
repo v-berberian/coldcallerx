@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -20,6 +21,7 @@ interface LeadCardProps {
   cardKey: number;
   onCall: () => void;
   onResetCallCount: () => void;
+  onListNameClick?: () => void;
 }
 
 const LeadCard: React.FC<LeadCardProps> = ({
@@ -29,19 +31,26 @@ const LeadCard: React.FC<LeadCardProps> = ({
   fileName,
   cardKey,
   onCall,
-  onResetCallCount
+  onResetCallCount,
+  onListNameClick
 }) => {
   return (
     <Card key={cardKey} className="shadow-2xl border-border/50 rounded-3xl bg-card h-[400px] flex flex-col animate-scale-in">
       <CardContent className="p-6 space-y-4 flex-1 flex flex-col">
-        {/* Top row with lead count and file name */}
+        {/* Top row with lead count and clickable file name */}
         <div className="flex items-center justify-between">
           <p className="text-sm text-muted-foreground opacity-40">
             {currentIndex + 1}/{totalCount}
           </p>
-          <p className="text-sm text-muted-foreground opacity-40">
-            {fileName}
-          </p>
+          {fileName && (
+            <button
+              onClick={onListNameClick}
+              className="text-sm text-muted-foreground opacity-40 hover:opacity-60 transition-opacity underline"
+              title="Switch list"
+            >
+              {fileName}
+            </button>
+          )}
         </div>
 
         {/* Lead info - Main content area with animation */}

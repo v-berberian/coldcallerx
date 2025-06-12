@@ -30,6 +30,58 @@ export const useSupabaseLeads = (userId: string | undefined) => {
     loadLeads(currentListId);
   }, [currentListId]);
 
+  // Set up real-time subscription for leads updates
+  useEffect(() => {
+    if (!currentListId) return;
+
+    console.log('Setting up real-time subscription for leads');
+    
+    const channel = supabase
+      .channel('leads-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'leads',
+          filter: `list_id=eq.${currentListId}`
+        },
+        (payload) => {
+          console.log('Real-time leads update:', payload);
+          
+          if (payload.eventType === 'UPDATE') {
+            const updatedLead = payload.new;
+            setLeadsData(prev => prev.map(lead => {
+              if (lead.name === updatedLead.name && lead.phone === updatedLead.phone) {
+                return {
+                  name: updatedLead.name,
+                  phone: updatedLead.phone,
+                  called: updatedLead.called || 0,
+                  lastCalled: updatedLead.last_called ? new Date(updatedLead.last_called).toLocaleString() : undefined
+                };
+              }
+              return lead;
+            }));
+          } else if (payload.eventType === 'INSERT') {
+            const newLead = payload.new;
+            const transformedLead: Lead = {
+              name: newLead.name,
+              phone: newLead.phone,
+              called: newLead.called || 0,
+              lastCalled: newLead.last_called ? new Date(newLead.last_called).toLocaleString() : undefined
+            };
+            setLeadsData(prev => [...prev, transformedLead]);
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      console.log('Cleaning up real-time subscription');
+      supabase.removeChannel(channel);
+    };
+  }, [currentListId]);
+
   const loadLeadLists = async () => {
     try {
       const { data, error } = await supabase
@@ -150,6 +202,11 @@ export const useSupabaseLeads = (userId: string | undefined) => {
         .eq('phone', lead.phone);
 
       if (error) throw error;
+
+      // Force local state update for immediate UI feedback
+      setLeadsData(prev => prev.map(l => 
+        l.name === lead.name && l.phone === lead.phone ? lead : l
+      ));
     } catch (error) {
       console.error('Error updating lead call status:', error);
     }
