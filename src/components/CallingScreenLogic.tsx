@@ -100,20 +100,13 @@ const CallingScreenLogic: React.FC<CallingScreenLogicProps> = ({
           onSync(); // Start sync status
         }
         
-        const success = await saveCurrentIndex(index);
-        
-        if (onSync && success) {
-          // Simulate successful sync after a short delay
-          setTimeout(() => {
-            if (onSync) onSync();
-          }, 500);
-        }
+        await saveCurrentIndex(index);
       };
 
       // Store the handler for use in navigation
       (window as any).saveCurrentIndex = handleNavigationChange;
     }
-  }, [sessionState, onSessionUpdate, onSync]);
+  }, [sessionState, onSessionUpdate, onSync, initializeFromSessionState]);
 
   // Handle new CSV imports by resetting the leads data
   useEffect(() => {
@@ -142,7 +135,7 @@ const CallingScreenLogic: React.FC<CallingScreenLogicProps> = ({
       
       setShouldAutoCall(false);
     }
-  }, [shouldAutoCall, autoCall, currentIndex, cardKey]);
+  }, [shouldAutoCall, autoCall, currentIndex, cardKey, getBaseLeads, setCurrentLeadForAutoCall, executeAutoCall, incrementDailyCallCount, setShouldAutoCall]);
 
   const handleLeadSelect = async (lead: Lead) => {
     const baseLeads = getBaseLeads();
