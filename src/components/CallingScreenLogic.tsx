@@ -5,10 +5,11 @@ import { Card, CardContent } from '@/components/ui/card';
 import CallingHeader from './CallingHeader';
 import MainContent from './MainContent';
 import DailyProgress from './DailyProgress';
-import AutoCallCountdown from './AutoCallCountdown';
 import { useSearchState } from './SearchState';
 import { useDailyCallState } from './DailyCallState';
 import { useLeadNavigation } from '../hooks/useLeadNavigation';
+import { useSupabaseLeads } from '../hooks/useSupabaseLeads';
+import { useAuth } from '@/hooks/useAuth';
 import { Lead } from '../types/lead';
 
 interface CallingScreenLogicProps {
@@ -24,8 +25,20 @@ const CallingScreenLogic: React.FC<CallingScreenLogicProps> = ({
   onBack,
   onLeadsImported
 }) => {
+  const { user } = useAuth();
   const {
+    leadLists,
+    currentListId,
     leadsData,
+    loading,
+    createLeadList,
+    updateLeadCallStatus,
+    switchToList,
+    getCurrentListName,
+    refreshLists
+  } = useSupabaseLeads(user?.id);
+
+  const {
     currentIndex,
     cardKey,
     timezoneFilter,
@@ -56,7 +69,7 @@ const CallingScreenLogic: React.FC<CallingScreenLogicProps> = ({
     toggleCallDelay,
     resetCallDelay,
     resetLeadsData
-  } = useLeadNavigation(leads);
+  } = useLeadNavigation(leadsData);
 
   const {
     searchQuery,
@@ -68,7 +81,7 @@ const CallingScreenLogic: React.FC<CallingScreenLogicProps> = ({
     handleSearchFocus,
     handleSearchBlur
   } = useSearchState({ 
-    leads, 
+    leads: leadsData, 
     getBaseLeads, 
     leadsData, 
     timezoneFilter, 
@@ -81,19 +94,33 @@ const CallingScreenLogic: React.FC<CallingScreenLogicProps> = ({
     resetDailyCallCount
   } = useDailyCallState();
 
-  // Handle new CSV imports by resetting the leads data
+  // Handle CSV imports (legacy support)
   useEffect(() => {
-    resetLeadsData(leads);
-  }, [leads]);
-
-  // Save updated leads data to localStorage whenever leadsData changes
-  useEffect(() => {
-    if (leadsData.length > 0) {
-      localStorage.setItem('coldcaller-leads', JSON.stringify(leadsData));
+    if (leads.length > 0 && fileName && user?.id) {
+      createLeadList(fileName, leads);
     }
-  }, [leadsData]);
+  }, [leads, fileName, user?.id]);
 
-  // Handle auto-call using the currently displayed lead
+  // Update server when call status changes
+  const handleCallClick = async () => {
+    const currentLeads = getBaseLeads();
+    const currentLead = currentLeads[currentIndex];
+    
+    // Make the call
+    makeCall(currentLead);
+    incrementDailyCallCount();
+    
+    // Update server with new call status
+    const updatedLead = {
+      ...currentLead,
+      called: (currentLead.called || 0) + 1,
+      lastCalled: new Date().toLocaleString()
+    };
+    
+    await updateLeadCallStatus(updatedLead);
+  };
+
+  // Handle auto-call with server sync
   useEffect(() => {
     if (shouldAutoCall && autoCall) {
       const currentLeads = getBaseLeads();
@@ -104,6 +131,14 @@ const CallingScreenLogic: React.FC<CallingScreenLogicProps> = ({
         setCurrentLeadForAutoCall(currentLead);
         executeAutoCall(currentLead);
         incrementDailyCallCount();
+        
+        // Update server
+        const updatedLead = {
+          ...currentLead,
+          called: (currentLead.called || 0) + 1,
+          lastCalled: new Date().toLocaleString()
+        };
+        updateLeadCallStatus(updatedLead);
       }
       
       setShouldAutoCall(false);
@@ -125,15 +160,6 @@ const CallingScreenLogic: React.FC<CallingScreenLogicProps> = ({
     setShowAutocomplete(false);
   };
 
-  // Handle manual call button click
-  const handleCallClick = () => {
-    const currentLeads = getBaseLeads();
-    const currentLead = currentLeads[currentIndex];
-    makeCall(currentLead);
-    incrementDailyCallCount();
-  };
-
-  // Create wrapper functions for navigation that pass the required baseLeads parameter
   const handleNextWrapper = () => {
     const currentLeads = getBaseLeads();
     handleNext(currentLeads);
@@ -143,6 +169,44 @@ const CallingScreenLogic: React.FC<CallingScreenLogicProps> = ({
     const currentLeads = getBaseLeads();
     handlePrevious(currentLeads);
   };
+
+  const handleLeadsImported = (importedLeads: Lead[], importedFileName: string) => {
+    if (user?.id) {
+      createLeadList(importedFileName, importedLeads);
+    } else {
+      onLeadsImported(importedLeads, importedFileName);
+    }
+  };
+
+  const handleResetCallCount = async () => {
+    const currentLeads = getBaseLeads();
+    const currentLead = currentLeads[currentIndex];
+    
+    resetCallCount(currentLead);
+    
+    // Update server
+    const updatedLead = {
+      ...currentLead,
+      called: 0,
+      lastCalled: undefined
+    };
+    await updateLeadCallStatus(updatedLead);
+  };
+
+  if (loading) {
+    return (
+      <div className="h-[100dvh] bg-background overflow-hidden fixed inset-0 flex items-center justify-center">
+        <div className="text-center">
+          <h1 className="text-3xl font-bold mb-4">
+            <span className="text-blue-500">Cold</span>
+            <span className="text-foreground">Caller </span>
+            <span className="text-blue-500">X</span>
+          </h1>
+          <p className="text-muted-foreground">Loading your lead lists...</p>
+        </div>
+      </div>
+    );
+  }
 
   const currentLeads = getBaseLeads();
   const currentLead = currentLeads[currentIndex];
@@ -162,7 +226,8 @@ const CallingScreenLogic: React.FC<CallingScreenLogicProps> = ({
           </div>
         </div>
         <div className="p-6 text-center">
-          <p className="text-lg text-muted-foreground">No leads imported</p>
+          <p className="text-lg text-muted-foreground">No leads found</p>
+          <p className="text-sm text-muted-foreground mt-2">Import a lead list to get started</p>
         </div>
       </div>
     );
@@ -186,7 +251,7 @@ const CallingScreenLogic: React.FC<CallingScreenLogicProps> = ({
                 Clear All Filters
               </Button>
               <Button onClick={onBack} variant="outline" className="w-full rounded-xl">
-                Back to Import
+                Back
               </Button>
             </div>
           </CardContent>
@@ -196,6 +261,7 @@ const CallingScreenLogic: React.FC<CallingScreenLogicProps> = ({
   }
 
   const totalLeadCount = currentLeads.length;
+  const currentListName = getCurrentListName();
 
   return (
     <div className="h-[100dvh] bg-background flex flex-col overflow-hidden fixed inset-0">
@@ -205,13 +271,17 @@ const CallingScreenLogic: React.FC<CallingScreenLogicProps> = ({
         showAutocomplete={showAutocomplete}
         searchResults={searchResults}
         leadsData={leadsData}
-        fileName={fileName}
+        fileName={currentListName}
+        leadLists={leadLists}
+        currentListId={currentListId}
         onSearchChange={setSearchQuery}
         onSearchFocus={handleSearchFocus}
         onSearchBlur={handleSearchBlur}
         onClearSearch={clearSearch}
         onLeadSelect={handleLeadSelect}
-        onLeadsImported={onLeadsImported}
+        onLeadsImported={handleLeadsImported}
+        onSelectList={switchToList}
+        onCreateList={createLeadList}
       />
 
       {/* Main Content - takes remaining space */}
@@ -220,7 +290,7 @@ const CallingScreenLogic: React.FC<CallingScreenLogicProps> = ({
           currentLead={currentLead}
           currentIndex={currentIndex}
           totalCount={totalLeadCount}
-          fileName={fileName}
+          fileName={currentListName}
           cardKey={cardKey}
           timezoneFilter={timezoneFilter}
           callFilter={callFilter}
@@ -230,7 +300,7 @@ const CallingScreenLogic: React.FC<CallingScreenLogicProps> = ({
           isCountdownActive={isCountdownActive}
           countdownTime={countdownTime}
           onCall={handleCallClick}
-          onResetCallCount={() => resetCallCount(currentLead)}
+          onResetCallCount={handleResetCallCount}
           onToggleTimezone={toggleTimezoneFilter}
           onToggleCallFilter={toggleCallFilter}
           onToggleShuffle={toggleShuffle}

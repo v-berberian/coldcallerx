@@ -6,7 +6,15 @@ import SearchAutocomplete from './SearchAutocomplete';
 import SearchBar from './SearchBar';
 import CSVImporter from './CSVImporter';
 import SettingsModal from './SettingsModal';
+import ListSelector from './ListSelector';
 import { useAuth } from '@/hooks/useAuth';
+
+interface LeadList {
+  id: string;
+  name: string;
+  created_at: string;
+  updated_at: string;
+}
 
 interface CallingHeaderProps {
   searchQuery: string;
@@ -14,12 +22,16 @@ interface CallingHeaderProps {
   searchResults: Lead[];
   leadsData: Lead[];
   fileName: string;
+  leadLists: LeadList[];
+  currentListId: string | null;
   onSearchChange: (query: string) => void;
   onSearchFocus: () => void;
   onSearchBlur: () => void;
   onClearSearch: () => void;
   onLeadSelect: (lead: Lead) => void;
   onLeadsImported: (leads: Lead[], fileName: string) => void;
+  onSelectList: (listId: string) => void;
+  onCreateList: (name: string, leads: Lead[]) => void;
 }
 
 const CallingHeader: React.FC<CallingHeaderProps> = ({
@@ -28,14 +40,19 @@ const CallingHeader: React.FC<CallingHeaderProps> = ({
   searchResults,
   leadsData,
   fileName,
+  leadLists,
+  currentListId,
   onSearchChange,
   onSearchFocus,
   onSearchBlur,
   onClearSearch,
   onLeadSelect,
-  onLeadsImported
+  onLeadsImported,
+  onSelectList,
+  onCreateList
 }) => {
   const [showSettings, setShowSettings] = useState(false);
+  const [showListSelector, setShowListSelector] = useState(false);
   const { user } = useAuth();
 
   return (
@@ -59,6 +76,18 @@ const CallingHeader: React.FC<CallingHeaderProps> = ({
           <Settings className="h-5 w-5" />
         </button>
       </div>
+      
+      {/* Clickable List Name */}
+      {fileName && (
+        <div className="mb-3 text-center">
+          <button
+            onClick={() => setShowListSelector(true)}
+            className="text-sm text-muted-foreground hover:text-foreground transition-colors underline"
+          >
+            {fileName}
+          </button>
+        </div>
+      )}
       
       {/* Search Bar */}
       <div className="relative">
@@ -89,6 +118,15 @@ const CallingHeader: React.FC<CallingHeaderProps> = ({
         isOpen={showSettings} 
         onClose={() => setShowSettings(false)} 
         userEmail={user?.email} 
+      />
+
+      <ListSelector
+        isOpen={showListSelector}
+        onClose={() => setShowListSelector(false)}
+        leadLists={leadLists}
+        currentListId={currentListId}
+        onSelectList={onSelectList}
+        onCreateList={onCreateList}
       />
     </div>
   );
