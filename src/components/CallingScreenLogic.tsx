@@ -1,4 +1,3 @@
-
 import React, { useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -92,7 +91,7 @@ const CallingScreenLogic: React.FC<CallingScreenLogicProps> = ({
     resetDailyCallCount
   } = useDailyCallState();
 
-  // Session management
+  // Session management - simplified
   useSessionManagement({
     sessionState,
     onSessionUpdate,
@@ -142,15 +141,16 @@ const CallingScreenLogic: React.FC<CallingScreenLogicProps> = ({
     incrementDailyCallCount();
   };
 
-  // Simple navigation handlers - directly use the base leads for navigation
+  // Direct navigation handlers - no double wrapping
   const handleNextClick = () => {
+    console.log('CallingScreenLogic: Next button clicked');
     const currentLeads = getBaseLeads();
     handleNext(currentLeads);
   };
 
   const handlePreviousClick = () => {
-    const currentLeads = getBaseLeads();
-    handlePrevious(currentLeads);
+    console.log('CallingScreenLogic: Previous button clicked');
+    handlePrevious();
   };
 
   const currentLeads = getBaseLeads();

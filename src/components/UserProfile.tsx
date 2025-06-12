@@ -24,7 +24,9 @@ const UserProfile: React.FC = () => {
   }, [signOut]);
 
   // Memoize user email to prevent unnecessary re-renders
-  const userEmail = useMemo(() => user?.email || '', [user?.email]);
+  const userEmail = useMemo(() => {
+    return user?.email || '';
+  }, [user?.email]);
 
   if (!user) {
     return null;

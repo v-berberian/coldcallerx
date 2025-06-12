@@ -17,7 +17,6 @@ export const useSessionManagement = ({
   initializeFromSessionState
 }: UseSessionManagementProps) => {
   const isInitializedRef = useRef(false);
-  const saveHandlerRef = useRef<((index: number) => Promise<void>) | null>(null);
 
   // Memoized session update function to prevent re-render loops
   const updateSession = useCallback(async (index: number) => {
@@ -42,9 +41,7 @@ export const useSessionManagement = ({
       
       try {
         console.log('Initializing session management with state:', sessionState);
-        const { saveCurrentIndex } = initializeFromSessionState(sessionState, onSessionUpdate);
-        saveHandlerRef.current = saveCurrentIndex;
-        
+        initializeFromSessionState(sessionState, onSessionUpdate);
         console.log('Session management initialized successfully');
       } catch (error) {
         console.error('Failed to initialize session management:', error);
@@ -53,13 +50,6 @@ export const useSessionManagement = ({
       }
     }
   }, [sessionState, onSessionUpdate, initializeFromSessionState]);
-
-  // Cleanup on unmount
-  useEffect(() => {
-    return () => {
-      saveHandlerRef.current = null;
-    };
-  }, []);
 
   // Return the update function for use by navigation
   return {
