@@ -2,9 +2,8 @@ import { useState, useEffect } from 'react';
 import { Lead } from '../types/lead';
 import { leadService, LeadList } from '../services/leadService';
 import { dailyStatsService } from '../services/dailyStatsService';
-import { SessionState } from '../services/sessionService';
+import { sessionService, SessionState } from '../services/sessionService';
 import { useAuth } from '../contexts/AuthContext';
-import { useSessionManagement } from './useSessionManagement';
 
 export const useCloudLeadsData = () => {
   const [currentLeadList, setCurrentLeadList] = useState<LeadList | null>(null);
@@ -21,28 +20,19 @@ export const useCloudLeadsData = () => {
     callDelay: 0
   });
   const { user } = useAuth();
-  const { 
-    deviceId, 
-    isSessionConflict, 
-    lastRemoteUpdate,
-    saveSession, 
-    loadSession,
-    syncFromRemoteSession,
-    clearSessionConflict 
-  } = useSessionManagement();
 
   // Load user's session, lead list and daily stats on mount
   useEffect(() => {
-    if (user && deviceId) {
+    if (user) {
       loadUserData();
     }
-  }, [user, deviceId]);
+  }, [user]);
 
   const loadUserData = async () => {
     setLoading(true);
     try {
       // Load saved session state
-      const savedSession = await loadSession();
+      const savedSession = await sessionService.getUserSession();
       
       // Load daily stats
       const stats = await dailyStatsService.getTodaysStats();
@@ -90,9 +80,7 @@ export const useCloudLeadsData = () => {
         setLeadsData(leads);
 
         // Save the initial session state
-        if (deviceId) {
-          await saveSession(initialSessionState);
-        }
+        await sessionService.saveUserSession(initialSessionState);
       }
     } catch (error) {
       console.error('Error loading user data:', error);
@@ -112,10 +100,7 @@ export const useCloudLeadsData = () => {
     try {
       const newSessionState = { ...sessionState, ...updates };
       setSessionState(newSessionState);
-      
-      if (deviceId) {
-        return await saveSession(newSessionState);
-      }
+      await sessionService.saveUserSession(newSessionState);
       return true;
     } catch (error) {
       console.error('Error updating session state:', error);
@@ -283,8 +268,6 @@ export const useCloudLeadsData = () => {
     dailyCallCount,
     loading,
     sessionState,
-    isSessionConflict,
-    lastRemoteUpdate,
     importLeadsFromCSV,
     switchToLeadList,
     deleteLeadList,
@@ -294,8 +277,6 @@ export const useCloudLeadsData = () => {
     resetAllCallCounts,
     resetDailyCallCount,
     loadDailyStats,
-    updateSessionState,
-    syncFromRemoteSession,
-    clearSessionConflict
+    updateSessionState
   };
 };

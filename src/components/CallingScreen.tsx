@@ -18,10 +18,6 @@ interface CallingScreenProps {
   onSessionUpdate?: (updates: any) => void;
   syncStatus?: 'idle' | 'syncing' | 'success' | 'error';
   onSync?: () => void;
-  isSessionConflict?: boolean;
-  lastRemoteUpdate?: string | null;
-  onSyncFromRemote?: () => void;
-  onClearSessionConflict?: () => void;
 }
 
 const CallingScreen: React.FC<CallingScreenProps> = (props) => {
