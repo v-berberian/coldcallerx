@@ -29,27 +29,11 @@ export interface SessionState {
   callDelay: number;
 }
 
-// Legacy session interface for backwards compatibility
-interface LegacySession {
-  id: string;
-  user_id: string;
-  current_lead_list_id: string | null;
-  current_lead_index: number;
-  timezone_filter: string;
-  call_filter: string;
-  shuffle_mode: boolean;
-  auto_call: boolean;
-  call_delay: number;
-  last_accessed_at: string;
-  created_at: string;
-  updated_at: string;
-}
-
 // Debounce utility for session saves
 let saveTimeout: NodeJS.Timeout | null = null;
 const SAVE_DEBOUNCE_MS = 1000;
 
-// Helper function to safely convert legacy session to new format
+// Helper function to safely convert database session to UserSession format
 function normalizeSession(rawSession: any): UserSession | null {
   if (!rawSession) return null;
   
@@ -74,49 +58,46 @@ function normalizeSession(rawSession: any): UserSession | null {
   };
 }
 
+async function getAuthenticatedUser() {
+  const { data: { user }, error } = await supabase.auth.getUser();
+  if (error || !user) {
+    console.error('User not authenticated:', error);
+    return null;
+  }
+  return user;
+}
+
 export const sessionService = {
   async getUserSession(): Promise<UserSession | null> {
     try {
-      const user = await supabase.auth.getUser();
-      
-      if (!user.data.user) {
-        console.error('User not authenticated');
-        return null;
-      }
+      const user = await getAuthenticatedUser();
+      if (!user) return null;
 
       const deviceId = getDeviceId();
 
-      // Try to get session for current device (will work if migration is applied)
-      try {
-        const { data: deviceSession, error: deviceError } = await supabase
-          .from('user_sessions')
-          .select('*')
-          .eq('user_id', user.data.user.id)
-          .eq('device_id', deviceId)
-          .maybeSingle();
+      // Try to get session for current device first
+      const { data: deviceSession, error: deviceError } = await supabase
+        .from('user_sessions')
+        .select('*')
+        .eq('user_id', user.id)
+        .eq('device_id', deviceId)
+        .maybeSingle();
 
-        if (!deviceError && deviceSession) {
-          return normalizeSession(deviceSession);
-        }
-      } catch (deviceQueryError) {
-        console.log('Device query failed (migration may not be applied yet):', deviceQueryError);
+      if (!deviceError && deviceSession) {
+        return normalizeSession(deviceSession);
       }
 
-      // Fallback: get any session for this user (backwards compatible)
-      try {
-        const { data: userSession, error: userError } = await supabase
-          .from('user_sessions')
-          .select('*')
-          .eq('user_id', user.data.user.id)
-          .order('updated_at', { ascending: false })
-          .limit(1)
-          .maybeSingle();
+      // Fallback: get any session for this user (backwards compatibility)
+      const { data: userSession, error: userError } = await supabase
+        .from('user_sessions')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('updated_at', { ascending: false })
+        .limit(1)
+        .maybeSingle();
 
-        if (!userError && userSession) {
-          return normalizeSession(userSession);
-        }
-      } catch (userQueryError) {
-        console.log('User query failed:', userQueryError);
+      if (!userError && userSession) {
+        return normalizeSession(userSession);
       }
 
       return null;
@@ -128,12 +109,8 @@ export const sessionService = {
 
   async saveUserSession(sessionState: SessionState): Promise<boolean> {
     try {
-      const user = await supabase.auth.getUser();
-      
-      if (!user.data.user) {
-        console.error('User not authenticated');
-        return false;
-      }
+      const user = await getAuthenticatedUser();
+      if (!user) return false;
 
       const deviceId = getDeviceId();
 
@@ -148,39 +125,9 @@ export const sessionService = {
           try {
             const now = new Date().toISOString();
             
-            // Try new format first (with device_id and last_updated_at)
-            try {
-              const sessionData = {
-                user_id: user.data.user.id,
-                device_id: deviceId,
-                current_lead_list_id: sessionState.currentLeadListId,
-                current_lead_index: sessionState.currentLeadIndex,
-                timezone_filter: sessionState.timezoneFilter,
-                call_filter: sessionState.callFilter,
-                shuffle_mode: sessionState.shuffleMode,
-                auto_call: sessionState.autoCall,
-                call_delay: sessionState.callDelay,
-                last_accessed_at: now,
-                last_updated_at: now
-              };
-
-              const { error } = await supabase
-                .from('user_sessions')
-                .upsert(sessionData, {
-                  onConflict: 'user_id,device_id'
-                });
-
-              if (!error) {
-                resolve(true);
-                return;
-              }
-            } catch (newFormatError) {
-              console.log('New format save failed, trying legacy format:', newFormatError);
-            }
-
-            // Fallback to legacy format (without device_id and last_updated_at)
-            const legacySessionData = {
-              user_id: user.data.user.id,
+            const sessionData = {
+              user_id: user.id,
+              device_id: deviceId,
               current_lead_list_id: sessionState.currentLeadListId,
               current_lead_index: sessionState.currentLeadIndex,
               timezone_filter: sessionState.timezoneFilter,
@@ -188,17 +135,18 @@ export const sessionService = {
               shuffle_mode: sessionState.shuffleMode,
               auto_call: sessionState.autoCall,
               call_delay: sessionState.callDelay,
-              last_accessed_at: now
+              last_accessed_at: now,
+              last_updated_at: now
             };
 
-            const { error: legacyError } = await supabase
+            const { error } = await supabase
               .from('user_sessions')
-              .upsert(legacySessionData, {
-                onConflict: 'user_id'
+              .upsert(sessionData, {
+                onConflict: 'user_id,device_id'
               });
 
-            if (legacyError) {
-              console.error('Error saving user session (legacy):', legacyError);
+            if (error) {
+              console.error('Error saving user session:', error);
               resolve(false);
             } else {
               resolve(true);
@@ -217,35 +165,16 @@ export const sessionService = {
 
   async clearUserSession(): Promise<boolean> {
     try {
-      const user = await supabase.auth.getUser();
-      
-      if (!user.data.user) {
-        console.error('User not authenticated');
-        return false;
-      }
+      const user = await getAuthenticatedUser();
+      if (!user) return false;
 
       const deviceId = getDeviceId();
 
-      // Try device-specific clear first
-      try {
-        const { error } = await supabase
-          .from('user_sessions')
-          .delete()
-          .eq('user_id', user.data.user.id)
-          .eq('device_id', deviceId);
-
-        if (!error) {
-          return true;
-        }
-      } catch (deviceClearError) {
-        console.log('Device-specific clear failed, trying user clear:', deviceClearError);
-      }
-
-      // Fallback to user-based clear
       const { error } = await supabase
         .from('user_sessions')
         .delete()
-        .eq('user_id', user.data.user.id);
+        .eq('user_id', user.id)
+        .eq('device_id', deviceId);
 
       if (error) {
         console.error('Error clearing user session:', error);
@@ -261,17 +190,13 @@ export const sessionService = {
 
   async clearAllUserSessions(): Promise<boolean> {
     try {
-      const user = await supabase.auth.getUser();
-      
-      if (!user.data.user) {
-        console.error('User not authenticated');
-        return false;
-      }
+      const user = await getAuthenticatedUser();
+      if (!user) return false;
 
       const { error } = await supabase
         .from('user_sessions')
         .delete()
-        .eq('user_id', user.data.user.id);
+        .eq('user_id', user.id);
 
       if (error) {
         console.error('Error clearing all user sessions:', error);
