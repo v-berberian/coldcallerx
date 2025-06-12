@@ -1,6 +1,5 @@
 
 import { useEffect, useRef } from 'react';
-import { Lead } from '../types/lead';
 
 interface UseSessionManagementProps {
   sessionState?: any;
@@ -18,30 +17,38 @@ export const useSessionManagement = ({
   initializeFromSessionState
 }: UseSessionManagementProps) => {
   const isInitializedRef = useRef(false);
+  const saveHandlerRef = useRef<((index: number) => Promise<void>) | null>(null);
 
   // Initialize from session state
   useEffect(() => {
     if (sessionState && onSessionUpdate && !isInitializedRef.current) {
       isInitializedRef.current = true;
       
-      const { saveCurrentIndex } = initializeFromSessionState(sessionState, onSessionUpdate);
-      
-      // Save session when navigation changes
-      const handleNavigationChange = async (index: number) => {
-        if (onSync) {
-          onSync(); // Start sync status
-        }
+      try {
+        const { saveCurrentIndex } = initializeFromSessionState(sessionState, onSessionUpdate);
+        saveHandlerRef.current = saveCurrentIndex;
         
-        try {
-          await saveCurrentIndex(index);
-        } catch (error) {
-          console.error('Failed to save navigation change:', error);
-          // Don't block the UI if session save fails
-        }
-      };
+        // Save session when navigation changes
+        const handleNavigationChange = async (index: number) => {
+          if (onSync) {
+            onSync(); // Start sync status
+          }
+          
+          try {
+            await saveCurrentIndex(index);
+          } catch (error) {
+            console.error('Failed to save navigation change:', error);
+            // Don't block the UI if session save fails
+          }
+        };
 
-      // Store the handler for use in navigation
-      (window as any).saveCurrentIndex = handleNavigationChange;
+        // Store the handler for use in navigation
+        (window as any).saveCurrentIndex = handleNavigationChange;
+      } catch (error) {
+        console.error('Failed to initialize session management:', error);
+        // Reset initialization flag on error
+        isInitializedRef.current = false;
+      }
     }
   }, [sessionState, onSessionUpdate, onSync, initializeFromSessionState]);
 
@@ -51,6 +58,7 @@ export const useSessionManagement = ({
       if ((window as any).saveCurrentIndex) {
         delete (window as any).saveCurrentIndex;
       }
+      saveHandlerRef.current = null;
     };
   }, []);
 };

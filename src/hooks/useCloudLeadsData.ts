@@ -35,9 +35,14 @@ export const useCloudLeadsData = () => {
       const savedSession = await loadSessionWithRetry();
       
       // Load daily stats
-      const stats = await dailyStatsService.getTodaysStats();
-      if (stats) {
-        setDailyCallCount(stats.call_count);
+      try {
+        const stats = await dailyStatsService.getTodaysStats();
+        if (stats) {
+          setDailyCallCount(stats.call_count);
+        }
+      } catch (statsError) {
+        console.log('Failed to load daily stats:', statsError);
+        // Continue without daily stats
       }
 
       // Load lead lists
@@ -80,7 +85,12 @@ export const useCloudLeadsData = () => {
         setLeadsData(leads);
 
         // Save the initial session state (debounced)
-        await sessionService.saveUserSession(initialSessionState);
+        try {
+          await sessionService.saveUserSession(initialSessionState);
+        } catch (sessionSaveError) {
+          console.log('Failed to save initial session state:', sessionSaveError);
+          // Continue without saving session
+        }
       }
     } catch (error) {
       console.error('Error loading user data:', error);
