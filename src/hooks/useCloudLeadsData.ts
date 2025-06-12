@@ -9,15 +9,41 @@ export const useCloudLeadsData = () => {
   const [currentLeadList, setCurrentLeadList] = useState<LeadList | null>(null);
   const [leadsData, setLeadsData] = useState<Lead[]>([]);
   const [dailyCallCount, setDailyCallCount] = useState(0);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const { user } = useAuth();
 
-  // Load daily stats
+  // Load user's most recent lead list and daily stats on mount
   useEffect(() => {
     if (user) {
-      loadDailyStats();
+      loadUserData();
     }
   }, [user]);
+
+  const loadUserData = async () => {
+    setLoading(true);
+    try {
+      // Load daily stats
+      const stats = await dailyStatsService.getTodaysStats();
+      if (stats) {
+        setDailyCallCount(stats.call_count);
+      }
+
+      // Load most recent lead list
+      const leadLists = await leadService.getLeadLists();
+      if (leadLists.length > 0) {
+        const mostRecentList = leadLists[0]; // Already ordered by created_at desc
+        setCurrentLeadList(mostRecentList);
+        
+        // Load leads for this list
+        const leads = await leadService.getLeads(mostRecentList.id);
+        setLeadsData(leads);
+      }
+    } catch (error) {
+      console.error('Error loading user data:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const loadDailyStats = async () => {
     const stats = await dailyStatsService.getTodaysStats();
@@ -49,6 +75,35 @@ export const useCloudLeadsData = () => {
       console.error('Error importing leads:', error);
     } finally {
       setLoading(false);
+    }
+    return false;
+  };
+
+  const switchToLeadList = async (leadList: LeadList) => {
+    setLoading(true);
+    try {
+      const leads = await leadService.getLeads(leadList.id);
+      setCurrentLeadList(leadList);
+      setLeadsData(leads);
+    } catch (error) {
+      console.error('Error switching lead list:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const deleteLeadList = async (leadListId: string): Promise<boolean> => {
+    try {
+      const success = await leadService.deleteLeadList(leadListId);
+      if (success) {
+        // If we deleted the current list, clear it and reload
+        if (currentLeadList?.id === leadListId) {
+          await loadUserData();
+        }
+        return true;
+      }
+    } catch (error) {
+      console.error('Error deleting lead list:', error);
     }
     return false;
   };
@@ -137,6 +192,8 @@ export const useCloudLeadsData = () => {
     dailyCallCount,
     loading,
     importLeadsFromCSV,
+    switchToLeadList,
+    deleteLeadList,
     uploadCSVFile,
     markLeadAsCalled,
     resetCallCount,

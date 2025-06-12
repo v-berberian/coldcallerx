@@ -39,7 +39,7 @@ const Index = () => {
     await signOut();
   };
 
-  if (authLoading) {
+  if (authLoading || leadsLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin" />
@@ -73,17 +73,8 @@ const Index = () => {
         
         <div className="flex items-center justify-center h-full">
           <div className="text-center space-y-4">
-            {leadsLoading ? (
-              <>
-                <Loader2 className="h-8 w-8 animate-spin mx-auto" />
-                <p className="text-lg text-muted-foreground">Loading leads...</p>
-              </>
-            ) : (
-              <>
-                <p className="text-lg text-muted-foreground">No Leads Imported</p>
-                <p className="text-sm text-muted-foreground">Click the upload icon above to import a CSV file</p>
-              </>
-            )}
+            <p className="text-lg text-muted-foreground">No Leads Imported</p>
+            <p className="text-sm text-muted-foreground">Click the upload icon above to import a CSV file</p>
           </div>
         </div>
       </div>

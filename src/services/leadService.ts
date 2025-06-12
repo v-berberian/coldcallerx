@@ -134,6 +134,32 @@ export const leadService = {
     }));
   },
 
+  async deleteLeadList(leadListId: string): Promise<boolean> {
+    // First delete all leads in the list
+    const { error: leadsError } = await supabase
+      .from('leads')
+      .delete()
+      .eq('lead_list_id', leadListId);
+
+    if (leadsError) {
+      console.error('Error deleting leads:', leadsError);
+      return false;
+    }
+
+    // Then delete the lead list
+    const { error: listError } = await supabase
+      .from('lead_lists')
+      .delete()
+      .eq('id', leadListId);
+
+    if (listError) {
+      console.error('Error deleting lead list:', listError);
+      return false;
+    }
+
+    return true;
+  },
+
   async updateLeadCallCount(leadListId: string, leadName: string, leadPhone: string, calledCount: number, lastCalled?: string): Promise<boolean> {
     const { error } = await supabase
       .from('leads')
