@@ -60,7 +60,7 @@ const Auth = () => {
               onChange={(e) => setEmail(e.target.value)}
               placeholder="E-mail"
               required
-              className="h-12 text-base"
+              className="h-12 text-base rounded-xl"
             />
             <Input
               type="password"
@@ -69,7 +69,7 @@ const Auth = () => {
               placeholder="Password"
               required
               minLength={6}
-              className="h-12 text-base"
+              className="h-12 text-base rounded-xl"
             />
           </div>
 
@@ -81,7 +81,8 @@ const Auth = () => {
 
           <Button 
             type="submit" 
-            className="w-full h-12 text-base font-medium" 
+            variant="outline"
+            className="w-full h-12 text-base font-medium rounded-xl" 
             disabled={loading}
           >
             {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}

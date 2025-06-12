@@ -1,3 +1,4 @@
+
 import React, { useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -105,7 +106,7 @@ const CallingScreenLogic: React.FC<CallingScreenLogicProps> = ({
         if (onSync && success) {
           // Simulate successful sync after a short delay
           setTimeout(() => {
-            if (onSync) onSync();
+            onSync();
           }, 500);
         }
       };
@@ -156,7 +157,7 @@ const CallingScreenLogic: React.FC<CallingScreenLogicProps> = ({
       
       // Save the new index to session with sync
       if ((window as any).saveCurrentIndex) {
-        await (window as any).saveCurrentIndex(leadIndexInBaseLeads);
+        (window as any).saveCurrentIndex(leadIndexInBaseLeads);
       }
     }
     
@@ -180,7 +181,7 @@ const CallingScreenLogic: React.FC<CallingScreenLogicProps> = ({
     // Save new index to session with sync
     if ((window as any).saveCurrentIndex) {
       const newIndex = (currentIndex + 1) % currentLeads.length;
-      await (window as any).saveCurrentIndex(newIndex);
+      (window as any).saveCurrentIndex(newIndex);
     }
   };
 
@@ -191,7 +192,7 @@ const CallingScreenLogic: React.FC<CallingScreenLogicProps> = ({
     // Save new index to session with sync
     if ((window as any).saveCurrentIndex) {
       const newIndex = currentIndex > 0 ? currentIndex - 1 : currentLeads.length - 1;
-      await (window as any).saveCurrentIndex(newIndex);
+      (window as any).saveCurrentIndex(newIndex);
     }
   };
 

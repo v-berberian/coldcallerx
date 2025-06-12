@@ -70,10 +70,12 @@ const CloudSyncButton: React.FC<CloudSyncButtonProps> = ({
       size="sm"
       onClick={onSync}
       disabled={status === 'syncing'}
-      className={`h-8 w-8 rounded-full transition-colors ${getButtonColor()}`}
+      className={`h-8 w-8 rounded-full transition-colors duration-200 ${getButtonColor()}`}
       title={getTitle()}
     >
-      {getIcon()}
+      <div className="flex items-center justify-center">
+        {getIcon()}
+      </div>
     </Button>
   );
 };
