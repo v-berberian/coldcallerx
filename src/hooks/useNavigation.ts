@@ -25,9 +25,9 @@ export const useNavigation = (
       currentIndex 
     });
 
-    // Only block navigation during filter changes, not during other operations
-    if (isFilterChanging) {
-      console.log('Skipping navigation because filters are changing');
+    // Block navigation during filter changes or auto-call
+    if (isFilterChanging || shouldBlockNavigation) {
+      console.log('Skipping navigation because filters are changing or navigation is blocked');
       return;
     }
     
@@ -68,9 +68,9 @@ export const useNavigation = (
   const handlePrevious = () => {
     console.log('handlePrevious called:', { isFilterChanging, shouldBlockNavigation });
 
-    // Only block navigation during filter changes, not during other operations
-    if (isFilterChanging) {
-      console.log('Skipping previous navigation because filters are changing');
+    // Block navigation during filter changes or auto-call
+    if (isFilterChanging || shouldBlockNavigation) {
+      console.log('Skipping previous navigation because filters are changing or navigation is blocked');
       return;
     }
     
@@ -85,9 +85,9 @@ export const useNavigation = (
       shouldBlockNavigation 
     });
 
-    // Only block selection during filter changes, not during other operations
-    if (isFilterChanging) {
-      console.log('Skipping lead selection because filters are changing');
+    // Block selection during filter changes or auto-call
+    if (isFilterChanging || shouldBlockNavigation) {
+      console.log('Skipping lead selection because filters are changing or navigation is blocked');
       return;
     }
     

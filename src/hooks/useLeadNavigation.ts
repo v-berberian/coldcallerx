@@ -12,10 +12,10 @@ import { useLeadNavigationState } from './useLeadNavigationState';
 import { useLeadNavigationActions } from './useLeadNavigationActions';
 import { useLeadNavigationEffects } from './useLeadNavigationEffects';
 import { useSessionNavigation } from './useSessionNavigation';
-import { useCallback } from 'react';
+import { useCallback, useEffect } from 'react';
 
-export const useLeadNavigation = (initialLeads: Lead[], initialSessionState?: any) => {
-  console.log('useLeadNavigation called with session:', initialSessionState);
+export const useLeadNavigation = (initialLeads: Lead[], onSessionUpdate?: (updates: any) => void, sessionState?: any) => {
+  console.log('useLeadNavigation called with session:', sessionState);
   
   const {
     shouldAutoCall,
@@ -70,7 +70,18 @@ export const useLeadNavigation = (initialLeads: Lead[], initialSessionState?: an
 
   const { isAutoCallInProgress, isCountdownActive, countdownTime, executeAutoCall, handleCountdownComplete, resetAutoCall, shouldBlockNavigation } = useAutoCall(makeCall, callDelay);
 
-  const { initializeFromSessionState } = useSessionNavigation(initialSessionState);
+  const { saveCurrentIndex } = useSessionNavigation(onSessionUpdate);
+
+  // Initialize from session state on mount
+  useEffect(() => {
+    if (sessionState?.currentLeadIndex !== undefined && 
+        sessionState.currentLeadIndex !== currentIndex &&
+        sessionState.currentLeadIndex >= 0) {
+      console.log('Initializing from session state:', sessionState.currentLeadIndex);
+      setCurrentIndex(sessionState.currentLeadIndex);
+      setCardKey(prev => prev + 1);
+    }
+  }, [sessionState?.currentLeadIndex]);
 
   const { handleNext, handlePrevious, selectLead } = useNavigation(
     currentIndex,
@@ -80,7 +91,7 @@ export const useLeadNavigation = (initialLeads: Lead[], initialSessionState?: an
     callFilter,
     isFilterChanging,
     isAutoCallInProgress,
-    false, // Remove navigation blocking
+    shouldBlockNavigation,
     // Only mark as called if a call was made to current lead
     (lead: Lead) => {
       if (callMadeToCurrentLead) {
@@ -99,7 +110,7 @@ export const useLeadNavigation = (initialLeads: Lead[], initialSessionState?: an
     callFilter,
     isFilterChanging,
     isAutoCallInProgress,
-    shouldBlockNavigation: false, // Remove navigation blocking
+    shouldBlockNavigation,
     markLeadAsCalledOnNavigation,
     shownLeadsInShuffle,
     setShownLeadsInShuffle,
@@ -108,7 +119,8 @@ export const useLeadNavigation = (initialLeads: Lead[], initialSessionState?: an
     selectLead,
     setCallMadeToCurrentLead,
     autoCall,
-    setShouldAutoCall
+    setShouldAutoCall,
+    saveCurrentIndex
   });
 
   const { makeCallWrapper, handleCountdownCompleteWrapper } = useLeadNavigationEffects({
@@ -178,11 +190,6 @@ export const useLeadNavigation = (initialLeads: Lead[], initialSessionState?: an
     resetCallState();
   }, [setLeadsData, resetNavigation, resetShownLeads, resetCallState]);
 
-  // Initialize session state wrapper
-  const initializeFromSessionStateWrapper = useCallback((sessionState: any, onSessionUpdate: (updates: any) => void) => {
-    return initializeFromSessionState(currentIndex, setCurrentIndex, setCardKey);
-  }, [initializeFromSessionState, currentIndex, setCurrentIndex, setCardKey]);
-
   return {
     leadsData,
     currentIndex,
@@ -215,7 +222,6 @@ export const useLeadNavigation = (initialLeads: Lead[], initialSessionState?: an
     toggleCallDelay,
     resetCallDelay,
     resetLeadsData,
-    countdownTime,
-    initializeFromSessionState: initializeFromSessionStateWrapper
+    countdownTime
   };
 };

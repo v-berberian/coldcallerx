@@ -35,10 +35,8 @@ const CallingScreenLogic: React.FC<CallingScreenLogicProps> = ({
   cloudSyncProps
 }) => {
   console.log('CallingScreenLogic rendering with sessionState:', sessionState);
-  const [isNavigating, setIsNavigating] = useState(false);
-  const [sessionInitialized, setSessionInitialized] = useState(false);
   
-  const leadNavigation = useLeadNavigation(leads, sessionState);
+  const leadNavigation = useLeadNavigation(leads, onSessionUpdate, sessionState);
   
   const {
     searchQuery,
@@ -63,28 +61,10 @@ const CallingScreenLogic: React.FC<CallingScreenLogicProps> = ({
     resetDailyCallCount
   } = useDailyCallState();
 
-  // Initialize from session state only once
-  useEffect(() => {
-    console.log('Session initialization effect triggered:', { sessionState, onSessionUpdate, sessionInitialized });
-    
-    if (sessionState && onSessionUpdate && !sessionInitialized) {
-      console.log('Initializing from session state:', sessionState);
-      const { saveCurrentIndex } = leadNavigation.initializeFromSessionState(sessionState, onSessionUpdate);
-      
-      // Store the handler for navigation sync
-      (window as any).saveCurrentIndex = saveCurrentIndex;
-      setSessionInitialized(true);
-    } else if (!sessionState) {
-      // No session state, mark as initialized
-      setSessionInitialized(true);
-    }
-  }, [sessionState, onSessionUpdate, sessionInitialized, leadNavigation.initializeFromSessionState]);
-
   // Handle new CSV imports by resetting the leads data
   useEffect(() => {
     console.log('Resetting leads data for new CSV import');
     leadNavigation.resetLeadsData(leads);
-    setSessionInitialized(false); // Reset session initialization for new data
   }, [leads, leadNavigation.resetLeadsData]);
 
   // Save updated leads data to localStorage whenever leadsData changes
@@ -114,19 +94,7 @@ const CallingScreenLogic: React.FC<CallingScreenLogicProps> = ({
   const handleLeadSelect = (lead: Lead) => {
     console.log('Lead selected from search:', lead.name);
     const baseLeads = leadNavigation.getBaseLeads();
-    const leadIndexInBaseLeads = baseLeads.findIndex(l => 
-      l.name === lead.name && l.phone === lead.phone
-    );
-    
-    if (leadIndexInBaseLeads !== -1) {
-      console.log('Selecting lead at index:', leadIndexInBaseLeads);
-      leadNavigation.selectLead(lead, baseLeads, leadNavigation.leadsData);
-      
-      // Save the new index to session
-      if ((window as any).saveCurrentIndex) {
-        (window as any).saveCurrentIndex(leadIndexInBaseLeads);
-      }
-    }
+    leadNavigation.selectLead(lead, baseLeads, leadNavigation.leadsData);
     
     setSearchQuery('');
     setShowAutocomplete(false);
@@ -140,37 +108,6 @@ const CallingScreenLogic: React.FC<CallingScreenLogicProps> = ({
     incrementDailyCallCount();
   };
 
-  // Create wrapper functions for navigation with cloud sync
-  const handleNextWrapper = async () => {
-    console.log('Next button clicked');
-    setIsNavigating(true);
-    const currentLeads = leadNavigation.getBaseLeads();
-    leadNavigation.handleNext(currentLeads);
-    
-    // Save new index to session
-    if ((window as any).saveCurrentIndex) {
-      const newIndex = (leadNavigation.currentIndex + 1) % currentLeads.length;
-      console.log('Navigating to next lead, saving index:', newIndex);
-      await (window as any).saveCurrentIndex(newIndex);
-    }
-    setIsNavigating(false);
-  };
-
-  const handlePreviousWrapper = async () => {
-    console.log('Previous button clicked');
-    setIsNavigating(true);
-    const currentLeads = leadNavigation.getBaseLeads();
-    leadNavigation.handlePrevious(currentLeads);
-    
-    // Save new index to session
-    if ((window as any).saveCurrentIndex) {
-      const newIndex = leadNavigation.currentIndex > 0 ? leadNavigation.currentIndex - 1 : currentLeads.length - 1;
-      console.log('Navigating to previous lead, saving index:', newIndex);
-      await (window as any).saveCurrentIndex(newIndex);
-    }
-    setIsNavigating(false);
-  };
-
   const currentLeads = leadNavigation.getBaseLeads();
   const currentLead = currentLeads[leadNavigation.currentIndex];
   
@@ -178,8 +115,7 @@ const CallingScreenLogic: React.FC<CallingScreenLogicProps> = ({
     currentIndex: leadNavigation.currentIndex, 
     currentLeadName: currentLead?.name, 
     totalLeads: currentLeads.length,
-    sessionCurrentIndex: sessionState?.currentLeadIndex,
-    sessionInitialized
+    sessionCurrentIndex: sessionState?.currentLeadIndex
   });
   
   if (leadNavigation.leadsData.length === 0) {
@@ -274,8 +210,8 @@ const CallingScreenLogic: React.FC<CallingScreenLogicProps> = ({
           onToggleCallDelay={leadNavigation.toggleCallDelay}
           onResetCallDelay={leadNavigation.resetCallDelay}
           onResetAllCalls={leadNavigation.resetAllCallCounts}
-          onPrevious={handlePreviousWrapper}
-          onNext={handleNextWrapper}
+          onPrevious={() => leadNavigation.handlePrevious(currentLeads)}
+          onNext={() => leadNavigation.handleNext(currentLeads)}
           canGoPrevious={currentLeads.length > 1}
           canGoNext={currentLeads.length > 1}
         />

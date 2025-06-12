@@ -19,6 +19,7 @@ interface UseLeadNavigationActionsProps {
   setCallMadeToCurrentLead: (called: boolean) => void;
   autoCall: boolean;
   setShouldAutoCall: (should: boolean) => void;
+  saveCurrentIndex: (index: number) => Promise<void>;
 }
 
 export const useLeadNavigationActions = ({
@@ -30,10 +31,14 @@ export const useLeadNavigationActions = ({
   selectLead,
   setCallMadeToCurrentLead,
   autoCall,
-  setShouldAutoCall
+  setShouldAutoCall,
+  saveCurrentIndex,
+  isFilterChanging
 }: UseLeadNavigationActionsProps) => {
 
-  const handleNextWrapper = (baseLeads: Lead[]) => {
+  const handleNextWrapper = async (baseLeads: Lead[]) => {
+    if (isFilterChanging) return;
+    
     console.log('handleNextWrapper called with', baseLeads.length, 'leads');
     handleNext(baseLeads);
     
@@ -44,9 +49,15 @@ export const useLeadNavigationActions = ({
     if (autoCall) {
       setShouldAutoCall(true);
     }
+
+    // Save to cloud after navigation completes
+    const nextIndex = currentIndex >= baseLeads.length - 1 ? 0 : currentIndex + 1;
+    await saveCurrentIndex(nextIndex);
   };
 
-  const handlePreviousWrapper = (baseLeads: Lead[]) => {
+  const handlePreviousWrapper = async (baseLeads: Lead[]) => {
+    if (isFilterChanging) return;
+    
     console.log('handlePreviousWrapper called with', baseLeads.length, 'leads');
     if (baseLeads.length === 0) return;
     
@@ -57,13 +68,24 @@ export const useLeadNavigationActions = ({
     
     // Reset call state when navigating
     setCallMadeToCurrentLead(false);
+
+    // Save to cloud
+    await saveCurrentIndex(prevIndex);
   };
 
-  const selectLeadWrapper = (lead: Lead, baseLeads: Lead[], leadsData: Lead[]) => {
+  const selectLeadWrapper = async (lead: Lead, baseLeads: Lead[], leadsData: Lead[]) => {
+    if (isFilterChanging) return;
+    
     console.log('selectLeadWrapper called for lead:', lead.name);
     selectLead(lead, baseLeads, leadsData);
     // Reset call state when selecting a new lead
     setCallMadeToCurrentLead(false);
+
+    // Save to cloud
+    const leadIndex = baseLeads.findIndex(l => l.name === lead.name && l.phone === lead.phone);
+    if (leadIndex !== -1) {
+      await saveCurrentIndex(leadIndex);
+    }
   };
 
   return {
