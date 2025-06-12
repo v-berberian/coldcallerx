@@ -45,7 +45,7 @@ const LeadCard: React.FC<LeadCardProps> = ({
           {fileName && (
             <button
               onClick={onListNameClick}
-              className="text-sm text-muted-foreground opacity-40 hover:opacity-60 transition-opacity underline"
+              className="text-sm text-muted-foreground opacity-40 hover:opacity-60 transition-opacity"
               title="Switch list"
             >
               {fileName}

@@ -22,6 +22,7 @@ interface CallingHeaderProps {
   leadsData: Lead[];
   leadLists: LeadList[];
   currentListId: string | null;
+  fileName: string;
   onSearchChange: (query: string) => void;
   onSearchFocus: () => void;
   onSearchBlur: () => void;
@@ -40,6 +41,7 @@ const CallingHeader: React.FC<CallingHeaderProps> = ({
   leadsData,
   leadLists,
   currentListId,
+  fileName,
   onSearchChange,
   onSearchFocus,
   onSearchBlur,
@@ -83,7 +85,8 @@ const CallingHeader: React.FC<CallingHeaderProps> = ({
           onSearchChange={onSearchChange} 
           onSearchFocus={onSearchFocus} 
           onSearchBlur={onSearchBlur} 
-          onClearSearch={onClearSearch} 
+          onClearSearch={onClearSearch}
+          fileName={fileName}
         />
         
         {/* Autocomplete Dropdown */}
