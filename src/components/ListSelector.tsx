@@ -1,10 +1,12 @@
+
 import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { Plus, Upload, FileSpreadsheet } from 'lucide-react';
+import { Plus, Upload, FileSpreadsheet, X, Trash2 } from 'lucide-react';
 import CSVImporter from './CSVImporter';
 import GoogleSheetsImporter from './GoogleSheetsImporter';
 import { Lead } from '@/types/lead';
+import { useToast } from '@/hooks/use-toast';
 
 interface LeadList {
   id: string;
@@ -20,6 +22,7 @@ interface ListSelectorProps {
   currentListId: string | null;
   onSelectList: (listId: string) => void;
   onCreateList: (name: string, leads: Lead[]) => void;
+  onDeleteList: (listId: string) => void;
 }
 
 const ListSelector: React.FC<ListSelectorProps> = ({
@@ -28,9 +31,11 @@ const ListSelector: React.FC<ListSelectorProps> = ({
   leadLists,
   currentListId,
   onSelectList,
-  onCreateList
+  onCreateList,
+  onDeleteList
 }) => {
   const [showImportOptions, setShowImportOptions] = useState(false);
+  const { toast } = useToast();
 
   const handleListSelect = (listId: string) => {
     onSelectList(listId);
@@ -47,6 +52,35 @@ const ListSelector: React.FC<ListSelectorProps> = ({
     onCreateList(sheetName, leads);
     setShowImportOptions(false);
     onClose();
+  };
+
+  const handleDeleteList = async (listId: string, listName: string, event: React.MouseEvent) => {
+    event.stopPropagation();
+    
+    if (leadLists.length === 1) {
+      toast({
+        title: "Cannot delete",
+        description: "You must have at least one lead list",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (window.confirm(`Are you sure you want to delete "${listName}"? This action cannot be undone.`)) {
+      try {
+        await onDeleteList(listId);
+        toast({
+          title: "List deleted",
+          description: `"${listName}" has been deleted successfully`,
+        });
+      } catch (error) {
+        toast({
+          title: "Delete failed",
+          description: "Failed to delete the lead list",
+          variant: "destructive",
+        });
+      }
+    }
   };
 
   if (showImportOptions) {
@@ -91,21 +125,35 @@ const ListSelector: React.FC<ListSelectorProps> = ({
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>Select Lead List</DialogTitle>
+          <DialogTitle>Lead Lists</DialogTitle>
         </DialogHeader>
         
         <div className="space-y-4">
           {/* Existing Lists */}
           <div className="space-y-2 max-h-60 overflow-y-auto">
             {leadLists.map((list) => (
-              <Button
+              <div
                 key={list.id}
-                variant={currentListId === list.id ? "default" : "outline"}
-                onClick={() => handleListSelect(list.id)}
-                className="w-full justify-start"
+                className="flex items-center space-x-2"
               >
-                {list.name}
-              </Button>
+                <Button
+                  variant={currentListId === list.id ? "default" : "outline"}
+                  onClick={() => handleListSelect(list.id)}
+                  className="flex-1 justify-start"
+                >
+                  {list.name}
+                </Button>
+                
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={(e) => handleDeleteList(list.id, list.name, e)}
+                  className="h-10 w-10 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
+                  title={`Delete ${list.name}`}
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              </div>
             ))}
             
             {leadLists.length === 0 && (

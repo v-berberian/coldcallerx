@@ -4,6 +4,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import CallingHeader from './CallingHeader';
 import MainContent from './MainContent';
 import DailyProgress from './DailyProgress';
+import ListSelector from './ListSelector';
 import { useSearchState } from './SearchState';
 import { useDailyCallState } from './DailyCallState';
 import { useLeadNavigation } from '../hooks/useLeadNavigation';
@@ -37,7 +38,8 @@ const CallingScreenLogic: React.FC<CallingScreenLogicProps> = ({
     updateLeadCallStatus,
     switchToList,
     getCurrentListName,
-    refreshLists
+    refreshLists,
+    deleteLeadList
   } = useSupabaseLeads(user?.id);
 
   const {
@@ -266,7 +268,6 @@ const CallingScreenLogic: React.FC<CallingScreenLogicProps> = ({
         showAutocomplete={showAutocomplete}
         searchResults={searchResults}
         leadsData={leadsData}
-        fileName={currentListName}
         leadLists={leadLists}
         currentListId={currentListId}
         onSearchChange={setSearchQuery}
@@ -277,6 +278,7 @@ const CallingScreenLogic: React.FC<CallingScreenLogicProps> = ({
         onLeadsImported={handleLeadsImported}
         onSelectList={switchToList}
         onCreateList={createLeadList}
+        onDeleteList={deleteLeadList}
       />
 
       {/* Main Content - takes remaining space */}
@@ -365,6 +367,7 @@ const CallingScreenLogic: React.FC<CallingScreenLogicProps> = ({
         currentListId={currentListId}
         onSelectList={switchToList}
         onCreateList={createLeadList}
+        onDeleteList={deleteLeadList}
       />
     </div>
   );

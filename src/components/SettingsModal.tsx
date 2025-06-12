@@ -3,8 +3,7 @@ import React from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
-import { useTheme } from 'next-themes';
-import { Sun, Moon, Smartphone, LogOut, User, List } from 'lucide-react';
+import { LogOut, User, List } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 
@@ -21,7 +20,6 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
   userEmail,
   onManageLeadLists 
 }) => {
-  const { theme, setTheme } = useTheme();
   const { toast } = useToast();
 
   const handleLogout = async () => {
@@ -41,26 +39,6 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
     }
   };
 
-  const getThemeIcon = () => {
-    switch (theme) {
-      case 'light':
-        return <Sun className="h-4 w-4" />;
-      case 'dark':
-        return <Moon className="h-4 w-4" />;
-      case 'system':
-        return <Smartphone className="h-4 w-4" />;
-      default:
-        return <Sun className="h-4 w-4" />;
-    }
-  };
-
-  const cycleTheme = () => {
-    const themes = ['light', 'dark', 'system'];
-    const currentIndex = themes.indexOf(theme || 'light');
-    const nextIndex = (currentIndex + 1) % themes.length;
-    setTheme(themes[nextIndex]);
-  };
-
   const handleManageLeadLists = () => {
     onManageLeadLists();
     onClose();
@@ -73,48 +51,27 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
           <DialogTitle>Settings</DialogTitle>
         </DialogHeader>
         
-        <div className="space-y-4">
+        <div className="space-y-6">
           {/* User Info */}
-          <div className="flex items-center space-x-3 p-3 bg-muted/50 rounded-lg">
-            <User className="h-5 w-5 text-muted-foreground" />
+          <div className="flex items-center space-x-3 p-4 bg-muted/30 rounded-lg border">
+            <User className="h-6 w-6 text-muted-foreground" />
             <div>
               <p className="text-sm font-medium">Signed in as</p>
-              <p className="text-sm text-muted-foreground">{userEmail}</p>
+              <p className="text-sm text-muted-foreground break-all">{userEmail}</p>
             </div>
           </div>
 
           <Separator />
 
-          {/* Manage Lead Lists */}
+          {/* Lead Lists Management */}
           <Button
             onClick={handleManageLeadLists}
             variant="outline"
-            className="w-full flex items-center space-x-2"
+            className="w-full flex items-center justify-start space-x-3 h-12"
           >
-            <List className="h-4 w-4" />
+            <List className="h-5 w-5" />
             <span>Manage Lead Lists</span>
           </Button>
-
-          <Separator />
-
-          {/* Theme Toggle */}
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium">Theme</p>
-              <p className="text-xs text-muted-foreground">
-                Current: {theme || 'light'}
-              </p>
-            </div>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={cycleTheme}
-              className="flex items-center space-x-2"
-            >
-              {getThemeIcon()}
-              <span className="capitalize">{theme || 'light'}</span>
-            </Button>
-          </div>
 
           <Separator />
 
@@ -122,10 +79,10 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
           <Button
             onClick={handleLogout}
             variant="destructive"
-            className="w-full flex items-center space-x-2"
+            className="w-full flex items-center justify-start space-x-3 h-12"
           >
-            <LogOut className="h-4 w-4" />
-            <span>Logout</span>
+            <LogOut className="h-5 w-5" />
+            <span>Sign Out</span>
           </Button>
         </div>
       </DialogContent>

@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Lead } from '@/types/lead';
@@ -220,6 +219,53 @@ export const useSupabaseLeads = (userId: string | undefined) => {
     return leadLists.find(list => list.id === currentListId)?.name || '';
   };
 
+  const deleteLeadList = async (listId: string) => {
+    if (!userId) return null;
+
+    try {
+      // First delete all leads in the list
+      const { error: leadsError } = await supabase
+        .from('leads')
+        .delete()
+        .eq('list_id', listId);
+
+      if (leadsError) throw leadsError;
+
+      // Then delete the list itself
+      const { error: listError } = await supabase
+        .from('lead_lists')
+        .delete()
+        .eq('id', listId)
+        .eq('user_id', userId);
+
+      if (listError) throw listError;
+
+      // If we deleted the current list, switch to another one
+      if (currentListId === listId) {
+        const remainingLists = leadLists.filter(list => list.id !== listId);
+        if (remainingLists.length > 0) {
+          setCurrentListId(remainingLists[0].id);
+        } else {
+          setCurrentListId(null);
+          setLeadsData([]);
+        }
+      }
+
+      // Refresh lists
+      await loadLeadLists();
+      
+      return true;
+    } catch (error) {
+      console.error('Error deleting lead list:', error);
+      toast({
+        title: "Error",
+        description: "Failed to delete lead list",
+        variant: "destructive",
+      });
+      return false;
+    }
+  };
+
   return {
     leadLists,
     currentListId,
@@ -229,6 +275,7 @@ export const useSupabaseLeads = (userId: string | undefined) => {
     updateLeadCallStatus,
     switchToList,
     getCurrentListName,
-    refreshLists: loadLeadLists
+    refreshLists: loadLeadLists,
+    deleteLeadList
   };
 };

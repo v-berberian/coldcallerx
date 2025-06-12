@@ -20,7 +20,6 @@ interface CallingHeaderProps {
   showAutocomplete: boolean;
   searchResults: Lead[];
   leadsData: Lead[];
-  fileName: string;
   leadLists: LeadList[];
   currentListId: string | null;
   onSearchChange: (query: string) => void;
@@ -31,6 +30,7 @@ interface CallingHeaderProps {
   onLeadsImported: (leads: Lead[], fileName: string) => void;
   onSelectList: (listId: string) => void;
   onCreateList: (name: string, leads: Lead[]) => void;
+  onDeleteList: (listId: string) => void;
 }
 
 const CallingHeader: React.FC<CallingHeaderProps> = ({
@@ -38,7 +38,6 @@ const CallingHeader: React.FC<CallingHeaderProps> = ({
   showAutocomplete,
   searchResults,
   leadsData,
-  fileName,
   leadLists,
   currentListId,
   onSearchChange,
@@ -48,7 +47,8 @@ const CallingHeader: React.FC<CallingHeaderProps> = ({
   onLeadSelect,
   onLeadsImported,
   onSelectList,
-  onCreateList
+  onCreateList,
+  onDeleteList
 }) => {
   const [showSettings, setShowSettings] = useState(false);
   const [showListSelector, setShowListSelector] = useState(false);
@@ -84,7 +84,6 @@ const CallingHeader: React.FC<CallingHeaderProps> = ({
           onSearchFocus={onSearchFocus} 
           onSearchBlur={onSearchBlur} 
           onClearSearch={onClearSearch} 
-          fileName={fileName} 
         />
         
         {/* Autocomplete Dropdown */}
@@ -115,6 +114,7 @@ const CallingHeader: React.FC<CallingHeaderProps> = ({
         currentListId={currentListId}
         onSelectList={onSelectList}
         onCreateList={onCreateList}
+        onDeleteList={onDeleteList}
       />
     </div>
   );
