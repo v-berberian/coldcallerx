@@ -18,14 +18,16 @@ export const useNavigation = (
   const { getNextLeadInSequential, getNextLeadInShuffle } = useLeadSelection();
 
   const handleNext = (baseLeads: Lead[]) => {
-    // Block navigation during filter changes or when countdown is 1 second or less
+    console.log('handleNext called:', { 
+      isFilterChanging, 
+      shouldBlockNavigation, 
+      baseLeadsLength: baseLeads.length,
+      currentIndex 
+    });
+
+    // Only block navigation during filter changes, not during other operations
     if (isFilterChanging) {
       console.log('Skipping navigation because filters are changing');
-      return;
-    }
-    
-    if (shouldBlockNavigation) {
-      console.log('Skipping navigation because countdown is less than 1 second');
       return;
     }
     
@@ -64,14 +66,11 @@ export const useNavigation = (
   };
 
   const handlePrevious = () => {
-    // Block navigation during filter changes or when countdown is 1 second or less
+    console.log('handlePrevious called:', { isFilterChanging, shouldBlockNavigation });
+
+    // Only block navigation during filter changes, not during other operations
     if (isFilterChanging) {
       console.log('Skipping previous navigation because filters are changing');
-      return;
-    }
-    
-    if (shouldBlockNavigation) {
-      console.log('Skipping previous navigation because countdown is less than 1 second');
       return;
     }
     
@@ -80,14 +79,15 @@ export const useNavigation = (
   };
 
   const selectLead = (lead: Lead, baseLeads: Lead[], allLeads: Lead[]) => {
-    // Block selection during filter changes or when countdown is 1 second or less
+    console.log('selectLead called:', { 
+      leadName: lead.name, 
+      isFilterChanging, 
+      shouldBlockNavigation 
+    });
+
+    // Only block selection during filter changes, not during other operations
     if (isFilterChanging) {
       console.log('Skipping lead selection because filters are changing');
-      return;
-    }
-    
-    if (shouldBlockNavigation) {
-      console.log('Skipping lead selection because countdown is less than 1 second');
       return;
     }
     

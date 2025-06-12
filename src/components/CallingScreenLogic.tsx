@@ -36,6 +36,7 @@ const CallingScreenLogic: React.FC<CallingScreenLogicProps> = ({
 }) => {
   console.log('CallingScreenLogic rendering with sessionState:', sessionState);
   const [isNavigating, setIsNavigating] = useState(false);
+  const [sessionInitialized, setSessionInitialized] = useState(false);
   
   const leadNavigation = useLeadNavigation(leads, sessionState);
   
@@ -62,23 +63,28 @@ const CallingScreenLogic: React.FC<CallingScreenLogicProps> = ({
     resetDailyCallCount
   } = useDailyCallState();
 
-  // Initialize from session state
+  // Initialize from session state only once
   useEffect(() => {
-    console.log('Session initialization effect triggered:', { sessionState, onSessionUpdate });
+    console.log('Session initialization effect triggered:', { sessionState, onSessionUpdate, sessionInitialized });
     
-    if (sessionState && onSessionUpdate) {
+    if (sessionState && onSessionUpdate && !sessionInitialized) {
       console.log('Initializing from session state:', sessionState);
       const { saveCurrentIndex } = leadNavigation.initializeFromSessionState(sessionState, onSessionUpdate);
       
       // Store the handler for navigation sync
       (window as any).saveCurrentIndex = saveCurrentIndex;
+      setSessionInitialized(true);
+    } else if (!sessionState) {
+      // No session state, mark as initialized
+      setSessionInitialized(true);
     }
-  }, [sessionState, onSessionUpdate, leadNavigation.initializeFromSessionState]);
+  }, [sessionState, onSessionUpdate, sessionInitialized, leadNavigation.initializeFromSessionState]);
 
   // Handle new CSV imports by resetting the leads data
   useEffect(() => {
     console.log('Resetting leads data for new CSV import');
     leadNavigation.resetLeadsData(leads);
+    setSessionInitialized(false); // Reset session initialization for new data
   }, [leads, leadNavigation.resetLeadsData]);
 
   // Save updated leads data to localStorage whenever leadsData changes
@@ -106,14 +112,15 @@ const CallingScreenLogic: React.FC<CallingScreenLogicProps> = ({
   }, [leadNavigation.shouldAutoCall, leadNavigation.autoCall, leadNavigation.currentIndex, leadNavigation.cardKey, leadNavigation.getBaseLeads, leadNavigation.setCurrentLeadForAutoCall, leadNavigation.executeAutoCall, incrementDailyCallCount, leadNavigation.setShouldAutoCall]);
 
   const handleLeadSelect = (lead: Lead) => {
+    console.log('Lead selected from search:', lead.name);
     const baseLeads = leadNavigation.getBaseLeads();
     const leadIndexInBaseLeads = baseLeads.findIndex(l => 
       l.name === lead.name && l.phone === lead.phone
     );
     
     if (leadIndexInBaseLeads !== -1) {
+      console.log('Selecting lead at index:', leadIndexInBaseLeads);
       leadNavigation.selectLead(lead, baseLeads, leadNavigation.leadsData);
-      console.log('Selected lead from autocomplete:', lead.name, 'at base index:', leadIndexInBaseLeads);
       
       // Save the new index to session
       if ((window as any).saveCurrentIndex) {
@@ -135,6 +142,7 @@ const CallingScreenLogic: React.FC<CallingScreenLogicProps> = ({
 
   // Create wrapper functions for navigation with cloud sync
   const handleNextWrapper = async () => {
+    console.log('Next button clicked');
     setIsNavigating(true);
     const currentLeads = leadNavigation.getBaseLeads();
     leadNavigation.handleNext(currentLeads);
@@ -149,6 +157,7 @@ const CallingScreenLogic: React.FC<CallingScreenLogicProps> = ({
   };
 
   const handlePreviousWrapper = async () => {
+    console.log('Previous button clicked');
     setIsNavigating(true);
     const currentLeads = leadNavigation.getBaseLeads();
     leadNavigation.handlePrevious(currentLeads);
@@ -169,7 +178,8 @@ const CallingScreenLogic: React.FC<CallingScreenLogicProps> = ({
     currentIndex: leadNavigation.currentIndex, 
     currentLeadName: currentLead?.name, 
     totalLeads: currentLeads.length,
-    sessionCurrentIndex: sessionState?.currentLeadIndex 
+    sessionCurrentIndex: sessionState?.currentLeadIndex,
+    sessionInitialized
   });
   
   if (leadNavigation.leadsData.length === 0) {

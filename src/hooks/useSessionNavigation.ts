@@ -19,8 +19,10 @@ export const useSessionNavigation = (
   ) => {
     console.log('Initializing from session state:', sessionState);
     
-    // Set initial index if we have valid session data
-    if (sessionState?.currentLeadIndex !== undefined && sessionState.currentLeadIndex !== currentIndex) {
+    // Set initial index if we have valid session data and it's different from current
+    if (sessionState?.currentLeadIndex !== undefined && 
+        sessionState.currentLeadIndex !== currentIndex &&
+        sessionState.currentLeadIndex >= 0) {
       console.log('Setting initial index from session:', sessionState.currentLeadIndex, 'current:', currentIndex);
       setCurrentIndex(sessionState.currentLeadIndex);
       setCardKey(prev => prev + 1);

@@ -25,7 +25,6 @@ export const useLeadNavigationActions = ({
   currentIndex,
   updateNavigation,
   shuffleMode,
-  shouldBlockNavigation,
   handleNext,
   handlePrevious,
   selectLead,
@@ -35,6 +34,7 @@ export const useLeadNavigationActions = ({
 }: UseLeadNavigationActionsProps) => {
 
   const handleNextWrapper = (baseLeads: Lead[]) => {
+    console.log('handleNextWrapper called with', baseLeads.length, 'leads');
     handleNext(baseLeads);
     
     // Reset call state when navigating
@@ -47,13 +47,8 @@ export const useLeadNavigationActions = ({
   };
 
   const handlePreviousWrapper = (baseLeads: Lead[]) => {
+    console.log('handlePreviousWrapper called with', baseLeads.length, 'leads');
     if (baseLeads.length === 0) return;
-    
-    // Check if navigation should be blocked
-    if (shouldBlockNavigation) {
-      console.log('Previous navigation blocked due to countdown');
-      return;
-    }
     
     // Simple list-based previous navigation
     const prevIndex = currentIndex === 0 ? baseLeads.length - 1 : currentIndex - 1;
@@ -65,6 +60,7 @@ export const useLeadNavigationActions = ({
   };
 
   const selectLeadWrapper = (lead: Lead, baseLeads: Lead[], leadsData: Lead[]) => {
+    console.log('selectLeadWrapper called for lead:', lead.name);
     selectLead(lead, baseLeads, leadsData);
     // Reset call state when selecting a new lead
     setCallMadeToCurrentLead(false);
