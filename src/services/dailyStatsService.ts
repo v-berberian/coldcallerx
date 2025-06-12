@@ -30,6 +30,12 @@ export const dailyStatsService = {
 
   async incrementDailyCallCount(): Promise<boolean> {
     const today = new Date().toISOString().split('T')[0];
+    const user = await supabase.auth.getUser();
+    
+    if (!user.data.user) {
+      console.error('User not authenticated');
+      return false;
+    }
     
     // Try to get existing record
     const { data: existing } = await supabase
@@ -54,6 +60,7 @@ export const dailyStatsService = {
       const { error } = await supabase
         .from('daily_call_stats')
         .insert({
+          user_id: user.data.user.id,
           date: today,
           call_count: 1,
           goal: 500
@@ -86,11 +93,18 @@ export const dailyStatsService = {
 
   async updateDailyGoal(goal: number): Promise<boolean> {
     const today = new Date().toISOString().split('T')[0];
+    const user = await supabase.auth.getUser();
+    
+    if (!user.data.user) {
+      console.error('User not authenticated');
+      return false;
+    }
     
     // Update both the daily stats and the user profile
     const { error: dailyError } = await supabase
       .from('daily_call_stats')
       .upsert({
+        user_id: user.data.user.id,
         date: today,
         goal: goal,
         call_count: 0
@@ -99,7 +113,7 @@ export const dailyStatsService = {
     const { error: profileError } = await supabase
       .from('profiles')
       .update({ daily_goal: goal })
-      .eq('id', (await supabase.auth.getUser()).data.user?.id);
+      .eq('id', user.data.user.id);
 
     if (dailyError || profileError) {
       console.error('Error updating daily goal:', dailyError || profileError);

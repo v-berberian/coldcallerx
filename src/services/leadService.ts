@@ -24,9 +24,17 @@ export interface CloudLead {
 
 export const leadService = {
   async createLeadList(name: string, fileName: string): Promise<LeadList | null> {
+    const user = await supabase.auth.getUser();
+    
+    if (!user.data.user) {
+      console.error('User not authenticated');
+      return null;
+    }
+
     const { data, error } = await supabase
       .from('lead_lists')
       .insert({
+        user_id: user.data.user.id,
         name,
         file_name: fileName,
         total_leads: 0
@@ -58,7 +66,15 @@ export const leadService = {
   },
 
   async saveLeads(leadListId: string, leads: Lead[]): Promise<boolean> {
+    const user = await supabase.auth.getUser();
+    
+    if (!user.data.user) {
+      console.error('User not authenticated');
+      return false;
+    }
+
     const leadsData = leads.map(lead => ({
+      user_id: user.data.user.id,
       lead_list_id: leadListId,
       name: lead.name,
       phone: lead.phone,
