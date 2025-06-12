@@ -11,6 +11,7 @@ import { useLeadNavigation } from '../hooks/useLeadNavigation';
 import { useSupabaseLeads } from '../hooks/useSupabaseLeads';
 import { useAuth } from '@/hooks/useAuth';
 import { Lead } from '../types/lead';
+import { useToast } from '@/hooks/use-toast';
 
 interface CallingScreenLogicProps {
   leads: Lead[];
@@ -26,6 +27,8 @@ const CallingScreenLogic: React.FC<CallingScreenLogicProps> = ({
   onLeadsImported
 }) => {
   const { user } = useAuth();
+  const { toast } = useToast();
+  
   const {
     leadLists,
     currentListId,
@@ -94,30 +97,72 @@ const CallingScreenLogic: React.FC<CallingScreenLogicProps> = ({
     resetDailyCallCount
   } = useDailyCallState();
 
-  // Handle CSV imports (legacy support)
+  // Handle CSV imports from props (legacy support for non-authenticated users)
   useEffect(() => {
-    if (leads.length > 0 && fileName && user?.id) {
-      createLeadList(fileName, leads);
+    if (leads.length > 0 && fileName && !user) {
+      // For non-authenticated users, use the legacy local storage approach
+      console.log('Legacy CSV import for non-authenticated user');
+      resetLeadsData(leads);
     }
-  }, [leads, fileName, user?.id]);
+  }, [leads, fileName, user]);
 
-  // Update server when call status changes
+  // Simplified import handler for authenticated users
+  const handleLeadsImported = async (importedLeads: Lead[], importedFileName: string) => {
+    if (!user?.id) {
+      console.error('No authenticated user found for import');
+      toast({
+        title: "Authentication Required",
+        description: "Please log in to import lead lists",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    console.log('Creating lead list for user:', user.id, 'with', importedLeads.length, 'leads');
+    
+    try {
+      const listId = await createLeadList(importedFileName, importedLeads);
+      if (listId) {
+        console.log('Lead list created successfully:', listId);
+        toast({
+          title: "Success",
+          description: `Lead list "${importedFileName}" imported successfully`,
+        });
+      } else {
+        console.error('Failed to create lead list - no ID returned');
+        toast({
+          title: "Import Failed",
+          description: "Failed to create lead list",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      console.error('Error importing leads:', error);
+      toast({
+        title: "Import Failed",
+        description: "Failed to create lead list. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  // Handle call click with server sync
   const handleCallClick = async () => {
     const currentLeads = getBaseLeads();
     const currentLead = currentLeads[currentIndex];
     
-    // Make the call
     makeCall(currentLead);
     incrementDailyCallCount();
     
-    // Update server with new call status
-    const updatedLead = {
-      ...currentLead,
-      called: (currentLead.called || 0) + 1,
-      lastCalled: new Date().toLocaleString()
-    };
-    
-    await updateLeadCallStatus(updatedLead);
+    if (user?.id && currentLead) {
+      const updatedLead = {
+        ...currentLead,
+        called: (currentLead.called || 0) + 1,
+        lastCalled: new Date().toLocaleString()
+      };
+      
+      await updateLeadCallStatus(updatedLead);
+    }
   };
 
   // Handle auto-call with server sync
@@ -132,13 +177,14 @@ const CallingScreenLogic: React.FC<CallingScreenLogicProps> = ({
         executeAutoCall(currentLead);
         incrementDailyCallCount();
         
-        // Update server
-        const updatedLead = {
-          ...currentLead,
-          called: (currentLead.called || 0) + 1,
-          lastCalled: new Date().toLocaleString()
-        };
-        updateLeadCallStatus(updatedLead);
+        if (user?.id) {
+          const updatedLead = {
+            ...currentLead,
+            called: (currentLead.called || 0) + 1,
+            lastCalled: new Date().toLocaleString()
+          };
+          updateLeadCallStatus(updatedLead);
+        }
       }
       
       setShouldAutoCall(false);
@@ -170,27 +216,20 @@ const CallingScreenLogic: React.FC<CallingScreenLogicProps> = ({
     handlePrevious(currentLeads);
   };
 
-  const handleLeadsImported = async (importedLeads: Lead[], importedFileName: string) => {
-    if (user?.id) {
-      await createLeadList(importedFileName, importedLeads);
-    } else {
-      onLeadsImported(importedLeads, importedFileName);
-    }
-  };
-
   const handleResetCallCount = async () => {
     const currentLeads = getBaseLeads();
     const currentLead = currentLeads[currentIndex];
     
     resetCallCount(currentLead);
     
-    // Update server
-    const updatedLead = {
-      ...currentLead,
-      called: 0,
-      lastCalled: undefined
-    };
-    await updateLeadCallStatus(updatedLead);
+    if (user?.id && currentLead) {
+      const updatedLead = {
+        ...currentLead,
+        called: 0,
+        lastCalled: undefined
+      };
+      await updateLeadCallStatus(updatedLead);
+    }
   };
 
   if (loading) {
@@ -270,20 +309,22 @@ const CallingScreenLogic: React.FC<CallingScreenLogicProps> = ({
               <CardContent className="p-8 text-center">
                 <h2 className="text-xl font-semibold mb-4">Ready to Start Calling</h2>
                 <p className="text-muted-foreground mb-6">
-                  {leadLists.length === 0 
-                    ? "Import your first lead list to get started"
-                    : leadsData.length === 0 
-                      ? "No leads found with current filters"
-                      : "No leads found"
+                  {!user 
+                    ? "Please log in to import and manage your lead lists"
+                    : leadLists.length === 0 
+                      ? "Import your first lead list to get started"
+                      : leadsData.length === 0 
+                        ? "No leads found with current filters"
+                        : "No leads found"
                   }
                 </p>
-                {leadLists.length === 0 || leadsData.length === 0 ? (
+                {user && (leadLists.length === 0 || leadsData.length === 0) ? (
                   <div className="space-y-3">
                     <p className="text-sm text-muted-foreground">
                       Use the import options in the header to add leads
                     </p>
                   </div>
-                ) : (
+                ) : user && leadsData.length === 0 ? (
                   <Button 
                     onClick={() => {
                       toggleTimezoneFilter();
@@ -294,7 +335,7 @@ const CallingScreenLogic: React.FC<CallingScreenLogicProps> = ({
                   >
                     Clear All Filters
                   </Button>
-                )}
+                ) : null}
               </CardContent>
             </Card>
           </div>
