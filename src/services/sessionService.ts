@@ -58,7 +58,7 @@ export const sessionService = {
       }
 
       if (deviceSession) {
-        return deviceSession;
+        return deviceSession as UserSession;
       }
 
       // If no session for current device, get the most recent session from any device
@@ -75,7 +75,7 @@ export const sessionService = {
         return null;
       }
 
-      return recentSession;
+      return recentSession as UserSession | null;
     } catch (error) {
       console.error('Error in getUserSession:', error);
       return null;
