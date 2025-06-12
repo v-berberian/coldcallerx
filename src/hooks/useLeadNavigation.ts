@@ -10,12 +10,8 @@ import { useFilterChangeEffects } from './useFilterChangeEffects';
 import { useLeadNavigationState } from './useLeadNavigationState';
 import { useLeadNavigationActions } from './useLeadNavigationActions';
 import { useLeadNavigationEffects } from './useLeadNavigationEffects';
-import { useSessionNavigation } from './useSessionNavigation';
-import { useCallback, useEffect } from 'react';
 
-export const useLeadNavigation = (initialLeads: Lead[], onSessionUpdate?: (updates: any) => void, sessionState?: any) => {
-  console.log('useLeadNavigation called with session:', sessionState);
-  
+export const useLeadNavigation = (initialLeads: Lead[], initialSessionState?: any) => {
   const {
     shouldAutoCall,
     setShouldAutoCall,
@@ -69,19 +65,6 @@ export const useLeadNavigation = (initialLeads: Lead[], onSessionUpdate?: (updat
 
   const { isAutoCallInProgress, isCountdownActive, countdownTime, executeAutoCall, handleCountdownComplete, resetAutoCall, shouldBlockNavigation } = useAutoCall(makeCall, callDelay);
 
-  const { saveCurrentIndex } = useSessionNavigation(onSessionUpdate);
-
-  // Initialize from session state on mount
-  useEffect(() => {
-    if (sessionState?.currentLeadIndex !== undefined && 
-        sessionState.currentLeadIndex !== currentIndex &&
-        sessionState.currentLeadIndex >= 0) {
-      console.log('Initializing from session state:', sessionState.currentLeadIndex);
-      setCurrentIndex(sessionState.currentLeadIndex);
-      setCardKey(prev => prev + 1);
-    }
-  }, [sessionState?.currentLeadIndex]);
-
   const { handleNext, handlePrevious, selectLead } = useNavigation(
     currentIndex,
     updateNavigation,
@@ -90,7 +73,7 @@ export const useLeadNavigation = (initialLeads: Lead[], onSessionUpdate?: (updat
     callFilter,
     isFilterChanging,
     isAutoCallInProgress,
-    shouldBlockNavigation(), // Call the function to get boolean value
+    shouldBlockNavigation(),
     // Only mark as called if a call was made to current lead
     (lead: Lead) => {
       if (callMadeToCurrentLead) {
@@ -109,7 +92,7 @@ export const useLeadNavigation = (initialLeads: Lead[], onSessionUpdate?: (updat
     callFilter,
     isFilterChanging,
     isAutoCallInProgress,
-    shouldBlockNavigation: shouldBlockNavigation(), // Call the function to get boolean value
+    shouldBlockNavigation: shouldBlockNavigation(),
     markLeadAsCalledOnNavigation,
     shownLeadsInShuffle,
     setShownLeadsInShuffle,
@@ -118,8 +101,7 @@ export const useLeadNavigation = (initialLeads: Lead[], onSessionUpdate?: (updat
     selectLead,
     setCallMadeToCurrentLead,
     autoCall,
-    setShouldAutoCall,
-    saveCurrentIndex
+    setShouldAutoCall
   });
 
   const { makeCallWrapper, handleCountdownCompleteWrapper } = useLeadNavigationEffects({
@@ -147,6 +129,7 @@ export const useLeadNavigation = (initialLeads: Lead[], onSessionUpdate?: (updat
     resetNavigation
   );
 
+  // Enhanced toggle functions to reset shown leads tracker
   const toggleShuffleWrapper = () => {
     toggleShuffle();
     resetShownLeads();
@@ -162,18 +145,20 @@ export const useLeadNavigation = (initialLeads: Lead[], onSessionUpdate?: (updat
     resetShownLeads();
   };
 
+  // Enhanced toggle auto-call to reset countdown when disabled
   const toggleAutoCallWrapper = () => {
     const wasAutoCallOn = autoCall;
     toggleAutoCall();
     
+    // If turning auto-call OFF, reset any active countdown
     if (wasAutoCallOn) {
       resetAutoCall();
       console.log('Auto-call disabled, resetting countdown');
     }
   };
 
-  const resetLeadsData = useCallback((newLeads: Lead[]) => {
-    console.log('Resetting leads data with new leads:', newLeads.length);
+  // Function to reset leads data (for CSV import)
+  const resetLeadsData = (newLeads: Lead[]) => {
     const formattedLeads = newLeads.map(lead => ({
       ...lead,
       called: lead.called || 0,
@@ -183,7 +168,23 @@ export const useLeadNavigation = (initialLeads: Lead[], onSessionUpdate?: (updat
     resetNavigation(0);
     resetShownLeads();
     resetCallState();
-  }, [setLeadsData, resetNavigation, resetShownLeads, resetCallState]);
+  };
+
+  // Initialize from session state if provided
+  const initializeFromSessionState = (sessionState: any, onSessionUpdate: (updates: any) => void) => {
+    // Set initial index from session state
+    if (sessionState?.currentLeadIndex !== undefined) {
+      setCurrentIndex(sessionState.currentLeadIndex);
+      setCardKey(prev => prev + 1);
+    }
+
+    // Return functions to save session state when navigation changes
+    return {
+      saveCurrentIndex: (index: number) => {
+        onSessionUpdate({ currentLeadIndex: index });
+      }
+    };
+  };
 
   return {
     leadsData,
@@ -217,6 +218,7 @@ export const useLeadNavigation = (initialLeads: Lead[], onSessionUpdate?: (updat
     toggleCallDelay,
     resetCallDelay,
     resetLeadsData,
-    countdownTime
+    countdownTime,
+    initializeFromSessionState
   };
 };

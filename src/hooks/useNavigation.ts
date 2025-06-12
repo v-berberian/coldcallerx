@@ -18,16 +18,14 @@ export const useNavigation = (
   const { getNextLeadInSequential, getNextLeadInShuffle } = useLeadSelection();
 
   const handleNext = (baseLeads: Lead[]) => {
-    console.log('handleNext called:', { 
-      isFilterChanging, 
-      shouldBlockNavigation, 
-      baseLeadsLength: baseLeads.length,
-      currentIndex 
-    });
-
-    // Block navigation during filter changes or auto-call
-    if (isFilterChanging || shouldBlockNavigation) {
-      console.log('Skipping navigation because filters are changing or navigation is blocked');
+    // Block navigation during filter changes or when countdown is 1 second or less
+    if (isFilterChanging) {
+      console.log('Skipping navigation because filters are changing');
+      return;
+    }
+    
+    if (shouldBlockNavigation) {
+      console.log('Skipping navigation because countdown is less than 1 second');
       return;
     }
     
@@ -66,11 +64,14 @@ export const useNavigation = (
   };
 
   const handlePrevious = () => {
-    console.log('handlePrevious called:', { isFilterChanging, shouldBlockNavigation });
-
-    // Block navigation during filter changes or auto-call
-    if (isFilterChanging || shouldBlockNavigation) {
-      console.log('Skipping previous navigation because filters are changing or navigation is blocked');
+    // Block navigation during filter changes or when countdown is 1 second or less
+    if (isFilterChanging) {
+      console.log('Skipping previous navigation because filters are changing');
+      return;
+    }
+    
+    if (shouldBlockNavigation) {
+      console.log('Skipping previous navigation because countdown is less than 1 second');
       return;
     }
     
@@ -79,15 +80,14 @@ export const useNavigation = (
   };
 
   const selectLead = (lead: Lead, baseLeads: Lead[], allLeads: Lead[]) => {
-    console.log('selectLead called:', { 
-      leadName: lead.name, 
-      isFilterChanging, 
-      shouldBlockNavigation 
-    });
-
-    // Block selection during filter changes or auto-call
-    if (isFilterChanging || shouldBlockNavigation) {
-      console.log('Skipping lead selection because filters are changing or navigation is blocked');
+    // Block selection during filter changes or when countdown is 1 second or less
+    if (isFilterChanging) {
+      console.log('Skipping lead selection because filters are changing');
+      return;
+    }
+    
+    if (shouldBlockNavigation) {
+      console.log('Skipping lead selection because countdown is less than 1 second');
       return;
     }
     

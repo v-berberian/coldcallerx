@@ -3,14 +3,9 @@ import React from 'react';
 import { Lead } from '../types/lead';
 import SearchAutocomplete from './SearchAutocomplete';
 import SearchBar from './SearchBar';
+import ThemeToggle from './ThemeToggle';
 import CSVImporter from './CSVImporter';
 import UserProfile from './UserProfile';
-import CloudSyncIndicator from './CloudSyncIndicator';
-
-interface CloudSyncProps {
-  isLoading: boolean;
-  lastSyncTime?: Date;
-}
 
 interface CallingHeaderProps {
   searchQuery: string;
@@ -24,7 +19,6 @@ interface CallingHeaderProps {
   onClearSearch: () => void;
   onLeadSelect: (lead: Lead) => void;
   onLeadsImported: (leads: Lead[], fileName: string) => void;
-  cloudSyncProps?: CloudSyncProps;
 }
 
 const CallingHeader: React.FC<CallingHeaderProps> = ({
@@ -38,8 +32,7 @@ const CallingHeader: React.FC<CallingHeaderProps> = ({
   onSearchBlur,
   onClearSearch,
   onLeadSelect,
-  onLeadsImported,
-  cloudSyncProps
+  onLeadsImported
 }) => {
   return (
     <div className="bg-background border-b border-border p-4 pt-safe flex-shrink-0" style={{ paddingTop: 'max(1rem, env(safe-area-inset-top))' }}>
@@ -55,12 +48,7 @@ const CallingHeader: React.FC<CallingHeaderProps> = ({
         </div>
         
         <div className="flex items-center space-x-2">
-          {cloudSyncProps && (
-            <CloudSyncIndicator 
-              isLoading={cloudSyncProps.isLoading} 
-              lastSyncTime={cloudSyncProps.lastSyncTime} 
-            />
-          )}
+          <ThemeToggle />
           <UserProfile />
         </div>
       </div>

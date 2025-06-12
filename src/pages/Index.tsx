@@ -1,10 +1,10 @@
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { Loader2 } from 'lucide-react';
 import CallingScreen from '@/components/CallingScreen';
-import CloudSyncIndicator from '@/components/CloudSyncIndicator';
+import ThemeToggle from '@/components/ThemeToggle';
 import UserProfile from '@/components/UserProfile';
 import CSVImporter from '@/components/CSVImporter';
 import { useCloudLeadsData } from '@/hooks/useCloudLeadsData';
@@ -13,10 +13,6 @@ import { Lead } from '@/types/lead';
 const Index = () => {
   const { user, loading: authLoading, signOut } = useAuth();
   const navigate = useNavigate();
-  const [initializationComplete, setInitializationComplete] = useState(false);
-  const [lastSyncTime, setLastSyncTime] = useState<Date | undefined>();
-  const [isSyncing, setIsSyncing] = useState(false);
-  
   const {
     currentLeadList,
     leadsData,
@@ -34,45 +30,18 @@ const Index = () => {
     }
   }, [user, authLoading, navigate]);
 
-  // Mark initialization as complete when we have either leads data or confirmed no leads
-  useEffect(() => {
-    if (!leadsLoading && (!currentLeadList || leadsData.length > 0 || currentLeadList)) {
-      console.log('Initialization complete:', { 
-        leadsLoading, 
-        currentLeadList: !!currentLeadList, 
-        leadsDataLength: leadsData.length,
-        sessionState 
-      });
-      setInitializationComplete(true);
-      if (!leadsLoading) {
-        setLastSyncTime(new Date());
-      }
-    }
-  }, [leadsLoading, currentLeadList, leadsData.length, sessionState]);
-
   const handleLeadsImported = async (importedLeads: Lead[], importedFileName: string) => {
-    setIsSyncing(true);
     const success = await importLeadsFromCSV(importedLeads, importedFileName);
     if (!success) {
       console.error('Failed to import leads to cloud');
     }
-    setLastSyncTime(new Date());
-    setIsSyncing(false);
-  };
-
-  const handleSessionUpdate = async (updates: any) => {
-    setIsSyncing(true);
-    await updateSessionState(updates);
-    setLastSyncTime(new Date());
-    setIsSyncing(false);
   };
 
   const handleBack = async () => {
     await signOut();
   };
 
-  if (authLoading || leadsLoading || !initializationComplete) {
-    console.log('Loading state:', { authLoading, leadsLoading, initializationComplete });
+  if (authLoading || leadsLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin" />
@@ -99,7 +68,7 @@ const Index = () => {
           </h1>
           
           <div className="flex items-center space-x-2">
-            <CloudSyncIndicator isLoading={isSyncing} lastSyncTime={lastSyncTime} />
+            <ThemeToggle />
             <UserProfile />
           </div>
         </div>
@@ -114,8 +83,6 @@ const Index = () => {
     );
   }
 
-  console.log('Rendering CallingScreen with session state:', sessionState);
-
   return (
     <CallingScreen 
       leads={leadsData} 
@@ -123,8 +90,7 @@ const Index = () => {
       onBack={handleBack}
       onLeadsImported={handleLeadsImported}
       sessionState={sessionState}
-      onSessionUpdate={handleSessionUpdate}
-      cloudSyncProps={{ isLoading: isSyncing, lastSyncTime }}
+      onSessionUpdate={updateSessionState}
     />
   );
 };

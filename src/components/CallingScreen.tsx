@@ -9,11 +9,6 @@ interface Lead {
   lastCalled?: string;
 }
 
-interface CloudSyncProps {
-  isLoading: boolean;
-  lastSyncTime?: Date;
-}
-
 interface CallingScreenProps {
   leads: Lead[];
   fileName: string;
@@ -21,7 +16,6 @@ interface CallingScreenProps {
   onLeadsImported: (leads: Lead[], fileName: string) => void;
   sessionState?: any;
   onSessionUpdate?: (updates: any) => void;
-  cloudSyncProps?: CloudSyncProps;
 }
 
 const CallingScreen: React.FC<CallingScreenProps> = (props) => {

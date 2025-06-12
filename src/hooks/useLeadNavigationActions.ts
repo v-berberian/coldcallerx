@@ -19,27 +19,22 @@ interface UseLeadNavigationActionsProps {
   setCallMadeToCurrentLead: (called: boolean) => void;
   autoCall: boolean;
   setShouldAutoCall: (should: boolean) => void;
-  saveCurrentIndex: (index: number) => Promise<void>;
 }
 
 export const useLeadNavigationActions = ({
   currentIndex,
   updateNavigation,
   shuffleMode,
+  shouldBlockNavigation,
   handleNext,
   handlePrevious,
   selectLead,
   setCallMadeToCurrentLead,
   autoCall,
-  setShouldAutoCall,
-  saveCurrentIndex,
-  isFilterChanging
+  setShouldAutoCall
 }: UseLeadNavigationActionsProps) => {
 
-  const handleNextWrapper = async (baseLeads: Lead[]) => {
-    if (isFilterChanging) return;
-    
-    console.log('handleNextWrapper called with', baseLeads.length, 'leads');
+  const handleNextWrapper = (baseLeads: Lead[]) => {
     handleNext(baseLeads);
     
     // Reset call state when navigating
@@ -49,17 +44,16 @@ export const useLeadNavigationActions = ({
     if (autoCall) {
       setShouldAutoCall(true);
     }
-
-    // Save to cloud after navigation completes
-    const nextIndex = currentIndex >= baseLeads.length - 1 ? 0 : currentIndex + 1;
-    await saveCurrentIndex(nextIndex);
   };
 
-  const handlePreviousWrapper = async (baseLeads: Lead[]) => {
-    if (isFilterChanging) return;
-    
-    console.log('handlePreviousWrapper called with', baseLeads.length, 'leads');
+  const handlePreviousWrapper = (baseLeads: Lead[]) => {
     if (baseLeads.length === 0) return;
+    
+    // Check if navigation should be blocked
+    if (shouldBlockNavigation) {
+      console.log('Previous navigation blocked due to countdown');
+      return;
+    }
     
     // Simple list-based previous navigation
     const prevIndex = currentIndex === 0 ? baseLeads.length - 1 : currentIndex - 1;
@@ -68,24 +62,12 @@ export const useLeadNavigationActions = ({
     
     // Reset call state when navigating
     setCallMadeToCurrentLead(false);
-
-    // Save to cloud
-    await saveCurrentIndex(prevIndex);
   };
 
-  const selectLeadWrapper = async (lead: Lead, baseLeads: Lead[], leadsData: Lead[]) => {
-    if (isFilterChanging) return;
-    
-    console.log('selectLeadWrapper called for lead:', lead.name);
+  const selectLeadWrapper = (lead: Lead, baseLeads: Lead[], leadsData: Lead[]) => {
     selectLead(lead, baseLeads, leadsData);
     // Reset call state when selecting a new lead
     setCallMadeToCurrentLead(false);
-
-    // Save to cloud
-    const leadIndex = baseLeads.findIndex(l => l.name === lead.name && l.phone === lead.phone);
-    if (leadIndex !== -1) {
-      await saveCurrentIndex(leadIndex);
-    }
   };
 
   return {
