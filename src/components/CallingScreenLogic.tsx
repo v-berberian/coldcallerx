@@ -110,9 +110,9 @@ const CallingScreenLogic: React.FC<CallingScreenLogicProps> = ({
           onSync(); // Start sync status
         }
         
-        const success = await saveCurrentIndex(index);
+        await saveCurrentIndex(index);
         
-        if (success && onSync) {
+        if (onSync) {
           // Simulate successful sync after a short delay
           setTimeout(() => {
             onSync();
