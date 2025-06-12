@@ -11,8 +11,8 @@ export interface UserSession {
   shuffle_mode: boolean;
   auto_call: boolean;
   call_delay: number;
-  daily_call_count?: number;
-  leads_data?: any;
+  daily_call_count: number;
+  leads_data: any;
   last_accessed_at: string;
   created_at: string;
   updated_at: string;

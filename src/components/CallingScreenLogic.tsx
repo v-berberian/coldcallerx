@@ -109,13 +109,22 @@ const CallingScreenLogic: React.FC<CallingScreenLogicProps> = ({
           lastSyncedAt: new Date().toISOString()
         };
         
-        const success = await saveCurrentIndex(updates.currentLeadIndex || currentIndex);
-        
-        if (onSync && success) {
-          // Delay the success animation to let card animation complete first
-          setTimeout(() => {
-            onSync();
-          }, 200); // Reduced from 500ms to 200ms to complete before card animation
+        try {
+          await saveCurrentIndex(updates.currentLeadIndex || currentIndex);
+          
+          if (onSync) {
+            // Delay the success animation to let card animation complete first
+            setTimeout(() => {
+              onSync();
+            }, 200);
+          }
+        } catch (error) {
+          console.error('Session save failed:', error);
+          if (onSync) {
+            setTimeout(() => {
+              onSync();
+            }, 200);
+          }
         }
       };
 
