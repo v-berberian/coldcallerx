@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Lead } from '../types/lead';
 import { leadService, LeadList } from '../services/leadService';
@@ -97,10 +96,16 @@ export const useCloudLeadsData = () => {
     }
   };
 
-  const updateSessionState = async (updates: Partial<SessionState>) => {
-    const newSessionState = { ...sessionState, ...updates };
-    setSessionState(newSessionState);
-    await sessionService.saveUserSession(newSessionState);
+  const updateSessionState = async (updates: Partial<SessionState>): Promise<boolean> => {
+    try {
+      const newSessionState = { ...sessionState, ...updates };
+      setSessionState(newSessionState);
+      await sessionService.saveUserSession(newSessionState);
+      return true;
+    } catch (error) {
+      console.error('Error updating session state:', error);
+      return false;
+    }
   };
 
   const importLeadsFromCSV = async (leads: Lead[], fileName: string): Promise<boolean> => {
@@ -177,42 +182,49 @@ export const useCloudLeadsData = () => {
     return await leadService.uploadCSVFile(file, user.id);
   };
 
-  const markLeadAsCalled = async (lead: Lead) => {
-    if (!currentLeadList) return;
+  const markLeadAsCalled = async (lead: Lead): Promise<boolean> => {
+    if (!currentLeadList) return false;
 
-    const now = new Date();
-    const dateString = now.toLocaleDateString();
-    const timeString = now.toLocaleTimeString('en-US', {
-      hour: 'numeric',
-      minute: '2-digit',
-      hour12: true
-    });
-    const lastCalledString = `${dateString} at ${timeString}`;
+    try {
+      const now = new Date();
+      const dateString = now.toLocaleDateString();
+      const timeString = now.toLocaleTimeString('en-US', {
+        hour: 'numeric',
+        minute: '2-digit',
+        hour12: true
+      });
+      const lastCalledString = `${dateString} at ${timeString}`;
 
-    const newCallCount = (lead.called || 0) + 1;
+      const newCallCount = (lead.called || 0) + 1;
 
-    // Update local state
-    const updatedLeads = leadsData.map(l => 
-      l.name === lead.name && l.phone === lead.phone ? {
-        ...l,
-        called: newCallCount,
-        lastCalled: lastCalledString
-      } : l
-    );
-    setLeadsData(updatedLeads);
+      // Update local state
+      const updatedLeads = leadsData.map(l => 
+        l.name === lead.name && l.phone === lead.phone ? {
+          ...l,
+          called: newCallCount,
+          lastCalled: lastCalledString
+        } : l
+      );
+      setLeadsData(updatedLeads);
 
-    // Update database
-    await leadService.updateLeadCallCount(
-      currentLeadList.id,
-      lead.name,
-      lead.phone,
-      newCallCount,
-      lastCalledString
-    );
+      // Update database
+      await leadService.updateLeadCallCount(
+        currentLeadList.id,
+        lead.name,
+        lead.phone,
+        newCallCount,
+        lastCalledString
+      );
 
-    // Increment daily call count
-    await dailyStatsService.incrementDailyCallCount();
-    await loadDailyStats();
+      // Increment daily call count
+      await dailyStatsService.incrementDailyCallCount();
+      await loadDailyStats();
+
+      return true;
+    } catch (error) {
+      console.error('Error marking lead as called:', error);
+      return false;
+    }
   };
 
   const resetCallCount = async (lead: Lead) => {

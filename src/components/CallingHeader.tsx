@@ -3,7 +3,7 @@ import React from 'react';
 import { Lead } from '../types/lead';
 import SearchAutocomplete from './SearchAutocomplete';
 import SearchBar from './SearchBar';
-import ThemeToggle from './ThemeToggle';
+import CloudSyncButton from './CloudSyncButton';
 import CSVImporter from './CSVImporter';
 import UserProfile from './UserProfile';
 
@@ -13,12 +13,14 @@ interface CallingHeaderProps {
   searchResults: Lead[];
   leadsData: Lead[];
   fileName: string;
+  syncStatus?: 'idle' | 'syncing' | 'success' | 'error';
   onSearchChange: (query: string) => void;
   onSearchFocus: () => void;
   onSearchBlur: () => void;
   onClearSearch: () => void;
   onLeadSelect: (lead: Lead) => void;
   onLeadsImported: (leads: Lead[], fileName: string) => void;
+  onSync?: () => void;
 }
 
 const CallingHeader: React.FC<CallingHeaderProps> = ({
@@ -27,12 +29,14 @@ const CallingHeader: React.FC<CallingHeaderProps> = ({
   searchResults,
   leadsData,
   fileName,
+  syncStatus = 'idle',
   onSearchChange,
   onSearchFocus,
   onSearchBlur,
   onClearSearch,
   onLeadSelect,
-  onLeadsImported
+  onLeadsImported,
+  onSync
 }) => {
   return (
     <div className="bg-background border-b border-border p-4 pt-safe flex-shrink-0" style={{ paddingTop: 'max(1rem, env(safe-area-inset-top))' }}>
@@ -48,7 +52,7 @@ const CallingHeader: React.FC<CallingHeaderProps> = ({
         </div>
         
         <div className="flex items-center space-x-2">
-          <ThemeToggle />
+          <CloudSyncButton status={syncStatus} onSync={onSync} />
           <UserProfile />
         </div>
       </div>

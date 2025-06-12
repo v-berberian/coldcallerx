@@ -4,10 +4,11 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { Loader2 } from 'lucide-react';
 import CallingScreen from '@/components/CallingScreen';
-import ThemeToggle from '@/components/ThemeToggle';
+import CloudSyncButton from '@/components/CloudSyncButton';
 import UserProfile from '@/components/UserProfile';
 import CSVImporter from '@/components/CSVImporter';
 import { useCloudLeadsData } from '@/hooks/useCloudLeadsData';
+import { useSyncStatus } from '@/hooks/useSyncStatus';
 import { Lead } from '@/types/lead';
 
 const Index = () => {
@@ -24,6 +25,8 @@ const Index = () => {
     updateSessionState
   } = useCloudLeadsData();
 
+  const { syncStatus, startSync, syncSuccess, syncError } = useSyncStatus();
+
   useEffect(() => {
     if (!authLoading && !user) {
       navigate('/auth');
@@ -31,9 +34,34 @@ const Index = () => {
   }, [user, authLoading, navigate]);
 
   const handleLeadsImported = async (importedLeads: Lead[], importedFileName: string) => {
+    startSync();
     const success = await importLeadsFromCSV(importedLeads, importedFileName);
-    if (!success) {
+    if (success) {
+      syncSuccess();
+    } else {
+      syncError();
       console.error('Failed to import leads to cloud');
+    }
+  };
+
+  const handleSessionUpdate = async (updates: any) => {
+    startSync();
+    const success = await updateSessionState(updates);
+    if (success) {
+      syncSuccess();
+    } else {
+      syncError();
+    }
+  };
+
+  const handleManualSync = async () => {
+    startSync();
+    // Trigger a session save to test sync
+    const success = await updateSessionState({});
+    if (success) {
+      syncSuccess();
+    } else {
+      syncError();
     }
   };
 
@@ -68,7 +96,7 @@ const Index = () => {
           </h1>
           
           <div className="flex items-center space-x-2">
-            <ThemeToggle />
+            <CloudSyncButton status={syncStatus} onSync={handleManualSync} />
             <UserProfile />
           </div>
         </div>
@@ -90,7 +118,9 @@ const Index = () => {
       onBack={handleBack}
       onLeadsImported={handleLeadsImported}
       sessionState={sessionState}
-      onSessionUpdate={updateSessionState}
+      onSessionUpdate={handleSessionUpdate}
+      syncStatus={syncStatus}
+      onSync={handleManualSync}
     />
   );
 };
