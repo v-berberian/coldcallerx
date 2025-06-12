@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Lead } from '../types/lead';
 import { leadService, LeadList } from '../services/leadService';
@@ -33,19 +32,13 @@ export const useCloudLeadsData = () => {
     }
   };
 
-  const switchToLeadList = async (leadListId: string): Promise<boolean> => {
+  const switchToLeadList = async (leadList: LeadList): Promise<boolean> => {
     if (!user) return false;
 
     setLoading(true);
     try {
-      const selectedList = leadLists.find(list => list.id === leadListId);
-      if (!selectedList) {
-        setLoading(false);
-        return false;
-      }
-
-      const leads = await leadService.getLeads(leadListId);
-      setCurrentLeadList(selectedList);
+      const leads = await leadService.getLeads(leadList.id);
+      setCurrentLeadList(leadList);
       setLeadsData(leads);
       return true;
     } catch (error) {
@@ -54,6 +47,27 @@ export const useCloudLeadsData = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const deleteLeadList = async (leadListId: string): Promise<boolean> => {
+    if (!user) return false;
+
+    try {
+      const success = await leadService.deleteLeadList(leadListId);
+      if (success) {
+        // If we deleted the current list, clear it
+        if (currentLeadList?.id === leadListId) {
+          setCurrentLeadList(null);
+          setLeadsData([]);
+        }
+        // Refresh lead lists
+        await loadLeadLists();
+        return true;
+      }
+    } catch (error) {
+      console.error('Error deleting lead list:', error);
+    }
+    return false;
   };
 
   const importLeadsFromCSV = async (leads: Lead[], fileName: string): Promise<boolean> => {
@@ -172,6 +186,7 @@ export const useCloudLeadsData = () => {
     importLeadsFromCSV,
     uploadCSVFile,
     switchToLeadList,
+    deleteLeadList,
     markLeadAsCalled,
     resetCallCount,
     resetAllCallCounts,

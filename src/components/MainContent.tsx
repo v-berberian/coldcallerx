@@ -21,6 +21,7 @@ interface MainContentProps {
   onCall: () => void;
   onResetCallCount: () => void;
   onLeadListSelect: (leadList: LeadList) => void;
+  onLeadListDelete?: (leadListId: string) => void;
   onToggleTimezone: () => void;
   onToggleCallFilter: () => void;
   onToggleShuffle: () => void;
@@ -51,6 +52,7 @@ const MainContent: React.FC<MainContentProps> = ({
   onCall,
   onResetCallCount,
   onLeadListSelect,
+  onLeadListDelete,
   onToggleTimezone,
   onToggleCallFilter,
   onToggleShuffle,
@@ -105,6 +107,7 @@ const MainContent: React.FC<MainContentProps> = ({
           onCall={onCall}
           onResetCallCount={onResetCallCount}
           onLeadListSelect={onLeadListSelect}
+          onLeadListDelete={onLeadListDelete}
         />
 
         {/* Navigation Controls */}

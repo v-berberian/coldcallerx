@@ -25,6 +25,7 @@ interface LeadCardProps {
   onCall: () => void;
   onResetCallCount: () => void;
   onLeadListSelect: (leadList: LeadList) => void;
+  onLeadListDelete?: (leadListId: string) => void;
 }
 
 const LeadCard: React.FC<LeadCardProps> = ({
@@ -36,7 +37,8 @@ const LeadCard: React.FC<LeadCardProps> = ({
   leadLists,
   onCall,
   onResetCallCount,
-  onLeadListSelect
+  onLeadListSelect,
+  onLeadListDelete
 }) => {
   return (
     <Card key={cardKey} className="shadow-2xl border-border/50 rounded-3xl bg-card h-[400px] flex flex-col animate-scale-in">
@@ -46,11 +48,14 @@ const LeadCard: React.FC<LeadCardProps> = ({
           <p className="text-sm text-muted-foreground opacity-40">
             {currentIndex + 1}/{totalCount}
           </p>
-          <LeadListSelector
-            currentFileName={fileName}
-            leadLists={leadLists}
-            onLeadListSelect={onLeadListSelect}
-          />
+          <div className="pr-0">
+            <LeadListSelector
+              currentFileName={fileName}
+              leadLists={leadLists}
+              onLeadListSelect={onLeadListSelect}
+              onLeadListDelete={onLeadListDelete}
+            />
+          </div>
         </div>
 
         {/* Lead info - Main content area with animation */}
