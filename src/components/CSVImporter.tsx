@@ -1,8 +1,8 @@
 
 import React, { useState, useRef } from 'react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Upload, FileText, Phone } from 'lucide-react';
+import { Upload } from 'lucide-react';
+import { useCloudLeadsData } from '@/hooks/useCloudLeadsData';
 
 interface Lead {
   name: string;
@@ -14,9 +14,10 @@ interface CSVImporterProps {
 }
 
 const CSVImporter: React.FC<CSVImporterProps> = ({ onLeadsImported }) => {
-  const [isDragOver, setIsDragOver] = useState(false);
   const [error, setError] = useState<string>('');
+  const [loading, setLoading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const { uploadCSVFile } = useCloudLeadsData();
 
   const formatPhoneNumber = (phone: string): string => {
     // Remove all non-digit characters
@@ -51,28 +52,45 @@ const CSVImporter: React.FC<CSVImporterProps> = ({ onLeadsImported }) => {
     return leads;
   };
 
-  const handleFileProcess = (file: File) => {
+  const handleFileProcess = async (file: File) => {
     if (file.type !== 'text/csv' && !file.name.endsWith('.csv')) {
       setError('Please select a valid CSV file');
       return;
     }
 
     setError('');
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      const text = e.target?.result as string;
-      const leads = parseCSV(text);
-      if (leads.length === 0) {
-        setError('No valid leads found in the CSV file');
+    setLoading(true);
+
+    try {
+      // Upload file to Supabase storage
+      const uploadPath = await uploadCSVFile(file);
+      if (!uploadPath) {
+        setError('Failed to upload file to cloud');
         return;
       }
-      const fileName = file.name.replace('.csv', '');
-      onLeadsImported(leads, fileName);
-    };
-    reader.onerror = () => {
-      setError('Error reading file');
-    };
-    reader.readAsText(file);
+
+      // Parse CSV content
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const text = e.target?.result as string;
+        const leads = parseCSV(text);
+        if (leads.length === 0) {
+          setError('No valid leads found in the CSV file');
+          return;
+        }
+        const fileName = file.name.replace('.csv', '');
+        onLeadsImported(leads, fileName);
+      };
+      reader.onerror = () => {
+        setError('Error reading file');
+      };
+      reader.readAsText(file);
+    } catch (error) {
+      setError('Error processing file');
+      console.error('File processing error:', error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -86,30 +104,13 @@ const CSVImporter: React.FC<CSVImporterProps> = ({ onLeadsImported }) => {
     fileInputRef.current?.click();
   };
 
-  const handleDrop = (event: React.DragEvent) => {
-    event.preventDefault();
-    setIsDragOver(false);
-    
-    const file = event.dataTransfer.files[0];
-    if (file) {
-      handleFileProcess(file);
-    }
-  };
-
-  const handleDragOver = (event: React.DragEvent) => {
-    event.preventDefault();
-    setIsDragOver(true);
-  };
-
-  const handleDragLeave = (event: React.DragEvent) => {
-    event.preventDefault();
-    setIsDragOver(false);
-  };
-
   return (
-    <button 
+    <Button 
+      variant="ghost" 
+      size="sm" 
       onClick={handleButtonClick} 
-      className="text-sm font-medium px-3 py-1 rounded transition-all duration-200 text-muted-foreground hover:text-foreground"
+      disabled={loading}
+      className="h-8 w-8 rounded-full"
       style={{ WebkitTapHighlightColor: 'transparent' }}
     >
       <Upload className="h-4 w-4" />
@@ -120,7 +121,7 @@ const CSVImporter: React.FC<CSVImporterProps> = ({ onLeadsImported }) => {
         onChange={handleFileChange}
         className="hidden"
       />
-    </button>
+    </Button>
   );
 };
 
