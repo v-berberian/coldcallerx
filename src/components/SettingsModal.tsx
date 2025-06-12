@@ -4,7 +4,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { useTheme } from 'next-themes';
-import { Sun, Moon, Smartphone, LogOut, User } from 'lucide-react';
+import { Sun, Moon, Smartphone, LogOut, User, List } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 
@@ -12,9 +12,15 @@ interface SettingsModalProps {
   isOpen: boolean;
   onClose: () => void;
   userEmail?: string;
+  onManageLeadLists: () => void;
 }
 
-const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose, userEmail }) => {
+const SettingsModal: React.FC<SettingsModalProps> = ({ 
+  isOpen, 
+  onClose, 
+  userEmail,
+  onManageLeadLists 
+}) => {
   const { theme, setTheme } = useTheme();
   const { toast } = useToast();
 
@@ -55,6 +61,11 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose, userEmai
     setTheme(themes[nextIndex]);
   };
 
+  const handleManageLeadLists = () => {
+    onManageLeadLists();
+    onClose();
+  };
+
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-md">
@@ -71,6 +82,18 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose, userEmai
               <p className="text-sm text-muted-foreground">{userEmail}</p>
             </div>
           </div>
+
+          <Separator />
+
+          {/* Manage Lead Lists */}
+          <Button
+            onClick={handleManageLeadLists}
+            variant="outline"
+            className="w-full flex items-center space-x-2"
+          >
+            <List className="h-4 w-4" />
+            <span>Manage Lead Lists</span>
+          </Button>
 
           <Separator />
 

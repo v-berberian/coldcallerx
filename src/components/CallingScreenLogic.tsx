@@ -1,10 +1,10 @@
-
 import React, { useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import CallingHeader from './CallingHeader';
 import MainContent from './MainContent';
 import DailyProgress from './DailyProgress';
+import WelcomeScreen from './WelcomeScreen';
 import { useSearchState } from './SearchState';
 import { useDailyCallState } from './DailyCallState';
 import { useLeadNavigation } from '../hooks/useLeadNavigation';
@@ -170,9 +170,9 @@ const CallingScreenLogic: React.FC<CallingScreenLogicProps> = ({
     handlePrevious(currentLeads);
   };
 
-  const handleLeadsImported = (importedLeads: Lead[], importedFileName: string) => {
+  const handleLeadsImported = async (importedLeads: Lead[], importedFileName: string) => {
     if (user?.id) {
-      createLeadList(importedFileName, importedLeads);
+      await createLeadList(importedFileName, importedLeads);
     } else {
       onLeadsImported(importedLeads, importedFileName);
     }
@@ -206,6 +206,11 @@ const CallingScreenLogic: React.FC<CallingScreenLogicProps> = ({
         </div>
       </div>
     );
+  }
+
+  // Show welcome screen if user has no lead lists
+  if (leadLists.length === 0) {
+    return <WelcomeScreen onLeadsImported={handleLeadsImported} />;
   }
 
   const currentLeads = getBaseLeads();

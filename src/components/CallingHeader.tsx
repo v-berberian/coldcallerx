@@ -4,7 +4,6 @@ import { Settings } from 'lucide-react';
 import { Lead } from '../types/lead';
 import SearchAutocomplete from './SearchAutocomplete';
 import SearchBar from './SearchBar';
-import CSVImporter from './CSVImporter';
 import SettingsModal from './SettingsModal';
 import ListSelector from './ListSelector';
 import { useAuth } from '@/hooks/useAuth';
@@ -58,7 +57,7 @@ const CallingHeader: React.FC<CallingHeaderProps> = ({
   return (
     <div className="bg-background border-b border-border p-4 pt-safe flex-shrink-0" style={{ paddingTop: 'max(1rem, env(safe-area-inset-top))' }}>
       <div className="flex items-center justify-between mb-4">
-        <CSVImporter onLeadsImported={onLeadsImported} />
+        <div className="w-12" /> {/* Spacer for alignment */}
         
         <div className="flex items-center space-x-3">
           <h1 className="text-2xl font-bold">
@@ -117,7 +116,8 @@ const CallingHeader: React.FC<CallingHeaderProps> = ({
       <SettingsModal 
         isOpen={showSettings} 
         onClose={() => setShowSettings(false)} 
-        userEmail={user?.email} 
+        userEmail={user?.email}
+        onManageLeadLists={() => setShowListSelector(true)}
       />
 
       <ListSelector
