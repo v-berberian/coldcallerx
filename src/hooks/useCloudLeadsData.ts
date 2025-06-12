@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Lead } from '../types/lead';
 import { leadService, LeadList } from '../services/leadService';
 import { dailyStatsService } from '../services/dailyStatsService';
@@ -31,8 +31,8 @@ export const useCloudLeadsData = () => {
   const loadUserData = async () => {
     setLoading(true);
     try {
-      // Load saved session state
-      const savedSession = await sessionService.getUserSession();
+      // Load saved session state with retry logic
+      const savedSession = await loadSessionWithRetry();
       
       // Load daily stats
       const stats = await dailyStatsService.getTodaysStats();
@@ -79,34 +79,67 @@ export const useCloudLeadsData = () => {
         const leads = await leadService.getLeads(targetLeadList.id);
         setLeadsData(leads);
 
-        // Save the initial session state
+        // Save the initial session state (debounced)
         await sessionService.saveUserSession(initialSessionState);
       }
     } catch (error) {
       console.error('Error loading user data:', error);
+      // Don't block the UI if session loading fails
     } finally {
       setLoading(false);
     }
   };
 
+  const loadSessionWithRetry = async (maxRetries = 3): Promise<any> => {
+    for (let i = 0; i < maxRetries; i++) {
+      try {
+        const session = await sessionService.getUserSession();
+        return session;
+      } catch (error) {
+        console.error(`Session load attempt ${i + 1} failed:`, error);
+        if (i === maxRetries - 1) {
+          // On final failure, return null to use defaults
+          return null;
+        }
+        // Wait before retry
+        await new Promise(resolve => setTimeout(resolve, 1000 * (i + 1)));
+      }
+    }
+    return null;
+  };
+
   const loadDailyStats = async () => {
-    const stats = await dailyStatsService.getTodaysStats();
-    if (stats) {
-      setDailyCallCount(stats.call_count);
+    try {
+      const stats = await dailyStatsService.getTodaysStats();
+      if (stats) {
+        setDailyCallCount(stats.call_count);
+      }
+    } catch (error) {
+      console.error('Error loading daily stats:', error);
     }
   };
 
-  const updateSessionState = async (updates: Partial<SessionState>): Promise<boolean> => {
+  const updateSessionState = useCallback(async (updates: Partial<SessionState>): Promise<boolean> => {
     try {
       const newSessionState = { ...sessionState, ...updates };
       setSessionState(newSessionState);
-      await sessionService.saveUserSession(newSessionState);
+      
+      // Use debounced save from sessionService
+      const success = await sessionService.saveUserSession(newSessionState);
+      
+      if (!success) {
+        console.warn('Session save failed, but continuing with local state');
+        // Don't fail the operation if session save fails
+        return true;
+      }
+      
       return true;
     } catch (error) {
       console.error('Error updating session state:', error);
-      return false;
+      // Don't fail the operation if session update fails
+      return true;
     }
-  };
+  }, [sessionState]);
 
   const importLeadsFromCSV = async (leads: Lead[], fileName: string): Promise<boolean> => {
     if (!user) return false;

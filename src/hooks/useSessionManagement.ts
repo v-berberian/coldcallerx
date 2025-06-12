@@ -1,5 +1,5 @@
 
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { Lead } from '../types/lead';
 
 interface UseSessionManagementProps {
@@ -17,9 +17,13 @@ export const useSessionManagement = ({
   onSync,
   initializeFromSessionState
 }: UseSessionManagementProps) => {
+  const isInitializedRef = useRef(false);
+
   // Initialize from session state
   useEffect(() => {
-    if (sessionState && onSessionUpdate) {
+    if (sessionState && onSessionUpdate && !isInitializedRef.current) {
+      isInitializedRef.current = true;
+      
       const { saveCurrentIndex } = initializeFromSessionState(sessionState, onSessionUpdate);
       
       // Save session when navigation changes
@@ -28,11 +32,25 @@ export const useSessionManagement = ({
           onSync(); // Start sync status
         }
         
-        await saveCurrentIndex(index);
+        try {
+          await saveCurrentIndex(index);
+        } catch (error) {
+          console.error('Failed to save navigation change:', error);
+          // Don't block the UI if session save fails
+        }
       };
 
       // Store the handler for use in navigation
       (window as any).saveCurrentIndex = handleNavigationChange;
     }
   }, [sessionState, onSessionUpdate, onSync, initializeFromSessionState]);
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      if ((window as any).saveCurrentIndex) {
+        delete (window as any).saveCurrentIndex;
+      }
+    };
+  }, []);
 };

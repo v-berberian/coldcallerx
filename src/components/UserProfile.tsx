@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useCallback } from 'react';
 import { User } from 'lucide-react';
 import {
   DropdownMenu,
@@ -15,9 +15,17 @@ import { useAuth } from '@/contexts/AuthContext';
 const UserProfile: React.FC = () => {
   const { user, signOut } = useAuth();
 
-  const handleSignOut = async () => {
-    await signOut();
-  };
+  const handleSignOut = useCallback(async () => {
+    try {
+      await signOut();
+    } catch (error) {
+      console.error('Sign out error:', error);
+    }
+  }, [signOut]);
+
+  if (!user) {
+    return null;
+  }
 
   return (
     <DropdownMenu>
@@ -31,7 +39,7 @@ const UserProfile: React.FC = () => {
           <div className="flex flex-col space-y-1">
             <p className="text-sm font-medium leading-none">Account</p>
             <p className="text-xs leading-none text-muted-foreground">
-              {user?.email}
+              {user.email}
             </p>
           </div>
         </DropdownMenuLabel>
