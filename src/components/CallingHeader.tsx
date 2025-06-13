@@ -1,10 +1,10 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Lead } from '../types/lead';
-import SearchAutocomplete from './SearchAutocomplete';
 import SearchBar from './SearchBar';
 import ThemeToggle from './ThemeToggle';
 import CSVImporter from './CSVImporter';
+import DraggableSearch from './DraggableSearch';
 
 interface CallingHeaderProps {
   searchQuery: string;
@@ -33,47 +33,64 @@ const CallingHeader: React.FC<CallingHeaderProps> = ({
   onLeadSelect,
   onLeadsImported
 }) => {
+  const [showDraggableSearch, setShowDraggableSearch] = useState(false);
+
+  const handleSearchFocus = () => {
+    setShowDraggableSearch(true);
+    onSearchFocus();
+  };
+
+  const handleCloseDraggableSearch = () => {
+    setShowDraggableSearch(false);
+    onClearSearch();
+  };
+
   return (
-    <div className="bg-background border-b border-border p-4 pt-safe flex-shrink-0" style={{ paddingTop: 'max(1rem, env(safe-area-inset-top))' }}>
-      <div className="flex items-center justify-between mb-4">
-        <CSVImporter onLeadsImported={onLeadsImported} />
-        
-        <div className="flex items-center space-x-3">
-          <h1 className="text-2xl font-bold">
-            <span className="text-blue-500">Cold</span>
-            <span className="text-foreground">Caller </span>
-            <span className="text-blue-500">X</span>
-          </h1>
+    <>
+      <div className="bg-background border-b border-border p-4 pt-safe flex-shrink-0" style={{ paddingTop: 'max(1rem, env(safe-area-inset-top))' }}>
+        <div className="flex items-center justify-between mb-4">
+          <CSVImporter onLeadsImported={onLeadsImported} />
+          
+          <div className="flex items-center space-x-3">
+            <h1 className="text-2xl font-bold">
+              <span className="text-blue-500">Cold</span>
+              <span className="text-foreground">Caller </span>
+              <span className="text-blue-500">X</span>
+            </h1>
+          </div>
+          
+          <ThemeToggle />
         </div>
         
-        <ThemeToggle />
-      </div>
-      
-      {/* Search Bar */}
-      <div className="relative">
-        <SearchBar 
-          searchQuery={searchQuery} 
-          onSearchChange={onSearchChange} 
-          onSearchFocus={onSearchFocus} 
-          onSearchBlur={onSearchBlur} 
-          onClearSearch={onClearSearch} 
-          fileName={fileName} 
-        />
-        
-        {/* Autocomplete Dropdown */}
-        {showAutocomplete && (
-          <SearchAutocomplete 
-            leads={searchResults} 
-            onLeadSelect={onLeadSelect} 
+        {/* Search Bar */}
+        <div className="relative">
+          <SearchBar 
             searchQuery={searchQuery} 
-            actualIndices={searchResults.map(lead => 
-              leadsData.findIndex(l => l.name === lead.name && l.phone === lead.phone) + 1
-            )} 
-            totalLeads={leadsData.length} 
+            onSearchChange={onSearchChange} 
+            onSearchFocus={handleSearchFocus} 
+            onSearchBlur={onSearchBlur} 
+            onClearSearch={onClearSearch} 
+            fileName={fileName} 
           />
-        )}
+        </div>
       </div>
-    </div>
+
+      {/* Draggable Search Modal */}
+      {showDraggableSearch && (
+        <DraggableSearch
+          searchQuery={searchQuery}
+          searchResults={searchResults}
+          leadsData={leadsData}
+          fileName={fileName}
+          onSearchChange={onSearchChange}
+          onLeadSelect={(lead) => {
+            onLeadSelect(lead);
+            setShowDraggableSearch(false);
+          }}
+          onClose={handleCloseDraggableSearch}
+        />
+      )}
+    </>
   );
 };
 

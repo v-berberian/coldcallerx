@@ -1,13 +1,18 @@
+
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { X } from 'lucide-react';
 import { formatPhoneNumber } from '../utils/phoneUtils';
 import { getStateFromAreaCode } from '../utils/timezoneUtils';
+import PhoneDropdown from './PhoneDropdown';
 
 interface Lead {
   name: string;
   phone: string;
+  additionalPhones?: string[];
+  company?: string;
+  position?: string;
   called?: number;
   lastCalled?: string;
 }
@@ -53,7 +58,21 @@ const LeadCard: React.FC<LeadCardProps> = ({
           
           <h2 className="text-3xl font-bold text-foreground">{lead.name}</h2>
           
-          <p className="text-lg text-muted-foreground text-center">{formatPhoneNumber(lead.phone)}</p>
+          {/* Company name */}
+          {lead.company && (
+            <p className="text-lg text-muted-foreground font-medium">{lead.company}</p>
+          )}
+          
+          {/* Phone number with dropdown */}
+          <PhoneDropdown 
+            mainPhone={lead.phone}
+            additionalPhones={lead.additionalPhones}
+          />
+          
+          {/* Position */}
+          {lead.position && (
+            <p className="text-sm text-muted-foreground italic">{lead.position}</p>
+          )}
           
           <div className="relative flex flex-col items-center space-y-3">
             <div className="flex items-center justify-center">
