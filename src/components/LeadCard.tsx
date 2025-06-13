@@ -12,7 +12,6 @@ interface Lead {
   phone: string;
   additionalPhones?: string[];
   company?: string;
-  position?: string;
   called?: number;
   lastCalled?: string;
 }
@@ -62,6 +61,7 @@ const LeadCard: React.FC<LeadCardProps> = ({
             {getStateFromAreaCode(lead.phone)}
           </p>
           
+          {/* Contact name */}
           <h2 className="text-3xl font-bold text-foreground">{lead.name}</h2>
           
           {/* Company name under contact name */}
