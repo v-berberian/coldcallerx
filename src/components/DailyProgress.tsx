@@ -1,8 +1,7 @@
 
-import React, { useState } from 'react';
+import React from 'react';
 import { Progress } from '@/components/ui/progress';
 import { X } from 'lucide-react';
-import EditableGoal from './EditableGoal';
 
 interface DailyProgressProps {
   dailyCallCount: number;
@@ -13,16 +12,7 @@ const DailyProgress: React.FC<DailyProgressProps> = ({
   dailyCallCount,
   onResetDailyCount
 }) => {
-  const [dailyGoal, setDailyGoal] = useState(() => {
-    const saved = localStorage.getItem('daily-goal');
-    return saved ? parseInt(saved, 10) : 500;
-  });
-
-  const handleGoalChange = (newGoal: number) => {
-    setDailyGoal(newGoal);
-    localStorage.setItem('daily-goal', newGoal.toString());
-  };
-
+  const dailyGoal = 500;
   const progressPercentage = Math.min((dailyCallCount / dailyGoal) * 100, 100);
 
   return (
@@ -31,12 +21,7 @@ const DailyProgress: React.FC<DailyProgressProps> = ({
         <div className="flex items-center justify-between text-sm text-muted-foreground">
           <span>Daily Goal</span>
           <div className="flex items-center space-x-2">
-            <span>{dailyCallCount}/</span>
-            <EditableGoal 
-              currentGoal={dailyGoal}
-              onGoalChange={handleGoalChange}
-            />
-            <span>calls</span>
+            <span>{dailyCallCount}/{dailyGoal} calls</span>
             <button
               onClick={onResetDailyCount}
               className="p-1 hover:bg-muted rounded transition-colors"
