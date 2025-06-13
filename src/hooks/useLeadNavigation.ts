@@ -1,3 +1,4 @@
+
 import { Lead } from '../types/lead';
 import { useNavigationState } from './useNavigationState';
 import { useFilters } from './useFilters';
@@ -10,8 +11,9 @@ import { useFilterChangeEffects } from './useFilterChangeEffects';
 import { useLeadNavigationState } from './useLeadNavigationState';
 import { useLeadNavigationActions } from './useLeadNavigationActions';
 import { useLeadNavigationEffects } from './useLeadNavigationEffects';
+import { useEffect } from 'react';
 
-export const useLeadNavigation = (initialLeads: Lead[], initialSessionState?: any) => {
+export const useLeadNavigation = (initialLeads: Lead[]) => {
   const {
     shouldAutoCall,
     setShouldAutoCall,
@@ -165,26 +167,25 @@ export const useLeadNavigation = (initialLeads: Lead[], initialSessionState?: an
       lastCalled: lead.lastCalled || undefined
     }));
     setLeadsData(formattedLeads);
-    resetNavigation(0);
+    
+    // Try to restore the last viewed lead index
+    const savedIndex = localStorage.getItem('coldcaller-current-index');
+    const startIndex = savedIndex ? parseInt(savedIndex, 10) : 0;
+    const validIndex = Math.max(0, Math.min(startIndex, formattedLeads.length - 1));
+    
+    resetNavigation(validIndex);
     resetShownLeads();
     resetCallState();
+    
+    console.log('Restored to lead index:', validIndex);
   };
 
-  // Initialize from session state if provided
-  const initializeFromSessionState = (sessionState: any, onSessionUpdate: (updates: any) => void) => {
-    // Set initial index from session state
-    if (sessionState?.currentLeadIndex !== undefined) {
-      setCurrentIndex(sessionState.currentLeadIndex);
-      setCardKey(prev => prev + 1);
+  // Save current index to localStorage when it changes
+  useEffect(() => {
+    if (leadsData.length > 0) {
+      localStorage.setItem('coldcaller-current-index', currentIndex.toString());
     }
-
-    // Return functions to save session state when navigation changes
-    return {
-      saveCurrentIndex: (index: number) => {
-        onSessionUpdate({ currentLeadIndex: index });
-      }
-    };
-  };
+  }, [currentIndex, leadsData.length]);
 
   return {
     leadsData,
@@ -218,7 +219,6 @@ export const useLeadNavigation = (initialLeads: Lead[], initialSessionState?: an
     toggleCallDelay,
     resetCallDelay,
     resetLeadsData,
-    countdownTime,
-    initializeFromSessionState
+    countdownTime
   };
 };

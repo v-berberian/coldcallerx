@@ -145,8 +145,12 @@ export type Database = {
           created_at: string | null
           current_lead_index: number | null
           current_lead_list_id: string | null
+          daily_call_count: number | null
+          device_id: string
           id: string
           last_accessed_at: string | null
+          last_updated_at: string | null
+          leads_data: Json | null
           shuffle_mode: boolean | null
           timezone_filter: string | null
           updated_at: string | null
@@ -159,8 +163,12 @@ export type Database = {
           created_at?: string | null
           current_lead_index?: number | null
           current_lead_list_id?: string | null
+          daily_call_count?: number | null
+          device_id?: string
           id?: string
           last_accessed_at?: string | null
+          last_updated_at?: string | null
+          leads_data?: Json | null
           shuffle_mode?: boolean | null
           timezone_filter?: string | null
           updated_at?: string | null
@@ -173,8 +181,12 @@ export type Database = {
           created_at?: string | null
           current_lead_index?: number | null
           current_lead_list_id?: string | null
+          daily_call_count?: number | null
+          device_id?: string
           id?: string
           last_accessed_at?: string | null
+          last_updated_at?: string | null
+          leads_data?: Json | null
           shuffle_mode?: boolean | null
           timezone_filter?: string | null
           updated_at?: string | null
@@ -195,7 +207,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      cleanup_old_device_sessions: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
     }
     Enums: {
       [_ in never]: never

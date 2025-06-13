@@ -2,10 +2,8 @@
 import { useState, useEffect } from 'react';
 import { Lead } from '../types/lead';
 import { getPhoneDigits } from '../utils/phoneUtils';
-import { useCloudLeadsData } from './useCloudLeadsData';
 
 export const useLeadsData = (initialLeads: Lead[]) => {
-  const { markLeadAsCalled, resetCallCount, resetAllCallCounts } = useCloudLeadsData();
   const [leadsData, setLeadsData] = useState<Lead[]>(
     initialLeads.map(lead => ({
       ...lead,
@@ -33,11 +31,7 @@ export const useLeadsData = (initialLeads: Lead[]) => {
     }
   };
 
-  const markLeadAsCalledWrapper = async (lead: Lead) => {
-    // Update cloud data
-    await markLeadAsCalled(lead);
-    
-    // Update local state for immediate UI feedback
+  const markLeadAsCalledWrapper = (lead: Lead) => {
     const now = new Date();
     const dateString = now.toLocaleDateString();
     const timeString = now.toLocaleTimeString('en-US', {
@@ -56,30 +50,33 @@ export const useLeadsData = (initialLeads: Lead[]) => {
     );
     
     setLeadsData(updatedLeads);
+    
+    // Save to localStorage
+    localStorage.setItem('coldcaller-leads', JSON.stringify(updatedLeads));
   };
 
-  const resetCallCountWrapper = async (lead: Lead) => {
-    await resetCallCount(lead);
-    
-    // Update local state
+  const resetCallCountWrapper = (lead: Lead) => {
     const updatedLeads = leadsData.map(l => 
       l.name === lead.name && l.phone === lead.phone 
         ? { ...l, called: 0, lastCalled: undefined }
         : l
     );
     setLeadsData(updatedLeads);
+    
+    // Save to localStorage
+    localStorage.setItem('coldcaller-leads', JSON.stringify(updatedLeads));
   };
 
-  const resetAllCallCountsWrapper = async () => {
-    await resetAllCallCounts();
-    
-    // Update local state
+  const resetAllCallCountsWrapper = () => {
     const updatedLeads = leadsData.map(l => ({
       ...l,
       called: 0,
       lastCalled: undefined
     }));
     setLeadsData(updatedLeads);
+    
+    // Save to localStorage
+    localStorage.setItem('coldcaller-leads', JSON.stringify(updatedLeads));
   };
 
   // Function to mark a lead as called when navigating away
