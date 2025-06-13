@@ -1,19 +1,31 @@
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { Loader2 } from 'lucide-react';
 import CallingScreen from '@/components/CallingScreen';
+import CloudSyncButton from '@/components/CloudSyncButton';
 import UserProfile from '@/components/UserProfile';
 import CSVImporter from '@/components/CSVImporter';
+import { useCloudLeadsData } from '@/hooks/useCloudLeadsData';
+import { useSyncStatus } from '@/hooks/useSyncStatus';
 import { Lead } from '@/types/lead';
 
 const Index = () => {
   const { user, loading: authLoading, signOut } = useAuth();
   const navigate = useNavigate();
-  const [leadsData, setLeadsData] = useState<Lead[]>([]);
-  const [fileName, setFileName] = useState<string>('');
-  const [loading, setLoading] = useState(true);
+  const {
+    currentLeadList,
+    leadsData,
+    dailyCallCount,
+    loading: leadsLoading,
+    sessionState,
+    importLeadsFromCSV,
+    resetDailyCallCount,
+    updateSessionState
+  } = useCloudLeadsData();
+
+  const { syncStatus, startSync, syncSuccess, syncError } = useSyncStatus();
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -21,49 +33,43 @@ const Index = () => {
     }
   }, [user, authLoading, navigate]);
 
-  // Load data from localStorage on mount
-  useEffect(() => {
-    if (user) {
-      loadLocalData();
-    }
-  }, [user]);
-
-  const loadLocalData = () => {
-    try {
-      const savedLeads = localStorage.getItem('coldcaller-leads');
-      const savedFileName = localStorage.getItem('coldcaller-filename');
-      
-      if (savedLeads) {
-        const leads = JSON.parse(savedLeads);
-        setLeadsData(leads);
-        console.log('Loaded leads from localStorage:', leads.length);
-      }
-      
-      if (savedFileName) {
-        setFileName(savedFileName);
-      }
-    } catch (error) {
-      console.error('Error loading from localStorage:', error);
-    } finally {
-      setLoading(false);
+  const handleLeadsImported = async (importedLeads: Lead[], importedFileName: string) => {
+    startSync();
+    const success = await importLeadsFromCSV(importedLeads, importedFileName);
+    if (success) {
+      syncSuccess();
+    } else {
+      syncError();
+      console.error('Failed to import leads to cloud');
     }
   };
 
-  const handleLeadsImported = (importedLeads: Lead[], importedFileName: string) => {
-    setLeadsData(importedLeads);
-    setFileName(importedFileName);
-    
-    // Save to localStorage
-    localStorage.setItem('coldcaller-leads', JSON.stringify(importedLeads));
-    localStorage.setItem('coldcaller-filename', importedFileName);
-    localStorage.setItem('coldcaller-current-index', '0');
+  const handleSessionUpdate = async (updates: any) => {
+    startSync();
+    const success = await updateSessionState(updates);
+    if (success) {
+      syncSuccess();
+    } else {
+      syncError();
+    }
+  };
+
+  const handleManualSync = async () => {
+    startSync();
+    // Trigger a session save to test sync
+    const success = await updateSessionState({});
+    if (success) {
+      syncSuccess();
+    } else {
+      syncError();
+    }
   };
 
   const handleBack = async () => {
     await signOut();
   };
 
-  if (authLoading || loading) {
+  if (authLoading || leadsLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin" />
@@ -75,8 +81,8 @@ const Index = () => {
     return null; // Will redirect to auth
   }
 
-  // If no leads, show empty state with proper header
-  if (leadsData.length === 0) {
+  // If no current lead list, show empty state with proper header
+  if (!currentLeadList || leadsData.length === 0) {
     return (
       <div className="h-screen h-[100vh] h-[100svh] bg-background overflow-hidden">
         {/* Header with user info and sign out */}
@@ -90,6 +96,7 @@ const Index = () => {
           </h1>
           
           <div className="flex items-center space-x-2">
+            <CloudSyncButton status={syncStatus} onSync={handleManualSync} />
             <UserProfile />
           </div>
         </div>
@@ -107,9 +114,13 @@ const Index = () => {
   return (
     <CallingScreen 
       leads={leadsData} 
-      fileName={fileName} 
+      fileName={currentLeadList.name} 
       onBack={handleBack}
       onLeadsImported={handleLeadsImported}
+      sessionState={sessionState}
+      onSessionUpdate={handleSessionUpdate}
+      syncStatus={syncStatus}
+      onSync={handleManualSync}
     />
   );
 };
