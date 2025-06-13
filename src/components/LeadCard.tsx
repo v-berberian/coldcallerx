@@ -1,17 +1,13 @@
-
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { X } from 'lucide-react';
-import { formatPhoneNumber, getPhoneDigits } from '../utils/phoneUtils';
+import { formatPhoneNumber } from '../utils/phoneUtils';
 import { getStateFromAreaCode } from '../utils/timezoneUtils';
-import PhoneDropdown from './PhoneDropdown';
 
 interface Lead {
   name: string;
   phone: string;
-  additionalPhones?: string[];
-  company?: string;
   called?: number;
   lastCalled?: string;
 }
@@ -22,7 +18,7 @@ interface LeadCardProps {
   totalCount: number;
   fileName: string;
   cardKey: number;
-  onCall: (phone?: string) => void;
+  onCall: () => void;
   onResetCallCount: () => void;
 }
 
@@ -35,12 +31,6 @@ const LeadCard: React.FC<LeadCardProps> = ({
   onCall,
   onResetCallCount
 }) => {
-  const handlePhoneSelect = (phone: string) => {
-    const phoneNumber = getPhoneDigits(phone);
-    window.location.href = `tel:${phoneNumber}`;
-    onCall(phone);
-  };
-
   return (
     <Card key={cardKey} className="shadow-2xl border-border/50 rounded-3xl bg-card h-[400px] flex flex-col animate-scale-in">
       <CardContent className="p-6 space-y-4 flex-1 flex flex-col">
@@ -61,22 +51,9 @@ const LeadCard: React.FC<LeadCardProps> = ({
             {getStateFromAreaCode(lead.phone)}
           </p>
           
-          {/* Contact name */}
           <h2 className="text-3xl font-bold text-foreground">{lead.name}</h2>
           
-          {/* Company name under contact name */}
-          {lead.company && (
-            <p className="text-lg text-muted-foreground">{lead.company}</p>
-          )}
-          
-          {/* Phone number with dropdown for additional phones */}
-          <div className="flex justify-center">
-            <PhoneDropdown
-              mainPhone={lead.phone}
-              additionalPhones={lead.additionalPhones}
-              onPhoneSelect={handlePhoneSelect}
-            />
-          </div>
+          <p className="text-lg text-muted-foreground text-center">{formatPhoneNumber(lead.phone)}</p>
           
           <div className="relative flex flex-col items-center space-y-3">
             <div className="flex items-center justify-center">
@@ -106,7 +83,7 @@ const LeadCard: React.FC<LeadCardProps> = ({
 
         {/* Main Call Button - with fixed hover styles */}
         <Button 
-          onClick={() => onCall()} 
+          onClick={onCall} 
           size="lg" 
           className="w-full h-16 text-lg font-semibold bg-green-600 hover:bg-green-600 text-white rounded-2xl shadow-lg"
         >
