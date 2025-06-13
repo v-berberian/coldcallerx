@@ -21,7 +21,7 @@ const PhoneDropdown: React.FC<PhoneDropdownProps> = ({
     return (
       <button
         onClick={() => onPhoneSelect(mainPhone)}
-        className="text-lg text-muted-foreground text-center hover:text-foreground transition-colors"
+        className="text-lg text-muted-foreground text-center hover:text-foreground transition-colors touch-manipulation"
       >
         {formatPhoneNumber(mainPhone)}
       </button>
@@ -33,11 +33,18 @@ const PhoneDropdown: React.FC<PhoneDropdownProps> = ({
     setIsOpen(false);
   };
 
+  const toggleDropdown = (e: React.MouseEvent | React.TouchEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsOpen(!isOpen);
+  };
+
   return (
     <div className="relative">
       <button
-        onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center space-x-1 text-lg text-muted-foreground text-center hover:text-foreground transition-colors"
+        onClick={toggleDropdown}
+        onTouchStart={toggleDropdown}
+        className="flex items-center space-x-1 text-lg text-muted-foreground text-center hover:text-foreground transition-colors touch-manipulation"
       >
         <span>{formatPhoneNumber(mainPhone)}</span>
         <ChevronDown className="h-4 w-4" />
@@ -49,6 +56,7 @@ const PhoneDropdown: React.FC<PhoneDropdownProps> = ({
           <div 
             className="fixed inset-0 z-40" 
             onClick={() => setIsOpen(false)}
+            onTouchStart={() => setIsOpen(false)}
           />
           
           {/* Dropdown */}
@@ -56,7 +64,8 @@ const PhoneDropdown: React.FC<PhoneDropdownProps> = ({
             <div className="py-2">
               <button
                 onClick={() => handlePhoneClick(mainPhone)}
-                className="w-full px-4 py-2 text-left hover:bg-accent transition-colors flex items-center space-x-2"
+                onTouchStart={() => handlePhoneClick(mainPhone)}
+                className="w-full px-4 py-3 text-left hover:bg-accent transition-colors flex items-center space-x-2 touch-manipulation"
               >
                 <Phone className="h-4 w-4" />
                 <span>Main: {formatPhoneNumber(mainPhone)}</span>
@@ -66,7 +75,8 @@ const PhoneDropdown: React.FC<PhoneDropdownProps> = ({
                 <button
                   key={index}
                   onClick={() => handlePhoneClick(phone)}
-                  className="w-full px-4 py-2 text-left hover:bg-accent transition-colors flex items-center space-x-2"
+                  onTouchStart={() => handlePhoneClick(phone)}
+                  className="w-full px-4 py-3 text-left hover:bg-accent transition-colors flex items-center space-x-2 touch-manipulation"
                 >
                   <Phone className="h-4 w-4" />
                   <span>Alt {index + 1}: {formatPhoneNumber(phone)}</span>

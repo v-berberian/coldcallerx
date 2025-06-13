@@ -78,11 +78,6 @@ const LeadCard: React.FC<LeadCardProps> = ({
             />
           </div>
           
-          {/* Position information under phone number */}
-          {lead.position && (
-            <p className="text-sm text-muted-foreground italic">{lead.position}</p>
-          )}
-          
           <div className="relative flex flex-col items-center space-y-3">
             <div className="flex items-center justify-center">
               <p className="text-sm text-muted-foreground">
