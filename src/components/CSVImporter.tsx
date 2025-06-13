@@ -7,6 +7,9 @@ import { Upload, FileText, Phone } from 'lucide-react';
 interface Lead {
   name: string;
   phone: string;
+  additionalPhones?: string[];
+  company?: string;
+  position?: string;
 }
 
 interface CSVImporterProps {
@@ -30,6 +33,21 @@ const CSVImporter: React.FC<CSVImporterProps> = ({ onLeadsImported }) => {
     return phone; // Return original if not 10 digits
   };
 
+  const parseAdditionalPhones = (additionalPhonesText: string): string[] => {
+    if (!additionalPhonesText || additionalPhonesText.trim() === '') {
+      return [];
+    }
+    
+    // Split by common delimiters and clean up
+    const phones = additionalPhonesText
+      .split(/[,;|\n]/)
+      .map(phone => phone.trim())
+      .filter(phone => phone.length > 0)
+      .map(phone => formatPhoneNumber(phone));
+    
+    return phones;
+  };
+
   const parseCSV = (text: string): Lead[] => {
     const lines = text.split('\n');
     const leads: Lead[] = [];
@@ -38,12 +56,34 @@ const CSVImporter: React.FC<CSVImporterProps> = ({ onLeadsImported }) => {
     for (let i = 1; i < lines.length; i++) {
       const line = lines[i].trim();
       if (line) {
-        const [name, phone] = line.split(',').map(cell => cell.trim().replace(/"/g, ''));
+        const columns = line.split(',').map(cell => cell.trim().replace(/"/g, ''));
+        const [name, phone, additionalPhonesText, company, position] = columns;
+        
         if (name && phone) {
-          leads.push({
+          const lead: Lead = {
             name,
             phone: formatPhoneNumber(phone)
-          });
+          };
+          
+          // Add additional phones if column C exists and has data
+          if (additionalPhonesText) {
+            const additionalPhones = parseAdditionalPhones(additionalPhonesText);
+            if (additionalPhones.length > 0) {
+              lead.additionalPhones = additionalPhones;
+            }
+          }
+          
+          // Add company if column D exists and has data
+          if (company) {
+            lead.company = company;
+          }
+          
+          // Add position if column E exists and has data
+          if (position) {
+            lead.position = position;
+          }
+          
+          leads.push(lead);
         }
       }
     }
