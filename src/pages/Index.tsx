@@ -1,106 +1,91 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '@/contexts/AuthContext';
+import { Loader2 } from 'lucide-react';
 import CallingScreen from '@/components/CallingScreen';
-import ThemeToggle from '@/components/ThemeToggle';
+import CloudSyncButton from '@/components/CloudSyncButton';
+import UserProfile from '@/components/UserProfile';
 import CSVImporter from '@/components/CSVImporter';
-
-interface Lead {
-  name: string;
-  phone: string;
-  called?: number;
-  lastCalled?: string;
-}
+import { useCloudLeadsData } from '@/hooks/useCloudLeadsData';
+import { useSyncStatus } from '@/hooks/useSyncStatus';
+import { Lead } from '@/types/lead';
 
 const Index = () => {
-  const [leads, setLeads] = useState<Lead[]>([]);
-  const [fileName, setFileName] = useState<string>('');
+  const { user, loading: authLoading, signOut } = useAuth();
+  const navigate = useNavigate();
+  const {
+    currentLeadList,
+    leadsData,
+    dailyCallCount,
+    loading: leadsLoading,
+    sessionState,
+    importLeadsFromCSV,
+    resetDailyCallCount,
+    updateSessionState
+  } = useCloudLeadsData();
 
-  // Load saved data on component mount
+  const { syncStatus, startSync, syncSuccess, syncError } = useSyncStatus();
+
   useEffect(() => {
-    const savedLeads = localStorage.getItem('coldcaller-leads');
-    const savedFileName = localStorage.getItem('coldcaller-filename');
-    
-    console.log('Loading data from localStorage...');
-    
-    if (savedLeads && savedFileName) {
-      try {
-        const parsedLeads = JSON.parse(savedLeads);
-        console.log('Loaded', parsedLeads.length, 'leads from localStorage');
-        
-        // Ensure all leads have the required properties
-        const formattedLeads = parsedLeads.map((lead: Lead) => ({
-          ...lead,
-          called: lead.called || 0,
-          lastCalled: lead.lastCalled || undefined
-        }));
-        
-        setLeads(formattedLeads);
-        setFileName(savedFileName);
-        console.log('Successfully restored leads with call tracking data');
-      } catch (error) {
-        console.error('Error parsing saved leads:', error);
-        // Clear corrupted data
-        localStorage.removeItem('coldcaller-leads');
-        localStorage.removeItem('coldcaller-filename');
-      }
+    if (!authLoading && !user) {
+      navigate('/auth');
+    }
+  }, [user, authLoading, navigate]);
+
+  const handleLeadsImported = async (importedLeads: Lead[], importedFileName: string) => {
+    startSync();
+    const success = await importLeadsFromCSV(importedLeads, importedFileName);
+    if (success) {
+      syncSuccess();
     } else {
-      console.log('No saved data found in localStorage');
+      syncError();
+      console.error('Failed to import leads to cloud');
     }
-  }, []);
-
-  const handleBack = () => {
-    // Clear saved data when going back
-    localStorage.removeItem('coldcaller-leads');
-    localStorage.removeItem('coldcaller-filename');
-    console.log('Cleared localStorage data');
-    
-    setLeads([]);
-    setFileName('');
   };
 
-  const handleLeadsImported = (importedLeads: Lead[], importedFileName: string) => {
-    // Check if we have existing data for these leads in localStorage
-    const savedLeads = localStorage.getItem('coldcaller-leads');
-    let mergedLeads = importedLeads;
-    
-    if (savedLeads) {
-      try {
-        const existingLeads = JSON.parse(savedLeads);
-        console.log('Merging new import with existing call tracking data...');
-        
-        // Merge call tracking data from existing leads
-        mergedLeads = importedLeads.map(newLead => {
-          const existingLead = existingLeads.find((l: Lead) => 
-            l.name === newLead.name && l.phone === newLead.phone
-          );
-          
-          return {
-            ...newLead,
-            called: existingLead?.called || 0,
-            lastCalled: existingLead?.lastCalled || undefined
-          };
-        });
-        
-        console.log('Merged call tracking data for', mergedLeads.length, 'leads');
-      } catch (error) {
-        console.error('Error merging with existing data:', error);
-      }
+  const handleSessionUpdate = async (updates: any) => {
+    startSync();
+    const success = await updateSessionState(updates);
+    if (success) {
+      syncSuccess();
+    } else {
+      syncError();
     }
-    
-    setLeads(mergedLeads);
-    setFileName(importedFileName);
-    
-    // Save to localStorage immediately
-    localStorage.setItem('coldcaller-leads', JSON.stringify(mergedLeads));
-    localStorage.setItem('coldcaller-filename', importedFileName);
-    console.log('Saved imported leads to localStorage');
   };
 
-  // If no leads, show empty state with proper header
-  if (leads.length === 0) {
+  const handleManualSync = async () => {
+    startSync();
+    // Trigger a session save to test sync
+    const success = await updateSessionState({});
+    if (success) {
+      syncSuccess();
+    } else {
+      syncError();
+    }
+  };
+
+  const handleBack = async () => {
+    await signOut();
+  };
+
+  if (authLoading || leadsLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin" />
+      </div>
+    );
+  }
+
+  if (!user) {
+    return null; // Will redirect to auth
+  }
+
+  // If no current lead list, show empty state with proper header
+  if (!currentLeadList || leadsData.length === 0) {
     return (
       <div className="h-screen h-[100vh] h-[100svh] bg-background overflow-hidden">
-        {/* Header with import icon, logo, and theme toggle - with safe area padding */}
+        {/* Header with user info and sign out */}
         <div className="flex items-center justify-between p-4 border-b border-border pt-safe" style={{ paddingTop: 'max(1rem, env(safe-area-inset-top))' }}>
           <CSVImporter onLeadsImported={handleLeadsImported} />
           
@@ -110,12 +95,16 @@ const Index = () => {
             <span className="text-blue-500">X</span>
           </h1>
           
-          <ThemeToggle />
+          <div className="flex items-center space-x-2">
+            <CloudSyncButton status={syncStatus} onSync={handleManualSync} />
+            <UserProfile />
+          </div>
         </div>
         
         <div className="flex items-center justify-center h-full">
           <div className="text-center space-y-4">
             <p className="text-lg text-muted-foreground">No Leads Imported</p>
+            <p className="text-sm text-muted-foreground">Click the upload icon above to import a CSV file</p>
           </div>
         </div>
       </div>
@@ -124,10 +113,14 @@ const Index = () => {
 
   return (
     <CallingScreen 
-      leads={leads} 
-      fileName={fileName} 
+      leads={leadsData} 
+      fileName={currentLeadList.name} 
       onBack={handleBack}
       onLeadsImported={handleLeadsImported}
+      sessionState={sessionState}
+      onSessionUpdate={handleSessionUpdate}
+      syncStatus={syncStatus}
+      onSync={handleManualSync}
     />
   );
 };
