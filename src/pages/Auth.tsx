@@ -15,64 +15,8 @@ const Auth = () => {
   const [error, setError] = useState<string>('');
   const [isRedirecting, setIsRedirecting] = useState(false);
   
-  // Typewriter effect states
-  const [emailPlaceholder, setEmailPlaceholder] = useState('');
-  const [passwordPlaceholder, setPasswordPlaceholder] = useState('');
-  const [emailFocused, setEmailFocused] = useState(false);
-  const [passwordFocused, setPasswordFocused] = useState(false);
-  
   const { signIn, signUp, user } = useAuth();
   const navigate = useNavigate();
-
-  const emailFullText = "Email";
-  const passwordFullText = "Password";
-
-  // Typewriter effect for email placeholder
-  useEffect(() => {
-    if (emailFocused || email) {
-      setEmailPlaceholder('');
-      return;
-    }
-
-    let currentIndex = 0;
-    setEmailPlaceholder('');
-
-    const typeInterval = setInterval(() => {
-      if (currentIndex < emailFullText.length) {
-        setEmailPlaceholder(emailFullText.slice(0, currentIndex + 1));
-        currentIndex++;
-      } else {
-        clearInterval(typeInterval);
-      }
-    }, 120);
-
-    return () => clearInterval(typeInterval);
-  }, [emailFocused, email]);
-
-  // Typewriter effect for password placeholder
-  useEffect(() => {
-    if (passwordFocused || password) {
-      setPasswordPlaceholder('');
-      return;
-    }
-
-    let currentIndex = 0;
-    setPasswordPlaceholder('');
-
-    // Start password typing after email is done
-    const delayTimeout = setTimeout(() => {
-      const typeInterval = setInterval(() => {
-        if (currentIndex < passwordFullText.length) {
-          setPasswordPlaceholder(passwordFullText.slice(0, currentIndex + 1));
-          currentIndex++;
-        } else {
-          clearInterval(typeInterval);
-        }
-      }, 120);
-    }, emailFullText.length * 120 + 300); // Delay after email finishes
-
-    return () => clearTimeout(delayTimeout);
-  }, [passwordFocused, password]);
 
   useEffect(() => {
     if (user && !isRedirecting) {
@@ -146,23 +90,19 @@ const Auth = () => {
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder={emailPlaceholder}
-                onFocus={() => setEmailFocused(true)}
-                onBlur={() => setEmailFocused(false)}
+                placeholder="Email"
                 required
-                className="h-14 text-lg rounded-2xl border-2 focus:border-blue-500 transition-colors text-center placeholder:text-center typewriter-cursor"
+                className="h-14 text-lg rounded-2xl border-2 focus:border-blue-500 transition-colors text-center placeholder:text-center"
                 disabled={loading}
               />
               <Input
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                placeholder={passwordPlaceholder}
-                onFocus={() => setPasswordFocused(true)}
-                onBlur={() => setPasswordFocused(false)}
+                placeholder="Password"
                 required
                 minLength={6}
-                className="h-14 text-lg rounded-2xl border-2 focus:border-blue-500 transition-colors text-center placeholder:text-center typewriter-cursor"
+                className="h-14 text-lg rounded-2xl border-2 focus:border-blue-500 transition-colors text-center placeholder:text-center"
                 disabled={loading}
               />
               
@@ -198,20 +138,6 @@ const Auth = () => {
           </div>
         </div>
       </div>
-
-      <style>
-        {`
-        .typewriter-cursor {
-          caret-color: #3b82f6;
-          animation: typewriter-blink 1s infinite;
-        }
-        
-        @keyframes typewriter-blink {
-          0%, 50% { caret-color: #3b82f6; }
-          51%, 100% { caret-color: transparent; }
-        }
-        `}
-      </style>
     </div>
   );
 };
