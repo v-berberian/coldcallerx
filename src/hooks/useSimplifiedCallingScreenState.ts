@@ -1,16 +1,14 @@
 
-import { useState, useCallback, useEffect, useRef } from 'react';
+import { useState, useCallback, useRef } from 'react';
 import { Lead } from '../types/lead';
-import { SessionState } from '@/services/sessionService';
 import { useSearchState } from '../components/SearchState';
 import { useLeadNavigation } from './useLeadNavigation';
 
 interface UseSimplifiedCallingScreenStateProps {
   leads: Lead[];
-  sessionState?: SessionState;
 }
 
-export const useSimplifiedCallingScreenState = ({ leads, sessionState }: UseSimplifiedCallingScreenStateProps) => {
+export const useSimplifiedCallingScreenState = ({ leads }: UseSimplifiedCallingScreenStateProps) => {
   const [componentReady, setComponentReady] = useState(false);
   const [leadsInitialized, setLeadsInitialized] = useState(false);
   const localStorageRestoredRef = useRef(false);
@@ -70,7 +68,7 @@ export const useSimplifiedCallingScreenState = ({ leads, sessionState }: UseSimp
     resetLeadsData(newLeads);
   }, [resetLeadsData]);
 
-  // Only restore from localStorage when leads are ready - no cloud session restoration
+  // Only restore from localStorage when leads are ready
   useEffect(() => {
     if (
       leadsData.length > 0 && 
@@ -115,7 +113,7 @@ export const useSimplifiedCallingScreenState = ({ leads, sessionState }: UseSimp
     toggleCallDelay,
     resetCallDelay,
     memoizedResetLeadsData,
-    resetCallCount: () => {}, // These will be handled by parent
+    resetCallCount: () => {}, // Local only now
     resetAllCallCounts: () => {},
     searchQuery,
     setSearchQuery,

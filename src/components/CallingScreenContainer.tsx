@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -7,30 +8,19 @@ import { Lead } from '../types/lead';
 import { useSimplifiedCallingScreenState } from '../hooks/useSimplifiedCallingScreenState';
 import { useSimplifiedCallingScreenEffects } from '../hooks/useSimplifiedCallingScreenEffects';
 import { useCallingScreenActions } from './CallingScreenActions';
-import { SessionState } from '@/services/sessionService';
 
 interface CallingScreenContainerProps {
   leads: Lead[];
   fileName: string;
   onBack: () => void;
   onLeadsImported: (leads: Lead[], fileName: string) => void;
-  markLeadAsCalled?: (lead: Lead) => Promise<boolean>;
-  resetCallCount?: (lead: Lead) => void;
-  resetAllCallCounts?: () => void;
-  sessionState?: SessionState;
-  updateSessionState?: (updates: Partial<SessionState>) => Promise<boolean>;
 }
 
 const CallingScreenContainer: React.FC<CallingScreenContainerProps> = ({
   leads,
   fileName,
   onBack,
-  onLeadsImported,
-  markLeadAsCalled,
-  resetCallCount,
-  resetAllCallCounts,
-  sessionState,
-  updateSessionState
+  onLeadsImported
 }) => {
   const {
     componentReady,
@@ -75,7 +65,7 @@ const CallingScreenContainer: React.FC<CallingScreenContainerProps> = ({
     handleSearchFocus,
     handleSearchBlur,
     getDelayDisplayType
-  } = useSimplifiedCallingScreenState({ leads, sessionState });
+  } = useSimplifiedCallingScreenState({ leads });
 
   useSimplifiedCallingScreenEffects({
     componentReady,
@@ -86,17 +76,13 @@ const CallingScreenContainer: React.FC<CallingScreenContainerProps> = ({
     leadsData,
     memoizedResetLeadsData,
     currentIndex,
-    timezoneFilter,
-    callFilter,
-    shuffleMode,
     autoCall,
     callDelay,
     shouldAutoCall,
     setShouldAutoCall,
     setCurrentLeadForAutoCall,
     executeAutoCall,
-    getBaseLeads,
-    markLeadAsCalled
+    getBaseLeads
   });
 
   const {
@@ -110,9 +96,6 @@ const CallingScreenContainer: React.FC<CallingScreenContainerProps> = ({
     getBaseLeads,
     currentIndex,
     makeCall,
-    markLeadAsCalled,
-    resetCallCount,
-    resetAllCallCounts,
     handleNext,
     handlePrevious,
     selectLead,

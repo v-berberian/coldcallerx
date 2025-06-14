@@ -1,7 +1,6 @@
 
 import { useEffect } from 'react';
 import { Lead } from '../types/lead';
-import { SessionState } from '@/services/sessionService';
 
 interface UseSimplifiedCallingScreenEffectsProps {
   componentReady: boolean;
@@ -12,18 +11,13 @@ interface UseSimplifiedCallingScreenEffectsProps {
   leadsData: Lead[];
   memoizedResetLeadsData: (leads: Lead[]) => void;
   currentIndex: number;
-  timezoneFilter: string;
-  callFilter: string;
-  shuffleMode: boolean;
   autoCall: boolean;
   callDelay: number;
-  updateSessionState?: (updates: Partial<SessionState>) => Promise<boolean>;
   shouldAutoCall: boolean;
   setShouldAutoCall: (should: boolean) => void;
   setCurrentLeadForAutoCall: (lead: Lead | null) => void;
   executeAutoCall: (lead: Lead) => void;
   getBaseLeads: () => Lead[];
-  markLeadAsCalled?: (lead: Lead) => Promise<boolean>;
 }
 
 export const useSimplifiedCallingScreenEffects = ({
@@ -38,7 +32,6 @@ export const useSimplifiedCallingScreenEffects = ({
   setCurrentLeadForAutoCall,
   executeAutoCall,
   getBaseLeads,
-  markLeadAsCalled,
   currentIndex,
   autoCall,
   callDelay
@@ -86,13 +79,6 @@ export const useSimplifiedCallingScreenEffects = ({
         
         // Execute auto-call with the current lead
         executeAutoCall(currentLead);
-        
-        // Mark as called in cloud if function is provided and no delay
-        if (markLeadAsCalled && callDelay === 0) {
-          markLeadAsCalled(currentLead).catch(error => {
-            console.error('Error marking lead as called:', error);
-          });
-        }
       } else {
         console.log('AUTO-CALL EFFECT: No current lead found');
       }
@@ -100,5 +86,5 @@ export const useSimplifiedCallingScreenEffects = ({
       // Reset the trigger flag
       setShouldAutoCall(false);
     }
-  }, [shouldAutoCall, autoCall, currentIndex, executeAutoCall, setCurrentLeadForAutoCall, setShouldAutoCall, markLeadAsCalled, componentReady, leadsInitialized, getBaseLeads, callDelay]);
+  }, [shouldAutoCall, autoCall, currentIndex, executeAutoCall, setCurrentLeadForAutoCall, setShouldAutoCall, componentReady, leadsInitialized, getBaseLeads, callDelay]);
 };

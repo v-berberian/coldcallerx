@@ -5,9 +5,6 @@ interface CallingScreenActionsProps {
   getBaseLeads: () => Lead[];
   currentIndex: number;
   makeCall: (lead: Lead) => void;
-  markLeadAsCalled?: (lead: Lead) => Promise<boolean>;
-  resetCallCount?: (lead: Lead) => void;
-  resetAllCallCounts?: () => void;
   handleNext: (baseLeads: Lead[]) => void;
   handlePrevious: (baseLeads: Lead[]) => void;
   selectLead: (lead: Lead, baseLeads: Lead[], leadsData: Lead[]) => void;
@@ -20,9 +17,6 @@ export const useCallingScreenActions = ({
   getBaseLeads,
   currentIndex,
   makeCall,
-  markLeadAsCalled,
-  resetCallCount,
-  resetAllCallCounts,
   handleNext,
   handlePrevious,
   selectLead,
@@ -54,16 +48,6 @@ export const useCallingScreenActions = ({
       
       console.log('CallingScreenActions: Manual call button clicked for:', currentLead.name);
       makeCall(currentLead);
-      
-      // Mark as called in cloud if function is provided
-      if (markLeadAsCalled) {
-        try {
-          await markLeadAsCalled(currentLead);
-          console.log('CallingScreenActions: Successfully marked lead as called in cloud');
-        } catch (error) {
-          console.error('CallingScreenActions: Error marking lead as called in cloud:', error);
-        }
-      }
     } catch (error) {
       console.error('CallingScreenActions: Error in handleCallClick:', error);
     }
@@ -90,25 +74,21 @@ export const useCallingScreenActions = ({
     }
   };
 
-  // Handle reset call count with cloud sync
+  // Handle reset call count - local only now
   const handleResetCallCount = async (lead: Lead) => {
     try {
-      if (resetCallCount) {
-        resetCallCount(lead);
-        console.log('CallingScreenActions: Reset call count for:', lead.name);
-      }
+      console.log('CallingScreenActions: Reset call count for:', lead.name, '(local only)');
+      // This would reset the local call count only
     } catch (error) {
       console.error('CallingScreenActions: Error in handleResetCallCount:', error);
     }
   };
 
-  // Handle reset all call counts with cloud sync
+  // Handle reset all call counts - local only now
   const handleResetAllCallCounts = async () => {
     try {
-      if (resetAllCallCounts) {
-        resetAllCallCounts();
-        console.log('CallingScreenActions: Reset all call counts');
-      }
+      console.log('CallingScreenActions: Reset all call counts (local only)');
+      // This would reset all local call counts only
     } catch (error) {
       console.error('CallingScreenActions: Error in handleResetAllCallCounts:', error);
     }
