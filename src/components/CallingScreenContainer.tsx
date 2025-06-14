@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Lead } from '../types/lead';
 import { useSimplifiedCallingScreenState } from '../hooks/useSimplifiedCallingScreenState';
@@ -74,7 +73,8 @@ const CallingScreenContainer: React.FC<CallingScreenContainerProps> = ({
     clearSearch,
     handleSearchFocus,
     handleSearchBlur,
-    getDelayDisplayType
+    getDelayDisplayType,
+    handleSessionUpdate
   } = useSimplifiedCallingScreenState({ leads, sessionState });
 
   useSimplifiedCallingScreenEffects({
@@ -92,7 +92,8 @@ const CallingScreenContainer: React.FC<CallingScreenContainerProps> = ({
     setCurrentLeadForAutoCall,
     executeAutoCall,
     getBaseLeads,
-    markLeadAsCalled
+    markLeadAsCalled,
+    handleSessionUpdate
   });
 
   const {

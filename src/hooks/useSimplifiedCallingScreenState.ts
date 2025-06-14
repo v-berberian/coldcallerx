@@ -1,12 +1,13 @@
 
-import { useCallback } from 'react';
+import { useState, useCallback, useRef } from 'react';
 import { Lead } from '../types/lead';
 import { SessionState } from '@/services/sessionService';
 import { useSearchState } from '../components/SearchState';
 import { useCallingScreenCore } from './useCallingScreenCore';
-import { useSimplifiedNavigation } from './useSimplifiedNavigation';
-import { useLeadsData } from './useLeadsData';
-import { useAutoCall } from './useAutoCall';
+import { useCallingScreenFilters } from './useCallingScreenFilters';
+import { useCallingScreenNavigation } from './useCallingScreenNavigation';
+import { useCallingScreenOperations } from './useCallingScreenOperations';
+import { useRealtimeSessionSync } from './useRealtimeSessionSync';
 
 interface UseSimplifiedCallingScreenStateProps {
   leads: Lead[];
@@ -16,66 +17,69 @@ interface UseSimplifiedCallingScreenStateProps {
 export const useSimplifiedCallingScreenState = ({ leads, sessionState }: UseSimplifiedCallingScreenStateProps) => {
   const {
     componentReady,
-    setComponentReady,
     leadsInitialized,
-    setLeadsInitialized,
     leadsData,
-    setLeadsData,
     currentIndex,
-    setCurrentIndex,
     cardKey,
+    setCurrentIndex,
     setCardKey,
+    resetLeadsData
+  } = useCallingScreenCore({ leads, sessionState });
+
+  const {
     timezoneFilter,
-    setTimezoneFilter,
     callFilter,
-    setCallFilter,
     shuffleMode,
-    setShuffleMode,
     autoCall,
-    setAutoCall,
     callDelay,
-    setCallDelay,
+    isFilterChanging,
+    getBaseLeads,
+    getDelayDisplayType,
+    toggleTimezoneFilter,
+    toggleCallFilter,
+    toggleShuffle,
+    toggleAutoCall,
+    toggleCallDelay,
+    resetCallDelay
+  } = useCallingScreenFilters({ leadsData });
+
+  const {
     shouldAutoCall,
     setShouldAutoCall,
     currentLeadForAutoCall,
     setCurrentLeadForAutoCall,
     isCountdownActive,
-    setIsCountdownActive,
     countdownTime,
-    setCountdownTime,
-    navigationHistory,
-    setNavigationHistory,
-    historyIndex,
-    setHistoryIndex,
-    shownLeadsInShuffle,
-    setShownLeadsInShuffle,
-    resetLeadsData
-  } = useCallingScreenCore({ leads, sessionState });
-
-  const { makeCall, markLeadAsCalled, resetCallCount, resetAllCallCounts } = useLeadsData(leadsData);
-
-  const {
-    getFilteredLeads,
+    isAutoCallInProgress,
+    executeAutoCall,
+    handleCountdownComplete,
+    resetAutoCall,
     handleNext,
     handlePrevious,
-    selectLead
-  } = useSimplifiedNavigation({
+    selectLead,
+    resetNavigation,
+    resetShownLeads,
+    resetCallState,
+    shouldBlockNavigation
+  } = useCallingScreenNavigation({
     leadsData,
-    currentIndex,
-    setCurrentIndex,
-    setCardKey,
-    timezoneFilter,
-    callFilter,
+    makeCall: (lead: Lead) => console.log('Making call to:', lead.name, lead.phone),
+    markLeadAsCalledOnNavigation: () => {},
+    callDelay,
     shuffleMode,
-    navigationHistory,
-    setNavigationHistory,
-    historyIndex,
-    setHistoryIndex,
-    shownLeadsInShuffle,
-    setShownLeadsInShuffle
+    callFilter,
+    isFilterChanging
   });
 
-  const { executeAutoCall, handleCountdownComplete } = useAutoCall(makeCall, callDelay);
+  const {
+    makeCall,
+    resetCallCount,
+    resetAllCallCounts
+  } = useCallingScreenOperations({
+    leadsData,
+    setCurrentIndex,
+    setCardKey
+  });
 
   const {
     searchQuery,
@@ -88,50 +92,23 @@ export const useSimplifiedCallingScreenState = ({ leads, sessionState }: UseSimp
     handleSearchBlur
   } = useSearchState({ 
     leads, 
-    getBaseLeads: getFilteredLeads, 
+    getBaseLeads, 
     leadsData, 
     timezoneFilter, 
     callFilter 
   });
 
-  // Filter toggle functions
-  const toggleTimezoneFilter = useCallback(() => {
-    setTimezoneFilter(prev => prev === 'ALL' ? 'EST_CST' : 'ALL');
-    setShownLeadsInShuffle(new Set()); // Reset shuffle tracking
-  }, [setTimezoneFilter, setShownLeadsInShuffle]);
-
-  const toggleCallFilter = useCallback(() => {
-    setCallFilter(prev => prev === 'ALL' ? 'UNCALLED' : 'ALL');
-    setShownLeadsInShuffle(new Set()); // Reset shuffle tracking
-  }, [setCallFilter, setShownLeadsInShuffle]);
-
-  const toggleShuffle = useCallback(() => {
-    setShuffleMode(prev => !prev);
-    setShownLeadsInShuffle(new Set()); // Reset shuffle tracking
-  }, [setShuffleMode, setShownLeadsInShuffle]);
-
-  const toggleAutoCall = useCallback(() => {
-    setAutoCall(prev => !prev);
-  }, [setAutoCall]);
-
-  const toggleCallDelay = useCallback(() => {
-    setCallDelay(prev => {
-      const delays = [0, 5, 10, 15];
-      const currentIndex = delays.indexOf(prev);
-      return delays[(currentIndex + 1) % delays.length];
-    });
-  }, [setCallDelay]);
-
-  const resetCallDelay = useCallback(() => {
-    setCallDelay(15);
-  }, [setCallDelay]);
-
-  const getDelayDisplayType = useCallback(() => {
-    if (callDelay === 0) return 'rocket';
-    if (callDelay === 5) return '5s';
-    if (callDelay === 10) return '10s';
-    return 'timer';
-  }, [callDelay]);
+  // Handle real-time session updates from other devices/tabs
+  const handleSessionUpdate = useCallback((updatedSession: SessionState) => {
+    console.log('Applying real-time session update:', updatedSession);
+    
+    // Update current index and force re-render
+    if (updatedSession.currentLeadIndex !== undefined && leadsData.length > 0) {
+      const validIndex = Math.max(0, Math.min(updatedSession.currentLeadIndex, leadsData.length - 1));
+      setCurrentIndex(validIndex);
+      setCardKey(prev => prev + 1);
+    }
+  }, [leadsData.length, setCurrentIndex, setCardKey]);
 
   // Memoize resetLeadsData to prevent infinite loops
   const memoizedResetLeadsData = useCallback((newLeads: Lead[]) => {
@@ -140,9 +117,7 @@ export const useSimplifiedCallingScreenState = ({ leads, sessionState }: UseSimp
 
   return {
     componentReady,
-    setComponentReady,
     leadsInitialized,
-    setLeadsInitialized,
     leadsData,
     currentIndex,
     cardKey,
@@ -157,7 +132,7 @@ export const useSimplifiedCallingScreenState = ({ leads, sessionState }: UseSimp
     setCurrentLeadForAutoCall,
     isCountdownActive,
     countdownTime,
-    getBaseLeads: getFilteredLeads,
+    getBaseLeads,
     makeCall,
     executeAutoCall,
     handleCountdownComplete,
@@ -181,6 +156,7 @@ export const useSimplifiedCallingScreenState = ({ leads, sessionState }: UseSimp
     clearSearch,
     handleSearchFocus,
     handleSearchBlur,
-    getDelayDisplayType
+    getDelayDisplayType,
+    handleSessionUpdate
   };
 };
