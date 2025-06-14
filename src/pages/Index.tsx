@@ -17,16 +17,18 @@ const Index = () => {
 
   useEffect(() => {
     if (!authLoading && !user) {
-      navigate('/auth');
+      console.log('No user found, redirecting to auth');
+      navigate('/auth', { replace: true });
     }
   }, [user, authLoading, navigate]);
 
   // Load data from localStorage on mount
   useEffect(() => {
-    if (user) {
+    if (user && !authLoading) {
+      console.log('User authenticated, loading local data');
       loadLocalData();
     }
-  }, [user]);
+  }, [user, authLoading]);
 
   const loadLocalData = () => {
     try {
@@ -60,6 +62,7 @@ const Index = () => {
   };
 
   const handleBack = async () => {
+    console.log('Signing out from main app');
     await signOut();
   };
 
