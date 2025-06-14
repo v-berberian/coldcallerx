@@ -106,10 +106,6 @@ export const useSimplifiedCallingScreenEffects = ({
     markLeadAsCalled
   });
 
-  // Save current index to localStorage when it changes
-  useEffect(() => {
-    if (leadsData.length > 0) {
-      localStorage.setItem('coldcaller-current-index', currentIndex.toString());
-    }
-  }, [currentIndex, leadsData.length]);
+  // Note: localStorage saving is now handled directly in useNavigationState
+  // for immediate persistence on every navigation change
 };

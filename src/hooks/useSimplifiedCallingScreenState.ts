@@ -13,14 +13,13 @@ interface UseSimplifiedCallingScreenStateProps {
 export const useSimplifiedCallingScreenState = ({ leads, sessionState }: UseSimplifiedCallingScreenStateProps) => {
   const [componentReady, setComponentReady] = useState(false);
   const [leadsInitialized, setLeadsInitialized] = useState(false);
-  const sessionRestoredRef = useRef(false);
   const localStorageRestoredRef = useRef(false);
+  const cloudSyncedRef = useRef(false);
 
   // Initialize hooks - only pass leads to useLeadNavigation
   const {
     leadsData,
     currentIndex,
-    cardKey,
     timezoneFilter,
     callFilter,
     shuffleMode,
@@ -46,9 +45,9 @@ export const useSimplifiedCallingScreenState = ({ leads, sessionState }: UseSimp
     toggleCallDelay,
     resetCallDelay,
     resetLeadsData,
-    restoreSessionState,
-    getDelayDisplayType,
-    restoreFromLocalStorage
+    restoreFromLocalStorage,
+    syncFromCloudSession,
+    getDelayDisplayType
   } = useLeadNavigation(leads);
 
   const {
@@ -73,34 +72,34 @@ export const useSimplifiedCallingScreenState = ({ leads, sessionState }: UseSimp
     resetLeadsData(newLeads);
   }, [resetLeadsData]);
 
-  // Immediate localStorage restoration when leads are ready
+  // Primary: Restore from localStorage immediately when leads are ready
   useEffect(() => {
     if (
       leadsData.length > 0 && 
       leadsInitialized && 
       !localStorageRestoredRef.current
     ) {
-      console.log('useSimplifiedCallingScreenState: Restoring from localStorage immediately');
+      console.log('Primary restoration: localStorage');
       restoreFromLocalStorage(leadsData.length);
       localStorageRestoredRef.current = true;
     }
   }, [leadsData.length, leadsInitialized, restoreFromLocalStorage]);
 
-  // Restore session state from cloud when available - silent restoration
+  // Secondary: Sync from cloud session state (only if different from localStorage)
   useEffect(() => {
     if (
-      sessionState && 
+      sessionState?.currentLeadIndex !== undefined &&
       leadsData.length > 0 && 
       leadsInitialized && 
       componentReady && 
-      !sessionRestoredRef.current &&
-      localStorageRestoredRef.current // Only after localStorage restoration
+      localStorageRestoredRef.current && 
+      !cloudSyncedRef.current
     ) {
-      console.log('useSimplifiedCallingScreenState: Restoring session state from cloud (silent)');
-      restoreSessionState(sessionState);
-      sessionRestoredRef.current = true;
+      console.log('Secondary sync: cloud session state');
+      syncFromCloudSession(sessionState.currentLeadIndex, leadsData.length);
+      cloudSyncedRef.current = true;
     }
-  }, [sessionState?.currentLeadIndex, leadsData.length, leadsInitialized, componentReady, restoreSessionState]);
+  }, [sessionState?.currentLeadIndex, leadsData.length, leadsInitialized, componentReady, syncFromCloudSession]);
 
   return {
     componentReady,
@@ -109,7 +108,6 @@ export const useSimplifiedCallingScreenState = ({ leads, sessionState }: UseSimp
     setLeadsInitialized,
     leadsData,
     currentIndex,
-    cardKey,
     timezoneFilter,
     callFilter,
     shuffleMode,

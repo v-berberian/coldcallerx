@@ -1,4 +1,3 @@
-
 import { Lead } from '../types/lead';
 import { useNavigationState } from './useNavigationState';
 import { useFilters } from './useFilters';
@@ -29,14 +28,13 @@ export const useLeadNavigation = (initialLeads: Lead[]) => {
 
   const {
     currentIndex,
-    cardKey,
     historyIndex,
     updateNavigation,
     goToPrevious,
     resetNavigation,
     setCurrentIndex,
-    setCardKey,
-    restoreFromLocalStorage
+    restoreFromLocalStorage,
+    syncFromCloudSession
   } = useNavigationState();
 
   const {
@@ -128,7 +126,6 @@ export const useLeadNavigation = (initialLeads: Lead[]) => {
     isFilterChanging,
     setFilterChanging,
     setCurrentIndex,
-    setCardKey,
     getBaseLeads,
     resetNavigation
   );
@@ -171,7 +168,7 @@ export const useLeadNavigation = (initialLeads: Lead[]) => {
     setLeadsData(formattedLeads);
     
     // Reset navigation to 0 and clear localStorage
-    resetNavigation(0, false); // Not silent for new data
+    resetNavigation(0, false);
     localStorage.removeItem('coldcaller-current-index');
     resetShownLeads();
     resetCallState();
@@ -179,24 +176,9 @@ export const useLeadNavigation = (initialLeads: Lead[]) => {
     console.log('Reset leads data with', formattedLeads.length, 'leads');
   };
 
-  // Function to restore session state from cloud (silent restoration to prevent card remount)
-  const restoreSessionState = (sessionState: any) => {
-    console.log('Restoring session state from cloud (silent):', sessionState);
-    
-    // Restore the current index from cloud session silently
-    if (sessionState.currentLeadIndex !== undefined && leadsData.length > 0) {
-      const validIndex = Math.max(0, Math.min(sessionState.currentLeadIndex, leadsData.length - 1));
-      console.log('Restoring current index from cloud (silent):', validIndex);
-      
-      // Use silent navigation to prevent card remount
-      updateNavigation(validIndex, false, true);
-    }
-  };
-
   return {
     leadsData,
     currentIndex,
-    cardKey,
     timezoneFilter,
     callFilter,
     shuffleMode,
@@ -225,8 +207,8 @@ export const useLeadNavigation = (initialLeads: Lead[]) => {
     toggleCallDelay,
     resetCallDelay,
     resetLeadsData,
-    restoreSessionState,
     restoreFromLocalStorage,
+    syncFromCloudSession,
     countdownTime
   };
 };
