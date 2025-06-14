@@ -1,3 +1,4 @@
+
 import { Lead } from '../types/lead';
 import { useNavigationState } from './useNavigationState';
 import { useFilters } from './useFilters';
@@ -10,7 +11,8 @@ import { useFilterChangeEffects } from './useFilterChangeEffects';
 import { useLeadNavigationState } from './useLeadNavigationState';
 import { useLeadNavigationActions } from './useLeadNavigationActions';
 import { useLeadNavigationEffects } from './useLeadNavigationEffects';
-import { useEffect } from 'react';
+import { useLeadNavigationWrappers } from './useLeadNavigationWrappers';
+import { useLeadNavigationReset } from './useLeadNavigationReset';
 
 export const useLeadNavigation = (initialLeads: Lead[]) => {
   const {
@@ -117,6 +119,28 @@ export const useLeadNavigation = (initialLeads: Lead[]) => {
     setCurrentLeadForAutoCall
   });
 
+  const {
+    toggleShuffleWrapper,
+    toggleCallFilterWrapper,
+    toggleTimezoneFilterWrapper,
+    toggleAutoCallWrapper
+  } = useLeadNavigationWrappers({
+    toggleShuffle,
+    toggleCallFilter,
+    toggleTimezoneFilter,
+    toggleAutoCall,
+    resetShownLeads,
+    resetAutoCall,
+    autoCall
+  });
+
+  const { resetLeadsData } = useLeadNavigationReset({
+    setLeadsData,
+    resetNavigation,
+    resetShownLeads,
+    resetCallState
+  });
+
   useFilterChangeEffects(
     leadsData,
     timezoneFilter,
@@ -129,52 +153,6 @@ export const useLeadNavigation = (initialLeads: Lead[]) => {
     getBaseLeads,
     resetNavigation
   );
-
-  // Enhanced toggle functions to reset shown leads tracker
-  const toggleShuffleWrapper = () => {
-    toggleShuffle();
-    resetShownLeads();
-  };
-
-  const toggleCallFilterWrapper = () => {
-    toggleCallFilter();
-    resetShownLeads();
-  };
-
-  const toggleTimezoneFilterWrapper = () => {
-    toggleTimezoneFilter();
-    resetShownLeads();
-  };
-
-  // Enhanced toggle auto-call to reset countdown when disabled
-  const toggleAutoCallWrapper = () => {
-    const wasAutoCallOn = autoCall;
-    toggleAutoCall();
-    
-    // If turning auto-call OFF, reset any active countdown
-    if (wasAutoCallOn) {
-      resetAutoCall();
-      console.log('Auto-call disabled, resetting countdown');
-    }
-  };
-
-  // Function to reset leads data (for CSV import)
-  const resetLeadsData = (newLeads: Lead[]) => {
-    const formattedLeads = newLeads.map(lead => ({
-      ...lead,
-      called: lead.called || 0,
-      lastCalled: lead.lastCalled || undefined
-    }));
-    setLeadsData(formattedLeads);
-    
-    // Reset navigation to 0 and clear localStorage
-    resetNavigation(0, false);
-    localStorage.removeItem('coldcaller-current-index');
-    resetShownLeads();
-    resetCallState();
-    
-    console.log('Reset leads data with', formattedLeads.length, 'leads');
-  };
 
   return {
     leadsData,
