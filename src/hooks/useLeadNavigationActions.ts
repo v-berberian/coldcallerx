@@ -18,7 +18,7 @@ interface UseLeadNavigationActionsProps {
   selectLead: (lead: Lead, baseLeads: Lead[], allLeads: Lead[]) => void;
   setCallMadeToCurrentLead: (called: boolean) => void;
   autoCall: boolean;
-  setShouldAutoCall: (should: boolean) => void;
+  executeAutoCall: (lead: Lead) => void;
   goToPrevious: () => boolean;
 }
 
@@ -32,7 +32,7 @@ export const useLeadNavigationActions = ({
   selectLead,
   setCallMadeToCurrentLead,
   autoCall,
-  setShouldAutoCall,
+  executeAutoCall,
   goToPrevious
 }: UseLeadNavigationActionsProps) => {
 
@@ -44,10 +44,14 @@ export const useLeadNavigationActions = ({
     // Reset call state when navigating
     setCallMadeToCurrentLead(false);
     
-    // Set flag to trigger auto-call after navigation if auto-call is enabled
-    if (autoCall) {
-      console.log('NAVIGATION: Auto-call enabled, triggering countdown after navigation');
-      setShouldAutoCall(true);
+    // Trigger auto-call immediately after navigation if auto-call is enabled
+    if (autoCall && baseLeads.length > 0) {
+      const nextIndex = shuffleMode ? currentIndex : (currentIndex + 1) % baseLeads.length;
+      const nextLead = baseLeads[nextIndex];
+      if (nextLead) {
+        console.log('NAVIGATION: Auto-call enabled, triggering countdown after next navigation for:', nextLead.name);
+        executeAutoCall(nextLead);
+      }
     }
   };
 
@@ -80,10 +84,14 @@ export const useLeadNavigationActions = ({
     // Reset call state when navigating
     setCallMadeToCurrentLead(false);
     
-    // Set flag to trigger auto-call after navigation if auto-call is enabled
-    if (autoCall) {
-      console.log('NAVIGATION: Auto-call enabled, triggering countdown after previous navigation');
-      setShouldAutoCall(true);
+    // Trigger auto-call immediately after navigation if auto-call is enabled
+    if (autoCall && baseLeads.length > 0) {
+      const prevIndex = shuffleMode ? currentIndex : (currentIndex === 0 ? baseLeads.length - 1 : currentIndex - 1);
+      const prevLead = baseLeads[prevIndex];
+      if (prevLead) {
+        console.log('NAVIGATION: Auto-call enabled, triggering countdown after previous navigation for:', prevLead.name);
+        executeAutoCall(prevLead);
+      }
     }
   };
 
@@ -94,10 +102,10 @@ export const useLeadNavigationActions = ({
     // Reset call state when selecting a new lead
     setCallMadeToCurrentLead(false);
     
-    // Set flag to trigger auto-call after lead selection if auto-call is enabled
+    // Trigger auto-call immediately after lead selection if auto-call is enabled
     if (autoCall) {
-      console.log('NAVIGATION: Auto-call enabled, triggering countdown after lead selection');
-      setShouldAutoCall(true);
+      console.log('NAVIGATION: Auto-call enabled, triggering countdown after lead selection for:', lead.name);
+      executeAutoCall(lead);
     }
   };
 

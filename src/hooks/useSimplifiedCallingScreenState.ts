@@ -113,8 +113,9 @@ export const useSimplifiedCallingScreenState = ({ leads, sessionState }: UseSimp
       setTimeout(() => {
         const currentLeads = getBaseLeads();
         if (currentLeads.length > 0 && currentIndex >= 0 && currentIndex < currentLeads.length) {
-          console.log('TOGGLE AUTO-CALL: Triggering countdown for current lead');
-          setShouldAutoCall(true);
+          const currentLead = currentLeads[currentIndex];
+          console.log('TOGGLE AUTO-CALL: Triggering countdown for current lead:', currentLead.name);
+          executeAutoCall(currentLead);
         } else {
           console.log('TOGGLE AUTO-CALL: No valid current lead found');
         }
@@ -123,9 +124,8 @@ export const useSimplifiedCallingScreenState = ({ leads, sessionState }: UseSimp
       // If we're turning auto-call OFF, reset any active countdown
       console.log('TOGGLE AUTO-CALL: Turning OFF auto-call, resetting countdown');
       resetAutoCall();
-      setShouldAutoCall(false);
     }
-  }, [autoCall, originalToggleAutoCall, componentReady, leadsInitialized, getBaseLeads, currentIndex, setShouldAutoCall, resetAutoCall]);
+  }, [autoCall, originalToggleAutoCall, componentReady, leadsInitialized, getBaseLeads, currentIndex, executeAutoCall, resetAutoCall]);
 
   // Handle real-time session updates from other devices/tabs
   const handleSessionUpdate = useCallback((updatedSession: SessionState) => {
@@ -171,7 +171,7 @@ export const useSimplifiedCallingScreenState = ({ leads, sessionState }: UseSimp
     toggleTimezoneFilter,
     toggleCallFilter,
     toggleShuffle,
-    toggleAutoCall, // Use our enhanced version
+    toggleAutoCall,
     toggleCallDelay,
     resetCallDelay,
     memoizedResetLeadsData,

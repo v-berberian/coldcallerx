@@ -56,61 +56,24 @@ export const useSimplifiedCallingScreenEffects = ({
     onSessionUpdate: handleSessionUpdate
   });
 
-  // Handle auto-call trigger - start countdown when conditions are met
-  useEffect(() => {
-    console.log('AUTO-CALL EFFECT: Checking conditions', {
-      shouldAutoCall,
-      autoCall,
-      componentReady,
-      leadsInitialized,
-      currentIndex
-    });
-
-    if (shouldAutoCall && autoCall && componentReady && leadsInitialized) {
-      const currentLeads = getBaseLeads();
-      const currentLead = currentLeads[currentIndex];
-      
-      if (currentLead) {
-        console.log('AUTO-CALL EFFECT: Triggering countdown for lead:', currentLead.name, currentLead.phone);
-        setCurrentLeadForAutoCall(currentLead);
-        
-        // Execute auto-call with the current lead
-        executeAutoCall(currentLead);
-        
-        // Mark as called in cloud if function is provided and no delay
-        if (markLeadAsCalled && callDelay === 0) {
-          markLeadAsCalled(currentLead).catch(error => {
-            console.error('Error marking lead as called:', error);
-          });
-        }
-      } else {
-        console.log('AUTO-CALL EFFECT: No current lead found');
-      }
-      
-      // Reset the trigger flag
-      setShouldAutoCall(false);
-    }
-  }, [shouldAutoCall, autoCall, currentIndex, executeAutoCall, setCurrentLeadForAutoCall, setShouldAutoCall, markLeadAsCalled, componentReady, leadsInitialized, getBaseLeads, callDelay]);
-
   // Trigger auto-call when auto-call is enabled and we have a current lead (for initial state)
   useEffect(() => {
     console.log('AUTO-CALL INITIAL TRIGGER: Checking initial conditions', {
       autoCall,
       componentReady,
       leadsInitialized,
-      currentIndex,
-      shouldAutoCall
+      currentIndex
     });
 
-    // Only trigger if auto-call is enabled, everything is ready, and we haven't already triggered
-    if (autoCall && componentReady && leadsInitialized && !shouldAutoCall) {
+    // Only trigger if auto-call is enabled and everything is ready
+    if (autoCall && componentReady && leadsInitialized) {
       const currentLeads = getBaseLeads();
       const currentLead = currentLeads[currentIndex];
       
       if (currentLead) {
         console.log('AUTO-CALL INITIAL TRIGGER: Auto-call is enabled, triggering for current lead:', currentLead.name);
-        setShouldAutoCall(true);
+        executeAutoCall(currentLead);
       }
     }
-  }, [autoCall, componentReady, leadsInitialized, currentIndex, shouldAutoCall, getBaseLeads, setShouldAutoCall]);
+  }, [autoCall, componentReady, leadsInitialized, currentIndex, getBaseLeads, executeAutoCall]);
 };
