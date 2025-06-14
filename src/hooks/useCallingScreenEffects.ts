@@ -92,33 +92,38 @@ export const useCallingScreenEffects = ({
     }
   }, [currentIndex, timezoneFilter, callFilter, shuffleMode, autoCall, callDelay, updateSessionState, componentReady, leadsInitialized]);
 
-  // Handle auto-call trigger - start countdown instead of calling immediately
+  // Handle auto-call trigger - start countdown when conditions are met
   useEffect(() => {
+    console.log('AUTO-CALL EFFECT: Checking conditions', {
+      shouldAutoCall,
+      autoCall,
+      componentReady,
+      leadsInitialized,
+      currentIndex
+    });
+
     if (shouldAutoCall && autoCall && componentReady && leadsInitialized) {
       const currentLeads = getBaseLeads();
       const currentLead = currentLeads[currentIndex];
       
       if (currentLead) {
-        console.log('CallingScreenLogic: Auto-call countdown triggered for displayed lead:', currentLead.name, currentLead.phone);
+        console.log('AUTO-CALL EFFECT: Triggering countdown for lead:', currentLead.name, currentLead.phone);
         setCurrentLeadForAutoCall(currentLead);
         
-        // Start the countdown instead of calling immediately
-        if (callDelay > 0) {
-          console.log('CallingScreenLogic: Starting countdown for', callDelay, 'seconds');
-          executeAutoCall(currentLead);
-        } else {
-          console.log('CallingScreenLogic: No delay, calling immediately');
-          executeAutoCall(currentLead);
-          
-          // Mark as called in cloud if function is provided for immediate calls
-          if (markLeadAsCalled) {
-            markLeadAsCalled(currentLead).catch(error => {
-              console.error('Error marking lead as called:', error);
-            });
-          }
+        // Execute auto-call with the current lead
+        executeAutoCall(currentLead);
+        
+        // Mark as called in cloud if function is provided and no delay
+        if (markLeadAsCalled && callDelay === 0) {
+          markLeadAsCalled(currentLead).catch(error => {
+            console.error('Error marking lead as called:', error);
+          });
         }
+      } else {
+        console.log('AUTO-CALL EFFECT: No current lead found');
       }
       
+      // Reset the trigger flag
       setShouldAutoCall(false);
     }
   }, [shouldAutoCall, autoCall, currentIndex, executeAutoCall, setCurrentLeadForAutoCall, setShouldAutoCall, markLeadAsCalled, componentReady, leadsInitialized, getBaseLeads, callDelay]);

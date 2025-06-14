@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Lead } from '../types/lead';
 
 export const useAutoCall = (
@@ -10,11 +10,18 @@ export const useAutoCall = (
   const [isCountdownActive, setIsCountdownActive] = useState(false);
   const [countdownTime, setCountdownTime] = useState(0);
   const [pendingLead, setPendingLead] = useState<Lead | null>(null);
+  const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
   const executeAutoCall = (lead: Lead) => {
     if (!lead) {
-      console.log('No lead provided for auto-call');
+      console.log('AUTO-CALL: No lead provided for auto-call');
       return;
+    }
+    
+    // Clear any existing interval
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current);
+      intervalRef.current = null;
     }
     
     let actualDelay: number;
@@ -33,10 +40,11 @@ export const useAutoCall = (
       actualDelay = Math.floor(Math.random() * 19) + 14; // 14 to 32 seconds
     }
     
-    console.log(`AUTO-CALL: Starting for ${lead.name} ${lead.phone} with ${actualDelay}s delay (mode: ${callDelay})`);
+    console.log(`AUTO-CALL: Starting countdown for ${lead.name} ${lead.phone} with ${actualDelay}s delay (mode: ${callDelay})`);
     
     if (actualDelay === 0) {
       // No delay, make call immediately
+      console.log('AUTO-CALL: Rocket mode - calling immediately');
       setIsAutoCallInProgress(true);
       makeCall(lead, false);
       setTimeout(() => {
@@ -44,15 +52,55 @@ export const useAutoCall = (
       }, 500);
     } else {
       // Start countdown with specified delay
+      console.log(`AUTO-CALL: Starting ${actualDelay}s countdown for ${lead.name}`);
       setPendingLead(lead);
       setIsCountdownActive(true);
       setIsAutoCallInProgress(true);
       setCountdownTime(actualDelay);
+      
+      // Start the countdown timer
+      intervalRef.current = setInterval(() => {
+        setCountdownTime((prev) => {
+          console.log(`AUTO-CALL: Countdown tick - ${prev - 1}s remaining`);
+          
+          if (prev <= 1) {
+            console.log('AUTO-CALL: Countdown complete, making call to:', lead.name, lead.phone);
+            
+            // Clear interval
+            if (intervalRef.current) {
+              clearInterval(intervalRef.current);
+              intervalRef.current = null;
+            }
+            
+            // Reset countdown state
+            setIsCountdownActive(false);
+            
+            // Make the call
+            makeCall(lead, false);
+            
+            // Clean up after a short delay
+            setTimeout(() => {
+              setIsAutoCallInProgress(false);
+              setPendingLead(null);
+            }, 500);
+            
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
     }
   };
 
   const resetAutoCall = () => {
     console.log('AUTO-CALL: Resetting countdown and stopping auto-call');
+    
+    // Clear any existing interval
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current);
+      intervalRef.current = null;
+    }
+    
     setIsCountdownActive(false);
     setIsAutoCallInProgress(false);
     setCountdownTime(0);
@@ -64,37 +112,18 @@ export const useAutoCall = (
     return isCountdownActive && countdownTime <= 1;
   };
 
-  // Handle countdown timer
+  // Cleanup on unmount
   useEffect(() => {
-    if (!isCountdownActive || !pendingLead) return;
-
-    const interval = setInterval(() => {
-      setCountdownTime((prev) => {
-        if (prev <= 1) {
-          clearInterval(interval);
-          setIsCountdownActive(false);
-          
-          // Make the call when countdown reaches 0
-          console.log('AUTO-CALL: Countdown complete, making call to:', pendingLead.name, pendingLead.phone);
-          makeCall(pendingLead, false);
-          
-          // Clean up after a short delay
-          setTimeout(() => {
-            setIsAutoCallInProgress(false);
-            setPendingLead(null);
-          }, 500);
-          
-          return 0;
-        }
-        return prev - 1;
-      });
-    }, 1000);
-
-    return () => clearInterval(interval);
-  }, [isCountdownActive, pendingLead, makeCall]);
+    return () => {
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+      }
+    };
+  }, []);
 
   const handleCountdownComplete = (lead: Lead) => {
     // This function is no longer needed as the countdown automatically makes the call
+    console.log('AUTO-CALL: Manual countdown complete triggered');
     setIsCountdownActive(false);
     makeCall(lead, false);
     
