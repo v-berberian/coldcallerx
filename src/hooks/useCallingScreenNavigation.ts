@@ -26,13 +26,11 @@ export const useCallingScreenNavigation = ({
 }: UseCallingScreenNavigationProps) => {
   const {
     currentIndex,
-    cardKey,
     historyIndex,
     updateNavigation,
     goToPrevious,
     resetNavigation,
-    setCurrentIndex,
-    setCardKey
+    setCurrentIndex
   } = useNavigationState();
 
   const {
@@ -71,7 +69,6 @@ export const useCallingScreenNavigation = ({
 
   return {
     currentIndex,
-    cardKey,
     historyIndex,
     shouldAutoCall,
     setShouldAutoCall,
@@ -92,7 +89,6 @@ export const useCallingScreenNavigation = ({
     resetShownLeads,
     resetCallState,
     setCurrentIndex,
-    setCardKey,
     shouldBlockNavigation
   };
 };

@@ -18,7 +18,6 @@ export const useCallingScreenState = ({ leads, sessionState }: UseCallingScreenS
   const {
     leadsData,
     currentIndex,
-    cardKey,
     timezoneFilter,
     callFilter,
     shuffleMode,
@@ -75,7 +74,6 @@ export const useCallingScreenState = ({ leads, sessionState }: UseCallingScreenS
     setLeadsInitialized,
     leadsData,
     currentIndex,
-    cardKey,
     timezoneFilter,
     callFilter,
     shuffleMode,

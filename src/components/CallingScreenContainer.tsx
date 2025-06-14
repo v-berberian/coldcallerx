@@ -40,7 +40,6 @@ const CallingScreenContainer: React.FC<CallingScreenContainerProps> = ({
     setLeadsInitialized,
     leadsData,
     currentIndex,
-    cardKey,
     timezoneFilter,
     callFilter,
     shuffleMode,
@@ -205,14 +204,13 @@ const CallingScreenContainer: React.FC<CallingScreenContainerProps> = ({
         onLeadsImported={onLeadsImported}
       />
 
-      {/* Main Content - takes remaining space, no daily progress bar */}
+      {/* Main Content - takes remaining space */}
       <div className="flex-1 overflow-hidden">
         <MainContent
           currentLead={currentLead}
           currentIndex={currentIndex}
           totalCount={totalLeadCount}
           fileName={fileName}
-          // Remove cardKey prop - no longer needed
           timezoneFilter={timezoneFilter}
           callFilter={callFilter}
           shuffleMode={shuffleMode}
