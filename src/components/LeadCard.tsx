@@ -9,6 +9,7 @@ import { getStateFromAreaCode } from '../utils/timezoneUtils';
 interface Lead {
   name: string;
   phone: string;
+  company?: string;
   called?: number;
   lastCalled?: string;
 }
@@ -54,6 +55,11 @@ const LeadCard: React.FC<LeadCardProps> = ({
           </p>
           
           <h2 className="text-3xl font-bold text-foreground">{lead.name}</h2>
+          
+          {/* Company name - displayed between name and phone */}
+          {lead.company && (
+            <p className="text-lg text-muted-foreground font-medium">{lead.company}</p>
+          )}
           
           <p className="text-lg text-muted-foreground text-center">{formatPhoneNumber(lead.phone)}</p>
           

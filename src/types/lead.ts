@@ -2,6 +2,7 @@
 export interface Lead {
   name: string;
   phone: string;
+  company?: string;
   called?: number;
   lastCalled?: string;
 }

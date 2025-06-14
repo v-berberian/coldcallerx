@@ -6,6 +6,7 @@ import { Upload } from 'lucide-react';
 interface Lead {
   name: string;
   phone: string;
+  company?: string;
 }
 
 interface CSVImporterProps {
@@ -37,11 +38,12 @@ const CSVImporter: React.FC<CSVImporterProps> = ({ onLeadsImported }) => {
     for (let i = 1; i < lines.length; i++) {
       const line = lines[i].trim();
       if (line) {
-        const [name, phone] = line.split(',').map(cell => cell.trim().replace(/"/g, ''));
+        const [name, phone, company] = line.split(',').map(cell => cell.trim().replace(/"/g, ''));
         if (name && phone) {
           leads.push({
             name,
-            phone: formatPhoneNumber(phone)
+            phone: formatPhoneNumber(phone),
+            company: company || undefined
           });
         }
       }
