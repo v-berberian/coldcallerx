@@ -54,7 +54,7 @@ export const useCallingScreenCore = ({ leads, sessionState }: UseCallingScreenCo
     }
   }, [leads.length]);
 
-  // Restore session state once when available - with improved timing and NO card reset
+  // Restore session state once when available - PRESERVE card key completely
   useEffect(() => {
     if (
       sessionState && 
@@ -63,7 +63,7 @@ export const useCallingScreenCore = ({ leads, sessionState }: UseCallingScreenCo
       componentReady && 
       !sessionRestoredRef.current
     ) {
-      console.log('Restoring session state:', sessionState);
+      console.log('Restoring session state - PRESERVING card key:', sessionState);
       
       // Restore filters first
       setTimezoneFilter(sessionState.timezoneFilter as 'ALL' | 'EST_CST');
@@ -72,12 +72,12 @@ export const useCallingScreenCore = ({ leads, sessionState }: UseCallingScreenCo
       setAutoCall(sessionState.autoCall);
       setCallDelay(sessionState.callDelay);
       
-      // Then restore the current index with proper bounds checking - WITHOUT resetting card
+      // Then restore the current index with proper bounds checking - WITHOUT touching cardKey at all
       if (sessionState.currentLeadIndex !== undefined && leadsData.length > 0) {
         const validIndex = Math.max(0, Math.min(sessionState.currentLeadIndex, leadsData.length - 1));
-        console.log('Restoring current index from session:', validIndex, 'out of', leadsData.length, 'leads');
+        console.log('Restoring current index from session:', validIndex, 'out of', leadsData.length, 'leads - CARD KEY PRESERVED');
         
-        // Update index WITHOUT incrementing cardKey to preserve card state
+        // Update index WITHOUT any cardKey changes - this preserves the exact card state
         setCurrentIndex(validIndex);
         
         // Update navigation history to reflect the restored position
@@ -86,7 +86,7 @@ export const useCallingScreenCore = ({ leads, sessionState }: UseCallingScreenCo
       }
       
       sessionRestoredRef.current = true;
-      console.log('Session restoration complete - card state preserved');
+      console.log('Session restoration complete - card key completely preserved');
     }
   }, [sessionState, leadsData.length, leadsInitialized, componentReady]);
 
@@ -116,11 +116,11 @@ export const useCallingScreenCore = ({ leads, sessionState }: UseCallingScreenCo
     initializationCompleteRef.current = true;
   }, []);
 
-  // New method to update index without resetting card (for session updates)
+  // Method to update index without any card changes (for session updates and navigation)
   const updateCurrentIndexSilently = useCallback((newIndex: number) => {
-    console.log('Updating current index silently to:', newIndex);
+    console.log('Updating current index silently to:', newIndex, '- preserving card state');
     setCurrentIndex(newIndex);
-    // Don't increment cardKey to preserve card state
+    // Absolutely no cardKey changes to preserve card state
   }, []);
 
   return {
