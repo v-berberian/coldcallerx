@@ -150,7 +150,7 @@ const Auth = () => {
                 onFocus={() => setEmailFocused(true)}
                 onBlur={() => setEmailFocused(false)}
                 required
-                className="h-14 text-lg rounded-2xl border-2 focus:border-blue-500 transition-colors text-center placeholder:text-center"
+                className="h-14 text-lg rounded-2xl border-2 focus:border-blue-500 transition-colors text-center placeholder:text-center typewriter-cursor"
                 disabled={loading}
               />
               <Input
@@ -162,7 +162,7 @@ const Auth = () => {
                 onBlur={() => setPasswordFocused(false)}
                 required
                 minLength={6}
-                className="h-14 text-lg rounded-2xl border-2 focus:border-blue-500 transition-colors text-center placeholder:text-center"
+                className="h-14 text-lg rounded-2xl border-2 focus:border-blue-500 transition-colors text-center placeholder:text-center typewriter-cursor"
                 disabled={loading}
               />
               
@@ -198,6 +198,18 @@ const Auth = () => {
           </div>
         </div>
       </div>
+
+      <style jsx>{`
+        .typewriter-cursor {
+          caret-color: #3b82f6;
+          animation: typewriter-blink 1s infinite;
+        }
+        
+        @keyframes typewriter-blink {
+          0%, 50% { caret-color: #3b82f6; }
+          51%, 100% { caret-color: transparent; }
+        }
+      `}</style>
     </div>
   );
 };
