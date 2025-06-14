@@ -32,55 +32,89 @@ export const useLeadsData = (initialLeads: Lead[]) => {
   };
 
   const markLeadAsCalledWrapper = (lead: Lead) => {
-    const now = new Date();
-    const dateString = now.toLocaleDateString();
-    const timeString = now.toLocaleTimeString('en-US', {
-      hour: 'numeric',
-      minute: '2-digit',
-      hour12: true
-    });
-    const lastCalledString = `${dateString} at ${timeString}`;
+    try {
+      const now = new Date();
+      
+      // Ensure we have a valid date
+      if (isNaN(now.getTime())) {
+        console.error('Invalid date created');
+        return;
+      }
 
-    const updatedLeads = leadsData.map(l => 
-      l.name === lead.name && l.phone === lead.phone ? {
-        ...l,
-        called: (l.called || 0) + 1,
-        lastCalled: lastCalledString
-      } : l
-    );
-    
-    setLeadsData(updatedLeads);
-    
-    // Save to localStorage
-    localStorage.setItem('coldcaller-leads', JSON.stringify(updatedLeads));
+      const dateString = now.toLocaleDateString();
+      const timeString = now.toLocaleTimeString('en-US', {
+        hour: 'numeric',
+        minute: '2-digit',
+        hour12: true
+      });
+      const lastCalledString = `${dateString} at ${timeString}`;
+
+      console.log('Marking lead as called:', lead.name, 'at', lastCalledString);
+
+      const updatedLeads = leadsData.map(l => 
+        l.name === lead.name && l.phone === lead.phone ? {
+          ...l,
+          called: (l.called || 0) + 1,
+          lastCalled: lastCalledString
+        } : l
+      );
+      
+      setLeadsData(updatedLeads);
+      
+      // Save to localStorage with error handling
+      try {
+        localStorage.setItem('coldcaller-leads', JSON.stringify(updatedLeads));
+      } catch (error) {
+        console.error('Error saving to localStorage:', error);
+      }
+    } catch (error) {
+      console.error('Error in markLeadAsCalledWrapper:', error);
+    }
   };
 
   const resetCallCountWrapper = (lead: Lead) => {
-    const updatedLeads = leadsData.map(l => 
-      l.name === lead.name && l.phone === lead.phone 
-        ? { ...l, called: 0, lastCalled: undefined }
-        : l
-    );
-    setLeadsData(updatedLeads);
-    
-    // Save to localStorage
-    localStorage.setItem('coldcaller-leads', JSON.stringify(updatedLeads));
+    try {
+      const updatedLeads = leadsData.map(l => 
+        l.name === lead.name && l.phone === lead.phone 
+          ? { ...l, called: 0, lastCalled: undefined }
+          : l
+      );
+      setLeadsData(updatedLeads);
+      
+      // Save to localStorage with error handling
+      try {
+        localStorage.setItem('coldcaller-leads', JSON.stringify(updatedLeads));
+      } catch (error) {
+        console.error('Error saving to localStorage:', error);
+      }
+    } catch (error) {
+      console.error('Error in resetCallCountWrapper:', error);
+    }
   };
 
   const resetAllCallCountsWrapper = () => {
-    const updatedLeads = leadsData.map(l => ({
-      ...l,
-      called: 0,
-      lastCalled: undefined
-    }));
-    setLeadsData(updatedLeads);
-    
-    // Save to localStorage
-    localStorage.setItem('coldcaller-leads', JSON.stringify(updatedLeads));
+    try {
+      const updatedLeads = leadsData.map(l => ({
+        ...l,
+        called: 0,
+        lastCalled: undefined
+      }));
+      setLeadsData(updatedLeads);
+      
+      // Save to localStorage with error handling
+      try {
+        localStorage.setItem('coldcaller-leads', JSON.stringify(updatedLeads));
+      } catch (error) {
+        console.error('Error saving to localStorage:', error);
+      }
+    } catch (error) {
+      console.error('Error in resetAllCallCountsWrapper:', error);
+    }
   };
 
   // Function to mark a lead as called when navigating away
   const markLeadAsCalledOnNavigation = (lead: Lead) => {
+    console.log('Marking lead as called on navigation:', lead.name);
     markLeadAsCalledWrapper(lead);
   };
 

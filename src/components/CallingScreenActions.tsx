@@ -39,7 +39,7 @@ export const useCallingScreenActions = ({
     
     if (leadIndexInBaseLeads !== -1) {
       selectLead(lead, baseLeads, leadsData);
-      console.log('CallingScreenLogic: Selected lead from autocomplete:', lead.name, 'at base index:', leadIndexInBaseLeads);
+      console.log('CallingScreenActions: Selected lead from autocomplete:', lead.name, 'at base index:', leadIndexInBaseLeads);
     }
     
     setSearchQuery('');
@@ -48,38 +48,69 @@ export const useCallingScreenActions = ({
 
   // Handle manual call button click
   const handleCallClick = async () => {
-    const currentLeads = getBaseLeads();
-    const currentLead = currentLeads[currentIndex];
-    makeCall(currentLead);
-    
-    // Mark as called in cloud if function is provided
-    if (markLeadAsCalled) {
-      await markLeadAsCalled(currentLead);
+    try {
+      const currentLeads = getBaseLeads();
+      const currentLead = currentLeads[currentIndex];
+      
+      console.log('CallingScreenActions: Manual call button clicked for:', currentLead.name);
+      makeCall(currentLead);
+      
+      // Mark as called in cloud if function is provided
+      if (markLeadAsCalled) {
+        try {
+          await markLeadAsCalled(currentLead);
+          console.log('CallingScreenActions: Successfully marked lead as called in cloud');
+        } catch (error) {
+          console.error('CallingScreenActions: Error marking lead as called in cloud:', error);
+        }
+      }
+    } catch (error) {
+      console.error('CallingScreenActions: Error in handleCallClick:', error);
     }
   };
 
   // Create wrapper functions for navigation that pass the required baseLeads parameter
   const handleNextWrapper = () => {
-    const currentLeads = getBaseLeads();
-    handleNext(currentLeads);
+    try {
+      const currentLeads = getBaseLeads();
+      console.log('CallingScreenActions: Next button clicked, triggering navigation with', currentLeads.length, 'leads');
+      handleNext(currentLeads);
+    } catch (error) {
+      console.error('CallingScreenActions: Error in handleNextWrapper:', error);
+    }
   };
 
   const handlePreviousWrapper = () => {
-    const currentLeads = getBaseLeads();
-    handlePrevious(currentLeads);
+    try {
+      const currentLeads = getBaseLeads();
+      console.log('CallingScreenActions: Previous button clicked, triggering navigation with', currentLeads.length, 'leads');
+      handlePrevious(currentLeads);
+    } catch (error) {
+      console.error('CallingScreenActions: Error in handlePreviousWrapper:', error);
+    }
   };
 
   // Handle reset call count with cloud sync
   const handleResetCallCount = async (lead: Lead) => {
-    if (resetCallCount) {
-      resetCallCount(lead);
+    try {
+      if (resetCallCount) {
+        resetCallCount(lead);
+        console.log('CallingScreenActions: Reset call count for:', lead.name);
+      }
+    } catch (error) {
+      console.error('CallingScreenActions: Error in handleResetCallCount:', error);
     }
   };
 
   // Handle reset all call counts with cloud sync
   const handleResetAllCallCounts = async () => {
-    if (resetAllCallCounts) {
-      resetAllCallCounts();
+    try {
+      if (resetAllCallCounts) {
+        resetAllCallCounts();
+        console.log('CallingScreenActions: Reset all call counts');
+      }
+    } catch (error) {
+      console.error('CallingScreenActions: Error in handleResetAllCallCounts:', error);
     }
   };
 

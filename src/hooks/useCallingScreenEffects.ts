@@ -73,14 +73,18 @@ export const useCallingScreenEffects = ({
   useEffect(() => {
     if (updateSessionState && componentReady && leadsInitialized) {
       const saveSessionState = async () => {
-        await updateSessionState({
-          currentLeadIndex: currentIndex,
-          timezoneFilter,
-          callFilter,
-          shuffleMode,
-          autoCall,
-          callDelay
-        });
+        try {
+          await updateSessionState({
+            currentLeadIndex: currentIndex,
+            timezoneFilter,
+            callFilter,
+            shuffleMode,
+            autoCall,
+            callDelay
+          });
+        } catch (error) {
+          console.error('Error saving session state:', error);
+        }
       };
 
       const timeoutId = setTimeout(saveSessionState, 500);
@@ -88,24 +92,34 @@ export const useCallingScreenEffects = ({
     }
   }, [currentIndex, timezoneFilter, callFilter, shuffleMode, autoCall, callDelay, updateSessionState, componentReady, leadsInitialized]);
 
-  // Handle auto-call trigger - this should fire immediately when shouldAutoCall becomes true
+  // Handle auto-call trigger - start countdown instead of calling immediately
   useEffect(() => {
     if (shouldAutoCall && autoCall && componentReady && leadsInitialized) {
       const currentLeads = getBaseLeads();
       const currentLead = currentLeads[currentIndex];
       
       if (currentLead) {
-        console.log('CallingScreenLogic: Auto-call triggered immediately for displayed lead:', currentLead.name, currentLead.phone);
+        console.log('CallingScreenLogic: Auto-call countdown triggered for displayed lead:', currentLead.name, currentLead.phone);
         setCurrentLeadForAutoCall(currentLead);
-        executeAutoCall(currentLead);
         
-        // Mark as called in cloud if function is provided
-        if (markLeadAsCalled) {
-          markLeadAsCalled(currentLead);
+        // Start the countdown instead of calling immediately
+        if (callDelay > 0) {
+          console.log('CallingScreenLogic: Starting countdown for', callDelay, 'seconds');
+          executeAutoCall(currentLead);
+        } else {
+          console.log('CallingScreenLogic: No delay, calling immediately');
+          executeAutoCall(currentLead);
+          
+          // Mark as called in cloud if function is provided for immediate calls
+          if (markLeadAsCalled) {
+            markLeadAsCalled(currentLead).catch(error => {
+              console.error('Error marking lead as called:', error);
+            });
+          }
         }
       }
       
       setShouldAutoCall(false);
     }
-  }, [shouldAutoCall, autoCall, currentIndex, executeAutoCall, setCurrentLeadForAutoCall, setShouldAutoCall, markLeadAsCalled, componentReady, leadsInitialized, getBaseLeads]);
+  }, [shouldAutoCall, autoCall, currentIndex, executeAutoCall, setCurrentLeadForAutoCall, setShouldAutoCall, markLeadAsCalled, componentReady, leadsInitialized, getBaseLeads, callDelay]);
 };

@@ -73,14 +73,32 @@ export const leadService = {
       return false;
     }
 
-    const leadsData = leads.map(lead => ({
-      user_id: user.data.user.id,
-      lead_list_id: leadListId,
-      name: lead.name,
-      phone: lead.phone,
-      called_count: lead.called || 0,
-      last_called_at: lead.lastCalled ? new Date(lead.lastCalled).toISOString() : null
-    }));
+    const leadsData = leads.map(lead => {
+      let lastCalledAt = null;
+      
+      // Handle lastCalled date conversion with proper validation
+      if (lead.lastCalled) {
+        try {
+          const date = new Date(lead.lastCalled);
+          if (!isNaN(date.getTime())) {
+            lastCalledAt = date.toISOString();
+          } else {
+            console.warn('Invalid lastCalled date for lead:', lead.name, lead.lastCalled);
+          }
+        } catch (error) {
+          console.warn('Error parsing lastCalled date for lead:', lead.name, error);
+        }
+      }
+
+      return {
+        user_id: user.data.user.id,
+        lead_list_id: leadListId,
+        name: lead.name,
+        phone: lead.phone,
+        called_count: lead.called || 0,
+        last_called_at: lastCalledAt
+      };
+    });
 
     const { error } = await supabase
       .from('leads')
@@ -161,11 +179,27 @@ export const leadService = {
   },
 
   async updateLeadCallCount(leadListId: string, leadName: string, leadPhone: string, calledCount: number, lastCalled?: string): Promise<boolean> {
+    let lastCalledAt = null;
+    
+    // Handle lastCalled date conversion with proper validation
+    if (lastCalled) {
+      try {
+        const date = new Date(lastCalled);
+        if (!isNaN(date.getTime())) {
+          lastCalledAt = date.toISOString();
+        } else {
+          console.warn('Invalid lastCalled date for updateLeadCallCount:', lastCalled);
+        }
+      } catch (error) {
+        console.warn('Error parsing lastCalled date for updateLeadCallCount:', error);
+      }
+    }
+
     const { error } = await supabase
       .from('leads')
       .update({
         called_count: calledCount,
-        last_called_at: lastCalled ? new Date(lastCalled).toISOString() : null
+        last_called_at: lastCalledAt
       })
       .eq('lead_list_id', leadListId)
       .eq('name', leadName)
