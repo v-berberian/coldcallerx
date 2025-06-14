@@ -56,10 +56,14 @@ const LeadCard: React.FC<LeadCardProps> = ({
           
           <h2 className="text-3xl font-bold text-foreground">{lead.name}</h2>
           
-          {/* Company name - displayed between name and phone */}
-          {lead.company && (
-            <p className="text-lg text-muted-foreground font-medium">{lead.company}</p>
-          )}
+          {/* Company name - fixed height container to prevent layout shift */}
+          <div className="h-7 flex items-center justify-center">
+            {lead.company && (
+              <p className="text-lg text-muted-foreground font-medium truncate max-w-full px-2">
+                {lead.company}
+              </p>
+            )}
+          </div>
           
           <p className="text-lg text-muted-foreground text-center">{formatPhoneNumber(lead.phone)}</p>
           
