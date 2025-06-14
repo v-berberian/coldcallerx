@@ -10,6 +10,7 @@ interface Lead {
   name: string;
   phone: string;
   company?: string;
+  email?: string;
   called?: number;
   lastCalled?: string;
 }
@@ -71,6 +72,13 @@ const LeadCard: React.FC<LeadCardProps> = ({
           )}
           
           <p className="text-lg text-muted-foreground text-center">{formatPhoneNumber(lead.phone)}</p>
+          
+          {/* Email - displayed underneath phone number */}
+          {lead.email && (
+            <p className="text-sm text-muted-foreground text-center break-words">
+              {lead.email}
+            </p>
+          )}
           
           <div className="relative flex flex-col items-center space-y-4">
             <div className="flex items-center justify-center">
