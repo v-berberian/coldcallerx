@@ -12,7 +12,6 @@ export const useFilterChangeEffects = (
   isFilterChanging: boolean,
   setFilterChanging: (isChanging: boolean) => void,
   setCurrentIndex: (index: number) => void,
-  setCardKey: (callback: (prev: number) => number) => void,
   getBaseLeads: () => Lead[],
   resetNavigation: (index: number) => void
 ) => {
@@ -21,6 +20,12 @@ export const useFilterChangeEffects = (
     // IMPORTANT: Don't navigate during auto-call to prevent jumping away from called leads
     if (isAutoCallInProgress || isFilterChanging) {
       console.log('Skipping filter navigation because auto-call is in progress or filters are changing');
+      return;
+    }
+
+    // Early return if leadsData is not ready
+    if (!leadsData || leadsData.length === 0) {
+      console.log('Skipping filter navigation because leads data is not ready');
       return;
     }
 
@@ -50,7 +55,6 @@ export const useFilterChangeEffects = (
         );
         console.log('Current lead matches new filter, keeping at index:', newIndexOfCurrentLead);
         setCurrentIndex(newIndexOfCurrentLead);
-        setCardKey(prev => prev + 1);
         setTimeout(() => setFilterChanging(false), 100);
         return;
       }
@@ -95,11 +99,9 @@ export const useFilterChangeEffects = (
       }
       
       setCurrentIndex(nextIndex);
-      setCardKey(prev => prev + 1);
     } else if (newFilteredLeads.length > 0) {
       console.log('No current lead, setting to first');
       setCurrentIndex(0);
-      setCardKey(prev => prev + 1);
     }
     
     setTimeout(() => setFilterChanging(false), 100);
@@ -107,7 +109,8 @@ export const useFilterChangeEffects = (
 
   useEffect(() => {
     const baseLeads = getBaseLeads();
-    if (currentIndex >= baseLeads.length && baseLeads.length > 0) {
+    // Add null check for baseLeads
+    if (baseLeads && currentIndex >= baseLeads.length && baseLeads.length > 0) {
       resetNavigation(0);
     }
   }, [timezoneFilter, callFilter, currentIndex]);
