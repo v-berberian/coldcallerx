@@ -169,24 +169,28 @@ export const useLeadNavigation = (initialLeads: Lead[]) => {
     }));
     setLeadsData(formattedLeads);
     
-    // Try to restore the last viewed lead index
-    const savedIndex = localStorage.getItem('coldcaller-current-index');
-    const startIndex = savedIndex ? parseInt(savedIndex, 10) : 0;
-    const validIndex = Math.max(0, Math.min(startIndex, formattedLeads.length - 1));
-    
-    resetNavigation(validIndex);
+    // Don't restore from localStorage anymore - rely on cloud session state
+    resetNavigation(0);
     resetShownLeads();
     resetCallState();
     
-    console.log('Restored to lead index:', validIndex);
+    console.log('Reset leads data with', formattedLeads.length, 'leads');
   };
 
-  // Save current index to localStorage when it changes
-  useEffect(() => {
-    if (leadsData.length > 0) {
-      localStorage.setItem('coldcaller-current-index', currentIndex.toString());
+  // Function to restore session state from cloud (called by parent component)
+  const restoreSessionState = (sessionState: any) => {
+    console.log('Restoring session state from cloud:', sessionState);
+    
+    // Restore the current index from cloud session
+    if (sessionState.currentLeadIndex !== undefined && leadsData.length > 0) {
+      const validIndex = Math.max(0, Math.min(sessionState.currentLeadIndex, leadsData.length - 1));
+      console.log('Restoring current index from cloud:', validIndex);
+      resetNavigation(validIndex);
     }
-  }, [currentIndex, leadsData.length]);
+  };
+
+  // Remove localStorage saving - we rely on cloud session state now
+  // The session state is saved via useSessionPersistence hook in the calling component
 
   return {
     leadsData,
@@ -220,6 +224,7 @@ export const useLeadNavigation = (initialLeads: Lead[]) => {
     toggleCallDelay,
     resetCallDelay,
     resetLeadsData,
+    restoreSessionState,
     countdownTime
   };
 };
