@@ -54,7 +54,12 @@ const LeadCard: React.FC<LeadCardProps> = ({
             {getStateFromAreaCode(lead.phone)}
           </p>
           
-          <h2 className="text-3xl font-bold text-foreground">{lead.name}</h2>
+          {/* Contact name - fixed height container with truncation to prevent layout shift */}
+          <div className="h-12 flex items-center justify-center px-2">
+            <h2 className="text-3xl font-bold text-foreground truncate max-w-full text-center">
+              {lead.name}
+            </h2>
+          </div>
           
           {/* Company name - fixed height container to prevent layout shift */}
           <div className="h-7 flex items-center justify-center">
