@@ -199,7 +199,8 @@ const Auth = () => {
         </div>
       </div>
 
-      <style jsx>{`
+      <style>
+        {`
         .typewriter-cursor {
           caret-color: #3b82f6;
           animation: typewriter-blink 1s infinite;
@@ -209,7 +210,8 @@ const Auth = () => {
           0%, 50% { caret-color: #3b82f6; }
           51%, 100% { caret-color: transparent; }
         }
-      `}</style>
+        `}
+      </style>
     </div>
   );
 };
