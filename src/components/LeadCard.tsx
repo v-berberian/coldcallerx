@@ -121,9 +121,9 @@ const LeadCard: React.FC<LeadCardProps> = ({
       <Dialog open={showCompanyDialog} onOpenChange={setShowCompanyDialog}>
         <DialogContent 
           hideCloseButton={true}
-          className="max-w-md p-8 border border-white/20 shadow-2xl rounded-2xl bg-white/10 backdrop-blur-md"
+          className="w-auto max-w-none p-8 border border-white/20 shadow-2xl rounded-2xl bg-white/10 backdrop-blur-md"
         >
-          <p className="text-center text-lg font-medium text-foreground break-words leading-relaxed">
+          <p className="text-center text-lg font-medium text-foreground break-words leading-relaxed whitespace-nowrap">
             {lead.company}
           </p>
         </DialogContent>
