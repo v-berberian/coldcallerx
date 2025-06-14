@@ -117,11 +117,11 @@ const LeadCard: React.FC<LeadCardProps> = ({
         </CardContent>
       </Card>
 
-      {/* Minimalistic Company Name Dialog */}
+      {/* Glass Morphism Company Name Dialog */}
       <Dialog open={showCompanyDialog} onOpenChange={setShowCompanyDialog}>
         <DialogContent 
           hideCloseButton={true}
-          className="max-w-md p-8 border-0 shadow-xl rounded-2xl"
+          className="max-w-md p-8 border border-white/20 shadow-2xl rounded-2xl bg-white/10 backdrop-blur-md"
         >
           <p className="text-center text-lg font-medium text-foreground break-words leading-relaxed">
             {lead.company}
