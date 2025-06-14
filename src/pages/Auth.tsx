@@ -4,7 +4,6 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Loader2 } from 'lucide-react';
 
@@ -61,36 +60,36 @@ const Auth = () => {
   // Show redirecting state
   if (isRedirecting) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="text-center space-y-2">
-          <Loader2 className="h-8 w-8 animate-spin mx-auto text-blue-500" />
-          <p className="text-sm text-muted-foreground">Signing you in...</p>
+      <div className="h-[100vh] h-[100dvh] h-[100svh] bg-background flex items-center justify-center fixed inset-0 overflow-hidden">
+        <div className="text-center space-y-4">
+          <Loader2 className="h-12 w-12 animate-spin mx-auto text-blue-500" />
+          <p className="text-lg text-muted-foreground">Signing you in...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-background flex flex-col">
-      {/* Header matching the app style */}
-      <div className="bg-background border-b border-border p-4 pt-safe">
-        <div className="flex items-center justify-center">
-          <h1 className="text-2xl font-bold">
-            <span className="text-blue-500">ColdCall </span>
-            <span className="text-blue-500">X</span>
-          </h1>
-        </div>
-      </div>
-
-      {/* Main content */}
+    <div className="h-[100vh] h-[100dvh] h-[100svh] bg-background flex flex-col fixed inset-0 overflow-hidden">
+      {/* Full screen container with proper viewport handling */}
       <div className="flex-1 flex items-center justify-center p-6">
-        <Card className="w-full max-w-sm shadow-lg rounded-2xl border-0 bg-card">
-          <CardHeader className="text-center pb-4">
-            <CardTitle className="text-xl font-semibold text-foreground">
-              {isSignUp ? 'Create Account' : 'Sign In'}
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-6">
+        <div className="w-full max-w-sm space-y-8">
+          {/* App Title */}
+          <div className="text-center">
+            <h1 className="text-4xl font-bold mb-12">
+              <span className="text-blue-500">ColdCall </span>
+              <span className="text-blue-500">X</span>
+            </h1>
+          </div>
+
+          {/* Auth Form */}
+          <div className="space-y-6">
+            <div className="text-center">
+              <h2 className="text-2xl font-semibold text-foreground mb-8">
+                {isSignUp ? 'Create Account' : 'Sign In'}
+              </h2>
+            </div>
+
             <form onSubmit={handleSubmit} className="space-y-4">
               <Input
                 type="email"
@@ -98,7 +97,7 @@ const Auth = () => {
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="Email"
                 required
-                className="rounded-xl border-border h-12 text-base"
+                className="h-14 text-lg rounded-2xl border-2 focus:border-blue-500 transition-colors"
                 disabled={loading}
               />
               <Input
@@ -108,23 +107,26 @@ const Auth = () => {
                 placeholder="Password"
                 required
                 minLength={6}
-                className="rounded-xl border-border h-12 text-base"
+                className="h-14 text-lg rounded-2xl border-2 focus:border-blue-500 transition-colors"
                 disabled={loading}
               />
+              
               {error && (
-                <Alert className="rounded-xl">
-                  <AlertDescription className="text-sm">{error}</AlertDescription>
+                <Alert className="rounded-2xl border-red-200 bg-red-50">
+                  <AlertDescription className="text-red-800">{error}</AlertDescription>
                 </Alert>
               )}
+              
               <Button 
                 type="submit" 
-                className="w-full rounded-xl h-12 text-base font-medium" 
+                className="w-full h-14 text-lg font-semibold rounded-2xl bg-blue-500 hover:bg-blue-600 transition-colors" 
                 disabled={loading}
               >
-                {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                {isSignUp ? 'Sign Up' : 'Sign In'}
+                {loading && <Loader2 className="mr-2 h-5 w-5 animate-spin" />}
+                {isSignUp ? 'Create Account' : 'Sign In'}
               </Button>
             </form>
+
             <div className="text-center">
               <Button
                 variant="ghost"
@@ -132,14 +134,14 @@ const Auth = () => {
                   setIsSignUp(!isSignUp);
                   setError('');
                 }}
-                className="text-muted-foreground hover:text-foreground"
+                className="text-muted-foreground hover:text-foreground text-base"
                 disabled={loading}
               >
-                {isSignUp ? 'Sign in instead' : 'Create account'}
+                {isSignUp ? 'Already have an account?' : 'Create account'}
               </Button>
             </div>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
       </div>
     </div>
   );

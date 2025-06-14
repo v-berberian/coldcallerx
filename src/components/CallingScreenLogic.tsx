@@ -4,29 +4,38 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import CallingHeader from './CallingHeader';
 import MainContent from './MainContent';
-import DailyProgress from './DailyProgress';
 import AutoCallCountdown from './AutoCallCountdown';
 import { useSearchState } from './SearchState';
-import { useDailyCallState } from './DailyCallState';
 import { useLeadNavigation } from '../hooks/useLeadNavigation';
 import { Lead } from '../types/lead';
+import { SessionState } from '@/services/sessionService';
 
 interface CallingScreenLogicProps {
   leads: Lead[];
   fileName: string;
   onBack: () => void;
   onLeadsImported: (leads: Lead[], fileName: string) => void;
+  markLeadAsCalled?: (lead: Lead) => Promise<boolean>;
+  resetCallCount?: (lead: Lead) => void;
+  resetAllCallCounts?: () => void;
+  sessionState?: SessionState;
+  updateSessionState?: (updates: Partial<SessionState>) => Promise<boolean>;
 }
 
 const CallingScreenLogic: React.FC<CallingScreenLogicProps> = ({
   leads,
   fileName,
   onBack,
-  onLeadsImported
+  onLeadsImported,
+  markLeadAsCalled,
+  resetCallCount,
+  resetAllCallCounts,
+  sessionState,
+  updateSessionState
 }) => {
   const [componentReady, setComponentReady] = useState(false);
 
-  // Initialize hooks progressively to prevent blocking
+  // Initialize hooks with cloud session state
   const {
     leadsData,
     currentIndex,
@@ -36,7 +45,6 @@ const CallingScreenLogic: React.FC<CallingScreenLogicProps> = ({
     shuffleMode,
     autoCall,
     callDelay,
-    historyIndex,
     shouldAutoCall,
     setShouldAutoCall,
     currentLeadForAutoCall,
@@ -49,8 +57,6 @@ const CallingScreenLogic: React.FC<CallingScreenLogicProps> = ({
     handleCountdownComplete,
     handleNext,
     handlePrevious,
-    resetCallCount,
-    resetAllCallCounts,
     selectLead,
     toggleTimezoneFilter,
     toggleCallFilter,
@@ -59,7 +65,7 @@ const CallingScreenLogic: React.FC<CallingScreenLogicProps> = ({
     toggleCallDelay,
     resetCallDelay,
     resetLeadsData
-  } = useLeadNavigation(leads);
+  } = useLeadNavigation(leads, sessionState);
 
   const {
     searchQuery,
@@ -78,17 +84,10 @@ const CallingScreenLogic: React.FC<CallingScreenLogicProps> = ({
     callFilter 
   });
 
-  const {
-    dailyCallCount,
-    incrementDailyCallCount,
-    resetDailyCallCount
-  } = useDailyCallState();
-
   // Progressive component initialization
   useEffect(() => {
     console.log('CallingScreenLogic: Starting progressive initialization');
     
-    // Defer component ready state to prevent initial render blocking
     const initializeComponent = async () => {
       await new Promise(resolve => setTimeout(resolve, 50));
       console.log('CallingScreenLogic: Component ready');
@@ -106,20 +105,24 @@ const CallingScreenLogic: React.FC<CallingScreenLogicProps> = ({
     }
   }, [leads, componentReady]);
 
-  // Save updated leads data to localStorage whenever leadsData changes (debounced)
+  // Save session state changes to cloud
   useEffect(() => {
-    if (leadsData.length > 0 && componentReady) {
-      const saveData = () => {
-        localStorage.setItem('coldcaller-leads', JSON.stringify(leadsData));
-        localStorage.setItem('coldcaller-current-index', currentIndex.toString());
-        localStorage.setItem('coldcaller-filename', fileName);
+    if (updateSessionState && componentReady) {
+      const saveSessionState = async () => {
+        await updateSessionState({
+          currentLeadIndex: currentIndex,
+          timezoneFilter,
+          callFilter,
+          shuffleMode,
+          autoCall,
+          callDelay
+        });
       };
 
-      // Debounce localStorage saves to prevent blocking
-      const timeoutId = setTimeout(saveData, 100);
+      const timeoutId = setTimeout(saveSessionState, 500);
       return () => clearTimeout(timeoutId);
     }
-  }, [leadsData, currentIndex, fileName, componentReady]);
+  }, [currentIndex, timezoneFilter, callFilter, shuffleMode, autoCall, callDelay, updateSessionState, componentReady]);
 
   // Handle auto-call using the currently displayed lead
   useEffect(() => {
@@ -131,12 +134,16 @@ const CallingScreenLogic: React.FC<CallingScreenLogicProps> = ({
         console.log('CallingScreenLogic: Auto-call triggered for displayed lead:', currentLead.name, currentLead.phone);
         setCurrentLeadForAutoCall(currentLead);
         executeAutoCall(currentLead);
-        incrementDailyCallCount();
+        
+        // Mark as called in cloud if function is provided
+        if (markLeadAsCalled) {
+          markLeadAsCalled(currentLead);
+        }
       }
       
       setShouldAutoCall(false);
     }
-  }, [shouldAutoCall, autoCall, currentIndex, cardKey, componentReady]);
+  }, [shouldAutoCall, autoCall, currentIndex, cardKey, componentReady, markLeadAsCalled]);
 
   const handleLeadSelect = (lead: Lead) => {
     const baseLeads = getBaseLeads();
@@ -154,11 +161,15 @@ const CallingScreenLogic: React.FC<CallingScreenLogicProps> = ({
   };
 
   // Handle manual call button click
-  const handleCallClick = () => {
+  const handleCallClick = async () => {
     const currentLeads = getBaseLeads();
     const currentLead = currentLeads[currentIndex];
     makeCall(currentLead);
-    incrementDailyCallCount();
+    
+    // Mark as called in cloud if function is provided
+    if (markLeadAsCalled) {
+      await markLeadAsCalled(currentLead);
+    }
   };
 
   // Create wrapper functions for navigation that pass the required baseLeads parameter
@@ -170,6 +181,20 @@ const CallingScreenLogic: React.FC<CallingScreenLogicProps> = ({
   const handlePreviousWrapper = () => {
     const currentLeads = getBaseLeads();
     handlePrevious(currentLeads);
+  };
+
+  // Handle reset call count with cloud sync
+  const handleResetCallCount = async (lead: Lead) => {
+    if (resetCallCount) {
+      resetCallCount(lead);
+    }
+  };
+
+  // Handle reset all call counts with cloud sync
+  const handleResetAllCallCounts = async () => {
+    if (resetAllCallCounts) {
+      resetAllCallCounts();
+    }
   };
 
   // Show loading until component is ready
@@ -253,7 +278,7 @@ const CallingScreenLogic: React.FC<CallingScreenLogicProps> = ({
         onLeadsImported={onLeadsImported}
       />
 
-      {/* Main Content - takes remaining space */}
+      {/* Main Content - takes remaining space, no daily progress bar */}
       <div className="flex-1 overflow-hidden">
         <MainContent
           currentLead={currentLead}
@@ -269,26 +294,18 @@ const CallingScreenLogic: React.FC<CallingScreenLogicProps> = ({
           isCountdownActive={isCountdownActive}
           countdownTime={countdownTime}
           onCall={handleCallClick}
-          onResetCallCount={() => resetCallCount(currentLead)}
+          onResetCallCount={() => handleResetCallCount(currentLead)}
           onToggleTimezone={toggleTimezoneFilter}
           onToggleCallFilter={toggleCallFilter}
           onToggleShuffle={toggleShuffle}
           onToggleAutoCall={toggleAutoCall}
           onToggleCallDelay={toggleCallDelay}
           onResetCallDelay={resetCallDelay}
-          onResetAllCalls={resetAllCallCounts}
+          onResetAllCalls={handleResetAllCallCounts}
           onPrevious={handlePreviousWrapper}
           onNext={handleNextWrapper}
           canGoPrevious={currentLeads.length > 1}
           canGoNext={currentLeads.length > 1}
-        />
-      </div>
-
-      {/* Daily Progress Bar - Fixed at bottom */}
-      <div className="fixed bottom-0 left-0 right-0 z-50">
-        <DailyProgress
-          dailyCallCount={dailyCallCount}
-          onResetDailyCount={resetDailyCallCount}
         />
       </div>
     </div>

@@ -27,60 +27,62 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
   const initialized = useRef(false);
-  const stabilizing = useRef(false);
 
   useEffect(() => {
     // Prevent multiple initializations
     if (initialized.current) return;
     initialized.current = true;
 
-    console.log('AuthProvider: Initializing auth listener');
+    console.log('AuthProvider: Initializing auth with session persistence');
 
     let mounted = true;
 
-    // Set up auth state listener with simplified logic
+    // Set up auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
         if (!mounted) return;
         
         console.log('AuthProvider: Auth state change:', event, session?.user?.email);
         
-        // Prevent rapid state changes during login
-        if (event === 'SIGNED_IN' && !stabilizing.current) {
-          stabilizing.current = true;
-          console.log('AuthProvider: Login detected, stabilizing...');
-          
-          // Small delay to ensure auth state is fully settled
-          setTimeout(() => {
-            if (!mounted) return;
-            
-            setSession(session);
-            setUser(session?.user ?? null);
-            setLoading(false);
-            
-            // Allow for stabilization before next auth change
-            setTimeout(() => {
-              stabilizing.current = false;
-            }, 500);
-          }, 200);
-        } else if (!stabilizing.current) {
-          // Handle other auth events normally
-          setSession(session);
-          setUser(session?.user ?? null);
-          setLoading(false);
+        // Update state immediately for all events
+        setSession(session);
+        setUser(session?.user ?? null);
+        setLoading(false);
+
+        // Store session persistence flag
+        if (session) {
+          localStorage.setItem('coldcaller-has-session', 'true');
+        } else {
+          localStorage.removeItem('coldcaller-has-session');
         }
       }
     );
 
-    // Check for existing session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (!mounted) return;
-      
-      console.log('AuthProvider: Initial session check:', session?.user?.email);
-      setSession(session);
-      setUser(session?.user ?? null);
-      setLoading(false);
-    });
+    // Check for existing session on startup
+    const initializeAuth = async () => {
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        
+        if (!mounted) return;
+        
+        console.log('AuthProvider: Initial session check:', session?.user?.email);
+        setSession(session);
+        setUser(session?.user ?? null);
+        setLoading(false);
+
+        // Update persistence flag
+        if (session) {
+          localStorage.setItem('coldcaller-has-session', 'true');
+        } else {
+          localStorage.removeItem('coldcaller-has-session');
+        }
+      } catch (error) {
+        console.error('AuthProvider: Error checking session:', error);
+        setLoading(false);
+      }
+    };
+
+    initializeAuth();
 
     return () => {
       console.log('AuthProvider: Cleaning up');
@@ -113,6 +115,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const signOut = async () => {
     console.log('AuthProvider: Signing out user');
+    localStorage.removeItem('coldcaller-has-session');
     await supabase.auth.signOut();
   };
 
