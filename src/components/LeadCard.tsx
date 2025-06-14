@@ -1,8 +1,7 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { X } from 'lucide-react';
 import { formatPhoneNumber } from '../utils/phoneUtils';
 import { getStateFromAreaCode } from '../utils/timezoneUtils';
@@ -117,13 +116,13 @@ const LeadCard: React.FC<LeadCardProps> = ({
         </CardContent>
       </Card>
 
-      {/* Company Name Dialog */}
+      {/* Minimalistic Company Name Dialog */}
       <Dialog open={showCompanyDialog} onOpenChange={setShowCompanyDialog}>
-        <DialogContent className="max-w-md">
-          <DialogHeader>
-            <DialogTitle>Company Name</DialogTitle>
-          </DialogHeader>
-          <p className="text-center text-lg font-medium text-foreground break-words">
+        <DialogContent 
+          hideCloseButton={true}
+          className="max-w-md p-8 border-0 shadow-xl rounded-2xl"
+        >
+          <p className="text-center text-lg font-medium text-foreground break-words leading-relaxed">
             {lead.company}
           </p>
         </DialogContent>
