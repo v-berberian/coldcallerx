@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -57,9 +58,9 @@ const LeadCard: React.FC<LeadCardProps> = ({
               {getStateFromAreaCode(lead.phone)}
             </p>
             
-            {/* Contact name - fixed height container with truncation to prevent layout shift */}
-            <div className="h-12 flex items-center justify-center px-2">
-              <h2 className="text-3xl font-bold text-foreground truncate max-w-full text-center">
+            {/* Contact name - removed truncation to show full name */}
+            <div className="flex items-center justify-center px-2">
+              <h2 className="text-3xl font-bold text-foreground text-center break-words leading-tight">
                 {lead.name}
               </h2>
             </div>
