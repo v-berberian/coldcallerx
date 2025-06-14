@@ -52,13 +52,33 @@ export const useSimplifiedCallingScreenEffects = ({
   markLeadAsCalled
 }: UseSimplifiedCallingScreenEffectsProps) => {
   
-  useComponentInitialization({
-    componentReady,
-    leadsInitialized,
-    setLeadsInitialized,
-    leads,
-    memoizedResetLeadsData
-  });
+  // Initialize component when leads are available
+  useEffect(() => {
+    console.log('Component initialization effect:', { 
+      leadsLength: leads.length, 
+      leadsDataLength: leadsData.length,
+      componentReady,
+      leadsInitialized
+    });
+
+    if (leads.length > 0 && leadsData.length > 0 && !leadsInitialized) {
+      console.log('Setting leads as initialized');
+      setLeadsInitialized(true);
+    }
+
+    if (leadsInitialized && !componentReady) {
+      console.log('Setting component as ready');
+      setComponentReady(true);
+    }
+  }, [leads.length, leadsData.length, leadsInitialized, componentReady, setLeadsInitialized, setComponentReady]);
+
+  // Reset leads data when leads change
+  useEffect(() => {
+    if (leads.length > 0 && leads !== leadsData) {
+      console.log('Resetting leads data with new leads:', leads.length);
+      memoizedResetLeadsData(leads);
+    }
+  }, [leads, memoizedResetLeadsData]);
 
   useSessionPersistence({
     componentReady,
