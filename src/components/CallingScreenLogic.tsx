@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import CallingHeader from './CallingHeader';
@@ -33,6 +33,7 @@ const CallingScreenLogic: React.FC<CallingScreenLogicProps> = ({
   updateSessionState
 }) => {
   const [componentReady, setComponentReady] = useState(false);
+  const [leadsInitialized, setLeadsInitialized] = useState(false);
 
   // Initialize hooks - only pass leads to useLeadNavigation
   const {
@@ -96,17 +97,18 @@ const CallingScreenLogic: React.FC<CallingScreenLogicProps> = ({
     initializeComponent();
   }, []);
 
-  // Handle new CSV imports by resetting the leads data
+  // Handle new CSV imports by resetting the leads data - only when leads actually change
   useEffect(() => {
-    if (componentReady) {
-      console.log('CallingScreenLogic: Resetting leads data for new import');
+    if (componentReady && !leadsInitialized) {
+      console.log('CallingScreenLogic: Initializing leads data for first time');
       resetLeadsData(leads);
+      setLeadsInitialized(true);
     }
-  }, [leads, componentReady, resetLeadsData]);
+  }, [componentReady, leadsInitialized, leads.length]); // Only depend on leads.length to avoid infinite loops
 
   // Save session state changes to cloud
   useEffect(() => {
-    if (updateSessionState && componentReady) {
+    if (updateSessionState && componentReady && leadsInitialized) {
       const saveSessionState = async () => {
         await updateSessionState({
           currentLeadIndex: currentIndex,
@@ -121,11 +123,11 @@ const CallingScreenLogic: React.FC<CallingScreenLogicProps> = ({
       const timeoutId = setTimeout(saveSessionState, 500);
       return () => clearTimeout(timeoutId);
     }
-  }, [currentIndex, timezoneFilter, callFilter, shuffleMode, autoCall, callDelay, updateSessionState, componentReady]);
+  }, [currentIndex, timezoneFilter, callFilter, shuffleMode, autoCall, callDelay, updateSessionState, componentReady, leadsInitialized]);
 
   // Handle auto-call using the currently displayed lead
   useEffect(() => {
-    if (shouldAutoCall && autoCall && componentReady) {
+    if (shouldAutoCall && autoCall && componentReady && leadsInitialized) {
       const currentLeads = getBaseLeads();
       const currentLead = currentLeads[currentIndex];
       
@@ -142,7 +144,7 @@ const CallingScreenLogic: React.FC<CallingScreenLogicProps> = ({
       
       setShouldAutoCall(false);
     }
-  }, [shouldAutoCall, autoCall, currentIndex, cardKey, componentReady, markLeadAsCalled]);
+  }, [shouldAutoCall, autoCall, currentIndex, cardKey, componentReady, leadsInitialized, markLeadAsCalled]);
 
   const handleLeadSelect = (lead: Lead) => {
     const baseLeads = getBaseLeads();
@@ -197,7 +199,7 @@ const CallingScreenLogic: React.FC<CallingScreenLogicProps> = ({
   };
 
   // Show loading until component is ready
-  if (!componentReady) {
+  if (!componentReady || !leadsInitialized) {
     return (
       <div className="h-[100dvh] bg-background flex items-center justify-center">
         <div className="text-center space-y-2">
@@ -261,53 +263,64 @@ const CallingScreenLogic: React.FC<CallingScreenLogicProps> = ({
   const totalLeadCount = currentLeads.length;
 
   return (
-    <div className="h-[100dvh] bg-background flex flex-col overflow-hidden fixed inset-0">
-      {/* Header */}
-      <CallingHeader
-        searchQuery={searchQuery}
-        showAutocomplete={showAutocomplete}
-        searchResults={searchResults}
-        leadsData={leadsData}
-        fileName={fileName}
-        onSearchChange={setSearchQuery}
-        onSearchFocus={handleSearchFocus}
-        onSearchBlur={handleSearchBlur}
-        onClearSearch={clearSearch}
-        onLeadSelect={handleLeadSelect}
-        onLeadsImported={onLeadsImported}
-      />
-
-      {/* Main Content - takes remaining space, no daily progress bar */}
-      <div className="flex-1 overflow-hidden">
-        <MainContent
-          currentLead={currentLead}
-          currentIndex={currentIndex}
-          totalCount={totalLeadCount}
+    <>
+      <div className="h-[100dvh] bg-background flex flex-col overflow-hidden fixed inset-0">
+        {/* Header */}
+        <CallingHeader
+          searchQuery={searchQuery}
+          showAutocomplete={showAutocomplete}
+          searchResults={searchResults}
+          leadsData={leadsData}
           fileName={fileName}
-          cardKey={cardKey}
-          timezoneFilter={timezoneFilter}
-          callFilter={callFilter}
-          shuffleMode={shuffleMode}
-          autoCall={autoCall}
-          callDelay={callDelay}
-          isCountdownActive={isCountdownActive}
-          countdownTime={countdownTime}
-          onCall={handleCallClick}
-          onResetCallCount={() => handleResetCallCount(currentLead)}
-          onToggleTimezone={toggleTimezoneFilter}
-          onToggleCallFilter={toggleCallFilter}
-          onToggleShuffle={toggleShuffle}
-          onToggleAutoCall={toggleAutoCall}
-          onToggleCallDelay={toggleCallDelay}
-          onResetCallDelay={resetCallDelay}
-          onResetAllCalls={handleResetAllCallCounts}
-          onPrevious={handlePreviousWrapper}
-          onNext={handleNextWrapper}
-          canGoPrevious={currentLeads.length > 1}
-          canGoNext={currentLeads.length > 1}
+          onSearchChange={setSearchQuery}
+          onSearchFocus={handleSearchFocus}
+          onSearchBlur={handleSearchBlur}
+          onClearSearch={clearSearch}
+          onLeadSelect={handleLeadSelect}
+          onLeadsImported={onLeadsImported}
         />
+
+        {/* Main Content - takes remaining space, no daily progress bar */}
+        <div className="flex-1 overflow-hidden">
+          <MainContent
+            currentLead={currentLead}
+            currentIndex={currentIndex}
+            totalCount={totalLeadCount}
+            fileName={fileName}
+            cardKey={cardKey}
+            timezoneFilter={timezoneFilter}
+            callFilter={callFilter}
+            shuffleMode={shuffleMode}
+            autoCall={autoCall}
+            callDelay={callDelay}
+            isCountdownActive={isCountdownActive}
+            countdownTime={countdownTime}
+            onCall={handleCallClick}
+            onResetCallCount={() => handleResetCallCount(currentLead)}
+            onToggleTimezone={toggleTimezoneFilter}
+            onToggleCallFilter={toggleCallFilter}
+            onToggleShuffle={toggleShuffle}
+            onToggleAutoCall={toggleAutoCall}
+            onToggleCallDelay={toggleCallDelay}
+            onResetCallDelay={resetCallDelay}
+            onResetAllCalls={handleResetAllCallCounts}
+            onPrevious={handlePreviousWrapper}
+            onNext={handleNextWrapper}
+            canGoPrevious={currentLeads.length > 1}
+            canGoNext={currentLeads.length > 1}
+          />
+        </div>
       </div>
-    </div>
+
+      {/* Auto Call Countdown Overlay */}
+      {isCountdownActive && (
+        <AutoCallCountdown
+          isActive={isCountdownActive}
+          duration={countdownTime}
+          onComplete={() => {}}
+        />
+      )}
+    </>
   );
 };
 
