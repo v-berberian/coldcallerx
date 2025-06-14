@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -103,7 +102,7 @@ const CallingScreenLogic: React.FC<CallingScreenLogicProps> = ({
       console.log('CallingScreenLogic: Resetting leads data for new import');
       resetLeadsData(leads);
     }
-  }, [leads, componentReady]);
+  }, [leads, componentReady, resetLeadsData]);
 
   // Save session state changes to cloud
   useEffect(() => {
