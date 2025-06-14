@@ -39,8 +39,8 @@ const LeadCard: React.FC<LeadCardProps> = ({
   
   return (
     <>
-      <Card key={leadKey} className="shadow-2xl border-border/50 rounded-3xl bg-card h-[400px] flex flex-col animate-scale-in">
-        <CardContent className="p-6 space-y-4 flex-1 flex flex-col">
+      <Card key={leadKey} className="shadow-2xl border-border/50 rounded-3xl bg-card h-[480px] flex flex-col animate-scale-in">
+        <CardContent className="p-8 space-y-6 flex-1 flex flex-col">
           {/* Top row with lead count and file name */}
           <div className="flex items-center justify-between">
             <p className="text-sm text-muted-foreground opacity-40">
@@ -52,7 +52,7 @@ const LeadCard: React.FC<LeadCardProps> = ({
           </div>
 
           {/* Lead info - Main content area with animation */}
-          <div key={leadKey} className="text-center space-y-3 flex-1 flex flex-col justify-center animate-content-change">
+          <div key={leadKey} className="text-center space-y-4 flex-1 flex flex-col justify-center animate-content-change">
             {/* State and timezone - moved to top with same font size as "Called: times" */}
             <p className="text-sm text-muted-foreground">
               {getStateFromAreaCode(lead.phone)}
@@ -80,7 +80,7 @@ const LeadCard: React.FC<LeadCardProps> = ({
             
             <p className="text-lg text-muted-foreground text-center">{formatPhoneNumber(lead.phone)}</p>
             
-            <div className="relative flex flex-col items-center space-y-3">
+            <div className="relative flex flex-col items-center space-y-4">
               <div className="flex items-center justify-center">
                 <p className="text-sm text-muted-foreground">
                   Called: {lead.called || 0} times
