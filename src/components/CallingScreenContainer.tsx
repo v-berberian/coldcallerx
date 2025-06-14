@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -35,9 +34,7 @@ const CallingScreenContainer: React.FC<CallingScreenContainerProps> = ({
 }) => {
   const {
     componentReady,
-    setComponentReady,
     leadsInitialized,
-    setLeadsInitialized,
     leadsData,
     currentIndex,
     cardKey,
@@ -81,12 +78,7 @@ const CallingScreenContainer: React.FC<CallingScreenContainerProps> = ({
 
   useSimplifiedCallingScreenEffects({
     componentReady,
-    setComponentReady,
     leadsInitialized,
-    setLeadsInitialized,
-    leads,
-    leadsData,
-    memoizedResetLeadsData,
     currentIndex,
     timezoneFilter,
     callFilter,
@@ -205,7 +197,7 @@ const CallingScreenContainer: React.FC<CallingScreenContainerProps> = ({
         onLeadsImported={onLeadsImported}
       />
 
-      {/* Main Content - takes remaining space, no daily progress bar */}
+      {/* Main Content */}
       <div className="flex-1 overflow-hidden">
         <MainContent
           currentLead={currentLead}

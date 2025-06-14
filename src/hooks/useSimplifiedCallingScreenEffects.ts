@@ -2,18 +2,10 @@
 import { useEffect } from 'react';
 import { Lead } from '../types/lead';
 import { SessionState } from '@/services/sessionService';
-import { useComponentInitialization } from './useComponentInitialization';
-import { useSessionPersistence } from './useSessionPersistence';
-import { useAutoCallEffects } from './useAutoCallEffects';
 
 interface UseSimplifiedCallingScreenEffectsProps {
   componentReady: boolean;
-  setComponentReady: (ready: boolean) => void;
   leadsInitialized: boolean;
-  setLeadsInitialized: (initialized: boolean) => void;
-  leads: Lead[];
-  leadsData: Lead[];
-  memoizedResetLeadsData: (leads: Lead[]) => void;
   currentIndex: number;
   timezoneFilter: string;
   callFilter: string;
@@ -31,12 +23,7 @@ interface UseSimplifiedCallingScreenEffectsProps {
 
 export const useSimplifiedCallingScreenEffects = ({
   componentReady,
-  setComponentReady,
   leadsInitialized,
-  setLeadsInitialized,
-  leads,
-  leadsData,
-  memoizedResetLeadsData,
   currentIndex,
   timezoneFilter,
   callFilter,
@@ -51,65 +38,56 @@ export const useSimplifiedCallingScreenEffects = ({
   getBaseLeads,
   markLeadAsCalled
 }: UseSimplifiedCallingScreenEffectsProps) => {
-  
-  // Initialize component when leads are available
+
+  // Save session state changes to cloud with debouncing
   useEffect(() => {
-    console.log('Component initialization effect:', { 
-      leadsLength: leads.length, 
-      leadsDataLength: leadsData.length,
-      componentReady,
-      leadsInitialized
-    });
+    if (updateSessionState && componentReady && leadsInitialized) {
+      const timeoutId = setTimeout(async () => {
+        try {
+          await updateSessionState({
+            currentLeadIndex: currentIndex,
+            timezoneFilter,
+            callFilter,
+            shuffleMode,
+            autoCall,
+            callDelay
+          });
+        } catch (error) {
+          console.error('Error saving session state:', error);
+        }
+      }, 500);
 
-    if (leads.length > 0 && leadsData.length > 0 && !leadsInitialized) {
-      console.log('Setting leads as initialized');
-      setLeadsInitialized(true);
+      return () => clearTimeout(timeoutId);
     }
+  }, [currentIndex, timezoneFilter, callFilter, shuffleMode, autoCall, callDelay, updateSessionState, componentReady, leadsInitialized]);
 
-    if (leadsInitialized && !componentReady) {
-      console.log('Setting component as ready');
-      setComponentReady(true);
-    }
-  }, [leads.length, leadsData.length, leadsInitialized, componentReady, setLeadsInitialized, setComponentReady]);
-
-  // Reset leads data when leads change - use length comparison instead of object comparison
+  // Handle auto-call trigger
   useEffect(() => {
-    if (leads.length > 0 && leads.length !== leadsData.length) {
-      console.log('Resetting leads data with new leads:', leads.length);
-      memoizedResetLeadsData(leads);
+    if (shouldAutoCall && autoCall && componentReady && leadsInitialized) {
+      const currentLeads = getBaseLeads();
+      const currentLead = currentLeads[currentIndex];
+      
+      if (currentLead) {
+        console.log('AUTO-CALL: Triggering for lead:', currentLead.name);
+        setCurrentLeadForAutoCall(currentLead);
+        executeAutoCall(currentLead);
+        
+        // Mark as called in cloud if no delay
+        if (markLeadAsCalled && callDelay === 0) {
+          markLeadAsCalled(currentLead).catch(error => {
+            console.error('Error marking lead as called:', error);
+          });
+        }
+      }
+      
+      setShouldAutoCall(false);
     }
-  }, [leads.length, leadsData.length, memoizedResetLeadsData]);
+  }, [shouldAutoCall, autoCall, currentIndex, executeAutoCall, setCurrentLeadForAutoCall, setShouldAutoCall, markLeadAsCalled, componentReady, leadsInitialized, getBaseLeads, callDelay]);
 
-  useSessionPersistence({
-    componentReady,
-    leadsInitialized,
-    currentIndex,
-    timezoneFilter,
-    callFilter,
-    shuffleMode,
-    autoCall,
-    callDelay,
-    updateSessionState
-  });
-
-  useAutoCallEffects({
-    shouldAutoCall,
-    autoCall,
-    componentReady,
-    leadsInitialized,
-    currentIndex,
-    callDelay,
-    getBaseLeads,
-    setCurrentLeadForAutoCall,
-    executeAutoCall,
-    setShouldAutoCall,
-    markLeadAsCalled
-  });
-
-  // Save current index to localStorage when it changes
+  // Save current index to localStorage
   useEffect(() => {
-    if (leadsData.length > 0) {
+    if (componentReady && leadsInitialized) {
       localStorage.setItem('coldcaller-current-index', currentIndex.toString());
     }
-  }, [currentIndex, leadsData.length]);
+  }, [currentIndex, componentReady, leadsInitialized]);
 };
