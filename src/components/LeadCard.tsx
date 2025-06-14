@@ -1,7 +1,8 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { X } from 'lucide-react';
 import { formatPhoneNumber } from '../utils/phoneUtils';
 import { getStateFromAreaCode } from '../utils/timezoneUtils';
@@ -31,83 +32,103 @@ const LeadCard: React.FC<LeadCardProps> = ({
   onCall,
   onResetCallCount
 }) => {
+  const [showCompanyDialog, setShowCompanyDialog] = useState(false);
+  
   // Use stable key based on lead data instead of changing cardKey
   const leadKey = `${lead.name}-${lead.phone}`;
   
   return (
-    <Card key={leadKey} className="shadow-2xl border-border/50 rounded-3xl bg-card h-[400px] flex flex-col animate-scale-in">
-      <CardContent className="p-6 space-y-4 flex-1 flex flex-col">
-        {/* Top row with lead count and file name */}
-        <div className="flex items-center justify-between">
-          <p className="text-sm text-muted-foreground opacity-40">
-            {currentIndex + 1}/{totalCount}
-          </p>
-          <p className="text-sm text-muted-foreground opacity-40">
-            {fileName}
-          </p>
-        </div>
-
-        {/* Lead info - Main content area with animation */}
-        <div key={leadKey} className="text-center space-y-3 flex-1 flex flex-col justify-center animate-content-change">
-          {/* State and timezone - moved to top with same font size as "Called: times" */}
-          <p className="text-sm text-muted-foreground">
-            {getStateFromAreaCode(lead.phone)}
-          </p>
-          
-          {/* Contact name - fixed height container with truncation to prevent layout shift */}
-          <div className="h-12 flex items-center justify-center px-2">
-            <h2 className="text-3xl font-bold text-foreground truncate max-w-full text-center">
-              {lead.name}
-            </h2>
+    <>
+      <Card key={leadKey} className="shadow-2xl border-border/50 rounded-3xl bg-card h-[400px] flex flex-col animate-scale-in">
+        <CardContent className="p-6 space-y-4 flex-1 flex flex-col">
+          {/* Top row with lead count and file name */}
+          <div className="flex items-center justify-between">
+            <p className="text-sm text-muted-foreground opacity-40">
+              {currentIndex + 1}/{totalCount}
+            </p>
+            <p className="text-sm text-muted-foreground opacity-40">
+              {fileName}
+            </p>
           </div>
-          
-          {/* Company name - fixed height container to prevent layout shift */}
-          <div className="h-7 flex items-center justify-center">
+
+          {/* Lead info - Main content area with animation */}
+          <div key={leadKey} className="text-center space-y-3 flex-1 flex flex-col justify-center animate-content-change">
+            {/* State and timezone - moved to top with same font size as "Called: times" */}
+            <p className="text-sm text-muted-foreground">
+              {getStateFromAreaCode(lead.phone)}
+            </p>
+            
+            {/* Contact name - fixed height container with truncation to prevent layout shift */}
+            <div className="h-12 flex items-center justify-center px-2">
+              <h2 className="text-3xl font-bold text-foreground truncate max-w-full text-center">
+                {lead.name}
+              </h2>
+            </div>
+            
+            {/* Company name - only render container if company exists */}
             {lead.company && (
-              <p className="text-lg text-muted-foreground font-medium truncate max-w-full px-2">
-                {lead.company}
-              </p>
-            )}
-          </div>
-          
-          <p className="text-lg text-muted-foreground text-center">{formatPhoneNumber(lead.phone)}</p>
-          
-          <div className="relative flex flex-col items-center space-y-3">
-            <div className="flex items-center justify-center">
-              <p className="text-sm text-muted-foreground">
-                Called: {lead.called || 0} times
-              </p>
-              {(lead.called || 0) > 0 && (
+              <div className="h-7 flex items-center justify-center">
                 <button
-                  onClick={onResetCallCount}
-                  className="ml-2 p-1 bg-muted rounded transition-colors"
-                  title="Reset call count"
+                  onClick={() => setShowCompanyDialog(true)}
+                  className="text-lg text-muted-foreground font-medium truncate max-w-full px-2 hover:text-foreground transition-colors cursor-pointer"
+                  title="Click to view full company name"
                 >
-                  <X className="h-3 w-3 text-muted-foreground" />
+                  {lead.company}
                 </button>
-              )}
-            </div>
-            {/* Reserve space for last called text to prevent layout shift */}
-            <div className="h-5 flex items-center justify-center">
-              {lead.lastCalled && (
-                <p className="text-sm text-muted-foreground transition-opacity duration-300 ease-in-out opacity-100 whitespace-nowrap">
-                  Last called: {lead.lastCalled}
+              </div>
+            )}
+            
+            <p className="text-lg text-muted-foreground text-center">{formatPhoneNumber(lead.phone)}</p>
+            
+            <div className="relative flex flex-col items-center space-y-3">
+              <div className="flex items-center justify-center">
+                <p className="text-sm text-muted-foreground">
+                  Called: {lead.called || 0} times
                 </p>
-              )}
+                {(lead.called || 0) > 0 && (
+                  <button
+                    onClick={onResetCallCount}
+                    className="ml-2 p-1 bg-muted rounded transition-colors"
+                    title="Reset call count"
+                  >
+                    <X className="h-3 w-3 text-muted-foreground" />
+                  </button>
+                )}
+              </div>
+              {/* Reserve space for last called text to prevent layout shift */}
+              <div className="h-5 flex items-center justify-center">
+                {lead.lastCalled && (
+                  <p className="text-sm text-muted-foreground transition-opacity duration-300 ease-in-out opacity-100 whitespace-nowrap">
+                    Last called: {lead.lastCalled}
+                  </p>
+                )}
+              </div>
             </div>
           </div>
-        </div>
 
-        {/* Main Call Button - with fixed hover styles */}
-        <Button 
-          onClick={onCall} 
-          size="lg" 
-          className="w-full h-16 text-lg font-semibold bg-green-600 hover:bg-green-600 text-white rounded-2xl shadow-lg"
-        >
-          Call
-        </Button>
-      </CardContent>
-    </Card>
+          {/* Main Call Button - with fixed hover styles */}
+          <Button 
+            onClick={onCall} 
+            size="lg" 
+            className="w-full h-16 text-lg font-semibold bg-green-600 hover:bg-green-600 text-white rounded-2xl shadow-lg"
+          >
+            Call
+          </Button>
+        </CardContent>
+      </Card>
+
+      {/* Company Name Dialog */}
+      <Dialog open={showCompanyDialog} onOpenChange={setShowCompanyDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Company Name</DialogTitle>
+          </DialogHeader>
+          <p className="text-center text-lg font-medium text-foreground break-words">
+            {lead.company}
+          </p>
+        </DialogContent>
+      </Dialog>
+    </>
   );
 };
 
