@@ -12,7 +12,6 @@ interface CallingHeaderProps {
   searchResults: Lead[];
   leadsData: Lead[];
   fileName: string;
-  syncStatus?: 'synced' | 'syncing' | 'not-synced';
   onSearchChange: (query: string) => void;
   onSearchFocus: () => void;
   onSearchBlur: () => void;
@@ -27,7 +26,6 @@ const CallingHeader: React.FC<CallingHeaderProps> = ({
   searchResults,
   leadsData,
   fileName,
-  syncStatus = 'synced',
   onSearchChange,
   onSearchFocus,
   onSearchBlur,
@@ -49,7 +47,7 @@ const CallingHeader: React.FC<CallingHeaderProps> = ({
         </div>
         
         <div className="flex items-center space-x-2">
-          <UserProfile syncStatus={syncStatus} />
+          <UserProfile />
         </div>
       </div>
       
