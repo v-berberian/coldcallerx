@@ -10,7 +10,6 @@ interface MainContentProps {
   currentIndex: number;
   totalCount: number;
   fileName: string;
-  cardKey: number;
   timezoneFilter: 'ALL' | 'EST_CST';
   callFilter: 'ALL' | 'UNCALLED';
   shuffleMode: boolean;
@@ -39,7 +38,6 @@ const MainContent: React.FC<MainContentProps> = ({
   currentIndex,
   totalCount,
   fileName,
-  cardKey,
   timezoneFilter,
   callFilter,
   shuffleMode,
@@ -90,7 +88,6 @@ const MainContent: React.FC<MainContentProps> = ({
           currentIndex={currentIndex}
           totalCount={totalCount}
           fileName={fileName}
-          cardKey={cardKey}
           onCall={onCall}
           onResetCallCount={onResetCallCount}
         />
