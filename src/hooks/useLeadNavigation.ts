@@ -103,7 +103,8 @@ export const useLeadNavigation = (initialLeads: Lead[]) => {
     selectLead,
     setCallMadeToCurrentLead,
     autoCall,
-    setShouldAutoCall
+    setShouldAutoCall,
+    goToPrevious
   });
 
   const { makeCallWrapper, handleCountdownCompleteWrapper } = useLeadNavigationEffects({

@@ -19,6 +19,7 @@ interface UseLeadNavigationActionsProps {
   setCallMadeToCurrentLead: (called: boolean) => void;
   autoCall: boolean;
   setShouldAutoCall: (should: boolean) => void;
+  goToPrevious: () => boolean;
 }
 
 export const useLeadNavigationActions = ({
@@ -31,7 +32,8 @@ export const useLeadNavigationActions = ({
   selectLead,
   setCallMadeToCurrentLead,
   autoCall,
-  setShouldAutoCall
+  setShouldAutoCall,
+  goToPrevious
 }: UseLeadNavigationActionsProps) => {
 
   const handleNextWrapper = (baseLeads: Lead[]) => {
@@ -55,10 +57,20 @@ export const useLeadNavigationActions = ({
       return;
     }
     
-    // Simple list-based previous navigation
-    const prevIndex = currentIndex === 0 ? baseLeads.length - 1 : currentIndex - 1;
-    console.log('Previous navigation: from index', currentIndex, 'to index', prevIndex);
-    updateNavigation(prevIndex);
+    if (shuffleMode) {
+      // In shuffle mode, use navigation history to go to previously shown lead
+      const didGoBack = goToPrevious();
+      if (didGoBack) {
+        console.log('Shuffle mode: Used navigation history to go to previous lead');
+      } else {
+        console.log('Shuffle mode: No previous lead in history');
+      }
+    } else {
+      // In sequential mode, use simple list-based navigation
+      const prevIndex = currentIndex === 0 ? baseLeads.length - 1 : currentIndex - 1;
+      console.log('Sequential mode: Previous navigation from index', currentIndex, 'to index', prevIndex);
+      updateNavigation(prevIndex);
+    }
     
     // Reset call state when navigating
     setCallMadeToCurrentLead(false);
