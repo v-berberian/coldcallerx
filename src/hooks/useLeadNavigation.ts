@@ -84,8 +84,7 @@ export const useLeadNavigation = (initialLeads: Lead[]) => {
       }
     },
     shownLeadsInShuffle,
-    setShownLeadsInShuffle,
-    callMadeToCurrentLead
+    setShownLeadsInShuffle
   );
 
   const { handleNextWrapper, handlePreviousWrapper, selectLeadWrapper } = useLeadNavigationActions({
