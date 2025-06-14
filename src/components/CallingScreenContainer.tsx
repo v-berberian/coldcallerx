@@ -124,6 +124,17 @@ const CallingScreenContainer: React.FC<CallingScreenContainerProps> = ({
     setShowAutocomplete
   });
 
+  // Determine sync status based on component state
+  const getSyncStatus = () => {
+    if (!componentReady || !leadsInitialized) {
+      return 'syncing';
+    }
+    if (!updateSessionState) {
+      return 'not-synced';
+    }
+    return 'synced';
+  };
+
   // Show loading until component is ready
   if (!componentReady || !leadsInitialized) {
     return (
@@ -197,6 +208,7 @@ const CallingScreenContainer: React.FC<CallingScreenContainerProps> = ({
         searchResults={searchResults}
         leadsData={leadsData}
         fileName={fileName}
+        syncStatus={getSyncStatus()}
         onSearchChange={setSearchQuery}
         onSearchFocus={handleSearchFocus}
         onSearchBlur={handleSearchBlur}

@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
@@ -99,7 +98,7 @@ const Index = () => {
           </h1>
           
           <div className="flex items-center space-x-2">
-            <UserProfile />
+            <UserProfile syncStatus={cloudLoading ? 'syncing' : 'synced'} />
           </div>
         </div>
         
