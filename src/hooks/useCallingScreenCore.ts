@@ -54,7 +54,7 @@ export const useCallingScreenCore = ({ leads, sessionState }: UseCallingScreenCo
     }
   }, [leads.length]);
 
-  // Restore session state once when available - with improved timing
+  // Restore session state once when available - with improved timing and NO card reset
   useEffect(() => {
     if (
       sessionState && 
@@ -72,12 +72,12 @@ export const useCallingScreenCore = ({ leads, sessionState }: UseCallingScreenCo
       setAutoCall(sessionState.autoCall);
       setCallDelay(sessionState.callDelay);
       
-      // Then restore the current index with proper bounds checking
+      // Then restore the current index with proper bounds checking - WITHOUT resetting card
       if (sessionState.currentLeadIndex !== undefined && leadsData.length > 0) {
         const validIndex = Math.max(0, Math.min(sessionState.currentLeadIndex, leadsData.length - 1));
         console.log('Restoring current index from session:', validIndex, 'out of', leadsData.length, 'leads');
         
-        // Only update the index, don't increment cardKey to prevent card reload
+        // Update index WITHOUT incrementing cardKey to preserve card state
         setCurrentIndex(validIndex);
         
         // Update navigation history to reflect the restored position
@@ -86,7 +86,7 @@ export const useCallingScreenCore = ({ leads, sessionState }: UseCallingScreenCo
       }
       
       sessionRestoredRef.current = true;
-      console.log('Session restoration complete');
+      console.log('Session restoration complete - card state preserved');
     }
   }, [sessionState, leadsData.length, leadsInitialized, componentReady]);
 
@@ -114,6 +114,13 @@ export const useCallingScreenCore = ({ leads, sessionState }: UseCallingScreenCo
     setHistoryIndex(0);
     setShownLeadsInShuffle(new Set());
     initializationCompleteRef.current = true;
+  }, []);
+
+  // New method to update index without resetting card (for session updates)
+  const updateCurrentIndexSilently = useCallback((newIndex: number) => {
+    console.log('Updating current index silently to:', newIndex);
+    setCurrentIndex(newIndex);
+    // Don't increment cardKey to preserve card state
   }, []);
 
   return {
@@ -160,6 +167,7 @@ export const useCallingScreenCore = ({ leads, sessionState }: UseCallingScreenCo
     setShownLeadsInShuffle,
     
     // Actions
-    resetLeadsData
+    resetLeadsData,
+    updateCurrentIndexSilently
   };
 };

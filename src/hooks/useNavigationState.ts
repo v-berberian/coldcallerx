@@ -7,9 +7,13 @@ export const useNavigationState = () => {
   const [historyIndex, setHistoryIndex] = useState(0);
   const [cardKey, setCardKey] = useState(0);
 
-  const updateNavigation = (newIndex: number, addToHistory = true) => {
+  const updateNavigation = (newIndex: number, addToHistory = true, forceCardUpdate = true) => {
     setCurrentIndex(newIndex);
-    setCardKey(prev => prev + 1); // This is needed for card switching animation
+    
+    // Only update card key if this is a user-initiated navigation (not session restoration)
+    if (forceCardUpdate) {
+      setCardKey(prev => prev + 1);
+    }
     
     if (addToHistory) {
       const newHistory = navigationHistory.slice(0, historyIndex + 1);
@@ -31,11 +35,20 @@ export const useNavigationState = () => {
     return false;
   };
 
-  const resetNavigation = (index = 0) => {
+  const resetNavigation = (index = 0, forceCardUpdate = true) => {
     setCurrentIndex(index);
     setNavigationHistory([index]);
     setHistoryIndex(0);
-    setCardKey(prev => prev + 1); // This is needed for proper card reset
+    
+    // Only force card update when explicitly requested (like CSV import)
+    if (forceCardUpdate) {
+      setCardKey(prev => prev + 1);
+    }
+  };
+
+  const updateCurrentIndexOnly = (index: number) => {
+    // This method updates index without changing cardKey - for session restoration
+    setCurrentIndex(index);
   };
 
   return {
@@ -46,6 +59,7 @@ export const useNavigationState = () => {
     updateNavigation,
     goToPrevious,
     resetNavigation,
+    updateCurrentIndexOnly,
     setCurrentIndex,
     setCardKey
   };

@@ -23,7 +23,8 @@ export const useSimplifiedCallingScreenState = ({ leads, sessionState }: UseSimp
     cardKey,
     setCurrentIndex,
     setCardKey,
-    resetLeadsData
+    resetLeadsData,
+    updateCurrentIndexSilently
   } = useCallingScreenCore({ leads, sessionState });
 
   const {
@@ -127,17 +128,17 @@ export const useSimplifiedCallingScreenState = ({ leads, sessionState }: UseSimp
     }
   }, [autoCall, originalToggleAutoCall, componentReady, leadsInitialized, getBaseLeads, currentIndex, executeAutoCall, resetAutoCall]);
 
-  // Handle real-time session updates from other devices/tabs - don't increment cardKey
+  // Handle real-time session updates from other devices/tabs - PRESERVE card state
   const handleSessionUpdate = useCallback((updatedSession: SessionState) => {
     console.log('Applying real-time session update:', updatedSession);
     
-    // Update current index without forcing card reload
+    // Update current index WITHOUT forcing card reload
     if (updatedSession.currentLeadIndex !== undefined && leadsData.length > 0) {
       const validIndex = Math.max(0, Math.min(updatedSession.currentLeadIndex, leadsData.length - 1));
-      setCurrentIndex(validIndex);
-      // Don't increment cardKey here to prevent card reload
+      console.log('Real-time update: Updating index to', validIndex, 'without card reset');
+      updateCurrentIndexSilently(validIndex);
     }
-  }, [leadsData.length, setCurrentIndex]);
+  }, [leadsData.length, updateCurrentIndexSilently]);
 
   // Memoize resetLeadsData to prevent infinite loops
   const memoizedResetLeadsData = useCallback((newLeads: Lead[]) => {
