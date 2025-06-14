@@ -54,7 +54,7 @@ export const useCallingScreenCore = ({ leads, sessionState }: UseCallingScreenCo
     }
   }, [leads.length]);
 
-  // Restore session state once when available
+  // Restore session state once when available - with improved timing
   useEffect(() => {
     if (
       sessionState && 
@@ -64,22 +64,32 @@ export const useCallingScreenCore = ({ leads, sessionState }: UseCallingScreenCo
       !sessionRestoredRef.current
     ) {
       console.log('Restoring session state:', sessionState);
-      if (sessionState.currentLeadIndex !== undefined && leadsData.length > 0) {
-        const validIndex = Math.max(0, Math.min(sessionState.currentLeadIndex, leadsData.length - 1));
-        setCurrentIndex(validIndex);
-        setCardKey(prev => prev + 1);
-      }
       
-      // Restore filters
+      // Restore filters first
       setTimezoneFilter(sessionState.timezoneFilter as 'ALL' | 'EST_CST');
       setCallFilter(sessionState.callFilter as 'ALL' | 'UNCALLED');
       setShuffleMode(sessionState.shuffleMode);
       setAutoCall(sessionState.autoCall);
       setCallDelay(sessionState.callDelay);
       
+      // Then restore the current index with proper bounds checking
+      if (sessionState.currentLeadIndex !== undefined && leadsData.length > 0) {
+        const validIndex = Math.max(0, Math.min(sessionState.currentLeadIndex, leadsData.length - 1));
+        console.log('Restoring current index from session:', validIndex, 'out of', leadsData.length, 'leads');
+        
+        // Force update the index and card key to trigger re-render
+        setCurrentIndex(validIndex);
+        setCardKey(prev => prev + 1);
+        
+        // Update navigation history to reflect the restored position
+        setNavigationHistory([validIndex]);
+        setHistoryIndex(0);
+      }
+      
       sessionRestoredRef.current = true;
+      console.log('Session restoration complete');
     }
-  }, [sessionState?.currentLeadIndex, leadsData.length, leadsInitialized, componentReady]);
+  }, [sessionState, leadsData.length, leadsInitialized, componentReady]);
 
   // Reset initialization when leads change significantly
   useEffect(() => {
