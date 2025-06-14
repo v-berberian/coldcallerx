@@ -120,7 +120,7 @@ export const useLeadNavigation = (initialLeads: Lead[]) => {
     selectLead,
     setCallMadeToCurrentLead,
     autoCall,
-    setShouldAutoCall,
+    executeAutoCall,
     goToPrevious
   });
 
