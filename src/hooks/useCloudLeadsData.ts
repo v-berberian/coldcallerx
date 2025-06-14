@@ -1,25 +1,39 @@
-import { useState, useEffect } from 'react';
-import { Lead } from '../types/lead';
+
+import { useEffect } from 'react';
 import { leadService, LeadList } from '../services/leadService';
-import { dailyStatsService } from '../services/dailyStatsService';
-import { sessionService, SessionState } from '../services/sessionService';
 import { useAuth } from '../contexts/AuthContext';
+import { useLeadListOperations } from './useLeadListOperations';
+import { useLeadCallOperations } from './useLeadCallOperations';
+import { useDailyStatsOperations } from './useDailyStatsOperations';
+import { useSessionManagement } from './useSessionManagement';
+import { SessionState } from '../services/sessionService';
 
 export const useCloudLeadsData = () => {
-  const [currentLeadList, setCurrentLeadList] = useState<LeadList | null>(null);
-  const [leadsData, setLeadsData] = useState<Lead[]>([]);
-  const [dailyCallCount, setDailyCallCount] = useState(0);
-  const [loading, setLoading] = useState(true);
-  const [sessionState, setSessionState] = useState<SessionState>({
-    currentLeadListId: null,
-    currentLeadIndex: 0,
-    timezoneFilter: 'ALL',
-    callFilter: 'ALL',
-    shuffleMode: false,
-    autoCall: false,
-    callDelay: 0
-  });
   const { user } = useAuth();
+  
+  const {
+    currentLeadList,
+    leadsData,
+    loading,
+    setCurrentLeadList,
+    setLeadsData,
+    setLoading,
+    importLeadsFromCSV,
+    switchToLeadList,
+    deleteLeadList,
+    uploadCSVFile
+  } = useLeadListOperations();
+
+  const { dailyCallCount, loadDailyStats, resetDailyCallCount } = useDailyStatsOperations();
+  
+  const { sessionState, updateSessionState, loadSessionState, setInitialSessionState } = useSessionManagement();
+
+  const { markLeadAsCalled, resetCallCount, resetAllCallCounts } = useLeadCallOperations({
+    currentLeadList,
+    leadsData,
+    setLeadsData,
+    loadDailyStats
+  });
 
   // Load user's session, lead list and daily stats on mount
   useEffect(() => {
@@ -35,15 +49,11 @@ export const useCloudLeadsData = () => {
       console.log('useCloudLeadsData: Starting to load user data');
       
       // Load saved session state first
-      const savedSession = await sessionService.getUserSession();
+      const savedSession = await loadSessionState();
       console.log('useCloudLeadsData: Saved session loaded:', savedSession ? 'found' : 'not found');
       
       // Load daily stats
-      const stats = await dailyStatsService.getTodaysStats();
-      if (stats) {
-        setDailyCallCount(stats.call_count);
-        console.log('useCloudLeadsData: Daily stats loaded:', stats.call_count, 'calls');
-      }
+      await loadDailyStats();
 
       // Load lead lists
       const leadLists = await leadService.getLeadLists();
@@ -54,21 +64,13 @@ export const useCloudLeadsData = () => {
         let initialSessionState = { ...sessionState };
 
         // If we have a saved session with a valid lead list, use it
-        if (savedSession?.current_lead_list_id) {
-          const savedLeadList = leadLists.find(list => list.id === savedSession.current_lead_list_id);
+        if (savedSession?.currentLeadListId) {
+          const savedLeadList = leadLists.find(list => list.id === savedSession.currentLeadListId);
           if (savedLeadList) {
             console.log('useCloudLeadsData: Restoring saved session for lead list:', savedLeadList.name);
             targetLeadList = savedLeadList;
-            initialSessionState = {
-              currentLeadListId: savedSession.current_lead_list_id,
-              currentLeadIndex: savedSession.current_lead_index,
-              timezoneFilter: savedSession.timezone_filter,
-              callFilter: savedSession.call_filter,
-              shuffleMode: savedSession.shuffle_mode,
-              autoCall: savedSession.auto_call,
-              callDelay: savedSession.call_delay
-            };
-            console.log('useCloudLeadsData: Session restored - index:', savedSession.current_lead_index, 'filters:', savedSession.timezone_filter, savedSession.call_filter);
+            initialSessionState = savedSession;
+            console.log('useCloudLeadsData: Session restored - index:', savedSession.currentLeadIndex, 'filters:', savedSession.timezoneFilter, savedSession.callFilter);
           } else {
             console.log('useCloudLeadsData: Saved lead list not found, using most recent');
             targetLeadList = leadLists[0];
@@ -81,7 +83,7 @@ export const useCloudLeadsData = () => {
         }
 
         setCurrentLeadList(targetLeadList);
-        setSessionState(initialSessionState);
+        setInitialSessionState(initialSessionState);
         
         // Load leads for this list
         const leads = await leadService.getLeads(targetLeadList.id);
@@ -89,9 +91,9 @@ export const useCloudLeadsData = () => {
         setLeadsData(leads);
 
         // Save the initial session state if it wasn't already saved
-        if (!savedSession || savedSession.current_lead_list_id !== targetLeadList.id) {
+        if (!savedSession || savedSession.currentLeadListId !== targetLeadList.id) {
           console.log('useCloudLeadsData: Saving initial session state');
-          await sessionService.saveUserSession(initialSessionState);
+          await updateSessionState(initialSessionState);
         }
       } else {
         console.log('useCloudLeadsData: No lead lists found');
@@ -104,180 +106,6 @@ export const useCloudLeadsData = () => {
     }
   };
 
-  const loadDailyStats = async () => {
-    const stats = await dailyStatsService.getTodaysStats();
-    if (stats) {
-      setDailyCallCount(stats.call_count);
-    }
-  };
-
-  const updateSessionState = async (updates: Partial<SessionState>): Promise<boolean> => {
-    try {
-      const newSessionState = { ...sessionState, ...updates };
-      console.log('useCloudLeadsData: Updating session state:', updates);
-      setSessionState(newSessionState);
-      await sessionService.saveUserSession(newSessionState);
-      return true;
-    } catch (error) {
-      console.error('useCloudLeadsData: Error updating session state:', error);
-      return false;
-    }
-  };
-
-  const importLeadsFromCSV = async (leads: Lead[], fileName: string): Promise<boolean> => {
-    if (!user) return false;
-
-    setLoading(true);
-    try {
-      // Create lead list
-      const leadList = await leadService.createLeadList(fileName, fileName);
-      if (!leadList) {
-        setLoading(false);
-        return false;
-      }
-
-      // Save leads to database
-      const success = await leadService.saveLeads(leadList.id, leads);
-      if (success) {
-        setCurrentLeadList(leadList);
-        setLeadsData(leads);
-
-        // Update session state for new lead list
-        await updateSessionState({
-          currentLeadListId: leadList.id,
-          currentLeadIndex: 0
-        });
-
-        return true;
-      }
-    } catch (error) {
-      console.error('Error importing leads:', error);
-    } finally {
-      setLoading(false);
-    }
-    return false;
-  };
-
-  const switchToLeadList = async (leadList: LeadList) => {
-    setLoading(true);
-    try {
-      const leads = await leadService.getLeads(leadList.id);
-      setCurrentLeadList(leadList);
-      setLeadsData(leads);
-
-      // Update session state for new lead list
-      await updateSessionState({
-        currentLeadListId: leadList.id,
-        currentLeadIndex: 0
-      });
-    } catch (error) {
-      console.error('Error switching lead list:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const deleteLeadList = async (leadListId: string): Promise<boolean> => {
-    try {
-      const success = await leadService.deleteLeadList(leadListId);
-      if (success) {
-        // If we deleted the current list, clear it and reload
-        if (currentLeadList?.id === leadListId) {
-          await loadUserData();
-        }
-        return true;
-      }
-    } catch (error) {
-      console.error('Error deleting lead list:', error);
-    }
-    return false;
-  };
-
-  const uploadCSVFile = async (file: File): Promise<string | null> => {
-    if (!user) return null;
-    return await leadService.uploadCSVFile(file, user.id);
-  };
-
-  const markLeadAsCalled = async (lead: Lead): Promise<boolean> => {
-    if (!currentLeadList) return false;
-
-    try {
-      const now = new Date();
-      const dateString = now.toLocaleDateString();
-      const timeString = now.toLocaleTimeString('en-US', {
-        hour: 'numeric',
-        minute: '2-digit',
-        hour12: true
-      });
-      const lastCalledString = `${dateString} at ${timeString}`;
-
-      const newCallCount = (lead.called || 0) + 1;
-
-      // Update local state
-      const updatedLeads = leadsData.map(l => 
-        l.name === lead.name && l.phone === lead.phone ? {
-          ...l,
-          called: newCallCount,
-          lastCalled: lastCalledString
-        } : l
-      );
-      setLeadsData(updatedLeads);
-
-      // Update database
-      await leadService.updateLeadCallCount(
-        currentLeadList.id,
-        lead.name,
-        lead.phone,
-        newCallCount,
-        lastCalledString
-      );
-
-      // Increment daily call count
-      await dailyStatsService.incrementDailyCallCount();
-      await loadDailyStats();
-
-      return true;
-    } catch (error) {
-      console.error('Error marking lead as called:', error);
-      return false;
-    }
-  };
-
-  const resetCallCount = async (lead: Lead) => {
-    if (!currentLeadList) return;
-
-    // Update local state
-    const updatedLeads = leadsData.map(l => 
-      l.name === lead.name && l.phone === lead.phone 
-        ? { ...l, called: 0, lastCalled: undefined }
-        : l
-    );
-    setLeadsData(updatedLeads);
-
-    // Update database
-    await leadService.resetLeadCallCount(currentLeadList.id, lead.name, lead.phone);
-  };
-
-  const resetAllCallCounts = async () => {
-    if (!currentLeadList) return;
-
-    // Update local state
-    const updatedLeads = leadsData.map(l => ({
-      ...l,
-      called: 0,
-      lastCalled: undefined
-    }));
-    setLeadsData(updatedLeads);
-
-    // Update database
-    await leadService.resetAllCallCounts(currentLeadList.id);
-  };
-
-  const resetDailyCallCount = async () => {
-    await dailyStatsService.resetDailyCallCount();
-    setDailyCallCount(0);
-  };
-
   return {
     currentLeadList,
     leadsData,
@@ -287,7 +115,7 @@ export const useCloudLeadsData = () => {
     importLeadsFromCSV,
     switchToLeadList,
     deleteLeadList,
-    uploadCSVFile,
+    uploadCSVFile: (file: File) => uploadCSVFile(file, user?.id || ''),
     markLeadAsCalled,
     resetCallCount,
     resetAllCallCounts,
