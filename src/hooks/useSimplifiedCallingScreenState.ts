@@ -1,4 +1,3 @@
-
 import { useState, useCallback, useEffect } from 'react';
 import { Lead } from '../types/lead';
 import { SessionState } from '@/services/sessionService';
@@ -44,7 +43,8 @@ export const useSimplifiedCallingScreenState = ({ leads, sessionState }: UseSimp
     toggleCallDelay,
     resetCallDelay,
     resetLeadsData,
-    restoreSessionState
+    restoreSessionState,
+    getDelayDisplayType
   } = useLeadNavigation(leads);
 
   const {
@@ -55,8 +55,7 @@ export const useSimplifiedCallingScreenState = ({ leads, sessionState }: UseSimp
     setShowAutocomplete,
     clearSearch,
     handleSearchFocus,
-    handleSearchBlur,
-    getDelayDisplayType
+    handleSearchBlur
   } = useSearchState({ 
     leads, 
     getBaseLeads, 
