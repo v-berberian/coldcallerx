@@ -85,6 +85,11 @@ const CallingScreenLogic: React.FC<CallingScreenLogicProps> = ({
     callFilter 
   });
 
+  // Memoize resetLeadsData to prevent infinite loops
+  const memoizedResetLeadsData = useCallback((newLeads: Lead[]) => {
+    resetLeadsData(newLeads);
+  }, [resetLeadsData]);
+
   // Progressive component initialization
   useEffect(() => {
     console.log('CallingScreenLogic: Starting progressive initialization');
@@ -102,10 +107,10 @@ const CallingScreenLogic: React.FC<CallingScreenLogicProps> = ({
   useEffect(() => {
     if (componentReady && !leadsInitialized) {
       console.log('CallingScreenLogic: Initializing leads data for first time');
-      resetLeadsData(leads);
+      memoizedResetLeadsData(leads);
       setLeadsInitialized(true);
     }
-  }, [componentReady, leadsInitialized, leads.length]); // Only depend on leads.length to avoid infinite loops
+  }, [componentReady, leadsInitialized, leads.length, memoizedResetLeadsData]);
 
   // Save session state changes to cloud
   useEffect(() => {
@@ -126,14 +131,14 @@ const CallingScreenLogic: React.FC<CallingScreenLogicProps> = ({
     }
   }, [currentIndex, timezoneFilter, callFilter, shuffleMode, autoCall, callDelay, updateSessionState, componentReady, leadsInitialized]);
 
-  // Handle auto-call using the currently displayed lead
+  // Handle auto-call trigger - this should fire immediately when shouldAutoCall becomes true
   useEffect(() => {
     if (shouldAutoCall && autoCall && componentReady && leadsInitialized) {
       const currentLeads = getBaseLeads();
       const currentLead = currentLeads[currentIndex];
       
       if (currentLead) {
-        console.log('CallingScreenLogic: Auto-call triggered for displayed lead:', currentLead.name, currentLead.phone);
+        console.log('CallingScreenLogic: Auto-call triggered immediately for displayed lead:', currentLead.name, currentLead.phone);
         setCurrentLeadForAutoCall(currentLead);
         executeAutoCall(currentLead);
         
@@ -145,7 +150,7 @@ const CallingScreenLogic: React.FC<CallingScreenLogicProps> = ({
       
       setShouldAutoCall(false);
     }
-  }, [shouldAutoCall, autoCall, currentIndex, cardKey, componentReady, leadsInitialized, markLeadAsCalled]);
+  }, [shouldAutoCall, autoCall, currentIndex, executeAutoCall, setCurrentLeadForAutoCall, setShouldAutoCall, markLeadAsCalled, componentReady, leadsInitialized, getBaseLeads]);
 
   const handleLeadSelect = (lead: Lead) => {
     const baseLeads = getBaseLeads();
@@ -310,13 +315,6 @@ const CallingScreenLogic: React.FC<CallingScreenLogicProps> = ({
           canGoNext={currentLeads.length > 1}
         />
       </div>
-
-      {/* Auto Call Countdown - hidden, just for logic */}
-      <AutoCallCountdown
-        isActive={isCountdownActive}
-        duration={countdownTime}
-        onComplete={() => {}}
-      />
     </div>
   );
 };
