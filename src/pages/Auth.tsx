@@ -8,14 +8,13 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Loader2 } from 'lucide-react';
 
 const Auth = () => {
-  const [isSignUp, setIsSignUp] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string>('');
   const [isRedirecting, setIsRedirecting] = useState(false);
   
-  const { signIn, signUp, user } = useAuth();
+  const { signIn, user } = useAuth();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -37,16 +36,11 @@ const Auth = () => {
     setError('');
 
     try {
-      const { error } = isSignUp 
-        ? await signUp(email, password)
-        : await signIn(email, password);
+      const { error } = await signIn(email, password);
 
       if (error) {
         console.log('Auth: Authentication error:', error.message);
         setError(error.message);
-        setLoading(false);
-      } else if (isSignUp) {
-        setError('Check your email for the confirmation link!');
         setLoading(false);
       }
     } catch (err) {
@@ -81,7 +75,7 @@ const Auth = () => {
           <div className="space-y-6">
             <div className="text-center">
               <h2 className="text-2xl font-semibold text-foreground mb-8">
-                {isSignUp ? 'Create Account' : 'Sign In'}
+                Sign In
               </h2>
             </div>
 
@@ -118,23 +112,9 @@ const Auth = () => {
                 disabled={loading}
               >
                 {loading && <Loader2 className="mr-2 h-5 w-5 animate-spin" />}
-                {isSignUp ? 'Create Account' : 'Sign In'}
+                Sign In
               </Button>
             </form>
-
-            <div className="text-center">
-              <Button
-                variant="ghost"
-                onClick={() => {
-                  setIsSignUp(!isSignUp);
-                  setError('');
-                }}
-                className="text-muted-foreground hover:text-foreground text-base"
-                disabled={loading}
-              >
-                {isSignUp ? 'Already have an account?' : 'Create account'}
-              </Button>
-            </div>
           </div>
         </div>
       </div>
