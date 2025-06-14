@@ -34,7 +34,7 @@ const CallingScreenLogic: React.FC<CallingScreenLogicProps> = ({
 }) => {
   const [componentReady, setComponentReady] = useState(false);
 
-  // Initialize hooks with cloud session state
+  // Initialize hooks - only pass leads to useLeadNavigation
   const {
     leadsData,
     currentIndex,
@@ -64,7 +64,7 @@ const CallingScreenLogic: React.FC<CallingScreenLogicProps> = ({
     toggleCallDelay,
     resetCallDelay,
     resetLeadsData
-  } = useLeadNavigation(leads, sessionState);
+  } = useLeadNavigation(leads);
 
   const {
     searchQuery,

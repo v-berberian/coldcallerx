@@ -14,8 +14,65 @@ const Auth = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string>('');
   const [isRedirecting, setIsRedirecting] = useState(false);
+  
+  // Typewriter effect states
+  const [emailPlaceholder, setEmailPlaceholder] = useState('');
+  const [passwordPlaceholder, setPasswordPlaceholder] = useState('');
+  const [emailFocused, setEmailFocused] = useState(false);
+  const [passwordFocused, setPasswordFocused] = useState(false);
+  
   const { signIn, signUp, user } = useAuth();
   const navigate = useNavigate();
+
+  const emailFullText = "Email";
+  const passwordFullText = "Password";
+
+  // Typewriter effect for email placeholder
+  useEffect(() => {
+    if (emailFocused || email) {
+      setEmailPlaceholder('');
+      return;
+    }
+
+    let currentIndex = 0;
+    setEmailPlaceholder('');
+
+    const typeInterval = setInterval(() => {
+      if (currentIndex < emailFullText.length) {
+        setEmailPlaceholder(emailFullText.slice(0, currentIndex + 1));
+        currentIndex++;
+      } else {
+        clearInterval(typeInterval);
+      }
+    }, 120);
+
+    return () => clearInterval(typeInterval);
+  }, [emailFocused, email]);
+
+  // Typewriter effect for password placeholder
+  useEffect(() => {
+    if (passwordFocused || password) {
+      setPasswordPlaceholder('');
+      return;
+    }
+
+    let currentIndex = 0;
+    setPasswordPlaceholder('');
+
+    // Start password typing after email is done
+    const delayTimeout = setTimeout(() => {
+      const typeInterval = setInterval(() => {
+        if (currentIndex < passwordFullText.length) {
+          setPasswordPlaceholder(passwordFullText.slice(0, currentIndex + 1));
+          currentIndex++;
+        } else {
+          clearInterval(typeInterval);
+        }
+      }, 120);
+    }, emailFullText.length * 120 + 300); // Delay after email finishes
+
+    return () => clearTimeout(delayTimeout);
+  }, [passwordFocused, password]);
 
   useEffect(() => {
     if (user && !isRedirecting) {
@@ -24,7 +81,6 @@ const Auth = () => {
       setLoading(false);
       setError('');
       
-      // Small delay to ensure smooth transition
       setTimeout(() => {
         navigate('/', { replace: true });
       }, 100);
@@ -49,7 +105,6 @@ const Auth = () => {
         setError('Check your email for the confirmation link!');
         setLoading(false);
       }
-      // For sign in success, loading state will be handled by user effect
     } catch (err) {
       console.error('Auth: Unexpected error:', err);
       setError('An unexpected error occurred');
@@ -57,10 +112,9 @@ const Auth = () => {
     }
   };
 
-  // Show redirecting state
   if (isRedirecting) {
     return (
-      <div className="h-[100vh] h-[100dvh] h-[100svh] bg-background flex items-center justify-center fixed inset-0 overflow-hidden">
+      <div className="h-screen w-screen bg-background flex items-center justify-center fixed inset-0 overflow-hidden">
         <div className="text-center space-y-4">
           <Loader2 className="h-12 w-12 animate-spin mx-auto text-blue-500" />
           <p className="text-lg text-muted-foreground">Signing you in...</p>
@@ -70,11 +124,9 @@ const Auth = () => {
   }
 
   return (
-    <div className="h-[100vh] h-[100dvh] h-[100svh] bg-background flex flex-col fixed inset-0 overflow-hidden">
-      {/* Full screen container with proper viewport handling */}
-      <div className="flex-1 flex items-center justify-center p-6">
+    <div className="h-screen w-screen bg-background fixed inset-0 overflow-hidden">
+      <div className="flex items-center justify-center h-full p-6">
         <div className="w-full max-w-sm space-y-8">
-          {/* App Title */}
           <div className="text-center">
             <h1 className="text-4xl font-bold mb-12">
               <span className="text-blue-500">ColdCall </span>
@@ -82,7 +134,6 @@ const Auth = () => {
             </h1>
           </div>
 
-          {/* Auth Form */}
           <div className="space-y-6">
             <div className="text-center">
               <h2 className="text-2xl font-semibold text-foreground mb-8">
@@ -95,25 +146,29 @@ const Auth = () => {
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="Email"
+                placeholder={emailPlaceholder}
+                onFocus={() => setEmailFocused(true)}
+                onBlur={() => setEmailFocused(false)}
                 required
-                className="h-14 text-lg rounded-2xl border-2 focus:border-blue-500 transition-colors"
+                className="h-14 text-lg rounded-2xl border-2 focus:border-blue-500 transition-colors text-center placeholder:text-center"
                 disabled={loading}
               />
               <Input
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                placeholder="Password"
+                placeholder={passwordPlaceholder}
+                onFocus={() => setPasswordFocused(true)}
+                onBlur={() => setPasswordFocused(false)}
                 required
                 minLength={6}
-                className="h-14 text-lg rounded-2xl border-2 focus:border-blue-500 transition-colors"
+                className="h-14 text-lg rounded-2xl border-2 focus:border-blue-500 transition-colors text-center placeholder:text-center"
                 disabled={loading}
               />
               
               {error && (
                 <Alert className="rounded-2xl border-red-200 bg-red-50">
-                  <AlertDescription className="text-red-800">{error}</AlertDescription>
+                  <AlertDescription className="text-red-800 text-center">{error}</AlertDescription>
                 </Alert>
               )}
               
