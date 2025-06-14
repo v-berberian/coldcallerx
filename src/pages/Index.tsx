@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
@@ -32,12 +33,12 @@ const Index = () => {
     }
   }, [user, authLoading, navigate]);
 
-  // Progressive loading - only start after auth is settled
+  // Progressive loading - wait for both auth and cloud data to be ready
   useEffect(() => {
-    if (user && !authLoading) {
-      console.log('Index: User authenticated, starting app initialization');
+    if (user && !authLoading && !cloudLoading) {
+      console.log('Index: User authenticated and data loaded, starting app initialization');
       
-      // Small delay to ensure smooth transition from auth
+      // Small delay to ensure smooth transition
       const initializeApp = async () => {
         await new Promise(resolve => setTimeout(resolve, 200));
         console.log('Index: App initialization complete');
@@ -51,7 +52,7 @@ const Index = () => {
 
       initializeApp();
     }
-  }, [user, authLoading]);
+  }, [user, authLoading, cloudLoading]);
 
   const handleLeadsImported = async (importedLeads: any[], fileName: string) => {
     console.log('Index: Importing new leads to cloud:', importedLeads.length);
@@ -66,14 +67,14 @@ const Index = () => {
     await signOut();
   };
 
-  // Show loading until both auth and app are ready
+  // Show loading until everything is ready
   if (authLoading || cloudLoading || (user && !appReady)) {
     return (
       <div className="h-[100vh] h-[100dvh] h-[100svh] bg-background flex items-center justify-center fixed inset-0 overflow-hidden">
         <div className="text-center space-y-4">
           <Loader2 className="h-12 w-12 animate-spin mx-auto text-blue-500" />
           <p className="text-lg text-muted-foreground">
-            {authLoading ? 'Loading...' : cloudLoading ? 'Loading your data...' : 'Initializing app...'}
+            {authLoading ? 'Loading...' : cloudLoading ? 'Restoring your session...' : 'Initializing app...'}
           </p>
         </div>
       </div>

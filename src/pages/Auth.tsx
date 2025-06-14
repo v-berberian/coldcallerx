@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
@@ -53,7 +54,7 @@ const Auth = () => {
 
   if (isRedirecting) {
     return (
-      <div className={`h-screen w-screen bg-background flex items-center justify-center fixed inset-0 overflow-hidden transition-opacity duration-300 ${fadeOut ? 'opacity-0' : 'opacity-100'}`}>
+      <div className={`h-[100vh] h-[100dvh] h-[100svh] w-full bg-background flex items-center justify-center fixed inset-0 overflow-hidden transition-opacity duration-300 ${fadeOut ? 'opacity-0' : 'opacity-100'}`}>
         <div className="text-center space-y-4">
           <Loader2 className="h-12 w-12 animate-spin mx-auto text-blue-500" />
           <p className="text-lg text-muted-foreground">Signing you in...</p>
@@ -63,11 +64,11 @@ const Auth = () => {
   }
 
   return (
-    <div className="h-screen w-screen bg-background fixed inset-0 overflow-hidden animate-fade-in">
-      <div className="flex items-center justify-center h-full p-6">
-        <div className="w-full max-w-sm space-y-8">
+    <div className="h-[100vh] h-[100dvh] h-[100svh] w-full bg-background fixed inset-0 overflow-hidden animate-fade-in">
+      <div className="flex items-center justify-center h-full p-4 pb-safe pt-safe">
+        <div className="w-full max-w-sm space-y-6">
           <div className="text-center">
-            <h1 className="text-4xl font-bold mb-12">
+            <h1 className="text-3xl sm:text-4xl font-bold mb-8 sm:mb-12">
               <span className="text-blue-500">ColdCall </span>
               <span className="text-blue-500">X</span>
             </h1>
@@ -75,7 +76,7 @@ const Auth = () => {
 
           <div className="space-y-6">
             <div className="text-center">
-              <h2 className="text-2xl font-semibold text-foreground mb-8">
+              <h2 className="text-xl sm:text-2xl font-semibold text-foreground mb-6 sm:mb-8">
                 Sign In
               </h2>
             </div>
@@ -87,7 +88,7 @@ const Auth = () => {
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="Email"
                 required
-                className="h-14 text-lg rounded-2xl border-2 focus:border-blue-500 transition-colors text-center placeholder:text-center"
+                className="h-12 sm:h-14 text-base sm:text-lg rounded-2xl border-2 focus:border-blue-500 transition-colors text-center placeholder:text-center"
                 disabled={loading}
               />
               <Input
@@ -97,22 +98,22 @@ const Auth = () => {
                 placeholder="Password"
                 required
                 minLength={6}
-                className="h-14 text-lg rounded-2xl border-2 focus:border-blue-500 transition-colors text-center placeholder:text-center"
+                className="h-12 sm:h-14 text-base sm:text-lg rounded-2xl border-2 focus:border-blue-500 transition-colors text-center placeholder:text-center"
                 disabled={loading}
               />
               
               {error && (
                 <Alert className="rounded-2xl border-red-200 bg-red-50">
-                  <AlertDescription className="text-red-800 text-center">{error}</AlertDescription>
+                  <AlertDescription className="text-red-800 text-center text-sm">{error}</AlertDescription>
                 </Alert>
               )}
               
               <Button 
                 type="submit" 
-                className="w-full h-14 text-lg font-semibold rounded-2xl bg-blue-500 hover:bg-blue-600 transition-colors" 
+                className="w-full h-12 sm:h-14 text-base sm:text-lg font-semibold rounded-2xl bg-blue-500 hover:bg-blue-600 transition-colors" 
                 disabled={loading}
               >
-                {loading && <Loader2 className="mr-2 h-5 w-5 animate-spin" />}
+                {loading && <Loader2 className="mr-2 h-4 w-4 sm:h-5 sm:w-5 animate-spin" />}
                 Sign In
               </Button>
             </form>

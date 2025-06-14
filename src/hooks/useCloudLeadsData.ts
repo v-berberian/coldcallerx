@@ -24,6 +24,7 @@ export const useCloudLeadsData = () => {
   // Load user's session, lead list and daily stats on mount
   useEffect(() => {
     if (user) {
+      console.log('useCloudLeadsData: User detected, loading session data');
       loadUserData();
     }
   }, [user]);
@@ -31,17 +32,22 @@ export const useCloudLeadsData = () => {
   const loadUserData = async () => {
     setLoading(true);
     try {
-      // Load saved session state
+      console.log('useCloudLeadsData: Starting to load user data');
+      
+      // Load saved session state first
       const savedSession = await sessionService.getUserSession();
+      console.log('useCloudLeadsData: Saved session loaded:', savedSession ? 'found' : 'not found');
       
       // Load daily stats
       const stats = await dailyStatsService.getTodaysStats();
       if (stats) {
         setDailyCallCount(stats.call_count);
+        console.log('useCloudLeadsData: Daily stats loaded:', stats.call_count, 'calls');
       }
 
       // Load lead lists
       const leadLists = await leadService.getLeadLists();
+      console.log('useCloudLeadsData: Lead lists loaded:', leadLists.length, 'lists');
       
       if (leadLists.length > 0) {
         let targetLeadList: LeadList;
@@ -51,6 +57,7 @@ export const useCloudLeadsData = () => {
         if (savedSession?.current_lead_list_id) {
           const savedLeadList = leadLists.find(list => list.id === savedSession.current_lead_list_id);
           if (savedLeadList) {
+            console.log('useCloudLeadsData: Restoring saved session for lead list:', savedLeadList.name);
             targetLeadList = savedLeadList;
             initialSessionState = {
               currentLeadListId: savedSession.current_lead_list_id,
@@ -61,13 +68,14 @@ export const useCloudLeadsData = () => {
               autoCall: savedSession.auto_call,
               callDelay: savedSession.call_delay
             };
+            console.log('useCloudLeadsData: Session restored - index:', savedSession.current_lead_index, 'filters:', savedSession.timezone_filter, savedSession.call_filter);
           } else {
-            // Saved lead list doesn't exist anymore, use most recent
+            console.log('useCloudLeadsData: Saved lead list not found, using most recent');
             targetLeadList = leadLists[0];
             initialSessionState.currentLeadListId = targetLeadList.id;
           }
         } else {
-          // No saved session, use most recent lead list
+          console.log('useCloudLeadsData: No saved session, using most recent lead list');
           targetLeadList = leadLists[0];
           initialSessionState.currentLeadListId = targetLeadList.id;
         }
@@ -77,15 +85,22 @@ export const useCloudLeadsData = () => {
         
         // Load leads for this list
         const leads = await leadService.getLeads(targetLeadList.id);
+        console.log('useCloudLeadsData: Loaded', leads.length, 'leads for list:', targetLeadList.name);
         setLeadsData(leads);
 
-        // Save the initial session state
-        await sessionService.saveUserSession(initialSessionState);
+        // Save the initial session state if it wasn't already saved
+        if (!savedSession || savedSession.current_lead_list_id !== targetLeadList.id) {
+          console.log('useCloudLeadsData: Saving initial session state');
+          await sessionService.saveUserSession(initialSessionState);
+        }
+      } else {
+        console.log('useCloudLeadsData: No lead lists found');
       }
     } catch (error) {
-      console.error('Error loading user data:', error);
+      console.error('useCloudLeadsData: Error loading user data:', error);
     } finally {
       setLoading(false);
+      console.log('useCloudLeadsData: Data loading complete');
     }
   };
 
@@ -99,11 +114,12 @@ export const useCloudLeadsData = () => {
   const updateSessionState = async (updates: Partial<SessionState>): Promise<boolean> => {
     try {
       const newSessionState = { ...sessionState, ...updates };
+      console.log('useCloudLeadsData: Updating session state:', updates);
       setSessionState(newSessionState);
       await sessionService.saveUserSession(newSessionState);
       return true;
     } catch (error) {
-      console.error('Error updating session state:', error);
+      console.error('useCloudLeadsData: Error updating session state:', error);
       return false;
     }
   };
