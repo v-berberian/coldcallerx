@@ -40,8 +40,7 @@ const CallingHeader: React.FC<CallingHeaderProps> = ({
         
         <div className="flex items-center space-x-3">
           <h1 className="text-2xl font-bold">
-            <span className="text-blue-500">Cold</span>
-            <span className="text-foreground">Caller </span>
+            <span className="text-blue-500">ColdCall </span>
             <span className="text-blue-500">X</span>
           </h1>
         </div>
