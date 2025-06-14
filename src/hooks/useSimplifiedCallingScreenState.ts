@@ -1,4 +1,5 @@
-import { useState, useCallback, useEffect } from 'react';
+
+import { useState, useCallback, useEffect, useRef } from 'react';
 import { Lead } from '../types/lead';
 import { SessionState } from '@/services/sessionService';
 import { useSearchState } from '../components/SearchState';
@@ -12,6 +13,7 @@ interface UseSimplifiedCallingScreenStateProps {
 export const useSimplifiedCallingScreenState = ({ leads, sessionState }: UseSimplifiedCallingScreenStateProps) => {
   const [componentReady, setComponentReady] = useState(false);
   const [leadsInitialized, setLeadsInitialized] = useState(false);
+  const sessionRestoredRef = useRef(false);
 
   // Initialize hooks - only pass leads to useLeadNavigation
   const {
@@ -69,13 +71,20 @@ export const useSimplifiedCallingScreenState = ({ leads, sessionState }: UseSimp
     resetLeadsData(newLeads);
   }, [resetLeadsData]);
 
-  // Restore session state from cloud when available
+  // Restore session state from cloud when available - with proper guards to prevent infinite loops
   useEffect(() => {
-    if (sessionState && leadsData.length > 0 && leadsInitialized && componentReady) {
+    if (
+      sessionState && 
+      leadsData.length > 0 && 
+      leadsInitialized && 
+      componentReady && 
+      !sessionRestoredRef.current
+    ) {
       console.log('useSimplifiedCallingScreenState: Restoring session state from cloud');
       restoreSessionState(sessionState);
+      sessionRestoredRef.current = true;
     }
-  }, [sessionState, leadsData.length, leadsInitialized, componentReady, restoreSessionState]);
+  }, [sessionState?.currentLeadIndex, leadsData.length, leadsInitialized, componentReady, restoreSessionState]);
 
   return {
     componentReady,

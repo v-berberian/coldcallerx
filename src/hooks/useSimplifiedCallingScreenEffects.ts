@@ -72,13 +72,13 @@ export const useSimplifiedCallingScreenEffects = ({
     }
   }, [leads.length, leadsData.length, leadsInitialized, componentReady, setLeadsInitialized, setComponentReady]);
 
-  // Reset leads data when leads change
+  // Reset leads data when leads change - use length comparison instead of object comparison
   useEffect(() => {
-    if (leads.length > 0 && leads !== leadsData) {
+    if (leads.length > 0 && leads.length !== leadsData.length) {
       console.log('Resetting leads data with new leads:', leads.length);
       memoizedResetLeadsData(leads);
     }
-  }, [leads, memoizedResetLeadsData]);
+  }, [leads.length, leadsData.length, memoizedResetLeadsData]);
 
   useSessionPersistence({
     componentReady,
