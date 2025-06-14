@@ -91,4 +91,26 @@ export const useSimplifiedCallingScreenEffects = ({
       setShouldAutoCall(false);
     }
   }, [shouldAutoCall, autoCall, currentIndex, executeAutoCall, setCurrentLeadForAutoCall, setShouldAutoCall, markLeadAsCalled, componentReady, leadsInitialized, getBaseLeads, callDelay]);
+
+  // Trigger auto-call when auto-call is enabled and we have a current lead (for initial state)
+  useEffect(() => {
+    console.log('AUTO-CALL INITIAL TRIGGER: Checking initial conditions', {
+      autoCall,
+      componentReady,
+      leadsInitialized,
+      currentIndex,
+      shouldAutoCall
+    });
+
+    // Only trigger if auto-call is enabled, everything is ready, and we haven't already triggered
+    if (autoCall && componentReady && leadsInitialized && !shouldAutoCall) {
+      const currentLeads = getBaseLeads();
+      const currentLead = currentLeads[currentIndex];
+      
+      if (currentLead) {
+        console.log('AUTO-CALL INITIAL TRIGGER: Auto-call is enabled, triggering for current lead:', currentLead.name);
+        setShouldAutoCall(true);
+      }
+    }
+  }, [autoCall, componentReady, leadsInitialized, currentIndex, shouldAutoCall, getBaseLeads, setShouldAutoCall]);
 };

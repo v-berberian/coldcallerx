@@ -38,7 +38,7 @@ export const useSimplifiedCallingScreenState = ({ leads, sessionState }: UseSimp
     toggleTimezoneFilter,
     toggleCallFilter,
     toggleShuffle,
-    toggleAutoCall,
+    toggleAutoCall: originalToggleAutoCall,
     toggleCallDelay,
     resetCallDelay
   } = useCallingScreenFilters({ leadsData });
@@ -98,6 +98,35 @@ export const useSimplifiedCallingScreenState = ({ leads, sessionState }: UseSimp
     callFilter 
   });
 
+  // Enhanced auto-call toggle that triggers countdown immediately
+  const toggleAutoCall = useCallback(() => {
+    console.log('TOGGLE AUTO-CALL: Current autoCall state:', autoCall);
+    
+    const wasAutoCallOff = !autoCall;
+    originalToggleAutoCall();
+    
+    // If we're turning auto-call ON and we have a current lead, trigger countdown immediately
+    if (wasAutoCallOff && componentReady && leadsInitialized) {
+      console.log('TOGGLE AUTO-CALL: Turning ON auto-call, triggering immediate countdown');
+      
+      // Small delay to allow state to update
+      setTimeout(() => {
+        const currentLeads = getBaseLeads();
+        if (currentLeads.length > 0 && currentIndex >= 0 && currentIndex < currentLeads.length) {
+          console.log('TOGGLE AUTO-CALL: Triggering countdown for current lead');
+          setShouldAutoCall(true);
+        } else {
+          console.log('TOGGLE AUTO-CALL: No valid current lead found');
+        }
+      }, 100);
+    } else if (!wasAutoCallOff) {
+      // If we're turning auto-call OFF, reset any active countdown
+      console.log('TOGGLE AUTO-CALL: Turning OFF auto-call, resetting countdown');
+      resetAutoCall();
+      setShouldAutoCall(false);
+    }
+  }, [autoCall, originalToggleAutoCall, componentReady, leadsInitialized, getBaseLeads, currentIndex, setShouldAutoCall, resetAutoCall]);
+
   // Handle real-time session updates from other devices/tabs
   const handleSessionUpdate = useCallback((updatedSession: SessionState) => {
     console.log('Applying real-time session update:', updatedSession);
@@ -142,7 +171,7 @@ export const useSimplifiedCallingScreenState = ({ leads, sessionState }: UseSimp
     toggleTimezoneFilter,
     toggleCallFilter,
     toggleShuffle,
-    toggleAutoCall,
+    toggleAutoCall, // Use our enhanced version
     toggleCallDelay,
     resetCallDelay,
     memoizedResetLeadsData,
