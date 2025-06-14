@@ -2,7 +2,6 @@
 import React, { useState, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Upload } from 'lucide-react';
-import { useCloudLeadsData } from '@/hooks/useCloudLeadsData';
 
 interface Lead {
   name: string;
@@ -17,7 +16,6 @@ const CSVImporter: React.FC<CSVImporterProps> = ({ onLeadsImported }) => {
   const [error, setError] = useState<string>('');
   const [loading, setLoading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const { uploadCSVFile } = useCloudLeadsData();
 
   const formatPhoneNumber = (phone: string): string => {
     // Remove all non-digit characters
@@ -62,14 +60,7 @@ const CSVImporter: React.FC<CSVImporterProps> = ({ onLeadsImported }) => {
     setLoading(true);
 
     try {
-      // Upload file to Supabase storage
-      const uploadPath = await uploadCSVFile(file);
-      if (!uploadPath) {
-        setError('Failed to upload file to cloud');
-        return;
-      }
-
-      // Parse CSV content
+      // Parse CSV content locally
       const reader = new FileReader();
       reader.onload = (e) => {
         const text = e.target?.result as string;

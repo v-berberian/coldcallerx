@@ -1,7 +1,6 @@
 
 import { useEffect } from 'react';
 import { Lead } from '../types/lead';
-import { SessionState } from '@/services/sessionService';
 
 interface UseCallingScreenEffectsProps {
   componentReady: boolean;
@@ -16,13 +15,11 @@ interface UseCallingScreenEffectsProps {
   shuffleMode: boolean;
   autoCall: boolean;
   callDelay: number;
-  updateSessionState?: (updates: Partial<SessionState>) => Promise<boolean>;
   shouldAutoCall: boolean;
   setShouldAutoCall: (should: boolean) => void;
   setCurrentLeadForAutoCall: (lead: Lead | null) => void;
   executeAutoCall: (lead: Lead) => void;
   getBaseLeads: () => Lead[];
-  markLeadAsCalled?: (lead: Lead) => Promise<boolean>;
 }
 
 export const useCallingScreenEffects = ({
@@ -33,18 +30,13 @@ export const useCallingScreenEffects = ({
   leads,
   memoizedResetLeadsData,
   currentIndex,
-  timezoneFilter,
-  callFilter,
-  shuffleMode,
   autoCall,
   callDelay,
-  updateSessionState,
   shouldAutoCall,
   setShouldAutoCall,
   setCurrentLeadForAutoCall,
   executeAutoCall,
-  getBaseLeads,
-  markLeadAsCalled
+  getBaseLeads
 }: UseCallingScreenEffectsProps) => {
   
   // Progressive component initialization
@@ -69,29 +61,6 @@ export const useCallingScreenEffects = ({
     }
   }, [componentReady, leadsInitialized, leads.length, memoizedResetLeadsData, setLeadsInitialized]);
 
-  // Save session state changes to cloud
-  useEffect(() => {
-    if (updateSessionState && componentReady && leadsInitialized) {
-      const saveSessionState = async () => {
-        try {
-          await updateSessionState({
-            currentLeadIndex: currentIndex,
-            timezoneFilter,
-            callFilter,
-            shuffleMode,
-            autoCall,
-            callDelay
-          });
-        } catch (error) {
-          console.error('Error saving session state:', error);
-        }
-      };
-
-      const timeoutId = setTimeout(saveSessionState, 500);
-      return () => clearTimeout(timeoutId);
-    }
-  }, [currentIndex, timezoneFilter, callFilter, shuffleMode, autoCall, callDelay, updateSessionState, componentReady, leadsInitialized]);
-
   // Handle auto-call trigger - start countdown when conditions are met
   useEffect(() => {
     console.log('AUTO-CALL EFFECT: Checking conditions', {
@@ -112,13 +81,6 @@ export const useCallingScreenEffects = ({
         
         // Execute auto-call with the current lead
         executeAutoCall(currentLead);
-        
-        // Mark as called in cloud if function is provided and no delay
-        if (markLeadAsCalled && callDelay === 0) {
-          markLeadAsCalled(currentLead).catch(error => {
-            console.error('Error marking lead as called:', error);
-          });
-        }
       } else {
         console.log('AUTO-CALL EFFECT: No current lead found');
       }
@@ -126,5 +88,5 @@ export const useCallingScreenEffects = ({
       // Reset the trigger flag
       setShouldAutoCall(false);
     }
-  }, [shouldAutoCall, autoCall, currentIndex, executeAutoCall, setCurrentLeadForAutoCall, setShouldAutoCall, markLeadAsCalled, componentReady, leadsInitialized, getBaseLeads, callDelay]);
+  }, [shouldAutoCall, autoCall, currentIndex, executeAutoCall, setCurrentLeadForAutoCall, setShouldAutoCall, componentReady, leadsInitialized, getBaseLeads, callDelay]);
 };

@@ -3,7 +3,6 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { Loader2 } from 'lucide-react';
-import { useCloudLeadsData } from '@/hooks/useCloudLeadsData';
 import CallingScreen from '@/components/CallingScreen';
 import UserProfile from '@/components/UserProfile';
 import CSVImporter from '@/components/CSVImporter';
@@ -13,18 +12,8 @@ const Index = () => {
   const navigate = useNavigate();
   const [appReady, setAppReady] = useState(false);
   const [showContent, setShowContent] = useState(false);
-
-  const {
-    currentLeadList,
-    leadsData,
-    loading: cloudLoading,
-    importLeadsFromCSV,
-    markLeadAsCalled,
-    resetCallCount,
-    resetAllCallCounts,
-    updateSessionState,
-    sessionState
-  } = useCloudLeadsData();
+  const [leadsData, setLeadsData] = useState<any[]>([]);
+  const [currentFileName, setCurrentFileName] = useState('');
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -33,12 +22,26 @@ const Index = () => {
     }
   }, [user, authLoading, navigate]);
 
-  // Progressive loading - wait for both auth and cloud data to be ready
+  // Load saved data from localStorage
   useEffect(() => {
-    if (user && !authLoading && !cloudLoading) {
-      console.log('Index: User authenticated and data loaded, starting app initialization');
+    if (user && !authLoading) {
+      console.log('Index: Loading saved data from localStorage');
       
-      // Small delay to ensure smooth transition
+      const savedLeads = localStorage.getItem('leadsData');
+      const savedLeadList = localStorage.getItem('currentLeadList');
+      
+      if (savedLeads && savedLeadList) {
+        try {
+          const leads = JSON.parse(savedLeads);
+          const leadList = JSON.parse(savedLeadList);
+          setLeadsData(leads);
+          setCurrentFileName(leadList.name);
+        } catch (error) {
+          console.error('Error loading saved data:', error);
+        }
+      }
+      
+      // Initialize app
       const initializeApp = async () => {
         await new Promise(resolve => setTimeout(resolve, 200));
         console.log('Index: App initialization complete');
@@ -52,14 +55,17 @@ const Index = () => {
 
       initializeApp();
     }
-  }, [user, authLoading, cloudLoading]);
+  }, [user, authLoading]);
 
   const handleLeadsImported = async (importedLeads: any[], fileName: string) => {
-    console.log('Index: Importing new leads to cloud:', importedLeads.length);
-    const success = await importLeadsFromCSV(importedLeads, fileName);
-    if (!success) {
-      console.error('Index: Failed to import leads to cloud');
-    }
+    console.log('Index: Importing new leads locally:', importedLeads.length);
+    setLeadsData(importedLeads);
+    setCurrentFileName(fileName);
+    
+    // Save to localStorage
+    const leadList = { id: Date.now().toString(), name: fileName };
+    localStorage.setItem('currentLeadList', JSON.stringify(leadList));
+    localStorage.setItem('leadsData', JSON.stringify(importedLeads));
   };
 
   const handleBack = async () => {
@@ -68,13 +74,13 @@ const Index = () => {
   };
 
   // Show loading until everything is ready
-  if (authLoading || cloudLoading || (user && !appReady)) {
+  if (authLoading || (user && !appReady)) {
     return (
       <div className="h-[100vh] h-[100dvh] h-[100svh] bg-background flex items-center justify-center fixed inset-0 overflow-hidden">
         <div className="text-center space-y-4">
           <Loader2 className="h-12 w-12 animate-spin mx-auto text-blue-500" />
           <p className="text-lg text-muted-foreground">
-            {authLoading ? 'Loading...' : cloudLoading ? 'Restoring your session...' : 'Initializing app...'}
+            {authLoading ? 'Loading...' : 'Initializing app...'}
           </p>
         </div>
       </div>
@@ -86,7 +92,7 @@ const Index = () => {
   }
 
   // If no leads, show empty state with proper header
-  if (!currentLeadList || leadsData.length === 0) {
+  if (leadsData.length === 0) {
     return (
       <div className={`h-[100vh] h-[100dvh] h-[100svh] bg-background overflow-hidden fixed inset-0 transition-opacity duration-300 ${showContent ? 'opacity-100' : 'opacity-0'}`}>
         {/* Header with user info and import */}
@@ -117,14 +123,9 @@ const Index = () => {
     <div className={`transition-opacity duration-300 ${showContent ? 'opacity-100' : 'opacity-0'}`}>
       <CallingScreen 
         leads={leadsData} 
-        fileName={currentLeadList.name}
+        fileName={currentFileName}
         onBack={handleBack}
         onLeadsImported={handleLeadsImported}
-        markLeadAsCalled={markLeadAsCalled}
-        resetCallCount={resetCallCount}
-        resetAllCallCounts={resetAllCallCounts}
-        sessionState={sessionState}
-        updateSessionState={updateSessionState}
       />
     </div>
   );

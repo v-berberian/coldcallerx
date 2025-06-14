@@ -1,16 +1,14 @@
 
 import { useState, useCallback } from 'react';
 import { Lead } from '../types/lead';
-import { SessionState } from '@/services/sessionService';
 import { useSearchState } from '../components/SearchState';
 import { useLeadNavigation } from './useLeadNavigation';
 
 interface UseCallingScreenStateProps {
   leads: Lead[];
-  sessionState?: SessionState;
 }
 
-export const useCallingScreenState = ({ leads, sessionState }: UseCallingScreenStateProps) => {
+export const useCallingScreenState = ({ leads }: UseCallingScreenStateProps) => {
   const [componentReady, setComponentReady] = useState(false);
   const [leadsInitialized, setLeadsInitialized] = useState(false);
 

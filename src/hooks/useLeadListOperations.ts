@@ -1,41 +1,27 @@
 
 import { useState } from 'react';
 import { Lead } from '../types/lead';
-import { leadService, LeadList } from '../services/leadService';
-import { sessionStateService } from '../services/sessionStateService';
 
 export const useLeadListOperations = () => {
-  const [currentLeadList, setCurrentLeadList] = useState<LeadList | null>(null);
+  const [currentLeadList, setCurrentLeadList] = useState<any>(null);
   const [leadsData, setLeadsData] = useState<Lead[]>([]);
   const [loading, setLoading] = useState(false);
 
   const importLeadsFromCSV = async (leads: Lead[], fileName: string): Promise<boolean> => {
     setLoading(true);
     try {
-      console.log('useLeadListOperations: Importing leads from CSV:', leads.length);
+      console.log('useLeadListOperations: Importing leads locally:', leads.length);
       
-      // Create lead list
-      const leadList = await leadService.createLeadList(fileName, fileName);
-      if (!leadList) {
-        setLoading(false);
-        return false;
-      }
-
-      // Save leads to database
-      const success = await leadService.saveLeads(leadList.id, leads);
-      if (success) {
-        setCurrentLeadList(leadList);
-        setLeadsData(leads);
-
-        // Update session state for new lead list
-        const newSessionState = sessionStateService.updateState({
-          currentLeadListId: leadList.id,
-          currentLeadIndex: 0
-        });
-        await sessionStateService.saveState();
-
-        return true;
-      }
+      // Store locally instead of cloud
+      const leadList = { id: Date.now().toString(), name: fileName };
+      setCurrentLeadList(leadList);
+      setLeadsData(leads);
+      
+      // Save to localStorage
+      localStorage.setItem('currentLeadList', JSON.stringify(leadList));
+      localStorage.setItem('leadsData', JSON.stringify(leads));
+      
+      return true;
     } catch (error) {
       console.error('useLeadListOperations: Error importing leads:', error);
     } finally {
@@ -44,47 +30,22 @@ export const useLeadListOperations = () => {
     return false;
   };
 
-  const switchToLeadList = async (leadList: LeadList) => {
-    setLoading(true);
-    try {
-      console.log('useLeadListOperations: Switching to lead list:', leadList.name);
-      const leads = await leadService.getLeads(leadList.id);
-      setCurrentLeadList(leadList);
-      setLeadsData(leads);
-
-      // Update session state for new lead list
-      const newSessionState = sessionStateService.updateState({
-        currentLeadListId: leadList.id,
-        currentLeadIndex: 0
-      });
-      await sessionStateService.saveState();
-    } catch (error) {
-      console.error('useLeadListOperations: Error switching lead list:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
   const deleteLeadList = async (leadListId: string): Promise<boolean> => {
     try {
-      console.log('useLeadListOperations: Deleting lead list:', leadListId);
-      const success = await leadService.deleteLeadList(leadListId);
-      if (success) {
-        // If we deleted the current list, clear it
-        if (currentLeadList?.id === leadListId) {
-          setCurrentLeadList(null);
-          setLeadsData([]);
-        }
-        return true;
+      console.log('useLeadListOperations: Deleting lead list locally:', leadListId);
+      
+      // If we deleted the current list, clear it
+      if (currentLeadList?.id === leadListId) {
+        setCurrentLeadList(null);
+        setLeadsData([]);
+        localStorage.removeItem('currentLeadList');
+        localStorage.removeItem('leadsData');
       }
+      return true;
     } catch (error) {
       console.error('useLeadListOperations: Error deleting lead list:', error);
     }
     return false;
-  };
-
-  const uploadCSVFile = async (file: File, userId: string): Promise<string | null> => {
-    return await leadService.uploadCSVFile(file, userId);
   };
 
   return {
@@ -95,8 +56,6 @@ export const useLeadListOperations = () => {
     setLeadsData,
     setLoading,
     importLeadsFromCSV,
-    switchToLeadList,
-    deleteLeadList,
-    uploadCSVFile
+    deleteLeadList
   };
 };
