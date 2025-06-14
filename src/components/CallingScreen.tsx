@@ -1,6 +1,6 @@
 
 import React from 'react';
-import CallingScreenLogic from './CallingScreenLogic';
+import CallingScreenContainer from './CallingScreenContainer';
 import { SessionState } from '@/services/sessionService';
 
 interface Lead {
@@ -23,7 +23,7 @@ interface CallingScreenProps {
 }
 
 const CallingScreen: React.FC<CallingScreenProps> = (props) => {
-  return <CallingScreenLogic {...props} />;
+  return <CallingScreenContainer {...props} />;
 };
 
 export default CallingScreen;

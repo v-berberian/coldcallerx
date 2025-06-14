@@ -31,6 +31,7 @@ interface MainContentProps {
   canGoNext: boolean;
   isCountdownActive?: boolean;
   countdownTime?: number;
+  getDelayDisplayType?: () => 'timer' | 'rocket' | '5s' | '10s';
 }
 
 const MainContent: React.FC<MainContentProps> = ({
@@ -58,15 +59,9 @@ const MainContent: React.FC<MainContentProps> = ({
   canGoPrevious,
   canGoNext,
   isCountdownActive,
-  countdownTime
+  countdownTime,
+  getDelayDisplayType
 }) => {
-  const getDelayDisplayType = (): 'timer' | 'rocket' | '5s' | '10s' => {
-    if (callDelay === 0) return 'rocket';
-    if (callDelay === 5) return '5s';
-    if (callDelay === 10) return '10s';
-    return 'timer';
-  };
-
   return (
     <div className="flex-1 flex items-start justify-center pt-1 p-4 min-h-0 px-6">
       <div className="w-full max-w-sm space-y-1">

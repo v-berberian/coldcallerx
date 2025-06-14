@@ -5,8 +5,8 @@ import { Card, CardContent } from '@/components/ui/card';
 import CallingHeader from './CallingHeader';
 import MainContent from './MainContent';
 import { Lead } from '../types/lead';
-import { useCallingScreenState } from '../hooks/useCallingScreenState';
-import { useCallingScreenEffects } from '../hooks/useCallingScreenEffects';
+import { useSimplifiedCallingScreenState } from '../hooks/useSimplifiedCallingScreenState';
+import { useSimplifiedCallingScreenEffects } from '../hooks/useSimplifiedCallingScreenEffects';
 import { useCallingScreenActions } from './CallingScreenActions';
 import { SessionState } from '@/services/sessionService';
 
@@ -66,6 +66,8 @@ const CallingScreenContainer: React.FC<CallingScreenContainerProps> = ({
     toggleCallDelay,
     resetCallDelay,
     memoizedResetLeadsData,
+    resetCallCount: localResetCallCount,
+    resetAllCallCounts: localResetAllCallCounts,
     searchQuery,
     setSearchQuery,
     searchResults,
@@ -73,10 +75,11 @@ const CallingScreenContainer: React.FC<CallingScreenContainerProps> = ({
     setShowAutocomplete,
     clearSearch,
     handleSearchFocus,
-    handleSearchBlur
-  } = useCallingScreenState({ leads, sessionState });
+    handleSearchBlur,
+    getDelayDisplayType
+  } = useSimplifiedCallingScreenState({ leads, sessionState });
 
-  useCallingScreenEffects({
+  useSimplifiedCallingScreenEffects({
     componentReady,
     setComponentReady,
     leadsInitialized,
@@ -229,6 +232,7 @@ const CallingScreenContainer: React.FC<CallingScreenContainerProps> = ({
           onNext={handleNextWrapper}
           canGoPrevious={currentLeads.length > 1}
           canGoNext={currentLeads.length > 1}
+          getDelayDisplayType={getDelayDisplayType}
         />
       </div>
     </div>
