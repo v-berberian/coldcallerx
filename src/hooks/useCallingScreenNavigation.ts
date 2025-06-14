@@ -1,7 +1,6 @@
 
 import { Lead, CallFilter } from '../types/lead';
 import { useNavigationState } from './useNavigationState';
-import { useLeadNavigationState } from './useLeadNavigationState';
 import { useNavigation } from './useNavigation';
 import { useAutoCall } from './useAutoCall';
 
@@ -35,18 +34,18 @@ export const useCallingScreenNavigation = ({
     setCardKey
   } = useNavigationState();
 
-  const {
-    shouldAutoCall,
-    setShouldAutoCall,
-    shownLeadsInShuffle,
-    setShownLeadsInShuffle,
-    callMadeToCurrentLead,
-    setCallMadeToCurrentLead,
-    currentLeadForAutoCall,
-    setCurrentLeadForAutoCall,
-    resetShownLeads,
-    resetCallState
-  } = useLeadNavigationState();
+  // Lead navigation state - moved inline since the hook was deleted
+  const [shouldAutoCall, setShouldAutoCall] = React.useState(false);
+  const [shownLeadsInShuffle, setShownLeadsInShuffle] = React.useState<Set<string>>(new Set());
+  const [callMadeToCurrentLead, setCallMadeToCurrentLead] = React.useState(false);
+  const [currentLeadForAutoCall, setCurrentLeadForAutoCall] = React.useState<Lead | null>(null);
+
+  const resetShownLeads = () => setShownLeadsInShuffle(new Set());
+  const resetCallState = () => {
+    setCallMadeToCurrentLead(false);
+    setCurrentLeadForAutoCall(null);
+    setShouldAutoCall(false);
+  };
 
   const { isAutoCallInProgress, isCountdownActive, countdownTime, executeAutoCall, handleCountdownComplete, resetAutoCall, shouldBlockNavigation } = useAutoCall(makeCall, callDelay);
 

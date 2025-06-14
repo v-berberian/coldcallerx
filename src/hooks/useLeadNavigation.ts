@@ -1,7 +1,6 @@
 
 import { Lead } from '../types/lead';
 import { useNavigationState } from './useNavigationState';
-import { useLeadNavigationState } from './useLeadNavigationState';
 import { useLeadNavigationCore } from './useLeadNavigationCore';
 import { useLeadNavigationFilters } from './useLeadNavigationFilters';
 import { useLeadNavigationOperations } from './useLeadNavigationOperations';
@@ -10,6 +9,7 @@ import { useLeadFiltering } from './useLeadFiltering';
 import { useNavigation } from './useNavigation';
 import { useFilterChangeEffects } from './useFilterChangeEffects';
 import { useLeadNavigationActions } from './useLeadNavigationActions';
+import { useState } from 'react';
 
 export const useLeadNavigation = (initialLeads: Lead[]) => {
   // Core state management
@@ -24,18 +24,18 @@ export const useLeadNavigation = (initialLeads: Lead[]) => {
     setCardKey
   } = useNavigationState();
 
-  const {
-    shouldAutoCall,
-    setShouldAutoCall,
-    shownLeadsInShuffle,
-    setShownLeadsInShuffle,
-    callMadeToCurrentLead,
-    setCallMadeToCurrentLead,
-    currentLeadForAutoCall,
-    setCurrentLeadForAutoCall,
-    resetShownLeads,
-    resetCallState
-  } = useLeadNavigationState();
+  // Lead navigation state - moved inline since the hook was deleted
+  const [shouldAutoCall, setShouldAutoCall] = useState(false);
+  const [shownLeadsInShuffle, setShownLeadsInShuffle] = useState<Set<string>>(new Set());
+  const [callMadeToCurrentLead, setCallMadeToCurrentLead] = useState(false);
+  const [currentLeadForAutoCall, setCurrentLeadForAutoCall] = useState<Lead | null>(null);
+
+  const resetShownLeads = () => setShownLeadsInShuffle(new Set());
+  const resetCallState = () => {
+    setCallMadeToCurrentLead(false);
+    setCurrentLeadForAutoCall(null);
+    setShouldAutoCall(false);
+  };
 
   const { leadsData, setLeadsData, resetLeadsData } = useLeadNavigationCore(initialLeads);
 
