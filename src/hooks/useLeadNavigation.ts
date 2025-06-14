@@ -35,7 +35,8 @@ export const useLeadNavigation = (initialLeads: Lead[]) => {
     goToPrevious,
     resetNavigation,
     setCurrentIndex,
-    setCardKey
+    setCardKey,
+    restoreFromLocalStorage
   } = useNavigationState();
 
   const {
@@ -169,28 +170,28 @@ export const useLeadNavigation = (initialLeads: Lead[]) => {
     }));
     setLeadsData(formattedLeads);
     
-    // Don't restore from localStorage anymore - rely on cloud session state
-    resetNavigation(0);
+    // Reset navigation to 0 and clear localStorage
+    resetNavigation(0, false); // Not silent for new data
+    localStorage.removeItem('coldcaller-current-index');
     resetShownLeads();
     resetCallState();
     
     console.log('Reset leads data with', formattedLeads.length, 'leads');
   };
 
-  // Function to restore session state from cloud (called by parent component)
+  // Function to restore session state from cloud (silent restoration to prevent card remount)
   const restoreSessionState = (sessionState: any) => {
-    console.log('Restoring session state from cloud:', sessionState);
+    console.log('Restoring session state from cloud (silent):', sessionState);
     
-    // Restore the current index from cloud session
+    // Restore the current index from cloud session silently
     if (sessionState.currentLeadIndex !== undefined && leadsData.length > 0) {
       const validIndex = Math.max(0, Math.min(sessionState.currentLeadIndex, leadsData.length - 1));
-      console.log('Restoring current index from cloud:', validIndex);
-      resetNavigation(validIndex);
+      console.log('Restoring current index from cloud (silent):', validIndex);
+      
+      // Use silent navigation to prevent card remount
+      updateNavigation(validIndex, false, true);
     }
   };
-
-  // Remove localStorage saving - we rely on cloud session state now
-  // The session state is saved via useSessionPersistence hook in the calling component
 
   return {
     leadsData,
@@ -225,6 +226,7 @@ export const useLeadNavigation = (initialLeads: Lead[]) => {
     resetCallDelay,
     resetLeadsData,
     restoreSessionState,
+    restoreFromLocalStorage,
     countdownTime
   };
 };

@@ -7,9 +7,16 @@ export const useNavigationState = () => {
   const [historyIndex, setHistoryIndex] = useState(0);
   const [cardKey, setCardKey] = useState(0);
 
-  const updateNavigation = (newIndex: number, addToHistory = true) => {
+  const updateNavigation = (newIndex: number, addToHistory = true, silent = false) => {
     setCurrentIndex(newIndex);
-    setCardKey(prev => prev + 1);
+    
+    // Save to localStorage immediately for instant restoration
+    localStorage.setItem('coldcaller-current-index', newIndex.toString());
+    
+    // Only update cardKey for user-initiated navigation, not for session restoration
+    if (!silent) {
+      setCardKey(prev => prev + 1);
+    }
     
     if (addToHistory) {
       const newHistory = navigationHistory.slice(0, historyIndex + 1);
@@ -25,17 +32,42 @@ export const useNavigationState = () => {
       const prevIndex = navigationHistory[newHistoryIndex];
       setCurrentIndex(prevIndex);
       setHistoryIndex(newHistoryIndex);
+      
+      // Save to localStorage immediately
+      localStorage.setItem('coldcaller-current-index', prevIndex.toString());
       setCardKey(prev => prev + 1);
       return true;
     }
     return false;
   };
 
-  const resetNavigation = (index = 0) => {
+  const resetNavigation = (index = 0, silent = false) => {
     setCurrentIndex(index);
     setNavigationHistory([index]);
     setHistoryIndex(0);
-    setCardKey(prev => prev + 1);
+    
+    // Save to localStorage immediately
+    localStorage.setItem('coldcaller-current-index', index.toString());
+    
+    // Only update cardKey for user-initiated resets
+    if (!silent) {
+      setCardKey(prev => prev + 1);
+    }
+  };
+
+  // Function to restore from localStorage immediately
+  const restoreFromLocalStorage = (leadsLength: number) => {
+    const savedIndex = localStorage.getItem('coldcaller-current-index');
+    if (savedIndex && leadsLength > 0) {
+      const index = Math.max(0, Math.min(parseInt(savedIndex, 10), leadsLength - 1));
+      if (index !== currentIndex) {
+        console.log('Restoring from localStorage:', index);
+        setCurrentIndex(index);
+        setNavigationHistory([index]);
+        setHistoryIndex(0);
+        // Don't update cardKey to prevent remount
+      }
+    }
   };
 
   return {
@@ -47,6 +79,7 @@ export const useNavigationState = () => {
     goToPrevious,
     resetNavigation,
     setCurrentIndex,
-    setCardKey
+    setCardKey,
+    restoreFromLocalStorage
   };
 };

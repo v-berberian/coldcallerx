@@ -14,6 +14,7 @@ export const useSimplifiedCallingScreenState = ({ leads, sessionState }: UseSimp
   const [componentReady, setComponentReady] = useState(false);
   const [leadsInitialized, setLeadsInitialized] = useState(false);
   const sessionRestoredRef = useRef(false);
+  const localStorageRestoredRef = useRef(false);
 
   // Initialize hooks - only pass leads to useLeadNavigation
   const {
@@ -46,7 +47,8 @@ export const useSimplifiedCallingScreenState = ({ leads, sessionState }: UseSimp
     resetCallDelay,
     resetLeadsData,
     restoreSessionState,
-    getDelayDisplayType
+    getDelayDisplayType,
+    restoreFromLocalStorage
   } = useLeadNavigation(leads);
 
   const {
@@ -71,16 +73,30 @@ export const useSimplifiedCallingScreenState = ({ leads, sessionState }: UseSimp
     resetLeadsData(newLeads);
   }, [resetLeadsData]);
 
-  // Restore session state from cloud when available - with proper guards to prevent infinite loops
+  // Immediate localStorage restoration when leads are ready
+  useEffect(() => {
+    if (
+      leadsData.length > 0 && 
+      leadsInitialized && 
+      !localStorageRestoredRef.current
+    ) {
+      console.log('useSimplifiedCallingScreenState: Restoring from localStorage immediately');
+      restoreFromLocalStorage(leadsData.length);
+      localStorageRestoredRef.current = true;
+    }
+  }, [leadsData.length, leadsInitialized, restoreFromLocalStorage]);
+
+  // Restore session state from cloud when available - silent restoration
   useEffect(() => {
     if (
       sessionState && 
       leadsData.length > 0 && 
       leadsInitialized && 
       componentReady && 
-      !sessionRestoredRef.current
+      !sessionRestoredRef.current &&
+      localStorageRestoredRef.current // Only after localStorage restoration
     ) {
-      console.log('useSimplifiedCallingScreenState: Restoring session state from cloud');
+      console.log('useSimplifiedCallingScreenState: Restoring session state from cloud (silent)');
       restoreSessionState(sessionState);
       sessionRestoredRef.current = true;
     }

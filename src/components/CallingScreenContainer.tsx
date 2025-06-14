@@ -212,7 +212,7 @@ const CallingScreenContainer: React.FC<CallingScreenContainerProps> = ({
           currentIndex={currentIndex}
           totalCount={totalLeadCount}
           fileName={fileName}
-          cardKey={cardKey}
+          // Remove cardKey prop - no longer needed
           timezoneFilter={timezoneFilter}
           callFilter={callFilter}
           shuffleMode={shuffleMode}
