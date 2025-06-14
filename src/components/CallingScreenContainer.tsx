@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -92,7 +91,6 @@ const CallingScreenContainer: React.FC<CallingScreenContainerProps> = ({
     shuffleMode,
     autoCall,
     callDelay,
-    updateSessionState,
     shouldAutoCall,
     setShouldAutoCall,
     setCurrentLeadForAutoCall,

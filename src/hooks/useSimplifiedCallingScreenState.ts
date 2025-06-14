@@ -14,7 +14,6 @@ export const useSimplifiedCallingScreenState = ({ leads, sessionState }: UseSimp
   const [componentReady, setComponentReady] = useState(false);
   const [leadsInitialized, setLeadsInitialized] = useState(false);
   const localStorageRestoredRef = useRef(false);
-  const cloudSyncedRef = useRef(false);
 
   // Initialize hooks - only pass leads to useLeadNavigation
   const {
@@ -46,7 +45,6 @@ export const useSimplifiedCallingScreenState = ({ leads, sessionState }: UseSimp
     resetCallDelay,
     resetLeadsData,
     restoreFromLocalStorage,
-    syncFromCloudSession,
     getDelayDisplayType
   } = useLeadNavigation(leads);
 
@@ -72,34 +70,18 @@ export const useSimplifiedCallingScreenState = ({ leads, sessionState }: UseSimp
     resetLeadsData(newLeads);
   }, [resetLeadsData]);
 
-  // Primary: Restore from localStorage immediately when leads are ready
+  // Only restore from localStorage when leads are ready - no cloud session restoration
   useEffect(() => {
     if (
       leadsData.length > 0 && 
       leadsInitialized && 
       !localStorageRestoredRef.current
     ) {
-      console.log('Primary restoration: localStorage');
+      console.log('Restoring session from localStorage only');
       restoreFromLocalStorage(leadsData.length);
       localStorageRestoredRef.current = true;
     }
   }, [leadsData.length, leadsInitialized, restoreFromLocalStorage]);
-
-  // Secondary: Sync from cloud session state (only if different from localStorage)
-  useEffect(() => {
-    if (
-      sessionState?.currentLeadIndex !== undefined &&
-      leadsData.length > 0 && 
-      leadsInitialized && 
-      componentReady && 
-      localStorageRestoredRef.current && 
-      !cloudSyncedRef.current
-    ) {
-      console.log('Secondary sync: cloud session state');
-      syncFromCloudSession(sessionState.currentLeadIndex, leadsData.length);
-      cloudSyncedRef.current = true;
-    }
-  }, [sessionState?.currentLeadIndex, leadsData.length, leadsInitialized, componentReady, syncFromCloudSession]);
 
   return {
     componentReady,
