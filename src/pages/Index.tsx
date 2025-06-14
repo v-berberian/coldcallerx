@@ -26,7 +26,10 @@ const Index = () => {
   useEffect(() => {
     if (user && !authLoading) {
       console.log('User authenticated, loading local data');
-      loadLocalData();
+      // Add small delay to ensure auth state is fully settled
+      setTimeout(() => {
+        loadLocalData();
+      }, 100);
     }
   }, [user, authLoading]);
 
@@ -87,8 +90,7 @@ const Index = () => {
           <CSVImporter onLeadsImported={handleLeadsImported} />
           
           <h1 className="text-2xl font-bold">
-            <span className="text-blue-500">Cold</span>
-            <span className="text-foreground">Caller </span>
+            <span className="text-blue-500">ColdCall </span>
             <span className="text-blue-500">X</span>
           </h1>
           

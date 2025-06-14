@@ -4,8 +4,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Label } from '@/components/ui/label';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Loader2 } from 'lucide-react';
 
@@ -20,10 +19,10 @@ const Auth = () => {
 
   useEffect(() => {
     if (user) {
-      // Add a small delay to ensure state is fully updated before navigation
-      setTimeout(() => {
-        navigate('/', { replace: true });
-      }, 100);
+      // Clear any existing state and navigate
+      setLoading(false);
+      setError('');
+      navigate('/', { replace: true });
     }
   }, [user, navigate]);
 
@@ -39,88 +38,84 @@ const Auth = () => {
 
       if (error) {
         setError(error.message);
+        setLoading(false);
       } else if (isSignUp) {
         setError('Check your email for the confirmation link!');
+        setLoading(false);
       }
+      // Don't set loading to false for sign in - let the user effect handle navigation
     } catch (err) {
       setError('An unexpected error occurred');
-    } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="h-[100dvh] bg-background flex flex-col overflow-hidden fixed inset-0">
+    <div className="min-h-screen bg-background flex flex-col">
       {/* Header matching the app style */}
-      <div className="bg-background border-b border-border p-4" style={{ paddingTop: 'max(1rem, env(safe-area-inset-top))' }}>
+      <div className="bg-background border-b border-border p-4 pt-safe">
         <div className="flex items-center justify-center">
           <h1 className="text-2xl font-bold">
-            <span className="text-blue-500">Cold</span>
-            <span className="text-foreground">Caller </span>
+            <span className="text-blue-500">ColdCall </span>
             <span className="text-blue-500">X</span>
           </h1>
         </div>
       </div>
 
       {/* Main content */}
-      <div className="flex-1 flex items-center justify-center p-4">
-        <Card className="w-full max-w-md shadow-lg rounded-2xl">
-          <CardHeader className="text-center">
-            <CardTitle className="text-xl font-semibold">
+      <div className="flex-1 flex items-center justify-center p-6">
+        <Card className="w-full max-w-sm shadow-lg rounded-2xl border-0 bg-card">
+          <CardHeader className="text-center pb-4">
+            <CardTitle className="text-xl font-semibold text-foreground">
               {isSignUp ? 'Create Account' : 'Sign In'}
             </CardTitle>
-            <CardDescription>
-              {isSignUp ? 'Get started with ColdCaller X' : 'Welcome back to ColdCaller X'}
-            </CardDescription>
           </CardHeader>
-          <CardContent>
+          <CardContent className="space-y-6">
             <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="Enter your email"
-                  required
-                  className="rounded-xl"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="password">Password</Label>
-                <Input
-                  id="password"
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="Enter your password"
-                  required
-                  minLength={6}
-                  className="rounded-xl"
-                />
-              </div>
+              <Input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="Email"
+                required
+                className="rounded-xl border-border h-12 text-base"
+                disabled={loading}
+              />
+              <Input
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="Password"
+                required
+                minLength={6}
+                className="rounded-xl border-border h-12 text-base"
+                disabled={loading}
+              />
               {error && (
-                <Alert>
-                  <AlertDescription>{error}</AlertDescription>
+                <Alert className="rounded-xl">
+                  <AlertDescription className="text-sm">{error}</AlertDescription>
                 </Alert>
               )}
-              <Button type="submit" className="w-full rounded-xl" disabled={loading}>
+              <Button 
+                type="submit" 
+                className="w-full rounded-xl h-12 text-base font-medium" 
+                disabled={loading}
+              >
                 {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 {isSignUp ? 'Sign Up' : 'Sign In'}
               </Button>
             </form>
-            <div className="mt-4 text-center">
+            <div className="text-center">
               <Button
-                variant="link"
+                variant="ghost"
                 onClick={() => {
                   setIsSignUp(!isSignUp);
                   setError('');
                 }}
+                className="text-muted-foreground hover:text-foreground"
+                disabled={loading}
               >
-                {isSignUp 
-                  ? 'Already have an account? Sign in' 
-                  : "Don't have an account? Sign up"}
+                {isSignUp ? 'Sign in instead' : 'Create account'}
               </Button>
             </div>
           </CardContent>

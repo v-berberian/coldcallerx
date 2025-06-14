@@ -27,6 +27,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
   const initialized = useRef(false);
+  const processingAuth = useRef(false);
 
   useEffect(() => {
     // Prevent multiple initializations
@@ -38,17 +39,24 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     // Set up auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, session) => {
-        if (!mounted) return;
+        if (!mounted || processingAuth.current) return;
         
         console.log('Auth state change:', event, session?.user?.email);
         
-        // Use setTimeout to prevent blocking the main thread
-        setTimeout(() => {
-          if (!mounted) return;
+        processingAuth.current = true;
+        
+        // Process auth changes immediately but safely
+        requestAnimationFrame(() => {
+          if (!mounted) {
+            processingAuth.current = false;
+            return;
+          }
+          
           setSession(session);
           setUser(session?.user ?? null);
           setLoading(false);
-        }, 0);
+          processingAuth.current = false;
+        });
       }
     );
 
