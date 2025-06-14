@@ -18,7 +18,7 @@ interface UseLeadNavigationActionsProps {
   selectLead: (lead: Lead, baseLeads: Lead[], allLeads: Lead[]) => void;
   setCallMadeToCurrentLead: (called: boolean) => void;
   autoCall: boolean;
-  executeAutoCall: (lead: Lead) => void;
+  setShouldAutoCall: (should: boolean) => void;
   goToPrevious: () => boolean;
 }
 
@@ -32,26 +32,19 @@ export const useLeadNavigationActions = ({
   selectLead,
   setCallMadeToCurrentLead,
   autoCall,
-  executeAutoCall,
+  setShouldAutoCall,
   goToPrevious
 }: UseLeadNavigationActionsProps) => {
 
   const handleNextWrapper = (baseLeads: Lead[]) => {
-    console.log('NAVIGATION: Next wrapper called, autoCall:', autoCall);
-    
     handleNext(baseLeads);
     
     // Reset call state when navigating
     setCallMadeToCurrentLead(false);
     
-    // Trigger auto-call immediately after navigation if auto-call is enabled
-    if (autoCall && baseLeads.length > 0) {
-      const nextIndex = shuffleMode ? currentIndex : (currentIndex + 1) % baseLeads.length;
-      const nextLead = baseLeads[nextIndex];
-      if (nextLead) {
-        console.log('NAVIGATION: Auto-call enabled, triggering countdown after next navigation for:', nextLead.name);
-        executeAutoCall(nextLead);
-      }
+    // Set flag to trigger auto-call after navigation
+    if (autoCall) {
+      setShouldAutoCall(true);
     }
   };
 
@@ -63,8 +56,6 @@ export const useLeadNavigationActions = ({
       console.log('Previous navigation blocked due to countdown');
       return;
     }
-    
-    console.log('NAVIGATION: Previous wrapper called, autoCall:', autoCall);
     
     if (shuffleMode) {
       // In shuffle mode, use navigation history to go to previously shown lead
@@ -83,30 +74,12 @@ export const useLeadNavigationActions = ({
     
     // Reset call state when navigating
     setCallMadeToCurrentLead(false);
-    
-    // Trigger auto-call immediately after navigation if auto-call is enabled
-    if (autoCall && baseLeads.length > 0) {
-      const prevIndex = shuffleMode ? currentIndex : (currentIndex === 0 ? baseLeads.length - 1 : currentIndex - 1);
-      const prevLead = baseLeads[prevIndex];
-      if (prevLead) {
-        console.log('NAVIGATION: Auto-call enabled, triggering countdown after previous navigation for:', prevLead.name);
-        executeAutoCall(prevLead);
-      }
-    }
   };
 
   const selectLeadWrapper = (lead: Lead, baseLeads: Lead[], leadsData: Lead[]) => {
-    console.log('NAVIGATION: Lead selected, autoCall:', autoCall);
-    
     selectLead(lead, baseLeads, leadsData);
     // Reset call state when selecting a new lead
     setCallMadeToCurrentLead(false);
-    
-    // Trigger auto-call immediately after lead selection if auto-call is enabled
-    if (autoCall) {
-      console.log('NAVIGATION: Auto-call enabled, triggering countdown after lead selection for:', lead.name);
-      executeAutoCall(lead);
-    }
   };
 
   return {

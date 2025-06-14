@@ -1,13 +1,14 @@
+
 import React from 'react';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
+import CallingHeader from './CallingHeader';
+import MainContent from './MainContent';
 import { Lead } from '../types/lead';
 import { useSimplifiedCallingScreenState } from '../hooks/useSimplifiedCallingScreenState';
 import { useSimplifiedCallingScreenEffects } from '../hooks/useSimplifiedCallingScreenEffects';
 import { useCallingScreenActions } from './CallingScreenActions';
 import { SessionState } from '@/services/sessionService';
-import CallingScreenLoading from './CallingScreenLoading';
-import CallingScreenEmpty from './CallingScreenEmpty';
-import CallingScreenNoResults from './CallingScreenNoResults';
-import CallingScreenMain from './CallingScreenMain';
 
 interface CallingScreenContainerProps {
   leads: Lead[];
@@ -34,7 +35,9 @@ const CallingScreenContainer: React.FC<CallingScreenContainerProps> = ({
 }) => {
   const {
     componentReady,
+    setComponentReady,
     leadsInitialized,
+    setLeadsInitialized,
     leadsData,
     currentIndex,
     cardKey,
@@ -73,13 +76,17 @@ const CallingScreenContainer: React.FC<CallingScreenContainerProps> = ({
     clearSearch,
     handleSearchFocus,
     handleSearchBlur,
-    getDelayDisplayType,
-    handleSessionUpdate
+    getDelayDisplayType
   } = useSimplifiedCallingScreenState({ leads, sessionState });
 
   useSimplifiedCallingScreenEffects({
     componentReady,
+    setComponentReady,
     leadsInitialized,
+    setLeadsInitialized,
+    leads,
+    leadsData,
+    memoizedResetLeadsData,
     currentIndex,
     timezoneFilter,
     callFilter,
@@ -92,8 +99,7 @@ const CallingScreenContainer: React.FC<CallingScreenContainerProps> = ({
     setCurrentLeadForAutoCall,
     executeAutoCall,
     getBaseLeads,
-    markLeadAsCalled,
-    handleSessionUpdate
+    markLeadAsCalled
   });
 
   const {
@@ -120,69 +126,117 @@ const CallingScreenContainer: React.FC<CallingScreenContainerProps> = ({
 
   // Show loading until component is ready
   if (!componentReady || !leadsInitialized) {
-    return <CallingScreenLoading />;
-  }
-
-  // No leads imported
-  if (leadsData.length === 0) {
-    return <CallingScreenEmpty onBack={onBack} />;
+    return (
+      <div className="h-[100dvh] bg-background flex items-center justify-center">
+        <div className="text-center space-y-2">
+          <div className="w-6 h-6 border-2 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto"></div>
+          <p className="text-sm text-muted-foreground">Loading caller...</p>
+        </div>
+      </div>
+    );
   }
 
   const currentLeads = getBaseLeads();
   const currentLead = currentLeads[currentIndex];
   
-  // No leads found with current filters
+  if (leadsData.length === 0) {
+    return (
+      <div className="h-[100dvh] bg-background overflow-hidden fixed inset-0">
+        <div className="bg-background border-b border-border p-4">
+          <div className="flex items-center justify-center">
+            <div className="flex items-center space-x-3">
+              <h1 className="text-2xl font-bold">
+                <span className="text-blue-500">ColdCall </span>
+                <span className="text-blue-500">X</span>
+              </h1>
+            </div>
+          </div>
+        </div>
+        <div className="p-6 text-center">
+          <p className="text-lg text-muted-foreground">No leads imported</p>
+        </div>
+      </div>
+    );
+  }
+  
   if (!currentLead) {
-    const handleClearFilters = () => {
-      toggleTimezoneFilter();
-      toggleCallFilter();
-      setSearchQuery('');
-    };
-
-    return <CallingScreenNoResults onClearFilters={handleClearFilters} onBack={onBack} />;
+    return (
+      <div className="h-[100dvh] bg-background flex items-center justify-center p-4 overflow-hidden fixed inset-0">
+        <Card className="w-full max-w-md shadow-lg rounded-2xl">
+          <CardContent className="p-8 text-center">
+            <p className="text-lg">No leads found with current filters</p>
+            <div className="mt-4 space-y-2">
+              <Button 
+                onClick={() => {
+                  toggleTimezoneFilter();
+                  toggleCallFilter();
+                  setSearchQuery('');
+                }} 
+                className="w-full rounded-xl"
+              >
+                Clear All Filters
+              </Button>
+              <Button onClick={onBack} variant="outline" className="w-full rounded-xl">
+                Back to Import
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
   }
 
   const totalLeadCount = currentLeads.length;
 
   return (
-    <CallingScreenMain
-      currentLead={currentLead}
-      currentIndex={currentIndex}
-      totalCount={totalLeadCount}
-      fileName={fileName}
-      cardKey={cardKey}
-      timezoneFilter={timezoneFilter}
-      callFilter={callFilter}
-      shuffleMode={shuffleMode}
-      autoCall={autoCall}
-      callDelay={callDelay}
-      isCountdownActive={isCountdownActive}
-      countdownTime={countdownTime}
-      searchQuery={searchQuery}
-      showAutocomplete={showAutocomplete}
-      searchResults={searchResults}
-      leadsData={leadsData}
-      onCall={handleCallClick}
-      onResetCallCount={() => handleResetCallCount(currentLead)}
-      onToggleTimezone={toggleTimezoneFilter}
-      onToggleCallFilter={toggleCallFilter}
-      onToggleShuffle={toggleShuffle}
-      onToggleAutoCall={toggleAutoCall}
-      onToggleCallDelay={toggleCallDelay}
-      onResetCallDelay={resetCallDelay}
-      onResetAllCalls={handleResetAllCallCounts}
-      onPrevious={handlePreviousWrapper}
-      onNext={handleNextWrapper}
-      canGoPrevious={currentLeads.length > 1}
-      canGoNext={currentLeads.length > 1}
-      onSearchChange={setSearchQuery}
-      onSearchFocus={handleSearchFocus}
-      onSearchBlur={handleSearchBlur}
-      onClearSearch={clearSearch}
-      onLeadSelect={handleLeadSelect}
-      onLeadsImported={onLeadsImported}
-      getDelayDisplayType={getDelayDisplayType}
-    />
+    <div className="h-[100dvh] bg-background flex flex-col overflow-hidden fixed inset-0">
+      {/* Header */}
+      <CallingHeader
+        searchQuery={searchQuery}
+        showAutocomplete={showAutocomplete}
+        searchResults={searchResults}
+        leadsData={leadsData}
+        fileName={fileName}
+        onSearchChange={setSearchQuery}
+        onSearchFocus={handleSearchFocus}
+        onSearchBlur={handleSearchBlur}
+        onClearSearch={clearSearch}
+        onLeadSelect={handleLeadSelect}
+        onLeadsImported={onLeadsImported}
+      />
+
+      {/* Main Content - takes remaining space, no daily progress bar */}
+      <div className="flex-1 overflow-hidden">
+        <MainContent
+          currentLead={currentLead}
+          currentIndex={currentIndex}
+          totalCount={totalLeadCount}
+          fileName={fileName}
+          cardKey={cardKey}
+          timezoneFilter={timezoneFilter}
+          callFilter={callFilter}
+          shuffleMode={shuffleMode}
+          autoCall={autoCall}
+          callDelay={callDelay}
+          isCountdownActive={isCountdownActive}
+          countdownTime={countdownTime}
+          onCall={handleCallClick}
+          onResetCallCount={() => handleResetCallCount(currentLead)}
+          onToggleTimezone={toggleTimezoneFilter}
+          onToggleCallFilter={toggleCallFilter}
+          onToggleShuffle={toggleShuffle}
+          onToggleAutoCall={toggleAutoCall}
+          onToggleCallDelay={toggleCallDelay}
+          onResetCallDelay={resetCallDelay}
+          onResetAllCalls={handleResetAllCallCounts}
+          onPrevious={handlePreviousWrapper}
+          onNext={handleNextWrapper}
+          canGoPrevious={currentLeads.length > 1}
+          canGoNext={currentLeads.length > 1}
+          getDelayDisplayType={getDelayDisplayType}
+        />
+      </div>
+    </div>
   );
 };
 

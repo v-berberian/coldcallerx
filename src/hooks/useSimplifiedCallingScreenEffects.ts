@@ -2,11 +2,18 @@
 import { useEffect } from 'react';
 import { Lead } from '../types/lead';
 import { SessionState } from '@/services/sessionService';
-import { useRealtimeSessionSync } from './useRealtimeSessionSync';
+import { useComponentInitialization } from './useComponentInitialization';
+import { useSessionPersistence } from './useSessionPersistence';
+import { useAutoCallEffects } from './useAutoCallEffects';
 
 interface UseSimplifiedCallingScreenEffectsProps {
   componentReady: boolean;
+  setComponentReady: (ready: boolean) => void;
   leadsInitialized: boolean;
+  setLeadsInitialized: (initialized: boolean) => void;
+  leads: Lead[];
+  leadsData: Lead[];
+  memoizedResetLeadsData: (leads: Lead[]) => void;
   currentIndex: number;
   timezoneFilter: string;
   callFilter: string;
@@ -20,12 +27,16 @@ interface UseSimplifiedCallingScreenEffectsProps {
   executeAutoCall: (lead: Lead) => void;
   getBaseLeads: () => Lead[];
   markLeadAsCalled?: (lead: Lead) => Promise<boolean>;
-  handleSessionUpdate: (sessionState: SessionState) => void;
 }
 
 export const useSimplifiedCallingScreenEffects = ({
   componentReady,
+  setComponentReady,
   leadsInitialized,
+  setLeadsInitialized,
+  leads,
+  leadsData,
+  memoizedResetLeadsData,
   currentIndex,
   timezoneFilter,
   callFilter,
@@ -38,12 +49,38 @@ export const useSimplifiedCallingScreenEffects = ({
   setCurrentLeadForAutoCall,
   executeAutoCall,
   getBaseLeads,
-  markLeadAsCalled,
-  handleSessionUpdate
+  markLeadAsCalled
 }: UseSimplifiedCallingScreenEffectsProps) => {
   
-  // Use real-time session sync
-  useRealtimeSessionSync({
+  // Initialize component when leads are available
+  useEffect(() => {
+    console.log('Component initialization effect:', { 
+      leadsLength: leads.length, 
+      leadsDataLength: leadsData.length,
+      componentReady,
+      leadsInitialized
+    });
+
+    if (leads.length > 0 && leadsData.length > 0 && !leadsInitialized) {
+      console.log('Setting leads as initialized');
+      setLeadsInitialized(true);
+    }
+
+    if (leadsInitialized && !componentReady) {
+      console.log('Setting component as ready');
+      setComponentReady(true);
+    }
+  }, [leads.length, leadsData.length, leadsInitialized, componentReady, setLeadsInitialized, setComponentReady]);
+
+  // Reset leads data when leads change - use length comparison instead of object comparison
+  useEffect(() => {
+    if (leads.length > 0 && leads.length !== leadsData.length) {
+      console.log('Resetting leads data with new leads:', leads.length);
+      memoizedResetLeadsData(leads);
+    }
+  }, [leads.length, leadsData.length, memoizedResetLeadsData]);
+
+  useSessionPersistence({
     componentReady,
     leadsInitialized,
     currentIndex,
@@ -52,28 +89,27 @@ export const useSimplifiedCallingScreenEffects = ({
     shuffleMode,
     autoCall,
     callDelay,
-    updateSessionState,
-    onSessionUpdate: handleSessionUpdate
+    updateSessionState
   });
 
-  // Trigger auto-call when auto-call is enabled and we have a current lead (for initial state)
-  useEffect(() => {
-    console.log('AUTO-CALL INITIAL TRIGGER: Checking initial conditions', {
-      autoCall,
-      componentReady,
-      leadsInitialized,
-      currentIndex
-    });
+  useAutoCallEffects({
+    shouldAutoCall,
+    autoCall,
+    componentReady,
+    leadsInitialized,
+    currentIndex,
+    callDelay,
+    getBaseLeads,
+    setCurrentLeadForAutoCall,
+    executeAutoCall,
+    setShouldAutoCall,
+    markLeadAsCalled
+  });
 
-    // Only trigger if auto-call is enabled and everything is ready
-    if (autoCall && componentReady && leadsInitialized) {
-      const currentLeads = getBaseLeads();
-      const currentLead = currentLeads[currentIndex];
-      
-      if (currentLead) {
-        console.log('AUTO-CALL INITIAL TRIGGER: Auto-call is enabled, triggering for current lead:', currentLead.name);
-        executeAutoCall(currentLead);
-      }
+  // Save current index to localStorage when it changes
+  useEffect(() => {
+    if (leadsData.length > 0) {
+      localStorage.setItem('coldcaller-current-index', currentIndex.toString());
     }
-  }, [autoCall, componentReady, leadsInitialized, currentIndex, getBaseLeads, executeAutoCall]);
+  }, [currentIndex, leadsData.length]);
 };

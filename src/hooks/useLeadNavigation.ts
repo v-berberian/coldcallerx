@@ -1,18 +1,32 @@
 
 import { Lead } from '../types/lead';
 import { useNavigationState } from './useNavigationState';
-import { useLeadNavigationCore } from './useLeadNavigationCore';
-import { useLeadNavigationFilters } from './useLeadNavigationFilters';
-import { useLeadNavigationOperations } from './useLeadNavigationOperations';
-import { useLeadNavigationSession } from './useLeadNavigationSession';
+import { useFilters } from './useFilters';
+import { useLeadsData } from './useLeadsData';
 import { useLeadFiltering } from './useLeadFiltering';
+import { useAutoCall } from './useAutoCall';
+import { useCallDelay } from './useCallDelay';
 import { useNavigation } from './useNavigation';
 import { useFilterChangeEffects } from './useFilterChangeEffects';
+import { useLeadNavigationState } from './useLeadNavigationState';
 import { useLeadNavigationActions } from './useLeadNavigationActions';
-import { useState } from 'react';
+import { useLeadNavigationEffects } from './useLeadNavigationEffects';
+import { useEffect } from 'react';
 
 export const useLeadNavigation = (initialLeads: Lead[]) => {
-  // Core state management
+  const {
+    shouldAutoCall,
+    setShouldAutoCall,
+    shownLeadsInShuffle,
+    setShownLeadsInShuffle,
+    callMadeToCurrentLead,
+    setCallMadeToCurrentLead,
+    currentLeadForAutoCall,
+    setCurrentLeadForAutoCall,
+    resetShownLeads,
+    resetCallState
+  } = useLeadNavigationState();
+
   const {
     currentIndex,
     cardKey,
@@ -24,65 +38,35 @@ export const useLeadNavigation = (initialLeads: Lead[]) => {
     setCardKey
   } = useNavigationState();
 
-  // Lead navigation state - moved inline since the hook was deleted
-  const [shouldAutoCall, setShouldAutoCall] = useState(false);
-  const [shownLeadsInShuffle, setShownLeadsInShuffle] = useState<Set<string>>(new Set());
-  const [callMadeToCurrentLead, setCallMadeToCurrentLead] = useState(false);
-  const [currentLeadForAutoCall, setCurrentLeadForAutoCall] = useState<Lead | null>(null);
-
-  const resetShownLeads = () => setShownLeadsInShuffle(new Set());
-  const resetCallState = () => {
-    setCallMadeToCurrentLead(false);
-    setCurrentLeadForAutoCall(null);
-    setShouldAutoCall(false);
-  };
-
-  const { leadsData, setLeadsData, resetLeadsData } = useLeadNavigationCore(initialLeads);
-
-  // Filters and settings
   const {
     timezoneFilter,
     callFilter,
     shuffleMode,
     autoCall,
-    callDelay,
     isFilterChanging,
-    getDelayDisplayType,
-    setFilterChanging,
     toggleTimezoneFilter,
     toggleCallFilter,
     toggleShuffle,
     toggleAutoCall,
-    toggleCallDelay,
-    resetCallDelay
-  } = useLeadNavigationFilters();
+    setFilterChanging
+  } = useFilters();
 
-  // Operations (calls, auto-call, etc.)
+  const { callDelay, toggleCallDelay, resetCallDelay, getDelayDisplayType } = useCallDelay();
+
   const {
+    leadsData,
+    setLeadsData,
     makeCall,
     markLeadAsCalled,
     markLeadAsCalledOnNavigation,
     resetCallCount,
-    resetAllCallCounts,
-    executeAutoCall,
-    handleCountdownComplete,
-    resetAutoCall,
-    isAutoCallInProgress,
-    isCountdownActive,
-    countdownTime,
-    shouldBlockNavigation
-  } = useLeadNavigationOperations({
-    leadsData,
-    callDelay,
-    setCallMadeToCurrentLead,
-    currentLeadForAutoCall,
-    setCurrentLeadForAutoCall
-  });
+    resetAllCallCounts
+  } = useLeadsData(initialLeads);
 
-  // Lead filtering
   const { getBaseLeads } = useLeadFiltering(leadsData, timezoneFilter, callFilter);
 
-  // Navigation logic
+  const { isAutoCallInProgress, isCountdownActive, countdownTime, executeAutoCall, handleCountdownComplete, resetAutoCall, shouldBlockNavigation } = useAutoCall(makeCall, callDelay);
+
   const { handleNext, handlePrevious, selectLead } = useNavigation(
     currentIndex,
     updateNavigation,
@@ -102,7 +86,6 @@ export const useLeadNavigation = (initialLeads: Lead[]) => {
     setShownLeadsInShuffle
   );
 
-  // Navigation actions wrapper
   const { handleNextWrapper, handlePreviousWrapper, selectLeadWrapper } = useLeadNavigationActions({
     currentIndex,
     updateNavigation,
@@ -120,19 +103,21 @@ export const useLeadNavigation = (initialLeads: Lead[]) => {
     selectLead,
     setCallMadeToCurrentLead,
     autoCall,
-    executeAutoCall,
+    setShouldAutoCall,
     goToPrevious
   });
 
-  // Session management
-  const { restoreSessionState } = useLeadNavigationSession({
-    leadsData,
-    resetNavigation,
-    resetShownLeads,
-    resetCallState
+  const { makeCallWrapper, handleCountdownCompleteWrapper } = useLeadNavigationEffects({
+    makeCall,
+    markLeadAsCalledOnNavigation,
+    setCallMadeToCurrentLead,
+    executeAutoCall,
+    handleCountdownComplete,
+    resetAutoCall,
+    currentLeadForAutoCall,
+    setCurrentLeadForAutoCall
   });
 
-  // Filter change effects
   useFilterChangeEffects(
     leadsData,
     timezoneFilter,
@@ -147,15 +132,65 @@ export const useLeadNavigation = (initialLeads: Lead[]) => {
     resetNavigation
   );
 
-  // Enhanced reset leads data function
-  const resetLeadsDataWrapper = (newLeads: Lead[]) => {
-    resetLeadsData(newLeads);
+  // Enhanced toggle functions to reset shown leads tracker
+  const toggleShuffleWrapper = () => {
+    toggleShuffle();
+    resetShownLeads();
+  };
+
+  const toggleCallFilterWrapper = () => {
+    toggleCallFilter();
+    resetShownLeads();
+  };
+
+  const toggleTimezoneFilterWrapper = () => {
+    toggleTimezoneFilter();
+    resetShownLeads();
+  };
+
+  // Enhanced toggle auto-call to reset countdown when disabled
+  const toggleAutoCallWrapper = () => {
+    const wasAutoCallOn = autoCall;
+    toggleAutoCall();
+    
+    // If turning auto-call OFF, reset any active countdown
+    if (wasAutoCallOn) {
+      resetAutoCall();
+      console.log('Auto-call disabled, resetting countdown');
+    }
+  };
+
+  // Function to reset leads data (for CSV import)
+  const resetLeadsData = (newLeads: Lead[]) => {
+    const formattedLeads = newLeads.map(lead => ({
+      ...lead,
+      called: lead.called || 0,
+      lastCalled: lead.lastCalled || undefined
+    }));
+    setLeadsData(formattedLeads);
     
     // Don't restore from localStorage anymore - rely on cloud session state
     resetNavigation(0);
     resetShownLeads();
     resetCallState();
+    
+    console.log('Reset leads data with', formattedLeads.length, 'leads');
   };
+
+  // Function to restore session state from cloud (called by parent component)
+  const restoreSessionState = (sessionState: any) => {
+    console.log('Restoring session state from cloud:', sessionState);
+    
+    // Restore the current index from cloud session
+    if (sessionState.currentLeadIndex !== undefined && leadsData.length > 0) {
+      const validIndex = Math.max(0, Math.min(sessionState.currentLeadIndex, leadsData.length - 1));
+      console.log('Restoring current index from cloud:', validIndex);
+      resetNavigation(validIndex);
+    }
+  };
+
+  // Remove localStorage saving - we rely on cloud session state now
+  // The session state is saved via useSessionPersistence hook in the calling component
 
   return {
     leadsData,
@@ -174,21 +209,21 @@ export const useLeadNavigation = (initialLeads: Lead[]) => {
     isCountdownActive,
     getBaseLeads,
     getDelayDisplayType,
-    makeCall,
+    makeCall: makeCallWrapper,
     executeAutoCall,
-    handleCountdownComplete,
+    handleCountdownComplete: handleCountdownCompleteWrapper,
     handleNext: handleNextWrapper,
     handlePrevious: handlePreviousWrapper,
     resetCallCount,
     resetAllCallCounts,
     selectLead: selectLeadWrapper,
-    toggleTimezoneFilter: toggleTimezoneFilter(resetShownLeads),
-    toggleCallFilter: toggleCallFilter(resetShownLeads),
-    toggleShuffle: toggleShuffle(resetShownLeads),
-    toggleAutoCall: toggleAutoCall(resetAutoCall),
+    toggleTimezoneFilter: toggleTimezoneFilterWrapper,
+    toggleCallFilter: toggleCallFilterWrapper,
+    toggleShuffle: toggleShuffleWrapper,
+    toggleAutoCall: toggleAutoCallWrapper,
     toggleCallDelay,
     resetCallDelay,
-    resetLeadsData: resetLeadsDataWrapper,
+    resetLeadsData,
     restoreSessionState,
     countdownTime
   };
