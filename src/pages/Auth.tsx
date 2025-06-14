@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
@@ -13,20 +12,22 @@ const Auth = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string>('');
   const [isRedirecting, setIsRedirecting] = useState(false);
+  const [fadeOut, setFadeOut] = useState(false);
   
   const { signIn, user } = useAuth();
   const navigate = useNavigate();
 
   useEffect(() => {
     if (user && !isRedirecting) {
-      console.log('Auth: User detected, redirecting to main app');
+      console.log('Auth: User detected, starting fade out transition');
       setIsRedirecting(true);
       setLoading(false);
       setError('');
+      setFadeOut(true);
       
       setTimeout(() => {
         navigate('/', { replace: true });
-      }, 100);
+      }, 400);
     }
   }, [user, navigate, isRedirecting]);
 
@@ -52,7 +53,7 @@ const Auth = () => {
 
   if (isRedirecting) {
     return (
-      <div className="h-screen w-screen bg-background flex items-center justify-center fixed inset-0 overflow-hidden">
+      <div className={`h-screen w-screen bg-background flex items-center justify-center fixed inset-0 overflow-hidden transition-opacity duration-300 ${fadeOut ? 'opacity-0' : 'opacity-100'}`}>
         <div className="text-center space-y-4">
           <Loader2 className="h-12 w-12 animate-spin mx-auto text-blue-500" />
           <p className="text-lg text-muted-foreground">Signing you in...</p>
@@ -62,7 +63,7 @@ const Auth = () => {
   }
 
   return (
-    <div className="h-screen w-screen bg-background fixed inset-0 overflow-hidden">
+    <div className="h-screen w-screen bg-background fixed inset-0 overflow-hidden animate-fade-in">
       <div className="flex items-center justify-center h-full p-6">
         <div className="w-full max-w-sm space-y-8">
           <div className="text-center">

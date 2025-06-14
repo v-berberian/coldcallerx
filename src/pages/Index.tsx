@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
@@ -12,6 +11,7 @@ const Index = () => {
   const { user, loading: authLoading, signOut } = useAuth();
   const navigate = useNavigate();
   const [appReady, setAppReady] = useState(false);
+  const [showContent, setShowContent] = useState(false);
 
   const {
     currentLeadList,
@@ -42,6 +42,11 @@ const Index = () => {
         await new Promise(resolve => setTimeout(resolve, 200));
         console.log('Index: App initialization complete');
         setAppReady(true);
+        
+        // Add fade-in effect
+        setTimeout(() => {
+          setShowContent(true);
+        }, 50);
       };
 
       initializeApp();
@@ -82,7 +87,7 @@ const Index = () => {
   // If no leads, show empty state with proper header
   if (!currentLeadList || leadsData.length === 0) {
     return (
-      <div className="h-[100vh] h-[100dvh] h-[100svh] bg-background overflow-hidden fixed inset-0">
+      <div className={`h-[100vh] h-[100dvh] h-[100svh] bg-background overflow-hidden fixed inset-0 transition-opacity duration-300 ${showContent ? 'opacity-100' : 'opacity-0'}`}>
         {/* Header with user info and import */}
         <div className="flex items-center justify-between p-4 border-b border-border pt-safe" style={{ paddingTop: 'max(1rem, env(safe-area-inset-top))' }}>
           <CSVImporter onLeadsImported={handleLeadsImported} />
@@ -108,17 +113,19 @@ const Index = () => {
   }
 
   return (
-    <CallingScreen 
-      leads={leadsData} 
-      fileName={currentLeadList.name}
-      onBack={handleBack}
-      onLeadsImported={handleLeadsImported}
-      markLeadAsCalled={markLeadAsCalled}
-      resetCallCount={resetCallCount}
-      resetAllCallCounts={resetAllCallCounts}
-      sessionState={sessionState}
-      updateSessionState={updateSessionState}
-    />
+    <div className={`transition-opacity duration-300 ${showContent ? 'opacity-100' : 'opacity-0'}`}>
+      <CallingScreen 
+        leads={leadsData} 
+        fileName={currentLeadList.name}
+        onBack={handleBack}
+        onLeadsImported={handleLeadsImported}
+        markLeadAsCalled={markLeadAsCalled}
+        resetCallCount={resetCallCount}
+        resetAllCallCounts={resetAllCallCounts}
+        sessionState={sessionState}
+        updateSessionState={updateSessionState}
+      />
+    </div>
   );
 };
 
