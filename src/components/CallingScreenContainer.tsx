@@ -85,6 +85,7 @@ const CallingScreenContainer: React.FC<CallingScreenContainerProps> = ({
     leadsInitialized,
     setLeadsInitialized,
     leads,
+    leadsData,
     memoizedResetLeadsData,
     currentIndex,
     timezoneFilter,

@@ -1,5 +1,5 @@
 
-import { Lead } from '../types/lead';
+import { Lead, CallFilter } from '../types/lead';
 import { useNavigationState } from './useNavigationState';
 import { useLeadNavigationState } from './useLeadNavigationState';
 import { useNavigation } from './useNavigation';
@@ -11,7 +11,7 @@ interface UseCallingScreenNavigationProps {
   markLeadAsCalledOnNavigation: (lead: Lead) => void;
   callDelay: number;
   shuffleMode: boolean;
-  callFilter: string;
+  callFilter: CallFilter;
   isFilterChanging: boolean;
 }
 

@@ -12,6 +12,7 @@ interface UseSimplifiedCallingScreenEffectsProps {
   leadsInitialized: boolean;
   setLeadsInitialized: (initialized: boolean) => void;
   leads: Lead[];
+  leadsData: Lead[];
   memoizedResetLeadsData: (leads: Lead[]) => void;
   currentIndex: number;
   timezoneFilter: string;
@@ -34,6 +35,7 @@ export const useSimplifiedCallingScreenEffects = ({
   leadsInitialized,
   setLeadsInitialized,
   leads,
+  leadsData,
   memoizedResetLeadsData,
   currentIndex,
   timezoneFilter,
