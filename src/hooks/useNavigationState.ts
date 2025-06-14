@@ -9,7 +9,7 @@ export const useNavigationState = () => {
 
   const updateNavigation = (newIndex: number, addToHistory = true) => {
     setCurrentIndex(newIndex);
-    setCardKey(prev => prev + 1);
+    setCardKey(prev => prev + 1); // This is needed for card switching animation
     
     if (addToHistory) {
       const newHistory = navigationHistory.slice(0, historyIndex + 1);
@@ -25,7 +25,7 @@ export const useNavigationState = () => {
       const prevIndex = navigationHistory[newHistoryIndex];
       setCurrentIndex(prevIndex);
       setHistoryIndex(newHistoryIndex);
-      setCardKey(prev => prev + 1);
+      setCardKey(prev => prev + 1); // This is needed for card switching animation
       return true;
     }
     return false;
@@ -35,7 +35,7 @@ export const useNavigationState = () => {
     setCurrentIndex(index);
     setNavigationHistory([index]);
     setHistoryIndex(0);
-    setCardKey(prev => prev + 1);
+    setCardKey(prev => prev + 1); // This is needed for proper card reset
   };
 
   return {

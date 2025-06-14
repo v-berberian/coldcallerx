@@ -89,7 +89,7 @@ export const useSimplifiedNavigation = ({
     }
 
     setCurrentIndex(nextIndex);
-    setCardKey(prev => prev + 1);
+    setCardKey(prev => prev + 1); // This is essential for card switching animation
 
     // Update navigation history
     const newHistory = navigationHistory.slice(0, historyIndex + 1);
@@ -108,12 +108,12 @@ export const useSimplifiedNavigation = ({
       const prevIndex = navigationHistory[newHistoryIndex];
       setCurrentIndex(prevIndex);
       setHistoryIndex(newHistoryIndex);
-      setCardKey(prev => prev + 1);
+      setCardKey(prev => prev + 1); // This is essential for card switching animation
     } else {
       // Sequential mode
       const prevIndex = currentIndex === 0 ? baseLeads.length - 1 : currentIndex - 1;
       setCurrentIndex(prevIndex);
-      setCardKey(prev => prev + 1);
+      setCardKey(prev => prev + 1); // This is essential for card switching animation
     }
   }, [currentIndex, shuffleMode, historyIndex, navigationHistory, getFilteredLeads, setCurrentIndex, setHistoryIndex, setCardKey]);
 
@@ -123,7 +123,7 @@ export const useSimplifiedNavigation = ({
     
     if (leadIndex !== -1) {
       setCurrentIndex(leadIndex);
-      setCardKey(prev => prev + 1);
+      setCardKey(prev => prev + 1); // This is essential for card switching animation
       
       // Update navigation history
       const newHistory = navigationHistory.slice(0, historyIndex + 1);
