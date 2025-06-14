@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -263,64 +264,60 @@ const CallingScreenLogic: React.FC<CallingScreenLogicProps> = ({
   const totalLeadCount = currentLeads.length;
 
   return (
-    <>
-      <div className="h-[100dvh] bg-background flex flex-col overflow-hidden fixed inset-0">
-        {/* Header */}
-        <CallingHeader
-          searchQuery={searchQuery}
-          showAutocomplete={showAutocomplete}
-          searchResults={searchResults}
-          leadsData={leadsData}
-          fileName={fileName}
-          onSearchChange={setSearchQuery}
-          onSearchFocus={handleSearchFocus}
-          onSearchBlur={handleSearchBlur}
-          onClearSearch={clearSearch}
-          onLeadSelect={handleLeadSelect}
-          onLeadsImported={onLeadsImported}
-        />
+    <div className="h-[100dvh] bg-background flex flex-col overflow-hidden fixed inset-0">
+      {/* Header */}
+      <CallingHeader
+        searchQuery={searchQuery}
+        showAutocomplete={showAutocomplete}
+        searchResults={searchResults}
+        leadsData={leadsData}
+        fileName={fileName}
+        onSearchChange={setSearchQuery}
+        onSearchFocus={handleSearchFocus}
+        onSearchBlur={handleSearchBlur}
+        onClearSearch={clearSearch}
+        onLeadSelect={handleLeadSelect}
+        onLeadsImported={onLeadsImported}
+      />
 
-        {/* Main Content - takes remaining space, no daily progress bar */}
-        <div className="flex-1 overflow-hidden">
-          <MainContent
-            currentLead={currentLead}
-            currentIndex={currentIndex}
-            totalCount={totalLeadCount}
-            fileName={fileName}
-            cardKey={cardKey}
-            timezoneFilter={timezoneFilter}
-            callFilter={callFilter}
-            shuffleMode={shuffleMode}
-            autoCall={autoCall}
-            callDelay={callDelay}
-            isCountdownActive={isCountdownActive}
-            countdownTime={countdownTime}
-            onCall={handleCallClick}
-            onResetCallCount={() => handleResetCallCount(currentLead)}
-            onToggleTimezone={toggleTimezoneFilter}
-            onToggleCallFilter={toggleCallFilter}
-            onToggleShuffle={toggleShuffle}
-            onToggleAutoCall={toggleAutoCall}
-            onToggleCallDelay={toggleCallDelay}
-            onResetCallDelay={resetCallDelay}
-            onResetAllCalls={handleResetAllCallCounts}
-            onPrevious={handlePreviousWrapper}
-            onNext={handleNextWrapper}
-            canGoPrevious={currentLeads.length > 1}
-            canGoNext={currentLeads.length > 1}
-          />
-        </div>
+      {/* Main Content - takes remaining space, no daily progress bar */}
+      <div className="flex-1 overflow-hidden">
+        <MainContent
+          currentLead={currentLead}
+          currentIndex={currentIndex}
+          totalCount={totalLeadCount}
+          fileName={fileName}
+          cardKey={cardKey}
+          timezoneFilter={timezoneFilter}
+          callFilter={callFilter}
+          shuffleMode={shuffleMode}
+          autoCall={autoCall}
+          callDelay={callDelay}
+          isCountdownActive={isCountdownActive}
+          countdownTime={countdownTime}
+          onCall={handleCallClick}
+          onResetCallCount={() => handleResetCallCount(currentLead)}
+          onToggleTimezone={toggleTimezoneFilter}
+          onToggleCallFilter={toggleCallFilter}
+          onToggleShuffle={toggleShuffle}
+          onToggleAutoCall={toggleAutoCall}
+          onToggleCallDelay={toggleCallDelay}
+          onResetCallDelay={resetCallDelay}
+          onResetAllCalls={handleResetAllCallCounts}
+          onPrevious={handlePreviousWrapper}
+          onNext={handleNextWrapper}
+          canGoPrevious={currentLeads.length > 1}
+          canGoNext={currentLeads.length > 1}
+        />
       </div>
 
-      {/* Auto Call Countdown Overlay */}
-      {isCountdownActive && (
-        <AutoCallCountdown
-          isActive={isCountdownActive}
-          duration={countdownTime}
-          onComplete={() => {}}
-        />
-      )}
-    </>
+      {/* Auto Call Countdown - hidden, just for logic */}
+      <AutoCallCountdown
+        isActive={isCountdownActive}
+        duration={countdownTime}
+        onComplete={() => {}}
+      />
+    </div>
   );
 };
 
