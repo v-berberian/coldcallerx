@@ -1,5 +1,5 @@
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import CallingHeader from './CallingHeader';
@@ -24,6 +24,9 @@ const CallingScreenLogic: React.FC<CallingScreenLogicProps> = ({
   onBack,
   onLeadsImported
 }) => {
+  const [componentReady, setComponentReady] = useState(false);
+
+  // Initialize hooks progressively to prevent blocking
   const {
     leadsData,
     currentIndex,
@@ -81,28 +84,51 @@ const CallingScreenLogic: React.FC<CallingScreenLogicProps> = ({
     resetDailyCallCount
   } = useDailyCallState();
 
+  // Progressive component initialization
+  useEffect(() => {
+    console.log('CallingScreenLogic: Starting progressive initialization');
+    
+    // Defer component ready state to prevent initial render blocking
+    const initializeComponent = async () => {
+      await new Promise(resolve => setTimeout(resolve, 50));
+      console.log('CallingScreenLogic: Component ready');
+      setComponentReady(true);
+    };
+
+    initializeComponent();
+  }, []);
+
   // Handle new CSV imports by resetting the leads data
   useEffect(() => {
-    resetLeadsData(leads);
-  }, [leads]);
-
-  // Save updated leads data to localStorage whenever leadsData changes
-  useEffect(() => {
-    if (leadsData.length > 0) {
-      localStorage.setItem('coldcaller-leads', JSON.stringify(leadsData));
-      localStorage.setItem('coldcaller-current-index', currentIndex.toString());
-      localStorage.setItem('coldcaller-filename', fileName);
+    if (componentReady) {
+      console.log('CallingScreenLogic: Resetting leads data for new import');
+      resetLeadsData(leads);
     }
-  }, [leadsData, currentIndex, fileName]);
+  }, [leads, componentReady]);
+
+  // Save updated leads data to localStorage whenever leadsData changes (debounced)
+  useEffect(() => {
+    if (leadsData.length > 0 && componentReady) {
+      const saveData = () => {
+        localStorage.setItem('coldcaller-leads', JSON.stringify(leadsData));
+        localStorage.setItem('coldcaller-current-index', currentIndex.toString());
+        localStorage.setItem('coldcaller-filename', fileName);
+      };
+
+      // Debounce localStorage saves to prevent blocking
+      const timeoutId = setTimeout(saveData, 100);
+      return () => clearTimeout(timeoutId);
+    }
+  }, [leadsData, currentIndex, fileName, componentReady]);
 
   // Handle auto-call using the currently displayed lead
   useEffect(() => {
-    if (shouldAutoCall && autoCall) {
+    if (shouldAutoCall && autoCall && componentReady) {
       const currentLeads = getBaseLeads();
       const currentLead = currentLeads[currentIndex];
       
       if (currentLead) {
-        console.log('Auto-call triggered for displayed lead:', currentLead.name, currentLead.phone);
+        console.log('CallingScreenLogic: Auto-call triggered for displayed lead:', currentLead.name, currentLead.phone);
         setCurrentLeadForAutoCall(currentLead);
         executeAutoCall(currentLead);
         incrementDailyCallCount();
@@ -110,7 +136,7 @@ const CallingScreenLogic: React.FC<CallingScreenLogicProps> = ({
       
       setShouldAutoCall(false);
     }
-  }, [shouldAutoCall, autoCall, currentIndex, cardKey]);
+  }, [shouldAutoCall, autoCall, currentIndex, cardKey, componentReady]);
 
   const handleLeadSelect = (lead: Lead) => {
     const baseLeads = getBaseLeads();
@@ -120,7 +146,7 @@ const CallingScreenLogic: React.FC<CallingScreenLogicProps> = ({
     
     if (leadIndexInBaseLeads !== -1) {
       selectLead(lead, baseLeads, leadsData);
-      console.log('Selected lead from autocomplete:', lead.name, 'at base index:', leadIndexInBaseLeads);
+      console.log('CallingScreenLogic: Selected lead from autocomplete:', lead.name, 'at base index:', leadIndexInBaseLeads);
     }
     
     setSearchQuery('');
@@ -146,6 +172,18 @@ const CallingScreenLogic: React.FC<CallingScreenLogicProps> = ({
     handlePrevious(currentLeads);
   };
 
+  // Show loading until component is ready
+  if (!componentReady) {
+    return (
+      <div className="h-[100dvh] bg-background flex items-center justify-center">
+        <div className="text-center space-y-2">
+          <div className="w-6 h-6 border-2 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto"></div>
+          <p className="text-sm text-muted-foreground">Loading caller...</p>
+        </div>
+      </div>
+    );
+  }
+
   const currentLeads = getBaseLeads();
   const currentLead = currentLeads[currentIndex];
   
@@ -156,8 +194,7 @@ const CallingScreenLogic: React.FC<CallingScreenLogicProps> = ({
           <div className="flex items-center justify-center">
             <div className="flex items-center space-x-3">
               <h1 className="text-2xl font-bold">
-                <span className="text-blue-500">Cold</span>
-                <span className="text-foreground">Caller </span> 
+                <span className="text-blue-500">ColdCall </span>
                 <span className="text-blue-500">X</span>
               </h1>
             </div>

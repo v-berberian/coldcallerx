@@ -14,17 +14,23 @@ const Auth = () => {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string>('');
+  const [isRedirecting, setIsRedirecting] = useState(false);
   const { signIn, signUp, user } = useAuth();
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (user) {
-      // Clear any existing state and navigate
+    if (user && !isRedirecting) {
+      console.log('Auth: User detected, redirecting to main app');
+      setIsRedirecting(true);
       setLoading(false);
       setError('');
-      navigate('/', { replace: true });
+      
+      // Small delay to ensure smooth transition
+      setTimeout(() => {
+        navigate('/', { replace: true });
+      }, 100);
     }
-  }, [user, navigate]);
+  }, [user, navigate, isRedirecting]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -37,18 +43,32 @@ const Auth = () => {
         : await signIn(email, password);
 
       if (error) {
+        console.log('Auth: Authentication error:', error.message);
         setError(error.message);
         setLoading(false);
       } else if (isSignUp) {
         setError('Check your email for the confirmation link!');
         setLoading(false);
       }
-      // Don't set loading to false for sign in - let the user effect handle navigation
+      // For sign in success, loading state will be handled by user effect
     } catch (err) {
+      console.error('Auth: Unexpected error:', err);
       setError('An unexpected error occurred');
       setLoading(false);
     }
   };
+
+  // Show redirecting state
+  if (isRedirecting) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center space-y-2">
+          <Loader2 className="h-8 w-8 animate-spin mx-auto text-blue-500" />
+          <p className="text-sm text-muted-foreground">Signing you in...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background flex flex-col">

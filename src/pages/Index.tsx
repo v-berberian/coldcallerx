@@ -13,66 +13,92 @@ const Index = () => {
   const navigate = useNavigate();
   const [leadsData, setLeadsData] = useState<Lead[]>([]);
   const [fileName, setFileName] = useState<string>('');
-  const [loading, setLoading] = useState(true);
+  const [appReady, setAppReady] = useState(false);
 
   useEffect(() => {
     if (!authLoading && !user) {
-      console.log('No user found, redirecting to auth');
+      console.log('Index: No user found, redirecting to auth');
       navigate('/auth', { replace: true });
     }
   }, [user, authLoading, navigate]);
 
-  // Load data from localStorage on mount
+  // Progressive loading - only start after auth is settled
   useEffect(() => {
     if (user && !authLoading) {
-      console.log('User authenticated, loading local data');
-      // Add small delay to ensure auth state is fully settled
-      setTimeout(() => {
-        loadLocalData();
-      }, 100);
+      console.log('Index: User authenticated, starting progressive loading');
+      
+      // Defer initialization to prevent blocking
+      const initializeApp = async () => {
+        // Small delay to ensure auth state is fully settled
+        await new Promise(resolve => setTimeout(resolve, 100));
+        
+        try {
+          await loadLocalDataAsync();
+          console.log('Index: App initialization complete');
+          setAppReady(true);
+        } catch (error) {
+          console.error('Index: Error during initialization:', error);
+          setAppReady(true); // Still mark as ready to prevent infinite loading
+        }
+      };
+
+      initializeApp();
     }
   }, [user, authLoading]);
 
-  const loadLocalData = () => {
-    try {
-      const savedLeads = localStorage.getItem('coldcaller-leads');
-      const savedFileName = localStorage.getItem('coldcaller-filename');
-      
-      if (savedLeads) {
-        const leads = JSON.parse(savedLeads);
-        setLeadsData(leads);
-        console.log('Loaded leads from localStorage:', leads.length);
-      }
-      
-      if (savedFileName) {
-        setFileName(savedFileName);
-      }
-    } catch (error) {
-      console.error('Error loading from localStorage:', error);
-    } finally {
-      setLoading(false);
-    }
+  const loadLocalDataAsync = async () => {
+    return new Promise<void>((resolve) => {
+      // Use setTimeout to make localStorage operations non-blocking
+      setTimeout(() => {
+        try {
+          const savedLeads = localStorage.getItem('coldcaller-leads');
+          const savedFileName = localStorage.getItem('coldcaller-filename');
+          
+          if (savedLeads) {
+            const leads = JSON.parse(savedLeads);
+            setLeadsData(leads);
+            console.log('Index: Loaded leads from localStorage:', leads.length);
+          }
+          
+          if (savedFileName) {
+            setFileName(savedFileName);
+          }
+        } catch (error) {
+          console.error('Index: Error loading from localStorage:', error);
+        }
+        resolve();
+      }, 0);
+    });
   };
 
   const handleLeadsImported = (importedLeads: Lead[], importedFileName: string) => {
+    console.log('Index: Importing new leads:', importedLeads.length);
     setLeadsData(importedLeads);
     setFileName(importedFileName);
     
-    // Save to localStorage
-    localStorage.setItem('coldcaller-leads', JSON.stringify(importedLeads));
-    localStorage.setItem('coldcaller-filename', importedFileName);
-    localStorage.setItem('coldcaller-current-index', '0');
+    // Save to localStorage with non-blocking approach
+    setTimeout(() => {
+      localStorage.setItem('coldcaller-leads', JSON.stringify(importedLeads));
+      localStorage.setItem('coldcaller-filename', importedFileName);
+      localStorage.setItem('coldcaller-current-index', '0');
+    }, 0);
   };
 
   const handleBack = async () => {
-    console.log('Signing out from main app');
+    console.log('Index: Signing out from main app');
     await signOut();
   };
 
-  if (authLoading || loading) {
+  // Show loading until both auth and app are ready
+  if (authLoading || (user && !appReady)) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin" />
+        <div className="text-center space-y-2">
+          <Loader2 className="h-8 w-8 animate-spin mx-auto" />
+          <p className="text-sm text-muted-foreground">
+            {authLoading ? 'Loading...' : 'Initializing app...'}
+          </p>
+        </div>
       </div>
     );
   }
