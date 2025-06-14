@@ -52,6 +52,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         // Store session persistence flag
         if (session) {
           localStorage.setItem('coldcaller-has-session', 'true');
+          // Ensure we maintain standalone mode after auth
+          if (window.navigator && 'standalone' in window.navigator) {
+            document.documentElement.classList.add('standalone-mode');
+          }
         } else {
           localStorage.removeItem('coldcaller-has-session');
         }
@@ -73,6 +77,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         // Update persistence flag
         if (session) {
           localStorage.setItem('coldcaller-has-session', 'true');
+          // Ensure we maintain standalone mode
+          if (window.navigator && 'standalone' in window.navigator) {
+            document.documentElement.classList.add('standalone-mode');
+          }
         } else {
           localStorage.removeItem('coldcaller-has-session');
         }
@@ -102,12 +110,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const signUp = async (email: string, password: string) => {
     console.log('AuthProvider: Attempting sign up for:', email);
-    const redirectUrl = `${window.location.origin}/`;
+    // Use current origin without redirect to avoid breaking standalone mode
     const { error } = await supabase.auth.signUp({
       email,
       password,
       options: {
-        emailRedirectTo: redirectUrl
+        emailRedirectTo: window.location.origin
       }
     });
     return { error };

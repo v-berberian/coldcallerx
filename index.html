@@ -4,19 +4,28 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover, maximum-scale=1.0, minimum-scale=1.0, interactive-widget=resizes-content" />
-    <title>ColdCaller</title>
+    <title>ColdCall X</title>
     <meta name="description" content="Professional mobile cold calling app for iPhone" />
     <meta name="author" content="Lovable" />
 
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="/manifest.json" />
+    
     <!-- iOS Web App Configuration -->
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-    <meta name="apple-mobile-web-app-title" content="ColdCaller" />
+    <meta name="apple-mobile-web-app-title" content="ColdCall X" />
+    
+    <!-- Enhanced PWA tags -->
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="application-name" content="ColdCall X" />
+    <meta name="msapplication-TileColor" content="#3b82f6" />
+    <meta name="theme-color" content="#3b82f6" />
     
     <!-- Prevent zooming and scrolling -->
     <meta name="format-detection" content="telephone=no" />
 
-    <meta property="og:title" content="ColdCaller - Mobile Calling App" />
+    <meta property="og:title" content="ColdCall X - Mobile Calling App" />
     <meta property="og:description" content="Professional mobile cold calling app for iPhone" />
     <meta property="og:type" content="website" />
     <meta property="og:image" content="https://lovable.dev/opengraph-image-p98pqg.png" />
@@ -29,5 +38,19 @@
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
+    
+    <!-- Service Worker Registration -->
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', function() {
+          navigator.serviceWorker.register('/sw.js')
+            .then(function(registration) {
+              console.log('ServiceWorker registration successful');
+            }, function(err) {
+              console.log('ServiceWorker registration failed: ', err);
+            });
+        });
+      }
+    </script>
   </body>
 </html>
