@@ -77,9 +77,8 @@ export const useCallingScreenCore = ({ leads, sessionState }: UseCallingScreenCo
         const validIndex = Math.max(0, Math.min(sessionState.currentLeadIndex, leadsData.length - 1));
         console.log('Restoring current index from session:', validIndex, 'out of', leadsData.length, 'leads');
         
-        // Force update the index and card key to trigger re-render
+        // Only update the index, don't increment cardKey to prevent card reload
         setCurrentIndex(validIndex);
-        setCardKey(prev => prev + 1);
         
         // Update navigation history to reflect the restored position
         setNavigationHistory([validIndex]);
@@ -109,6 +108,7 @@ export const useCallingScreenCore = ({ leads, sessionState }: UseCallingScreenCo
     }));
     setLeadsData(formattedLeads);
     setCurrentIndex(0);
+    // Only increment cardKey when actually resetting leads data (new CSV import)
     setCardKey(prev => prev + 1);
     setNavigationHistory([0]);
     setHistoryIndex(0);
