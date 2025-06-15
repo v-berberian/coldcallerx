@@ -63,9 +63,16 @@ const DropdownMenuContent = React.forwardRef<
       ref={ref}
       sideOffset={sideOffset}
       className={cn(
-        "z-50 min-w-[8rem] rounded-xl shadow-lg overflow-hidden bg-background/15 backdrop-blur-sm border border-border/15",
+        "z-50 min-w-[8rem] rounded-xl shadow-lg overflow-hidden",
         className
       )}
+      style={{
+        background: 'rgba(255, 255, 255, 0.25)',
+        backdropFilter: 'blur(20px)',
+        WebkitBackdropFilter: 'blur(20px)',
+        border: '1px solid rgba(255, 255, 255, 0.2)',
+        boxShadow: '0 8px 32px 0 rgba(31, 38, 135, 0.37)'
+      }}
       {...props}
     />
   </DropdownMenuPrimitive.Portal>
