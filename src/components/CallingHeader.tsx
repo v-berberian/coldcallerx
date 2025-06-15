@@ -47,22 +47,24 @@ const CallingHeader: React.FC<CallingHeaderProps> = ({
   }, [showAutocomplete]);
 
   return (
-    <div className="bg-background border-b border-border p-4 pt-safe flex-shrink-0" style={{ paddingTop: 'max(1rem, env(safe-area-inset-top))' }}>
-      <div className="flex items-center justify-between mb-4">
-        <CSVImporter onLeadsImported={onLeadsImported} />
+    <div className="bg-background border-b border-border p-3 sm:p-4 pt-safe flex-shrink-0 w-full" style={{ paddingTop: 'max(0.75rem, env(safe-area-inset-top))' }}>
+      <div className="flex items-center justify-between mb-3 sm:mb-4 w-full">
+        <div className="min-w-0 flex-shrink-0">
+          <CSVImporter onLeadsImported={onLeadsImported} />
+        </div>
         
-        <div className="flex items-center space-x-3">
-          <h1 className="text-2xl font-bold">
+        <div className="flex items-center space-x-2 sm:space-x-3 flex-1 justify-center min-w-0">
+          <h1 className="text-xl sm:text-2xl font-bold truncate">
             <span className="text-blue-500">ColdCall </span>
             <span className="text-blue-500">X</span>
           </h1>
         </div>
         
-        <div className="w-8"></div>
+        <div className="w-8 sm:w-8 flex-shrink-0"></div>
       </div>
       
       {/* Search Bar */}
-      <div className="relative">
+      <div className="relative w-full">
         <SearchBar 
           searchQuery={searchQuery} 
           onSearchChange={onSearchChange} 

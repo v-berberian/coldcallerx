@@ -1,3 +1,4 @@
+
 import React, { useState, useRef, useEffect } from 'react';
 import { RotateCcw, Timer, Rocket } from 'lucide-react';
 
@@ -79,35 +80,40 @@ const FilterButtons: React.FC<FilterButtonsProps> = ({
   };
 
   return (
-    <div className="space-y-1 my-[11px]">
+    <div className="space-y-1 my-[11px] w-full">
       {/* First row: Timezone and Call filters */}
-      <div className="flex">
-        <div className="flex-1">
+      <div className="flex w-full gap-0">
+        <div className="flex-1 min-w-0">
           <button 
             onClick={onToggleTimezone} 
-            className={`w-full text-sm font-medium py-3 px-3 rounded transition-all duration-200 ${
+            className={`w-full text-sm font-medium py-3 px-2 sm:px-3 rounded transition-all duration-200 touch-manipulation select-none ${
               timezoneFilter === 'EST_CST' ? 'text-blue-600 animate-button-switch' : 'text-muted-foreground'
             }`} 
             style={{ WebkitTapHighlightColor: 'transparent' }}
           >
-            {timezoneFilter === 'ALL' ? 'All States' : 'EST, CST & CDT'}
+            <span className="block truncate">
+              {timezoneFilter === 'ALL' ? 'All States' : 'EST, CST & CDT'}
+            </span>
           </button>
         </div>
-        <div className="flex-1 flex items-center gap-2">
+        <div className="flex-1 min-w-0 flex items-center gap-1 sm:gap-2">
           <button 
             onClick={onToggleCallFilter} 
-            className={`flex-1 text-sm font-medium py-3 px-3 rounded transition-all duration-200 ${
+            className={`flex-1 min-w-0 text-sm font-medium py-3 px-2 sm:px-3 rounded transition-all duration-200 touch-manipulation select-none ${
               callFilter === 'UNCALLED' ? 'text-purple-600 animate-button-switch' : 'text-muted-foreground'
             }`} 
             style={{ WebkitTapHighlightColor: 'transparent' }}
           >
-            {callFilter === 'ALL' ? 'All Numbers' : 'Uncalled Numbers'}
+            <span className="block truncate">
+              {callFilter === 'ALL' ? 'All Numbers' : 'Uncalled Numbers'}
+            </span>
           </button>
           {callFilter === 'UNCALLED' && (
             <button 
               onClick={onResetAllCalls} 
-              className="text-muted-foreground transition-colors p-2 min-w-[32px] h-[32px] flex items-center justify-center" 
+              className="text-muted-foreground transition-colors p-2 min-w-[32px] h-[32px] flex items-center justify-center touch-manipulation" 
               title="Reset all call counts"
+              style={{ WebkitTapHighlightColor: 'transparent' }}
             >
               <RotateCcw size={14} />
             </button>
@@ -116,32 +122,32 @@ const FilterButtons: React.FC<FilterButtonsProps> = ({
       </div>
 
       {/* Second row: Shuffle and Auto Call */}
-      <div className="flex">
-        <div className="flex-1">
+      <div className="flex w-full gap-0">
+        <div className="flex-1 min-w-0">
           <button 
             onClick={onToggleShuffle} 
-            className={`w-full text-sm font-medium py-3 px-3 rounded transition-all duration-200 ${
+            className={`w-full text-sm font-medium py-3 px-2 sm:px-3 rounded transition-all duration-200 touch-manipulation select-none ${
               shuffleMode ? 'text-orange-600 animate-button-switch' : 'text-muted-foreground'
             }`} 
             style={{ WebkitTapHighlightColor: 'transparent' }}
           >
-            Shuffle
+            <span className="block truncate">Shuffle</span>
           </button>
         </div>
-        <div className="flex-1 relative flex items-center justify-center">
+        <div className="flex-1 min-w-0 relative flex items-center justify-center">
           <button 
             onClick={handleAutoCallToggle} 
-            className={`w-full text-sm font-medium py-3 px-3 rounded transition-all duration-200 ${
+            className={`w-full text-sm font-medium py-3 px-2 sm:px-3 rounded transition-all duration-200 touch-manipulation select-none ${
               autoCall ? 'text-green-600 animate-button-switch' : 'text-muted-foreground'
             }`} 
             style={{ WebkitTapHighlightColor: 'transparent' }}
           >
-            Auto Call
+            <span className="block truncate">Auto Call</span>
           </button>
           {autoCall && showTimerIcon && (
             <button 
               onClick={onToggleCallDelay}
-              className="absolute right-0 text-green-600 text-xs font-medium px-3 py-2 rounded min-w-[40px] flex items-center justify-center select-none"
+              className="absolute right-1 sm:right-2 text-green-600 text-xs font-medium px-2 sm:px-3 py-2 rounded min-w-[32px] sm:min-w-[40px] flex items-center justify-center select-none touch-manipulation"
               style={{ WebkitTapHighlightColor: 'transparent' }}
               title="Click to change delay mode"
             >

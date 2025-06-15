@@ -65,7 +65,7 @@ const MainContent: React.FC<MainContentProps> = ({
   noLeadsMessage
 }) => {
   return (
-    <div className="flex-1 flex items-start justify-center pt-1 p-4 min-h-0 px-6">
+    <div className="flex-1 flex items-start justify-center pt-1 p-3 sm:p-4 min-h-0 px-4 sm:px-6">
       <div className="w-full max-w-sm space-y-1">
         {/* Filter Buttons */}
         <FilterButtons
@@ -100,7 +100,7 @@ const MainContent: React.FC<MainContentProps> = ({
         </div>
 
         {/* Navigation Controls */}
-        <div className="pt-4">
+        <div className="pt-3 sm:pt-4">
           <NavigationControls
             onPrevious={showAutocomplete ? () => {} : onPrevious}
             onNext={showAutocomplete ? () => {} : onNext}
