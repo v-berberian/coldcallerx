@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -51,7 +52,10 @@ const LeadCard: React.FC<LeadCardProps> = ({
         
         // Remove the primary phone if it appears in the additional phones
         const primaryPhoneFormatted = formatPhoneNumber(lead.phone);
-        return foundPhones.filter(phone => phone !== primaryPhoneFormatted);
+        const filteredPhones = foundPhones.filter(phone => phone !== primaryPhoneFormatted);
+        
+        // Limit to only 3 additional numbers
+        return filteredPhones.slice(0, 3);
       })()
     : [];
   
@@ -67,7 +71,7 @@ const LeadCard: React.FC<LeadCardProps> = ({
     setSelectedPhone(primaryPhone);
   }, [lead.phone, lead.name]); // Reset when lead changes (using phone and name as dependencies)
   
-  // All available phones (primary + additional)
+  // All available phones (primary + up to 3 additional)
   const allPhones = [
     { phone: formatPhoneNumber(lead.phone), isPrimary: true },
     ...additionalPhones.map(phone => ({ phone, isPrimary: false }))
@@ -75,7 +79,7 @@ const LeadCard: React.FC<LeadCardProps> = ({
 
   // Debug logging
   console.log('Primary phone:', formatPhoneNumber(lead.phone));
-  console.log('Additional phones after parsing:', additionalPhones);
+  console.log('Additional phones after parsing (limited to 3):', additionalPhones);
   console.log('Selected phone:', selectedPhone);
 
   // Handle phone selection
