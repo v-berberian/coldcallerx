@@ -6,15 +6,21 @@ import { Loader2 } from 'lucide-react';
 import CallingScreen from '@/components/CallingScreen';
 import UserProfile from '@/components/UserProfile';
 import CSVImporter from '@/components/CSVImporter';
-import { Lead } from '@/types/lead';
+import { useHybridLeadOperations } from '@/hooks/useHybridLeadOperations';
 
 const Index = () => {
   const { user, loading: authLoading, signOut } = useAuth();
   const navigate = useNavigate();
   const [appReady, setAppReady] = useState(false);
   const [showContent, setShowContent] = useState(false);
-  const [leadsData, setLeadsData] = useState<Lead[]>([]);
-  const [currentLeadList, setCurrentLeadList] = useState<any>(null);
+
+  const {
+    leadsData,
+    currentLeadList,
+    isOnline,
+    importLeadsFromCSV,
+    loadExistingData
+  } = useHybridLeadOperations();
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -23,31 +29,11 @@ const Index = () => {
     }
   }, [user, authLoading, navigate]);
 
-  // Load saved data from localStorage when user is ready
+  // Load saved data when user is ready
   useEffect(() => {
     if (user && !authLoading) {
-      console.log('Index: Loading saved data from localStorage');
-      
-      // Load from localStorage
-      const savedLeads = localStorage.getItem('leadsData');
-      const savedLeadList = localStorage.getItem('currentLeadList');
-      
-      if (savedLeads && savedLeadList) {
-        try {
-          const parsedLeads = JSON.parse(savedLeads);
-          const parsedLeadList = JSON.parse(savedLeadList);
-          console.log('Index: Loaded', parsedLeads.length, 'leads from localStorage');
-          setLeadsData(parsedLeads);
-          setCurrentLeadList(parsedLeadList);
-        } catch (error) {
-          console.error('Index: Error parsing saved data:', error);
-          // Clear corrupted data
-          localStorage.removeItem('leadsData');
-          localStorage.removeItem('currentLeadList');
-        }
-      } else {
-        console.log('Index: No saved data found in localStorage');
-      }
+      console.log('Index: Loading saved data');
+      loadExistingData();
       
       // Initialize app
       const initializeApp = async () => {
@@ -63,34 +49,11 @@ const Index = () => {
 
       initializeApp();
     }
-  }, [user, authLoading]);
+  }, [user, authLoading, loadExistingData]);
 
-  const handleLeadsImported = async (importedLeads: Lead[], fileName: string) => {
-    console.log('Index: Importing new leads locally:', importedLeads.length);
-    console.log('Index: Sample lead:', importedLeads[0]);
-    
-    const leadList = { 
-      id: Date.now().toString(), 
-      name: fileName,
-      file_name: fileName + '.csv',
-      total_leads: importedLeads.length
-    };
-
-    // Save to localStorage first
-    try {
-      localStorage.setItem('currentLeadList', JSON.stringify(leadList));
-      localStorage.setItem('leadsData', JSON.stringify(importedLeads));
-      console.log('Index: Successfully saved to localStorage');
-    } catch (error) {
-      console.error('Index: Error saving to localStorage:', error);
-      return;
-    }
-
-    // Then update state
-    setCurrentLeadList(leadList);
-    setLeadsData(importedLeads);
-    
-    console.log('Index: State updated with', importedLeads.length, 'leads');
+  const handleLeadsImported = async (importedLeads: any[], fileName: string) => {
+    console.log('Index: Importing new leads with hybrid storage:', importedLeads.length);
+    await importLeadsFromCSV(importedLeads, fileName);
   };
 
   const handleBack = async () => {

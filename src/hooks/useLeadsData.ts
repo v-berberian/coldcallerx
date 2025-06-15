@@ -14,40 +14,12 @@ export const useLeadsData = (initialLeads: Lead[]) => {
 
   // Update local state when initialLeads change
   useEffect(() => {
-    console.log('useLeadsData: Updating with new initial leads:', initialLeads.length);
     setLeadsData(initialLeads.map(lead => ({
       ...lead,
       called: lead.called || 0,
       lastCalled: lead.lastCalled || undefined
     })));
   }, [initialLeads]);
-
-  // Load from localStorage on component mount to restore call counts
-  useEffect(() => {
-    const savedLeads = localStorage.getItem('leadsData');
-    if (savedLeads && initialLeads.length > 0) {
-      try {
-        const parsedLeads = JSON.parse(savedLeads);
-        console.log('useLeadsData: Restoring call counts from localStorage for', parsedLeads.length, 'leads');
-        
-        // Merge saved call data with current leads
-        const mergedLeads = initialLeads.map(lead => {
-          const savedLead = parsedLeads.find((saved: Lead) => 
-            saved.name === lead.name && saved.phone === lead.phone
-          );
-          return {
-            ...lead,
-            called: savedLead?.called || 0,
-            lastCalled: savedLead?.lastCalled || undefined
-          };
-        });
-        
-        setLeadsData(mergedLeads);
-      } catch (error) {
-        console.error('useLeadsData: Error loading from localStorage:', error);
-      }
-    }
-  }, [initialLeads.length]); // Only run when leads count changes
 
   const makeCall = (lead: Lead, markAsCalled: boolean = true) => {
     const phoneNumber = getPhoneDigits(lead.phone);
@@ -89,10 +61,9 @@ export const useLeadsData = (initialLeads: Lead[]) => {
       
       setLeadsData(updatedLeads);
       
-      // Save to localStorage with consistent key
+      // Save to localStorage with error handling
       try {
-        localStorage.setItem('leadsData', JSON.stringify(updatedLeads));
-        console.log('useLeadsData: Saved updated leads to localStorage');
+        localStorage.setItem('coldcaller-leads', JSON.stringify(updatedLeads));
       } catch (error) {
         console.error('Error saving to localStorage:', error);
       }
@@ -103,7 +74,6 @@ export const useLeadsData = (initialLeads: Lead[]) => {
 
   const resetCallCountWrapper = (lead: Lead) => {
     try {
-      console.log('useLeadsData: Resetting call count for:', lead.name);
       const updatedLeads = leadsData.map(l => 
         l.name === lead.name && l.phone === lead.phone 
           ? { ...l, called: 0, lastCalled: undefined }
@@ -111,10 +81,9 @@ export const useLeadsData = (initialLeads: Lead[]) => {
       );
       setLeadsData(updatedLeads);
       
-      // Save to localStorage with consistent key
+      // Save to localStorage with error handling
       try {
-        localStorage.setItem('leadsData', JSON.stringify(updatedLeads));
-        console.log('useLeadsData: Saved reset lead to localStorage');
+        localStorage.setItem('coldcaller-leads', JSON.stringify(updatedLeads));
       } catch (error) {
         console.error('Error saving to localStorage:', error);
       }
@@ -125,7 +94,6 @@ export const useLeadsData = (initialLeads: Lead[]) => {
 
   const resetAllCallCountsWrapper = () => {
     try {
-      console.log('useLeadsData: Resetting all call counts');
       const updatedLeads = leadsData.map(l => ({
         ...l,
         called: 0,
@@ -133,10 +101,9 @@ export const useLeadsData = (initialLeads: Lead[]) => {
       }));
       setLeadsData(updatedLeads);
       
-      // Save to localStorage with consistent key
+      // Save to localStorage with error handling
       try {
-        localStorage.setItem('leadsData', JSON.stringify(updatedLeads));
-        console.log('useLeadsData: Saved reset all leads to localStorage');
+        localStorage.setItem('coldcaller-leads', JSON.stringify(updatedLeads));
       } catch (error) {
         console.error('Error saving to localStorage:', error);
       }
