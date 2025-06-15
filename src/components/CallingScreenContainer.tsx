@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -86,6 +85,11 @@ const CallingScreenContainer: React.FC<CallingScreenContainerProps> = ({
     getBaseLeads
   });
 
+  // Handle leads data updates
+  const handleLeadsDataUpdate = (updatedLeads: Lead[]) => {
+    memoizedResetLeadsData(updatedLeads);
+  };
+
   const {
     handleLeadSelect,
     handleCallClick,
@@ -105,7 +109,8 @@ const CallingScreenContainer: React.FC<CallingScreenContainerProps> = ({
     setShowAutocomplete,
     updateLeadCallCount,
     resetCallCount,
-    resetAllCallCounts
+    resetAllCallCounts,
+    onLeadsDataUpdate: handleLeadsDataUpdate
   });
 
   // Handle CSV import locally

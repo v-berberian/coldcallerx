@@ -11,9 +11,10 @@ interface CallingScreenActionsProps {
   leadsData: Lead[];
   setSearchQuery: (query: string) => void;
   setShowAutocomplete: (show: boolean) => void;
-  updateLeadCallCount: (lead: Lead) => Promise<boolean>;
-  resetCallCount: (lead: Lead) => Promise<boolean>;
-  resetAllCallCounts: () => Promise<boolean>;
+  updateLeadCallCount: (currentLeadsData: Lead[], lead: Lead) => Lead[];
+  resetCallCount: (currentLeadsData: Lead[], lead: Lead) => Lead[];
+  resetAllCallCounts: (currentLeadsData: Lead[]) => Lead[];
+  onLeadsDataUpdate: (updatedLeads: Lead[]) => void;
 }
 
 export const useCallingScreenActions = ({
@@ -28,7 +29,8 @@ export const useCallingScreenActions = ({
   setShowAutocomplete,
   updateLeadCallCount,
   resetCallCount,
-  resetAllCallCounts
+  resetAllCallCounts,
+  onLeadsDataUpdate
 }: CallingScreenActionsProps) => {
   
   const handleLeadSelect = (lead: Lead) => {
@@ -55,7 +57,8 @@ export const useCallingScreenActions = ({
       console.log('CallingScreenActions: Manual call button clicked for:', currentLead.name);
       
       // First, update the call count and timestamp
-      await updateLeadCallCount(currentLead);
+      const updatedLeads = updateLeadCallCount(leadsData, currentLead);
+      onLeadsDataUpdate(updatedLeads);
       
       // Then make the actual call
       makeCall(currentLead);
@@ -89,7 +92,8 @@ export const useCallingScreenActions = ({
   const handleResetCallCount = async (lead: Lead) => {
     try {
       console.log('CallingScreenActions: Reset call count for:', lead.name);
-      await resetCallCount(lead);
+      const updatedLeads = resetCallCount(leadsData, lead);
+      onLeadsDataUpdate(updatedLeads);
     } catch (error) {
       console.error('CallingScreenActions: Error in handleResetCallCount:', error);
     }
@@ -99,7 +103,8 @@ export const useCallingScreenActions = ({
   const handleResetAllCallCounts = async () => {
     try {
       console.log('CallingScreenActions: Reset all call counts');
-      await resetAllCallCounts();
+      const updatedLeads = resetAllCallCounts(leadsData);
+      onLeadsDataUpdate(updatedLeads);
     } catch (error) {
       console.error('CallingScreenActions: Error in handleResetAllCallCounts:', error);
     }

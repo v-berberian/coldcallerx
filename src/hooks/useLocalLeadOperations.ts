@@ -49,7 +49,8 @@ export const useLocalLeadOperations = () => {
     }
   };
 
-  const updateLeadCallCount = async (lead: Lead): Promise<boolean> => {
+  // Updated to work with external leads data and return updated data
+  const updateLeadCallCount = useCallback((currentLeadsData: Lead[], lead: Lead): Lead[] => {
     try {
       const now = new Date();
       const dateString = now.toLocaleDateString();
@@ -63,59 +64,58 @@ export const useLocalLeadOperations = () => {
 
       console.log('Updating call count for:', lead.name, 'to:', newCallCount);
 
-      // Update local state
-      const updatedLeads = leadsData.map(l => 
+      // Update the leads data
+      const updatedLeads = currentLeadsData.map(l => 
         l.name === lead.name && l.phone === lead.phone ? {
           ...l,
           called: newCallCount,
           lastCalled: lastCalledString
         } : l
       );
-      setLeadsData(updatedLeads);
+      
+      // Save to localStorage
       localStorage.setItem('leadsData', JSON.stringify(updatedLeads));
-
-      return true;
+      
+      return updatedLeads;
     } catch (error) {
       console.error('Error updating call count:', error);
-      return false;
+      return currentLeadsData;
     }
-  };
+  }, []);
 
-  const resetCallCount = async (lead: Lead): Promise<boolean> => {
+  const resetCallCount = useCallback((currentLeadsData: Lead[], lead: Lead): Lead[] => {
     try {
-      // Update local state
-      const updatedLeads = leadsData.map(l => 
+      // Update the leads data
+      const updatedLeads = currentLeadsData.map(l => 
         l.name === lead.name && l.phone === lead.phone 
           ? { ...l, called: 0, lastCalled: undefined }
           : l
       );
-      setLeadsData(updatedLeads);
+      
       localStorage.setItem('leadsData', JSON.stringify(updatedLeads));
-
-      return true;
+      return updatedLeads;
     } catch (error) {
       console.error('Error resetting call count:', error);
-      return false;
+      return currentLeadsData;
     }
-  };
+  }, []);
 
-  const resetAllCallCounts = async (): Promise<boolean> => {
+  const resetAllCallCounts = useCallback((currentLeadsData: Lead[]): Lead[] => {
     try {
-      // Update local state
-      const updatedLeads = leadsData.map(l => ({
+      // Update the leads data
+      const updatedLeads = currentLeadsData.map(l => ({
         ...l,
         called: 0,
         lastCalled: undefined
       }));
-      setLeadsData(updatedLeads);
+      
       localStorage.setItem('leadsData', JSON.stringify(updatedLeads));
-
-      return true;
+      return updatedLeads;
     } catch (error) {
       console.error('Error resetting all call counts:', error);
-      return false;
+      return currentLeadsData;
     }
-  };
+  }, []);
 
   return {
     currentLeadList,
