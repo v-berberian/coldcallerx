@@ -133,14 +133,14 @@ const LeadCard: React.FC<LeadCardProps> = ({
                   <DropdownMenuContent 
                     side="bottom" 
                     align="center" 
-                    className="p-0"
+                    className="p-0 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md border border-white/20 shadow-xl"
                   >
                     <div className="max-h-[200px] overflow-y-auto">
                       <div className="py-1">
                         {allPhones.map((phoneData, index) => (
                           <DropdownMenuItem 
                             key={index}
-                            className="px-4 py-2 text-sm hover:bg-accent cursor-pointer whitespace-nowrap flex items-center justify-between"
+                            className="px-4 py-2 text-sm hover:bg-white/30 dark:hover:bg-white/10 cursor-pointer whitespace-nowrap flex items-center justify-between backdrop-blur-sm transition-all duration-200"
                             onClick={() => handlePhoneSelect(phoneData.phone)}
                           >
                             <span>
