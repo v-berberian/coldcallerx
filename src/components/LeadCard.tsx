@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -243,11 +242,11 @@ const LeadCard: React.FC<LeadCardProps> = ({
             </div>
           )}
           
-          {/* Main Call Button */}
+          {/* Main Call Button - Made bigger */}
           <Button 
             onClick={handleCall} 
             size="lg" 
-            className="w-full h-14 sm:h-16 text-lg font-semibold bg-green-600 hover:bg-green-600 text-white rounded-2xl shadow-lg"
+            className="w-full h-16 sm:h-20 text-xl font-semibold bg-green-600 hover:bg-green-600 text-white rounded-2xl shadow-lg"
           >
             Call
           </Button>
