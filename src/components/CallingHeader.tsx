@@ -4,7 +4,6 @@ import { Lead } from '../types/lead';
 import SearchAutocomplete from './SearchAutocomplete';
 import SearchBar from './SearchBar';
 import CSVImporter from './CSVImporter';
-import UserProfile from './UserProfile';
 
 interface CallingHeaderProps {
   searchQuery: string;
@@ -59,7 +58,7 @@ const CallingHeader: React.FC<CallingHeaderProps> = ({
           </h1>
         </div>
         
-        <UserProfile />
+        <div className="w-8"></div>
       </div>
       
       {/* Search Bar */}

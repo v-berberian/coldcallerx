@@ -4,12 +4,11 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import CallingHeader from './CallingHeader';
 import MainContent from './MainContent';
-import OnlineStatusIndicator from './OnlineStatusIndicator';
 import { Lead } from '../types/lead';
-import { useHybridCallingScreenState } from '../hooks/useHybridCallingScreenState';
+import { useLocalCallingScreenState } from '../hooks/useLocalCallingScreenState';
 import { useSimplifiedCallingScreenEffects } from '../hooks/useSimplifiedCallingScreenEffects';
 import { useCallingScreenActions } from './CallingScreenActions';
-import { useHybridLeadOperations } from '../hooks/useHybridLeadOperations';
+import { useLocalLeadOperations } from '../hooks/useLocalLeadOperations';
 
 interface CallingScreenContainerProps {
   leads: Lead[];
@@ -24,7 +23,7 @@ const CallingScreenContainer: React.FC<CallingScreenContainerProps> = ({
   onBack,
   onLeadsImported
 }) => {
-  const { importLeadsFromCSV } = useHybridLeadOperations();
+  const { importLeadsFromCSV } = useLocalLeadOperations();
 
   const {
     componentReady,
@@ -44,7 +43,6 @@ const CallingScreenContainer: React.FC<CallingScreenContainerProps> = ({
     setCurrentLeadForAutoCall,
     isCountdownActive,
     countdownTime,
-    isOnline,
     getBaseLeads,
     makeCall,
     executeAutoCall,
@@ -70,7 +68,7 @@ const CallingScreenContainer: React.FC<CallingScreenContainerProps> = ({
     handleSearchFocus,
     handleSearchBlur,
     getDelayDisplayType
-  } = useHybridCallingScreenState({ leads });
+  } = useLocalCallingScreenState({ leads });
 
   useSimplifiedCallingScreenEffects({
     componentReady,
@@ -109,7 +107,7 @@ const CallingScreenContainer: React.FC<CallingScreenContainerProps> = ({
     setShowAutocomplete
   });
 
-  // Handle CSV import with hybrid storage
+  // Handle CSV import locally
   const handleLeadsImported = async (newLeads: Lead[], newFileName: string) => {
     const success = await importLeadsFromCSV(newLeads, newFileName);
     if (success) {
@@ -143,7 +141,6 @@ const CallingScreenContainer: React.FC<CallingScreenContainerProps> = ({
                 <span className="text-blue-500">X</span>
               </h1>
             </div>
-            <OnlineStatusIndicator isOnline={isOnline} />
           </div>
         </div>
         <div className="p-6 text-center">
