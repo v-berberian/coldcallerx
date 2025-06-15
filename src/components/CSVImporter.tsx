@@ -33,9 +33,15 @@ const CSVImporter: React.FC<CSVImporterProps> = ({ onLeadsImported }) => {
   };
 
   const cleanCsvValue = (value: string): string | undefined => {
-    if (!value) return undefined;
+    console.log('cleanCsvValue input:', JSON.stringify(value));
+    
+    if (!value) {
+      console.log('cleanCsvValue: value is falsy, returning undefined');
+      return undefined;
+    }
     
     const cleaned = value.trim().replace(/"/g, '');
+    console.log('cleanCsvValue cleaned:', JSON.stringify(cleaned));
     
     // Check for various "empty" states
     if (cleaned === '' || 
@@ -43,36 +49,52 @@ const CSVImporter: React.FC<CSVImporterProps> = ({ onLeadsImported }) => {
         cleaned.toLowerCase() === 'null' || 
         cleaned === 'N/A' || 
         cleaned === '-') {
+      console.log('cleanCsvValue: detected empty state, returning undefined');
       return undefined;
     }
     
+    console.log('cleanCsvValue returning:', JSON.stringify(cleaned));
     return cleaned;
   };
 
   const parseCSV = (text: string): Lead[] => {
+    console.log('Raw CSV text:', text);
     const lines = text.split('\n');
+    console.log('Total lines:', lines.length);
     const leads: Lead[] = [];
     
     // Skip header row and process data
     // Column order: A=Company, B=Name, C=Phone, D=Additional Phones, E=Email
     for (let i = 1; i < lines.length; i++) {
       const line = lines[i].trim();
+      console.log(`Line ${i}:`, JSON.stringify(line));
+      
       if (line) {
-        const [company, name, phone, additionalPhones, email] = line.split(',').map(cell => cell.trim().replace(/"/g, ''));
+        const columns = line.split(',').map(cell => cell.trim().replace(/"/g, ''));
+        console.log(`Line ${i} columns:`, columns);
+        
+        const [company, name, phone, additionalPhones, email] = columns;
+        console.log(`Parsed fields - Company: ${JSON.stringify(company)}, Name: ${JSON.stringify(name)}, Phone: ${JSON.stringify(phone)}, Additional: ${JSON.stringify(additionalPhones)}, Email: ${JSON.stringify(email)}`);
         
         if (name && phone) {
+          const cleanedEmail = cleanCsvValue(email);
+          console.log('Final cleaned email:', JSON.stringify(cleanedEmail));
+          
           const lead = {
             name: name.trim(),
             phone: formatPhoneNumber(phone),
             company: cleanCsvValue(company),
-            email: cleanCsvValue(email),
+            email: cleanedEmail,
             additionalPhones: cleanCsvValue(additionalPhones)
           };
+          
+          console.log('Created lead:', lead);
           leads.push(lead);
         }
       }
     }
     
+    console.log('Final leads array:', leads);
     return leads;
   };
 
