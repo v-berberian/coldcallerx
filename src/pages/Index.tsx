@@ -6,7 +6,6 @@ import { Loader2 } from 'lucide-react';
 import CallingScreen from '@/components/CallingScreen';
 import UserProfile from '@/components/UserProfile';
 import CSVImporter from '@/components/CSVImporter';
-import OnlineStatusIndicator from '@/components/OnlineStatusIndicator';
 import { useHybridLeadOperations } from '@/hooks/useHybridLeadOperations';
 
 const Index = () => {
@@ -94,22 +93,13 @@ const Index = () => {
             <span className="text-blue-500">X</span>
           </h1>
           
-          <div className="flex items-center space-x-2">
-            <OnlineStatusIndicator isOnline={isOnline} />
-            <UserProfile />
-          </div>
+          <UserProfile />
         </div>
         
         <div className="flex items-center justify-center h-full">
           <div className="text-center space-y-4">
             <p className="text-lg text-muted-foreground">No Leads Imported</p>
             <p className="text-sm text-muted-foreground">Click the upload icon above to import a CSV file</p>
-            <div className="mt-4">
-              <OnlineStatusIndicator isOnline={isOnline} />
-              <p className="text-xs text-muted-foreground mt-2">
-                {isOnline ? 'Data will sync to server' : 'Working offline - data stored locally'}
-              </p>
-            </div>
           </div>
         </div>
       </div>

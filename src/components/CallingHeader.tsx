@@ -5,7 +5,6 @@ import SearchAutocomplete from './SearchAutocomplete';
 import SearchBar from './SearchBar';
 import CSVImporter from './CSVImporter';
 import UserProfile from './UserProfile';
-import OnlineStatusIndicator from './OnlineStatusIndicator';
 
 interface CallingHeaderProps {
   searchQuery: string;
@@ -48,10 +47,7 @@ const CallingHeader: React.FC<CallingHeaderProps> = ({
           </h1>
         </div>
         
-        <div className="flex items-center space-x-2">
-          <OnlineStatusIndicator isOnline={isOnline} />
-          <UserProfile />
-        </div>
+        <UserProfile />
       </div>
       
       {/* Search Bar */}
