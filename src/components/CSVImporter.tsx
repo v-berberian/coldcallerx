@@ -32,11 +32,11 @@ const CSVImporter: React.FC<CSVImporterProps> = ({ onLeadsImported }) => {
     return phone; // Return original if not 10 digits
   };
 
-  const cleanCsvValue = (value: string): string | undefined => {
+  const cleanCsvValue = (value: string | undefined): string | undefined => {
     console.log('cleanCsvValue input:', JSON.stringify(value));
     
-    if (!value) {
-      console.log('cleanCsvValue: value is falsy, returning undefined');
+    if (!value || typeof value !== 'string') {
+      console.log('cleanCsvValue: value is not a valid string, returning undefined');
       return undefined;
     }
     
@@ -58,43 +58,85 @@ const CSVImporter: React.FC<CSVImporterProps> = ({ onLeadsImported }) => {
   };
 
   const parseCSV = (text: string): Lead[] => {
-    console.log('Raw CSV text:', text);
-    const lines = text.split('\n');
-    console.log('Total lines:', lines.length);
+    console.log('Raw CSV text (first 200 chars):', text.substring(0, 200));
+    const lines = text.split('\n').filter(line => line.trim());
+    console.log('Total lines after filtering:', lines.length);
+    
+    if (lines.length < 2) {
+      console.log('Not enough lines in CSV');
+      return [];
+    }
+    
+    // Log the header to understand structure
+    console.log('Header line:', JSON.stringify(lines[0]));
+    
     const leads: Lead[] = [];
     
     // Skip header row and process data
-    // Column order: A=Company, B=Name, C=Phone, D=Additional Phones, E=Email
+    // Expected column order: A=Company, B=Name, C=Phone, D=Additional Phones, E=Email
     for (let i = 1; i < lines.length; i++) {
       const line = lines[i].trim();
-      console.log(`Line ${i}:`, JSON.stringify(line));
+      console.log(`Processing line ${i}:`, JSON.stringify(line));
       
       if (line) {
-        const columns = line.split(',').map(cell => cell.trim().replace(/"/g, ''));
-        console.log(`Line ${i} columns:`, columns);
+        // More robust CSV parsing - handle quoted values properly
+        const columns: string[] = [];
+        let currentColumn = '';
+        let inQuotes = false;
+        
+        for (let j = 0; j < line.length; j++) {
+          const char = line[j];
+          if (char === '"') {
+            inQuotes = !inQuotes;
+          } else if (char === ',' && !inQuotes) {
+            columns.push(currentColumn.trim());
+            currentColumn = '';
+          } else {
+            currentColumn += char;
+          }
+        }
+        columns.push(currentColumn.trim()); // Add the last column
+        
+        console.log(`Line ${i} parsed columns:`, columns);
+        console.log(`Column count: ${columns.length}`);
+        
+        // Ensure we have at least 5 columns (A through E)
+        while (columns.length < 5) {
+          columns.push('');
+        }
         
         const [company, name, phone, additionalPhones, email] = columns;
-        console.log(`Parsed fields - Company: ${JSON.stringify(company)}, Name: ${JSON.stringify(name)}, Phone: ${JSON.stringify(phone)}, Additional: ${JSON.stringify(additionalPhones)}, Email: ${JSON.stringify(email)}`);
+        console.log(`Extracted values:`, {
+          company: JSON.stringify(company),
+          name: JSON.stringify(name), 
+          phone: JSON.stringify(phone),
+          additionalPhones: JSON.stringify(additionalPhones),
+          email: JSON.stringify(email)
+        });
         
-        if (name && phone) {
+        // Only create lead if we have required fields
+        if (name && name.trim() && phone && phone.trim()) {
           const cleanedEmail = cleanCsvValue(email);
-          console.log('Final cleaned email:', JSON.stringify(cleanedEmail));
+          console.log('Final cleaned email for lead:', JSON.stringify(cleanedEmail));
           
-          const lead = {
+          const lead: Lead = {
             name: name.trim(),
-            phone: formatPhoneNumber(phone),
+            phone: formatPhoneNumber(phone.trim()),
             company: cleanCsvValue(company),
             email: cleanedEmail,
             additionalPhones: cleanCsvValue(additionalPhones)
           };
           
-          console.log('Created lead:', lead);
+          console.log('Created lead object:', lead);
           leads.push(lead);
+        } else {
+          console.log(`Skipping line ${i} - missing required fields (name: "${name}", phone: "${phone}")`);
         }
       }
     }
     
     console.log('Final leads array:', leads);
+    console.log('Total leads created:', leads.length);
     return leads;
   };
 

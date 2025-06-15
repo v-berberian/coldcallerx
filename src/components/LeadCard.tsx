@@ -39,7 +39,8 @@ const LeadCard: React.FC<LeadCardProps> = ({
     name: lead.name,
     email: lead.email,
     emailType: typeof lead.email,
-    emailLength: lead.email?.length
+    emailLength: lead.email?.length,
+    emailValue: JSON.stringify(lead.email)
   });
   
   return (
@@ -86,8 +87,8 @@ const LeadCard: React.FC<LeadCardProps> = ({
             </div>
           </div>
           
-          {/* Email with icon positioned to the left */}
-          {lead.email && lead.email.trim() !== '' && (
+          {/* Email with icon positioned to the left - improved validation */}
+          {lead.email && typeof lead.email === 'string' && lead.email.trim() !== '' && (
             <div className="flex items-center justify-center">
               <div className="relative">
                 <Mail className="absolute -left-6 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -98,7 +99,7 @@ const LeadCard: React.FC<LeadCardProps> = ({
             </div>
           )}
           
-          {/* Debug email display */}
+          {/* Debug email display - temporary for troubleshooting */}
           <div className="text-xs text-red-500 border border-red-300 p-2 rounded">
             Email debug: "{lead.email}" (type: {typeof lead.email}, length: {lead.email?.length || 0})
           </div>
