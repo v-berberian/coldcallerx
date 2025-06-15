@@ -70,10 +70,41 @@ const Index = () => {
         </div>
         
         {/* Centered content */}
-        <div className="flex-1 flex items-center justify-center">
-          <div className="text-center space-y-4">
-            <p className="text-lg text-muted-foreground">No Leads Imported</p>
-            <p className="text-sm text-muted-foreground">Click the upload icon above to import a CSV file</p>
+        <div className="flex-1 flex items-center justify-center p-6">
+          <div className="text-center space-y-6 max-w-md">
+            <div className="space-y-2">
+              <p className="text-lg text-muted-foreground">No Leads Imported</p>
+              <p className="text-sm text-muted-foreground">Click the upload icon above to import a CSV file</p>
+            </div>
+            
+            <div className="bg-muted/50 rounded-lg p-4 text-left">
+              <h3 className="font-semibold text-sm mb-3 text-center">CSV Column Order:</h3>
+              <div className="space-y-1 text-xs text-muted-foreground">
+                <div className="flex justify-between">
+                  <span>1. Company</span>
+                  <span className="text-orange-600">(optional)</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>2. Name</span>
+                  <span className="text-red-600">(required)</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>3. Phone</span>
+                  <span className="text-red-600">(required)</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>4. Additional Phones</span>
+                  <span className="text-orange-600">(optional)</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>5. Email</span>
+                  <span className="text-orange-600">(optional)</span>
+                </div>
+              </div>
+              <p className="text-xs text-muted-foreground mt-3 text-center">
+                Use commas for empty columns
+              </p>
+            </div>
           </div>
         </div>
       </div>
