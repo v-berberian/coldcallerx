@@ -132,16 +132,28 @@ const LeadCard: React.FC<LeadCardProps> = ({
                   </DropdownMenuTrigger>
                   <DropdownMenuContent 
                     side="bottom" 
-                    align="center" 
-                    className="p-0 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md border border-white/20 shadow-xl"
+                    align="center"
+                    className="!z-[9999] !bg-transparent !border-white/20"
+                    style={{
+                      backgroundColor: 'rgba(255, 255, 255, 0.15) !important',
+                      backdropFilter: 'blur(25px)',
+                      WebkitBackdropFilter: 'blur(25px)',
+                      boxShadow: '0 12px 40px 0 rgba(31, 38, 135, 0.5)',
+                      border: '1px solid rgba(255, 255, 255, 0.25)',
+                      borderRadius: '12px'
+                    }}
                   >
                     <div className="max-h-[200px] overflow-y-auto">
                       <div className="py-1">
                         {allPhones.map((phoneData, index) => (
                           <DropdownMenuItem 
                             key={index}
-                            className="px-4 py-2 text-sm hover:bg-white/30 dark:hover:bg-white/10 cursor-pointer whitespace-nowrap flex items-center justify-between backdrop-blur-sm transition-all duration-200"
+                            className="px-4 py-2 text-sm cursor-pointer whitespace-nowrap flex items-center justify-between transition-all duration-200 !bg-transparent hover:!bg-white/20 focus:!bg-white/20 data-[highlighted]:!bg-white/20"
                             onClick={() => handlePhoneSelect(phoneData.phone)}
+                            style={{
+                              backgroundColor: 'transparent',
+                              color: 'inherit'
+                            }}
                           >
                             <span>
                               {phoneData.phone} {phoneData.isPrimary && '(Primary)'}
