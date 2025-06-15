@@ -33,8 +33,20 @@ const Index = () => {
       const savedLeadList = localStorage.getItem('currentLeadList');
       
       if (savedLeads && savedLeadList) {
-        setLeadsData(JSON.parse(savedLeads));
-        setCurrentLeadList(JSON.parse(savedLeadList));
+        try {
+          const parsedLeads = JSON.parse(savedLeads);
+          const parsedLeadList = JSON.parse(savedLeadList);
+          console.log('Index: Loaded', parsedLeads.length, 'leads from localStorage');
+          setLeadsData(parsedLeads);
+          setCurrentLeadList(parsedLeadList);
+        } catch (error) {
+          console.error('Index: Error parsing saved data:', error);
+          // Clear corrupted data
+          localStorage.removeItem('leadsData');
+          localStorage.removeItem('currentLeadList');
+        }
+      } else {
+        console.log('Index: No saved data found in localStorage');
       }
       
       // Initialize app
@@ -55,6 +67,7 @@ const Index = () => {
 
   const handleLeadsImported = async (importedLeads: Lead[], fileName: string) => {
     console.log('Index: Importing new leads locally:', importedLeads.length);
+    console.log('Index: Sample lead:', importedLeads[0]);
     
     const leadList = { 
       id: Date.now().toString(), 
@@ -66,8 +79,14 @@ const Index = () => {
     // Save to localStorage
     setCurrentLeadList(leadList);
     setLeadsData(importedLeads);
-    localStorage.setItem('currentLeadList', JSON.stringify(leadList));
-    localStorage.setItem('leadsData', JSON.stringify(importedLeads));
+    
+    try {
+      localStorage.setItem('currentLeadList', JSON.stringify(leadList));
+      localStorage.setItem('leadsData', JSON.stringify(importedLeads));
+      console.log('Index: Successfully saved to localStorage');
+    } catch (error) {
+      console.error('Index: Error saving to localStorage:', error);
+    }
   };
 
   const handleBack = async () => {

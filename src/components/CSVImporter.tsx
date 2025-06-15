@@ -31,26 +31,59 @@ const CSVImporter: React.FC<CSVImporterProps> = ({ onLeadsImported }) => {
     return phone; // Return original if not 10 digits
   };
 
+  const parseCSVLine = (line: string): string[] => {
+    const result = [];
+    let current = '';
+    let inQuotes = false;
+    
+    for (let i = 0; i < line.length; i++) {
+      const char = line[i];
+      
+      if (char === '"') {
+        inQuotes = !inQuotes;
+      } else if (char === ',' && !inQuotes) {
+        result.push(current.trim());
+        current = '';
+      } else {
+        current += char;
+      }
+    }
+    
+    result.push(current.trim());
+    return result;
+  };
+
   const parseCSV = (text: string): Lead[] => {
-    const lines = text.split('\n');
+    const lines = text.split('\n').map(line => line.trim()).filter(line => line);
     const leads: Lead[] = [];
+    
+    console.log('CSVImporter: Parsing CSV with', lines.length, 'lines');
     
     // Skip header row and process data
     for (let i = 1; i < lines.length; i++) {
-      const line = lines[i].trim();
+      const line = lines[i];
       if (line) {
-        const [name, company, phone, email] = line.split(',').map(cell => cell.trim().replace(/"/g, ''));
+        const fields = parseCSVLine(line);
+        const [name, company, phone, email] = fields.map(field => 
+          field.replace(/^"(.*)"$/, '$1').trim() // Remove surrounding quotes
+        );
+        
         if (name && phone) {
-          leads.push({
+          const lead = {
             name,
             phone: formatPhoneNumber(phone),
             company: company || undefined,
             email: email || undefined
-          });
+          };
+          leads.push(lead);
+          console.log('CSVImporter: Parsed lead:', lead.name, lead.phone);
+        } else {
+          console.warn('CSVImporter: Skipping invalid line:', line);
         }
       }
     }
     
+    console.log('CSVImporter: Successfully parsed', leads.length, 'leads');
     return leads;
   };
 
@@ -62,6 +95,7 @@ const CSVImporter: React.FC<CSVImporterProps> = ({ onLeadsImported }) => {
 
     setError('');
     setLoading(true);
+    console.log('CSVImporter: Processing file:', file.name);
 
     try {
       // Parse CSV content locally
@@ -69,20 +103,25 @@ const CSVImporter: React.FC<CSVImporterProps> = ({ onLeadsImported }) => {
       reader.onload = (e) => {
         const text = e.target?.result as string;
         const leads = parseCSV(text);
+        
         if (leads.length === 0) {
           setError('No valid leads found in the CSV file');
+          console.error('CSVImporter: No leads found in file');
           return;
         }
+        
         const fileName = file.name.replace('.csv', '');
+        console.log('CSVImporter: Importing', leads.length, 'leads with filename:', fileName);
         onLeadsImported(leads, fileName);
       };
       reader.onerror = () => {
         setError('Error reading file');
+        console.error('CSVImporter: Error reading file');
       };
       reader.readAsText(file);
     } catch (error) {
       setError('Error processing file');
-      console.error('File processing error:', error);
+      console.error('CSVImporter: File processing error:', error);
     } finally {
       setLoading(false);
     }
