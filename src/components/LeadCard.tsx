@@ -194,18 +194,9 @@ const LeadCard: React.FC<LeadCardProps> = ({
           </div>
         </div>
 
-        {/* Group 3: Call Button and Last Called */}
+        {/* Group 3: Last Called and Call Button */}
         <div className="space-y-3">
-          {/* Main Call Button */}
-          <Button 
-            onClick={handleCall} 
-            size="lg" 
-            className="w-full h-16 text-lg font-semibold bg-green-600 hover:bg-green-600 text-white rounded-2xl shadow-lg"
-          >
-            Call
-          </Button>
-          
-          {/* Last called section below button */}
+          {/* Last called section above button */}
           {lead.lastCalled && (
             <div className="flex items-center justify-center">
               <div className="flex items-center">
@@ -222,6 +213,15 @@ const LeadCard: React.FC<LeadCardProps> = ({
               </div>
             </div>
           )}
+          
+          {/* Main Call Button */}
+          <Button 
+            onClick={handleCall} 
+            size="lg" 
+            className="w-full h-16 text-lg font-semibold bg-green-600 hover:bg-green-600 text-white rounded-2xl shadow-lg"
+          >
+            Call
+          </Button>
         </div>
       </CardContent>
     </Card>
