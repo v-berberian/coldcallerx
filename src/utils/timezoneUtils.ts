@@ -1,3 +1,4 @@
+
 const AREA_CODE_MAP: {
   [key: string]: {
     state: string;
@@ -68,6 +69,7 @@ const AREA_CODE_MAP: {
   '336': { state: 'NC', timezone: 'America/New_York' },
   '337': { state: 'LA', timezone: 'America/Chicago' },
   '339': { state: 'MA', timezone: 'America/New_York' },
+  '346': { state: 'TX', timezone: 'America/Chicago' },
   '347': { state: 'NY', timezone: 'America/New_York' },
   '351': { state: 'MA', timezone: 'America/New_York' },
   '352': { state: 'FL', timezone: 'America/New_York' },

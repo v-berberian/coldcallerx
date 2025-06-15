@@ -47,10 +47,6 @@ const LeadCard: React.FC<LeadCardProps> = ({
   const emailValue = lead.email?.trim() ?? '';
   const hasValidEmail = emailValue && emailValue.includes('@');
 
-  // Clean phone number for state extraction - remove all non-digit characters
-  const cleanPhoneForState = lead.phone.replace(/\D/g, '');
-  const leadState = getStateFromAreaCode(cleanPhoneForState);
-
   // Completely rewrite phone parsing - handle format: "773) 643-4644 (773) 643-9346"
   const additionalPhones = lead.additionalPhones ? (() => {
     const rawString = lead.additionalPhones.trim();
@@ -94,12 +90,16 @@ const LeadCard: React.FC<LeadCardProps> = ({
     isPrimary: false
   }))];
 
+  // Calculate state from currently selected phone number
+  const cleanSelectedPhone = selectedPhone.replace(/\D/g, '');
+  const leadState = getStateFromAreaCode(cleanSelectedPhone);
+
   // Debug logging
   console.log('Primary phone:', formatPhoneNumber(lead.phone));
-  console.log('Clean phone for state:', cleanPhoneForState);
-  console.log('Lead state:', leadState);
-  console.log('Additional phones after parsing (limited to 3):', additionalPhones);
   console.log('Selected phone:', selectedPhone);
+  console.log('Clean selected phone for state:', cleanSelectedPhone);
+  console.log('Lead state from selected phone:', leadState);
+  console.log('Additional phones after parsing (limited to 3):', additionalPhones);
 
   // Handle phone selection
   const handlePhoneSelect = (phone: string) => {
