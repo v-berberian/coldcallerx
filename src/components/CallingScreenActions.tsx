@@ -74,21 +74,21 @@ export const useCallingScreenActions = ({
     }
   };
 
-  // Handle reset call count - local only now
+  // Handle reset call count - local only
   const handleResetCallCount = async (lead: Lead) => {
     try {
       console.log('CallingScreenActions: Reset call count for:', lead.name, '(local only)');
-      // This would reset the local call count only
+      // This functionality is now handled by the local storage hooks
     } catch (error) {
       console.error('CallingScreenActions: Error in handleResetCallCount:', error);
     }
   };
 
-  // Handle reset all call counts - local only now
+  // Handle reset all call counts - local only
   const handleResetAllCallCounts = async () => {
     try {
       console.log('CallingScreenActions: Reset all call counts (local only)');
-      // This would reset all local call counts only
+      // This functionality is now handled by the local storage hooks
     } catch (error) {
       console.error('CallingScreenActions: Error in handleResetAllCallCounts:', error);
     }

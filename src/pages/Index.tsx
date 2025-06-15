@@ -6,21 +6,15 @@ import { Loader2 } from 'lucide-react';
 import CallingScreen from '@/components/CallingScreen';
 import UserProfile from '@/components/UserProfile';
 import CSVImporter from '@/components/CSVImporter';
-import { useHybridLeadOperations } from '@/hooks/useHybridLeadOperations';
+import { Lead } from '@/types/lead';
 
 const Index = () => {
   const { user, loading: authLoading, signOut } = useAuth();
   const navigate = useNavigate();
   const [appReady, setAppReady] = useState(false);
   const [showContent, setShowContent] = useState(false);
-
-  const {
-    leadsData,
-    currentLeadList,
-    isOnline,
-    importLeadsFromCSV,
-    loadExistingData
-  } = useHybridLeadOperations();
+  const [leadsData, setLeadsData] = useState<Lead[]>([]);
+  const [currentLeadList, setCurrentLeadList] = useState<any>(null);
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -29,11 +23,19 @@ const Index = () => {
     }
   }, [user, authLoading, navigate]);
 
-  // Load saved data when user is ready
+  // Load saved data from localStorage when user is ready
   useEffect(() => {
     if (user && !authLoading) {
-      console.log('Index: Loading saved data');
-      loadExistingData();
+      console.log('Index: Loading saved data from localStorage');
+      
+      // Load from localStorage
+      const savedLeads = localStorage.getItem('leadsData');
+      const savedLeadList = localStorage.getItem('currentLeadList');
+      
+      if (savedLeads && savedLeadList) {
+        setLeadsData(JSON.parse(savedLeads));
+        setCurrentLeadList(JSON.parse(savedLeadList));
+      }
       
       // Initialize app
       const initializeApp = async () => {
@@ -49,11 +51,23 @@ const Index = () => {
 
       initializeApp();
     }
-  }, [user, authLoading, loadExistingData]);
+  }, [user, authLoading]);
 
-  const handleLeadsImported = async (importedLeads: any[], fileName: string) => {
-    console.log('Index: Importing new leads with hybrid storage:', importedLeads.length);
-    await importLeadsFromCSV(importedLeads, fileName);
+  const handleLeadsImported = async (importedLeads: Lead[], fileName: string) => {
+    console.log('Index: Importing new leads locally:', importedLeads.length);
+    
+    const leadList = { 
+      id: Date.now().toString(), 
+      name: fileName,
+      file_name: fileName + '.csv',
+      total_leads: importedLeads.length
+    };
+
+    // Save to localStorage
+    setCurrentLeadList(leadList);
+    setLeadsData(importedLeads);
+    localStorage.setItem('currentLeadList', JSON.stringify(leadList));
+    localStorage.setItem('leadsData', JSON.stringify(importedLeads));
   };
 
   const handleBack = async () => {

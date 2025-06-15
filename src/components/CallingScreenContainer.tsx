@@ -4,12 +4,10 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import CallingHeader from './CallingHeader';
 import MainContent from './MainContent';
-import OnlineStatusIndicator from './OnlineStatusIndicator';
 import { Lead } from '../types/lead';
-import { useHybridCallingScreenState } from '../hooks/useHybridCallingScreenState';
+import { useSimplifiedCallingScreenState } from '../hooks/useSimplifiedCallingScreenState';
 import { useSimplifiedCallingScreenEffects } from '../hooks/useSimplifiedCallingScreenEffects';
 import { useCallingScreenActions } from './CallingScreenActions';
-import { useHybridLeadOperations } from '../hooks/useHybridLeadOperations';
 
 interface CallingScreenContainerProps {
   leads: Lead[];
@@ -24,7 +22,6 @@ const CallingScreenContainer: React.FC<CallingScreenContainerProps> = ({
   onBack,
   onLeadsImported
 }) => {
-  const { importLeadsFromCSV } = useHybridLeadOperations();
 
   const {
     componentReady,
@@ -44,7 +41,6 @@ const CallingScreenContainer: React.FC<CallingScreenContainerProps> = ({
     setCurrentLeadForAutoCall,
     isCountdownActive,
     countdownTime,
-    isOnline,
     getBaseLeads,
     makeCall,
     executeAutoCall,
@@ -70,7 +66,7 @@ const CallingScreenContainer: React.FC<CallingScreenContainerProps> = ({
     handleSearchFocus,
     handleSearchBlur,
     getDelayDisplayType
-  } = useHybridCallingScreenState({ leads });
+  } = useSimplifiedCallingScreenState({ leads });
 
   useSimplifiedCallingScreenEffects({
     componentReady,
@@ -109,14 +105,6 @@ const CallingScreenContainer: React.FC<CallingScreenContainerProps> = ({
     setShowAutocomplete
   });
 
-  // Handle CSV import with hybrid storage
-  const handleLeadsImported = async (newLeads: Lead[], newFileName: string) => {
-    const success = await importLeadsFromCSV(newLeads, newFileName);
-    if (success) {
-      onLeadsImported(newLeads, newFileName);
-    }
-  };
-
   // Show loading until component is ready
   if (!componentReady || !leadsInitialized) {
     return (
@@ -143,7 +131,6 @@ const CallingScreenContainer: React.FC<CallingScreenContainerProps> = ({
                 <span className="text-blue-500">X</span>
               </h1>
             </div>
-            <OnlineStatusIndicator isOnline={isOnline} />
           </div>
         </div>
         <div className="p-6 text-center">
@@ -196,7 +183,7 @@ const CallingScreenContainer: React.FC<CallingScreenContainerProps> = ({
         onSearchBlur={handleSearchBlur}
         onClearSearch={clearSearch}
         onLeadSelect={handleLeadSelect}
-        onLeadsImported={handleLeadsImported}
+        onLeadsImported={onLeadsImported}
       />
 
       {/* Main Content - takes remaining space */}
