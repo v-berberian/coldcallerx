@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect } from 'react';
 import { RotateCcw, Timer, Rocket } from 'lucide-react';
 
@@ -132,7 +131,7 @@ const FilterButtons: React.FC<FilterButtonsProps> = ({
         <div className="flex-1 relative flex items-center justify-center">
           <button 
             onClick={handleAutoCallToggle} 
-            className={`text-sm font-medium py-3 px-3 rounded transition-all duration-200 ${
+            className={`w-full text-sm font-medium py-3 px-3 rounded transition-all duration-200 ${
               autoCall ? 'text-green-600 animate-button-switch' : 'text-muted-foreground'
             }`} 
             style={{ WebkitTapHighlightColor: 'transparent' }}
