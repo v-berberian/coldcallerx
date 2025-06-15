@@ -1,7 +1,7 @@
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from '@/components/ui/dropdown-menu';
+import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent } from '@/components/ui/dropdown-menu';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { X, Phone, Mail, ChevronDown } from 'lucide-react';
 import { formatPhoneNumber } from '../utils/phoneUtils';
@@ -88,7 +88,7 @@ const LeadCard: React.FC<LeadCardProps> = ({
                     align="center" 
                     className="w-fit min-w-[280px] p-0"
                   >
-                    <ScrollArea className="max-h-[200px]">
+                    <ScrollArea className="max-h-[200px] rounded-md">
                       <div className="py-1">
                         <div className="px-4 py-2 text-sm font-medium border-b bg-muted/50">
                           {formatPhoneNumber(lead.phone)} (Primary)
