@@ -85,45 +85,73 @@ const CSVImporter: React.FC<CSVImporterProps> = ({ onLeadsImported }) => {
 
   const parseCSV = (text: string): Lead[] => {
     console.log('Raw CSV text (first 200 chars):', text.substring(0, 200));
-    const lines = text.split('\n').filter(line => line.trim());
-    console.log('Total lines after filtering:', lines.length);
+
+    const rows: string[][] = [];
+    let currentRow: string[] = [];
+    let currentField = '';
+    let inQuotes = false;
+
+    // Normalize line endings and handle BOM
+    const normalizedText = text.replace(/^\uFEFF/, '').replace(/\r\n/g, '\n').replace(/\r/g, '\n');
+
+    for (let i = 0; i < normalizedText.length; i++) {
+        const char = normalizedText[i];
+        
+        if (inQuotes) {
+            if (char === '"') {
+                // Check for escaped quote (two double quotes)
+                if (i + 1 < normalizedText.length && normalizedText[i + 1] === '"') {
+                    currentField += '"';
+                    i++; // Skip the next quote
+                } else {
+                    inQuotes = false;
+                }
+            } else {
+                currentField += char;
+            }
+        } else {
+            if (char === '"') {
+                inQuotes = true;
+            } else if (char === ',') {
+                currentRow.push(currentField);
+                currentField = '';
+            } else if (char === '\n') {
+                currentRow.push(currentField);
+                if (currentRow.length > 1 || currentRow.some(field => field.trim() !== '')) {
+                    rows.push(currentRow);
+                }
+                currentRow = [];
+                currentField = '';
+            } else {
+                currentField += char;
+            }
+        }
+    }
     
-    if (lines.length < 2) {
-      console.log('Not enough lines in CSV');
+    // Add the last field and row if they exist
+    currentRow.push(currentField);
+    if (currentRow.length > 1 || currentRow.some(field => field.trim() !== '')) {
+        rows.push(currentRow);
+    }
+    
+    if (rows.length < 2) {
+      console.log('Not enough valid rows in CSV');
       return [];
     }
     
-    // Log the header to understand structure
-    console.log('Header line:', JSON.stringify(lines[0]));
+    const header = rows[0].map(h => h.trim());
+    console.log('Header line:', JSON.stringify(header));
     
     const leads: Lead[] = [];
     
     // Skip header row and process data
     // Expected column order: A=Company, B=Name, C=Phone, D=Additional Phones, E=Email
-    for (let i = 1; i < lines.length; i++) {
-      const line = lines[i].trim();
-      console.log(`Processing line ${i}:`, JSON.stringify(line));
+    for (let i = 1; i < rows.length; i++) {
+      const columns = rows[i].map(col => col.trim());
+      console.log(`Processing row ${i}:`, JSON.stringify(columns));
       
-      if (line) {
-        // More robust CSV parsing - handle quoted values properly
-        const columns: string[] = [];
-        let currentColumn = '';
-        let inQuotes = false;
-        
-        for (let j = 0; j < line.length; j++) {
-          const char = line[j];
-          if (char === '"') {
-            inQuotes = !inQuotes;
-          } else if (char === ',' && !inQuotes) {
-            columns.push(currentColumn.trim());
-            currentColumn = '';
-          } else {
-            currentColumn += char;
-          }
-        }
-        columns.push(currentColumn.trim()); // Add the last column
-        
-        console.log(`Line ${i} parsed columns:`, columns);
+      if (columns.length > 0 && columns.some(c => c !== '')) {
+        console.log(`Row ${i} parsed columns:`, columns);
         console.log(`Column count: ${columns.length}`);
         
         // Ensure we have at least 5 columns (A through E)
@@ -152,7 +180,7 @@ const CSVImporter: React.FC<CSVImporterProps> = ({ onLeadsImported }) => {
             phone: formatPhoneNumber(phone.trim()),
             company: cleanCsvValue(company),
             email: cleanedEmail, // This is guaranteed to be string | undefined
-            additionalPhones: cleanCsvValue(additionalPhones)
+            additionalPhones: cleanCsvValue(additionalPhones?.replace(/\n/g, ' ')) // Join multi-line phones
           };
           
           console.log('Created lead object with email type check:', {
@@ -162,7 +190,7 @@ const CSVImporter: React.FC<CSVImporterProps> = ({ onLeadsImported }) => {
           });
           leads.push(lead);
         } else {
-          console.log(`Skipping line ${i} - missing required fields (name: "${name}", phone: "${phone}")`);
+          console.log(`Skipping row ${i} - missing required fields (name: "${name}", phone: "${phone}")`);
         }
       }
     }

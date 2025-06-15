@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -34,29 +33,9 @@ const LeadCard: React.FC<LeadCardProps> = ({
   // Use stable key based on lead data instead of changing cardKey
   const leadKey = `${lead.name}-${lead.phone}`;
   
-  // Safely extract email string, handling both string and old object formats from localStorage
-  let emailString: string | undefined;
-  if (typeof lead.email === 'string') {
-    emailString = lead.email;
-  } else if (lead.email && typeof lead.email === 'object' && 'value' in (lead.email as object)) {
-    // Backwards compatibility for old data in localStorage
-    const maybeEmail = (lead.email as any).value;
-    if (typeof maybeEmail === 'string' && maybeEmail.toLowerCase() !== 'undefined' && maybeEmail.toLowerCase() !== 'null') {
-      emailString = maybeEmail;
-    }
-  }
-
-  const emailValue = emailString?.trim() ?? '';
+  // Email is now guaranteed to be a string or undefined from the importer
+  const emailValue = lead.email?.trim() ?? '';
   const hasValidEmail = emailValue && emailValue.includes('@');
-  
-  // Enhanced debug logging for email
-  console.log('LeadCard rendering email analysis:', {
-    name: lead.name,
-    rawEmail: lead.email,
-    resolvedEmailString: emailString,
-    finalEmailValue: emailValue,
-    hasValidEmail: hasValidEmail,
-  });
   
   return (
     <Card className="shadow-2xl border-border/50 rounded-3xl bg-card h-[480px] flex flex-col">
