@@ -47,6 +47,10 @@ const LeadCard: React.FC<LeadCardProps> = ({
   const emailValue = lead.email?.trim() ?? '';
   const hasValidEmail = emailValue && emailValue.includes('@');
 
+  // Clean phone number for state extraction - remove all non-digit characters
+  const cleanPhoneForState = lead.phone.replace(/\D/g, '');
+  const leadState = getStateFromAreaCode(cleanPhoneForState);
+
   // Completely rewrite phone parsing - handle format: "773) 643-4644 (773) 643-9346"
   const additionalPhones = lead.additionalPhones ? (() => {
     const rawString = lead.additionalPhones.trim();
@@ -92,6 +96,8 @@ const LeadCard: React.FC<LeadCardProps> = ({
 
   // Debug logging
   console.log('Primary phone:', formatPhoneNumber(lead.phone));
+  console.log('Clean phone for state:', cleanPhoneForState);
+  console.log('Lead state:', leadState);
   console.log('Additional phones after parsing (limited to 3):', additionalPhones);
   console.log('Selected phone:', selectedPhone);
 
@@ -135,9 +141,9 @@ const LeadCard: React.FC<LeadCardProps> = ({
 
         {/* Lead info - Main content area with animation */}
         <div key={leadKey} className="text-center space-y-6 flex-1 flex flex-col justify-center animate-fade-in">
-          {/* State and timezone */}
+          {/* State and timezone - always show, with fallback */}
           <p className="text-sm text-muted-foreground">
-            {getStateFromAreaCode(lead.phone)}
+            {leadState || 'Unknown State'}
           </p>
           
           {/* Group 1: Name and Company */}
