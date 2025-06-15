@@ -5,6 +5,7 @@ import SearchAutocomplete from './SearchAutocomplete';
 import SearchBar from './SearchBar';
 import CSVImporter from './CSVImporter';
 import UserProfile from './UserProfile';
+import OnlineStatusIndicator from './OnlineStatusIndicator';
 
 interface CallingHeaderProps {
   searchQuery: string;
@@ -12,6 +13,7 @@ interface CallingHeaderProps {
   searchResults: Lead[];
   leadsData: Lead[];
   fileName: string;
+  isOnline?: boolean;
   onSearchChange: (query: string) => void;
   onSearchFocus: () => void;
   onSearchBlur: () => void;
@@ -26,6 +28,7 @@ const CallingHeader: React.FC<CallingHeaderProps> = ({
   searchResults,
   leadsData,
   fileName,
+  isOnline = true,
   onSearchChange,
   onSearchFocus,
   onSearchBlur,
@@ -46,6 +49,7 @@ const CallingHeader: React.FC<CallingHeaderProps> = ({
         </div>
         
         <div className="flex items-center space-x-2">
+          <OnlineStatusIndicator isOnline={isOnline} />
           <UserProfile />
         </div>
       </div>

@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
@@ -5,14 +6,22 @@ import { Loader2 } from 'lucide-react';
 import CallingScreen from '@/components/CallingScreen';
 import UserProfile from '@/components/UserProfile';
 import CSVImporter from '@/components/CSVImporter';
+import OnlineStatusIndicator from '@/components/OnlineStatusIndicator';
+import { useHybridLeadOperations } from '@/hooks/useHybridLeadOperations';
 
 const Index = () => {
   const { user, loading: authLoading, signOut } = useAuth();
   const navigate = useNavigate();
   const [appReady, setAppReady] = useState(false);
   const [showContent, setShowContent] = useState(false);
-  const [leadsData, setLeadsData] = useState<any[]>([]);
-  const [currentFileName, setCurrentFileName] = useState('');
+
+  const {
+    leadsData,
+    currentLeadList,
+    isOnline,
+    importLeadsFromCSV,
+    loadExistingData
+  } = useHybridLeadOperations();
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -21,24 +30,11 @@ const Index = () => {
     }
   }, [user, authLoading, navigate]);
 
-  // Load saved data from localStorage
+  // Load saved data when user is ready
   useEffect(() => {
     if (user && !authLoading) {
-      console.log('Index: Loading saved data from localStorage');
-      
-      const savedLeads = localStorage.getItem('leadsData');
-      const savedLeadList = localStorage.getItem('currentLeadList');
-      
-      if (savedLeads && savedLeadList) {
-        try {
-          const leads = JSON.parse(savedLeads);
-          const leadList = JSON.parse(savedLeadList);
-          setLeadsData(leads);
-          setCurrentFileName(leadList.name);
-        } catch (error) {
-          console.error('Error loading saved data:', error);
-        }
-      }
+      console.log('Index: Loading saved data');
+      loadExistingData();
       
       // Initialize app
       const initializeApp = async () => {
@@ -54,17 +50,11 @@ const Index = () => {
 
       initializeApp();
     }
-  }, [user, authLoading]);
+  }, [user, authLoading, loadExistingData]);
 
   const handleLeadsImported = async (importedLeads: any[], fileName: string) => {
-    console.log('Index: Importing new leads locally:', importedLeads.length);
-    setLeadsData(importedLeads);
-    setCurrentFileName(fileName);
-    
-    // Save to localStorage
-    const leadList = { id: Date.now().toString(), name: fileName };
-    localStorage.setItem('currentLeadList', JSON.stringify(leadList));
-    localStorage.setItem('leadsData', JSON.stringify(importedLeads));
+    console.log('Index: Importing new leads with hybrid storage:', importedLeads.length);
+    await importLeadsFromCSV(importedLeads, fileName);
   };
 
   const handleBack = async () => {
@@ -105,6 +95,7 @@ const Index = () => {
           </h1>
           
           <div className="flex items-center space-x-2">
+            <OnlineStatusIndicator isOnline={isOnline} />
             <UserProfile />
           </div>
         </div>
@@ -113,6 +104,12 @@ const Index = () => {
           <div className="text-center space-y-4">
             <p className="text-lg text-muted-foreground">No Leads Imported</p>
             <p className="text-sm text-muted-foreground">Click the upload icon above to import a CSV file</p>
+            <div className="mt-4">
+              <OnlineStatusIndicator isOnline={isOnline} />
+              <p className="text-xs text-muted-foreground mt-2">
+                {isOnline ? 'Data will sync to server' : 'Working offline - data stored locally'}
+              </p>
+            </div>
           </div>
         </div>
       </div>
@@ -123,7 +120,7 @@ const Index = () => {
     <div className={`transition-opacity duration-300 ${showContent ? 'opacity-100' : 'opacity-0'}`}>
       <CallingScreen 
         leads={leadsData} 
-        fileName={currentFileName}
+        fileName={currentLeadList?.name || 'Imported Leads'}
         onBack={handleBack}
         onLeadsImported={handleLeadsImported}
       />

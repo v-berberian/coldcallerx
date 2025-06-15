@@ -72,8 +72,11 @@ export type Database = {
       leads: {
         Row: {
           called_count: number | null
+          company: string | null
           created_at: string | null
+          email: string | null
           id: string
+          last_called: string | null
           last_called_at: string | null
           lead_list_id: string
           name: string
@@ -83,8 +86,11 @@ export type Database = {
         }
         Insert: {
           called_count?: number | null
+          company?: string | null
           created_at?: string | null
+          email?: string | null
           id?: string
+          last_called?: string | null
           last_called_at?: string | null
           lead_list_id: string
           name: string
@@ -94,8 +100,11 @@ export type Database = {
         }
         Update: {
           called_count?: number | null
+          company?: string | null
           created_at?: string | null
+          email?: string | null
           id?: string
+          last_called?: string | null
           last_called_at?: string | null
           lead_list_id?: string
           name?: string
