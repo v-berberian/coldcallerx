@@ -42,7 +42,7 @@ const SearchBar: React.FC<SearchBarProps> = ({
         onChange={e => onSearchChange(e.target.value)} 
         onFocus={handleFocus} 
         onBlur={handleBlur} 
-        className="w-full px-4 py-2 bg-white/20 backdrop-blur-md rounded-xl border border-white/30 text-center placeholder:text-center placeholder:text-foreground/60 focus:border-white/50 focus:bg-white/30 transition-all duration-200 shadow-lg"
+        className="w-full px-4 py-2 bg-secondary backdrop-blur-md rounded-xl border border-border dark:border-white/30 text-center placeholder:text-center placeholder:text-muted-foreground focus:border-primary/50 focus:bg-secondary transition-all duration-200 shadow-lg"
       />
       {searchQuery && (
         <button onClick={onClearSearch} className="absolute right-3 top-1/2 transform -translate-y-1/2">
