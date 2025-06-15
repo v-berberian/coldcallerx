@@ -1,11 +1,10 @@
 
-import React from 'react';
-import { Search } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import SearchAutocomplete from './SearchAutocomplete';
-import CSVImporter from './CSVImporter';
+import React, { useState } from 'react';
 import { Lead } from '../types/lead';
+import SearchAutocomplete from './SearchAutocomplete';
+import SearchBar from './SearchBar';
+import CSVImporter from './CSVImporter';
+import UserProfile from './UserProfile';
 
 interface CallingHeaderProps {
   searchQuery: string;
@@ -34,59 +33,56 @@ const CallingHeader: React.FC<CallingHeaderProps> = ({
   onLeadSelect,
   onLeadsImported
 }) => {
-  const handleLeadSelect = (lead: Lead) => {
-    onLeadSelect(lead);
-    onClearSearch(); // This will close the autocomplete
-  };
+  const [isAutocompleteVisible, setIsAutocompleteVisible] = useState(showAutocomplete);
+
+  React.useEffect(() => {
+    if (showAutocomplete) {
+      setIsAutocompleteVisible(true);
+    } else {
+      // Delay hiding to allow slide-up animation
+      const timer = setTimeout(() => {
+        setIsAutocompleteVisible(false);
+      }, 50);
+      return () => clearTimeout(timer);
+    }
+  }, [showAutocomplete]);
 
   return (
-    <div className="bg-background border-b border-border p-4" style={{ paddingTop: 'max(1rem, env(safe-area-inset-top))' }}>
+    <div className="bg-background border-b border-border p-4 pt-safe flex-shrink-0" style={{ paddingTop: 'max(1rem, env(safe-area-inset-top))' }}>
       <div className="flex items-center justify-between mb-4">
+        <CSVImporter onLeadsImported={onLeadsImported} />
+        
         <div className="flex items-center space-x-3">
-          <CSVImporter onLeadsImported={onLeadsImported} />
-          <h1 className="text-xl font-bold">
+          <h1 className="text-2xl font-bold">
             <span className="text-blue-500">ColdCall </span>
             <span className="text-blue-500">X</span>
           </h1>
         </div>
         
-        <div className="text-sm text-muted-foreground">
-          {fileName}
-        </div>
+        <UserProfile />
       </div>
-
-      {/* Search Bar with Autocomplete */}
+      
+      {/* Search Bar */}
       <div className="relative">
-        <div className="relative">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
-          <Input
-            type="text"
-            placeholder="Search leads..."
-            value={searchQuery}
-            onChange={(e) => onSearchChange(e.target.value)}
-            onFocus={onSearchFocus}
-            onBlur={onSearchBlur}
-            className="pl-10 pr-10 rounded-xl"
-          />
-          {searchQuery && (
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={onClearSearch}
-              className="absolute right-2 top-1/2 transform -translate-y-1/2 h-6 w-6 p-0 hover:bg-muted rounded-full"
-            >
-              ×
-            </Button>
-          )}
-        </div>
-
-        {/* Autocomplete Results */}
-        <SearchAutocomplete
-          results={searchResults}
-          onLeadSelect={handleLeadSelect}
-          leadsData={leadsData}
-          isVisible={showAutocomplete && searchQuery.length > 0}
-          onClose={onClearSearch}
+        <SearchBar 
+          searchQuery={searchQuery} 
+          onSearchChange={onSearchChange} 
+          onSearchFocus={onSearchFocus} 
+          onSearchBlur={onSearchBlur} 
+          onClearSearch={onClearSearch} 
+          fileName={fileName} 
+        />
+        
+        {/* Autocomplete Dropdown */}
+        <SearchAutocomplete 
+          leads={searchResults} 
+          onLeadSelect={onLeadSelect} 
+          searchQuery={searchQuery} 
+          actualIndices={searchResults.map(lead => 
+            leadsData.findIndex(l => l.name === lead.name && l.phone === lead.phone) + 1
+          )} 
+          totalLeads={leadsData.length}
+          isVisible={showAutocomplete}
         />
       </div>
     </div>
