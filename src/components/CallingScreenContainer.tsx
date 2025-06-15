@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -56,6 +57,7 @@ const CallingScreenContainer: React.FC<CallingScreenContainerProps> = ({
     toggleCallDelay,
     resetCallDelay,
     memoizedResetLeadsData,
+    updateLeadsDataDirectly,
     searchQuery,
     setSearchQuery,
     searchResults,
@@ -85,8 +87,15 @@ const CallingScreenContainer: React.FC<CallingScreenContainerProps> = ({
     getBaseLeads
   });
 
-  // Handle leads data updates
+  // Handle leads data updates without navigation reset
   const handleLeadsDataUpdate = (updatedLeads: Lead[]) => {
+    console.log('CallingScreenContainer: Updating leads data without navigation reset');
+    updateLeadsDataDirectly(updatedLeads);
+  };
+
+  // Handle full leads data reset (for CSV import)
+  const handleLeadsDataReset = (updatedLeads: Lead[]) => {
+    console.log('CallingScreenContainer: Full reset of leads data');
     memoizedResetLeadsData(updatedLeads);
   };
 

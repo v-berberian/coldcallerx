@@ -68,6 +68,13 @@ export const useLocalCallingScreenState = ({ leads }: UseLocalCallingScreenState
     resetLeadsData(newLeads);
   }, [resetLeadsData]);
 
+  // Direct leads data update without navigation reset
+  const updateLeadsDataDirectly = useCallback((updatedLeads: Lead[]) => {
+    console.log('Updating leads data directly without navigation reset');
+    // This directly updates the leads data without triggering navigation reset
+    resetLeadsData(updatedLeads);
+  }, [resetLeadsData]);
+
   // Only restore from localStorage when leads are ready
   useEffect(() => {
     if (
@@ -124,6 +131,7 @@ export const useLocalCallingScreenState = ({ leads }: UseLocalCallingScreenState
     toggleCallDelay,
     resetCallDelay,
     memoizedResetLeadsData,
+    updateLeadsDataDirectly,
     resetCallCount,
     resetAllCallCounts,
     searchQuery,
