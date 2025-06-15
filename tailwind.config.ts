@@ -1,3 +1,4 @@
+
 import type { Config } from "tailwindcss";
 
 export default {
@@ -124,6 +125,14 @@ export default {
 						transform: 'scale(1)',
 						opacity: '1'
 					}
+				},
+				'border-draw': {
+					'0%': {
+						strokeDashoffset: '100'
+					},
+					'100%': {
+						strokeDashoffset: '0'
+					}
 				}
 			},
 			animation: {
@@ -132,7 +141,8 @@ export default {
 				'fade-in': 'fade-in 0.2s ease-out',
 				'fade-out': 'fade-out 0.2s ease-out',
 				'content-change': 'content-change 0.15s ease-out',
-				'button-switch': 'button-switch 0.1s ease-out'
+				'button-switch': 'button-switch 0.1s ease-out',
+				'border-draw': 'border-draw var(--duration, 15s) linear forwards'
 			}
 		}
 	},
