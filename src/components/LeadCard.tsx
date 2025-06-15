@@ -121,7 +121,7 @@ const LeadCard: React.FC<LeadCardProps> = ({
   };
 
   return (
-    <Card className="shadow-2xl border-border/50 rounded-3xl bg-card h-[480px] flex flex-col">
+    <Card className="shadow-2xl border-border/50 rounded-3xl bg-card h-[480px] flex flex-col relative">
       <CardContent className="p-6 space-y-6 flex-1 flex flex-col">
         {/* Top row with lead count and file name */}
         <div className="flex items-center justify-between">
@@ -209,27 +209,26 @@ const LeadCard: React.FC<LeadCardProps> = ({
           </div>
         </div>
 
-        {/* Group 3: Last Called and Call Button */}
-        <div className="space-y-3">
-          {/* Last called section above button */}
-          {lead.lastCalled && (
-            <div className="flex items-center justify-center">
-              <div className="flex items-center">
-                <p className="text-sm text-muted-foreground transition-opacity duration-300 ease-in-out opacity-100 whitespace-nowrap my-0 py-0">
-                  Last called: {lead.lastCalled}
-                </p>
-                <button
-                  onClick={onResetCallCount}
-                  className="ml-2 p-1 bg-muted rounded transition-colors"
-                  title="Clear last called"
-                >
-                  <X className="h-3 w-3 text-muted-foreground" />
-                </button>
-              </div>
+        {/* Fixed position for last called - doesn't affect layout */}
+        {lead.lastCalled && (
+          <div className="absolute top-20 left-1/2 transform -translate-x-1/2">
+            <div className="flex items-center bg-muted/20 backdrop-blur-sm rounded-lg px-3 py-1">
+              <p className="text-xs text-muted-foreground whitespace-nowrap">
+                Last called: {lead.lastCalled}
+              </p>
+              <button
+                onClick={onResetCallCount}
+                className="ml-2 p-1 bg-muted rounded transition-colors"
+                title="Clear last called"
+              >
+                <X className="h-3 w-3 text-muted-foreground" />
+              </button>
             </div>
-          )}
-          
-          {/* Main Call Button */}
+          </div>
+        )}
+
+        {/* Main Call Button - fixed at bottom */}
+        <div className="mt-auto pt-3">
           <Button 
             onClick={handleCall} 
             size="lg" 
