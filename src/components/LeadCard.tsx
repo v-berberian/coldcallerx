@@ -32,14 +32,16 @@ const LeadCard: React.FC<LeadCardProps> = ({
   const emailValue = lead.email?.trim() ?? '';
   const hasValidEmail = emailValue && emailValue.includes('@');
   
+  // Fix phone parsing - split on commas first, then clean up each phone
   const additionalPhones = lead.additionalPhones
-    ? lead.additionalPhones.split(/[\s,]+/).filter(phone => phone.trim() !== '')
+    ? lead.additionalPhones.split(',').map(phone => phone.trim()).filter(phone => phone !== '')
     : [];
   const hasAdditionalPhones = additionalPhones.length > 0;
 
   // Debug logging
+  console.log('Raw additional phones string:', lead.additionalPhones);
   console.log('Primary phone:', formatPhoneNumber(lead.phone));
-  console.log('Additional phones:', additionalPhones.map(phone => formatPhoneNumber(phone.trim())));
+  console.log('Additional phones after parsing:', additionalPhones.map(phone => formatPhoneNumber(phone)));
 
   return (
     <Card className="shadow-2xl border-border/50 rounded-3xl bg-card h-[480px] flex flex-col">
@@ -90,24 +92,24 @@ const LeadCard: React.FC<LeadCardProps> = ({
                   <DropdownMenuContent 
                     side="bottom" 
                     align="center" 
-                    className="!w-[350px] !min-w-[350px] p-0 bg-red-100"
+                    className="!w-[350px] !min-w-[350px] p-0"
                     style={{ width: '350px', minWidth: '350px' }}
                   >
                     <div className="max-h-[200px] overflow-y-auto">
                       <div className="py-1">
                         <div 
-                          className="px-4 py-2 text-sm font-medium border-b bg-muted/50 flex flex-shrink-0"
-                          style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', display: 'block' }}
+                          className="px-4 py-2 text-sm font-medium border-b bg-muted/50"
+                          style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}
                         >
                           {formatPhoneNumber(lead.phone)} (Primary)
                         </div>
                         {additionalPhones.map((phone, index) => (
                           <div 
                             key={index} 
-                            className="px-4 py-2 text-sm hover:bg-accent cursor-pointer flex flex-shrink-0"
-                            style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', display: 'block' }}
+                            className="px-4 py-2 text-sm hover:bg-accent cursor-pointer"
+                            style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}
                           >
-                            {formatPhoneNumber(phone.trim())}
+                            {formatPhoneNumber(phone)}
                           </div>
                         ))}
                       </div>
