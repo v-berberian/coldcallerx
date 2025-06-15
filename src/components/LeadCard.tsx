@@ -2,6 +2,7 @@ import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from '@/components/ui/dropdown-menu';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { X, Phone, Mail, ChevronDown } from 'lucide-react';
 import { formatPhoneNumber } from '../utils/phoneUtils';
 import { getStateFromAreaCode } from '../utils/timezoneUtils';
@@ -83,10 +84,12 @@ const LeadCard: React.FC<LeadCardProps> = ({
                     <ChevronDown className="h-4 w-4 text-muted-foreground" />
                   </DropdownMenuTrigger>
                   <DropdownMenuContent side="bottom" align="center" className="w-max">
-                    <DropdownMenuItem>{formatPhoneNumber(lead.phone)} (Primary)</DropdownMenuItem>
-                    {additionalPhones.map((phone, index) => (
-                      <DropdownMenuItem key={index}>{formatPhoneNumber(phone)}</DropdownMenuItem>
-                    ))}
+                    <ScrollArea className="max-h-[160px]">
+                      <DropdownMenuItem>{formatPhoneNumber(lead.phone)} (Primary)</DropdownMenuItem>
+                      {additionalPhones.map((phone, index) => (
+                        <DropdownMenuItem key={index}>{formatPhoneNumber(phone)}</DropdownMenuItem>
+                      ))}
+                    </ScrollArea>
                   </DropdownMenuContent>
                 </DropdownMenu>
               ) : (
