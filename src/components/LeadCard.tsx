@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -32,19 +31,34 @@ const LeadCard: React.FC<LeadCardProps> = ({
   const emailValue = lead.email?.trim() ?? '';
   const hasValidEmail = emailValue && emailValue.includes('@');
   
-  // Fix phone parsing - handle the specific format in the data
+  // Fix phone parsing - handle the actual format: "773) 643-4644 (773) 643-9346"
   const additionalPhones = lead.additionalPhones
     ? lead.additionalPhones
-        .split(/\)\s+\(/) // Split on ") (" pattern
-        .map(phone => {
-          // Clean up each phone number
+        .split(/\)\s+\(/g) // Split on ") (" pattern globally
+        .map((phone, index, array) => {
           let cleanPhone = phone.trim();
-          // Add missing parentheses if needed
-          if (!cleanPhone.startsWith('(')) cleanPhone = '(' + cleanPhone;
-          if (!cleanPhone.includes(')')) cleanPhone = cleanPhone.replace(/(\d{3})/, '($1)');
+          
+          // Add opening parenthesis to all but the first phone
+          if (index > 0 && !cleanPhone.startsWith('(')) {
+            cleanPhone = '(' + cleanPhone;
+          }
+          
+          // Add closing parenthesis to all but the last phone
+          if (index < array.length - 1 && !cleanPhone.includes(')')) {
+            cleanPhone = cleanPhone.replace(/^(\d{3})/, '($1)');
+          }
+          
+          // For the first phone, it might be missing the opening parenthesis
+          if (index === 0 && !cleanPhone.startsWith('(')) {
+            cleanPhone = '(' + cleanPhone;
+          }
+          
           return cleanPhone;
         })
-        .filter(phone => phone.length >= 10) // Keep phones with at least 10 digits
+        .filter(phone => {
+          const digits = phone.replace(/\D/g, '');
+          return digits.length >= 10;
+        })
     : [];
   const hasAdditionalPhones = additionalPhones.length > 0;
 
