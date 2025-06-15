@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -136,15 +137,15 @@ const LeadCard: React.FC<LeadCardProps> = ({
                           key={index}
                           onClick={() => handlePhoneSelect(phoneData.phone)}
                         >
-                          <div className="flex justify-between items-start w-full">
-                            <div className="flex-1 min-w-0">
+                          <div className="flex justify-between items-center w-full">
+                            <div className="flex items-center gap-2">
+                              {selectedPhone === phoneData.phone && (
+                                <div className="w-2 h-2 bg-black rounded-full"></div>
+                              )}
                               <span className="font-medium text-foreground">
                                 {phoneData.phone} {phoneData.isPrimary && '(Primary)'}
                               </span>
                             </div>
-                            {selectedPhone === phoneData.phone && (
-                              <Check className="h-4 w-4 text-primary ml-2" />
-                            )}
                           </div>
                         </DropdownMenuItem>
                       ))}
