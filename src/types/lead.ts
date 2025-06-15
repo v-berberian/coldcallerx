@@ -5,6 +5,7 @@ export interface Lead {
   company?: string;
   email?: string;
   lastCalled?: string;
+  additionalPhones?: string;
 }
 
 export type TimezoneFilter = 'ALL' | 'EST_CST';

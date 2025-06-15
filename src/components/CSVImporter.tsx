@@ -1,3 +1,4 @@
+
 import React, { useState, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Upload } from 'lucide-react';
@@ -7,6 +8,7 @@ interface Lead {
   phone: string;
   company?: string;
   email?: string;
+  additionalPhones?: string;
 }
 
 interface CSVImporterProps {
@@ -35,16 +37,18 @@ const CSVImporter: React.FC<CSVImporterProps> = ({ onLeadsImported }) => {
     const leads: Lead[] = [];
     
     // Skip header row and process data
+    // New order: Company, Name, Phone, Additional Phones, Email
     for (let i = 1; i < lines.length; i++) {
       const line = lines[i].trim();
       if (line) {
-        const [name, phone, company, email] = line.split(',').map(cell => cell.trim().replace(/"/g, ''));
+        const [company, name, phone, additionalPhones, email] = line.split(',').map(cell => cell.trim().replace(/"/g, ''));
         if (name && phone) {
           leads.push({
             name,
             phone: formatPhoneNumber(phone),
             company: company || undefined,
-            email: email || undefined
+            email: email || undefined,
+            additionalPhones: additionalPhones || undefined
           });
         }
       }
