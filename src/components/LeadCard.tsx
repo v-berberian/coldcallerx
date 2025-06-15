@@ -15,6 +15,7 @@ interface LeadCardProps {
   fileName: string;
   onCall: () => void;
   onResetCallCount: () => void;
+  noLeadsMessage?: string;
 }
 
 const LeadCard: React.FC<LeadCardProps> = ({
@@ -23,8 +24,22 @@ const LeadCard: React.FC<LeadCardProps> = ({
   totalCount,
   fileName,
   onCall,
-  onResetCallCount
+  onResetCallCount,
+  noLeadsMessage
 }) => {
+  // If we have a noLeadsMessage, show the empty state
+  if (noLeadsMessage) {
+    return (
+      <Card className="shadow-2xl border-border/50 rounded-3xl bg-card h-[480px] flex flex-col">
+        <CardContent className="p-6 space-y-6 flex-1 flex flex-col justify-center">
+          <div className="text-center">
+            <h2 className="text-2xl font-bold text-foreground">{noLeadsMessage}</h2>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
   // Use stable key based on lead data instead of changing cardKey
   const leadKey = `${lead.name}-${lead.phone}`;
 
