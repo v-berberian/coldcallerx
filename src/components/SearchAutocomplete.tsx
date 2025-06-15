@@ -1,68 +1,31 @@
 
 import React, { useEffect, useState } from 'react';
 import { Card } from '@/components/ui/card';
-
-interface Lead {
-  name: string;
-  phone: string;
-  called?: number;
-}
+import { Lead } from '../types/lead';
 
 interface SearchAutocompleteProps {
-  leads: Lead[];
+  results: Lead[];
   onLeadSelect: (lead: Lead) => void;
-  searchQuery: string;
-  actualIndices: number[];
-  totalLeads: number;
-  isVisible: boolean;
-  onAnimationComplete?: () => void;
+  leadsData: Lead[];
 }
 
 const SearchAutocomplete: React.FC<SearchAutocompleteProps> = ({ 
-  leads, 
+  results, 
   onLeadSelect, 
-  searchQuery, 
-  actualIndices,
-  totalLeads,
-  isVisible,
-  onAnimationComplete
+  leadsData
 }) => {
-  const [isAnimating, setIsAnimating] = useState(false);
-  const [shouldRender, setShouldRender] = useState(false);
-
-  useEffect(() => {
-    if (isVisible) {
-      setShouldRender(true);
-      setIsAnimating(true);
-    } else if (shouldRender) {
-      setIsAnimating(false);
-      // Faster close animation - reduced from 200ms to 100ms
-      const timer = setTimeout(() => {
-        setShouldRender(false);
-        onAnimationComplete?.();
-      }, 100); // Match faster animation duration
-      return () => clearTimeout(timer);
-    }
-  }, [isVisible, shouldRender, onAnimationComplete]);
-
-  if (!shouldRender) {
-    return null;
-  }
-
-  const animationClass = isAnimating ? 'animate-slide-down' : 'animate-slide-up-fast';
-
-  if (leads.length === 0) {
+  if (results.length === 0) {
     return (
-      <div className={`absolute top-full left-0 right-0 z-50 mt-1 p-4 text-center text-muted-foreground rounded-xl shadow-lg ${animationClass} bg-background/15 backdrop-blur-sm border border-border/15`}>
+      <div className="absolute top-full left-0 right-0 z-50 mt-1 p-4 text-center text-muted-foreground rounded-xl shadow-lg bg-background/15 backdrop-blur-sm border border-border/15">
         No leads found
       </div>
     );
   }
 
   return (
-    <div className={`absolute top-full left-0 right-0 z-50 mt-1 rounded-xl shadow-lg overflow-hidden ${animationClass} bg-background/15 backdrop-blur-sm border border-border/15`}>
+    <div className="absolute top-full left-0 right-0 z-50 mt-1 rounded-xl shadow-lg overflow-hidden bg-background/15 backdrop-blur-sm border border-border/15">
       <div className="max-h-60 overflow-y-auto">
-        {leads.map((lead, index) => (
+        {results.map((lead, index) => (
           <button
             key={`${lead.name}-${lead.phone}-${index}`}
             onClick={() => onLeadSelect(lead)}
@@ -74,7 +37,7 @@ const SearchAutocomplete: React.FC<SearchAutocompleteProps> = ({
                 <p className="text-sm text-muted-foreground">{lead.phone}</p>
               </div>
               <div className="ml-2 text-xs text-muted-foreground">
-                {actualIndices[index]}/{totalLeads}
+                {index + 1}/{results.length}
               </div>
             </div>
           </button>
