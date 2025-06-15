@@ -1,8 +1,7 @@
-
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { X, Phone } from 'lucide-react';
+import { X, Phone, Mail } from 'lucide-react';
 import { formatPhoneNumber } from '../utils/phoneUtils';
 import { getStateFromAreaCode } from '../utils/timezoneUtils';
 
@@ -78,11 +77,16 @@ const LeadCard: React.FC<LeadCardProps> = ({
             </div>
           </div>
           
-          {/* Email - displayed underneath phone number */}
+          {/* Email with icon positioned to the left */}
           {lead.email && (
-            <p className="text-sm text-muted-foreground text-center break-words">
-              {lead.email}
-            </p>
+            <div className="flex items-center justify-center">
+              <div className="relative">
+                <Mail className="absolute -left-6 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <p className="text-sm text-muted-foreground text-center break-words">
+                  {lead.email}
+                </p>
+              </div>
+            </div>
           )}
           
           <div className="relative flex flex-col items-center space-y-4">
