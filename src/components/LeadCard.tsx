@@ -36,7 +36,7 @@ const LeadCard: React.FC<LeadCardProps> = ({
   const leadKey = `${lead.name}-${lead.phone}`;
   
   return (
-    <Card key={leadKey} className="shadow-2xl border-border/50 rounded-3xl bg-card h-[480px] flex flex-col animate-scale-in">
+    <Card className="shadow-2xl border-border/50 rounded-3xl bg-card h-[480px] flex flex-col">
       <CardContent className="p-8 space-y-6 flex-1 flex flex-col">
         {/* Top row with lead count and file name */}
         <div className="flex items-center justify-between">
@@ -49,7 +49,7 @@ const LeadCard: React.FC<LeadCardProps> = ({
         </div>
 
         {/* Lead info - Main content area with animation */}
-        <div key={leadKey} className="text-center space-y-4 flex-1 flex flex-col justify-center animate-content-change">
+        <div key={leadKey} className="text-center space-y-4 flex-1 flex flex-col justify-center animate-fade-in">
           {/* State and timezone - moved to top with same font size as "Called: times" */}
           <p className="text-sm text-muted-foreground">
             {getStateFromAreaCode(lead.phone)}
