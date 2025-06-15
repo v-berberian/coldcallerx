@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { Mail, HelpCircle, ChevronRight, Plus, Edit, Trash2, MessageSquare } from 'lucide-react';
+import { Mail, HelpCircle, ChevronDown, Plus, Edit, Trash2, MessageSquare, Check } from 'lucide-react';
 import {
   Popover,
   PopoverContent,
@@ -38,6 +38,8 @@ interface SettingsMenuProps {
 const SettingsMenu: React.FC<SettingsMenuProps> = ({ children }) => {
   const [emailTemplates, setEmailTemplates] = useState<EmailTemplate[]>([]);
   const [textTemplates, setTextTemplates] = useState<TextTemplate[]>([]);
+  const [selectedEmailTemplate, setSelectedEmailTemplate] = useState<string>('');
+  const [selectedTextTemplate, setSelectedTextTemplate] = useState<string>('');
   const [editingEmailTemplate, setEditingEmailTemplate] = useState<EmailTemplate | null>(null);
   const [editingTextTemplate, setEditingTextTemplate] = useState<TextTemplate | null>(null);
   const [isCreatingEmail, setIsCreatingEmail] = useState(false);
@@ -47,8 +49,10 @@ const SettingsMenu: React.FC<SettingsMenuProps> = ({ children }) => {
   const [emailTemplateBody, setEmailTemplateBody] = useState('');
   const [textTemplateName, setTextTemplateName] = useState('');
   const [textTemplateMessage, setTextTemplateMessage] = useState('');
+  const [emailDropdownOpen, setEmailDropdownOpen] = useState(false);
+  const [textDropdownOpen, setTextDropdownOpen] = useState(false);
 
-  // Load templates from localStorage on mount
+  // Load templates and selections from localStorage on mount
   useEffect(() => {
     const savedEmailTemplates = localStorage.getItem('emailTemplates');
     if (savedEmailTemplates) {
@@ -58,6 +62,16 @@ const SettingsMenu: React.FC<SettingsMenuProps> = ({ children }) => {
     const savedTextTemplates = localStorage.getItem('textTemplates');
     if (savedTextTemplates) {
       setTextTemplates(JSON.parse(savedTextTemplates));
+    }
+
+    const savedSelectedEmailTemplate = localStorage.getItem('selectedEmailTemplate');
+    if (savedSelectedEmailTemplate) {
+      setSelectedEmailTemplate(savedSelectedEmailTemplate);
+    }
+
+    const savedSelectedTextTemplate = localStorage.getItem('selectedTextTemplate');
+    if (savedSelectedTextTemplate) {
+      setSelectedTextTemplate(savedSelectedTextTemplate);
     }
   }, []);
 
@@ -71,6 +85,18 @@ const SettingsMenu: React.FC<SettingsMenuProps> = ({ children }) => {
   const saveTextTemplates = (templates: TextTemplate[]) => {
     localStorage.setItem('textTemplates', JSON.stringify(templates));
     setTextTemplates(templates);
+  };
+
+  // Save selected email template
+  const saveSelectedEmailTemplate = (templateId: string) => {
+    localStorage.setItem('selectedEmailTemplate', templateId);
+    setSelectedEmailTemplate(templateId);
+  };
+
+  // Save selected text template
+  const saveSelectedTextTemplate = (templateId: string) => {
+    localStorage.setItem('selectedTextTemplate', templateId);
+    setSelectedTextTemplate(templateId);
   };
 
   const handleCreateEmailTemplate = () => {
@@ -166,11 +192,21 @@ const SettingsMenu: React.FC<SettingsMenuProps> = ({ children }) => {
   const handleDeleteEmailTemplate = (templateId: string) => {
     const updatedTemplates = emailTemplates.filter(t => t.id !== templateId);
     saveEmailTemplates(updatedTemplates);
+    
+    // Clear selection if deleted template was selected
+    if (selectedEmailTemplate === templateId) {
+      saveSelectedEmailTemplate('');
+    }
   };
 
   const handleDeleteTextTemplate = (templateId: string) => {
     const updatedTemplates = textTemplates.filter(t => t.id !== templateId);
     saveTextTemplates(updatedTemplates);
+    
+    // Clear selection if deleted template was selected
+    if (selectedTextTemplate === templateId) {
+      saveSelectedTextTemplate('');
+    }
   };
 
   const cancelEmailEditing = () => {
@@ -188,6 +224,10 @@ const SettingsMenu: React.FC<SettingsMenuProps> = ({ children }) => {
     setEditingTextTemplate(null);
   };
 
+  // Get selected template names for display
+  const selectedEmailTemplateName = emailTemplates.find(t => t.id === selectedEmailTemplate)?.name || 'None selected';
+  const selectedTextTemplateName = textTemplates.find(t => t.id === selectedTextTemplate)?.name || 'None selected';
+
   return (
     <Popover>
       <PopoverTrigger asChild>
@@ -203,7 +243,7 @@ const SettingsMenu: React.FC<SettingsMenuProps> = ({ children }) => {
           
           {/* Email Templates Submenu */}
           <div className="space-y-3">
-            <DropdownMenu>
+            <DropdownMenu onOpenChange={setEmailDropdownOpen}>
               <DropdownMenuTrigger asChild>
                 <Button
                   variant="ghost"
@@ -213,10 +253,10 @@ const SettingsMenu: React.FC<SettingsMenuProps> = ({ children }) => {
                     <Mail className="h-4 w-4 text-muted-foreground" />
                     <span className="text-sm font-medium">Email Templates</span>
                   </div>
-                  <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                  <ChevronDown className={`h-4 w-4 text-muted-foreground transition-transform duration-200 ${emailDropdownOpen ? 'rotate-180' : ''}`} />
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent className="w-80 p-4" align="start">
+              <DropdownMenuContent className="w-96 p-4" align="start">
                 <div className="space-y-3">
                   <div className="flex items-center justify-between">
                     <Label className="text-sm font-medium">Email Templates</Label>
@@ -230,6 +270,32 @@ const SettingsMenu: React.FC<SettingsMenuProps> = ({ children }) => {
                       Add
                     </Button>
                   </div>
+
+                  {/* Template Selection */}
+                  <div className="space-y-2">
+                    <Label className="text-xs text-muted-foreground">Default Template</Label>
+                    <div className="space-y-1">
+                      <div 
+                        className={`flex items-center justify-between p-2 rounded cursor-pointer hover:bg-muted/50 ${selectedEmailTemplate === '' ? 'bg-muted' : ''}`}
+                        onClick={() => saveSelectedEmailTemplate('')}
+                      >
+                        <span className="text-sm">None (Manual email)</span>
+                        {selectedEmailTemplate === '' && <Check className="h-4 w-4 text-foreground" />}
+                      </div>
+                      {emailTemplates.map((template) => (
+                        <div 
+                          key={template.id}
+                          className={`flex items-center justify-between p-2 rounded cursor-pointer hover:bg-muted/50 ${selectedEmailTemplate === template.id ? 'bg-muted' : ''}`}
+                          onClick={() => saveSelectedEmailTemplate(template.id)}
+                        >
+                          <span className="text-sm">{template.name}</span>
+                          {selectedEmailTemplate === template.id && <Check className="h-4 w-4 text-foreground" />}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                  
+                  <Separator />
                   
                   {/* Email Template Creation/Edit Form */}
                   {isCreatingEmail && (
@@ -312,7 +378,7 @@ const SettingsMenu: React.FC<SettingsMenuProps> = ({ children }) => {
 
           {/* Text Templates Submenu */}
           <div className="space-y-3">
-            <DropdownMenu>
+            <DropdownMenu onOpenChange={setTextDropdownOpen}>
               <DropdownMenuTrigger asChild>
                 <Button
                   variant="ghost"
@@ -322,10 +388,10 @@ const SettingsMenu: React.FC<SettingsMenuProps> = ({ children }) => {
                     <MessageSquare className="h-4 w-4 text-muted-foreground" />
                     <span className="text-sm font-medium">Text Templates</span>
                   </div>
-                  <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                  <ChevronDown className={`h-4 w-4 text-muted-foreground transition-transform duration-200 ${textDropdownOpen ? 'rotate-180' : ''}`} />
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent className="w-80 p-4" align="start">
+              <DropdownMenuContent className="w-96 p-4" align="start">
                 <div className="space-y-3">
                   <div className="flex items-center justify-between">
                     <Label className="text-sm font-medium">Text Templates</Label>
@@ -339,6 +405,32 @@ const SettingsMenu: React.FC<SettingsMenuProps> = ({ children }) => {
                       Add
                     </Button>
                   </div>
+
+                  {/* Template Selection */}
+                  <div className="space-y-2">
+                    <Label className="text-xs text-muted-foreground">Default Template</Label>
+                    <div className="space-y-1">
+                      <div 
+                        className={`flex items-center justify-between p-2 rounded cursor-pointer hover:bg-muted/50 ${selectedTextTemplate === '' ? 'bg-muted' : ''}`}
+                        onClick={() => saveSelectedTextTemplate('')}
+                      >
+                        <span className="text-sm">None (Manual text)</span>
+                        {selectedTextTemplate === '' && <Check className="h-4 w-4 text-foreground" />}
+                      </div>
+                      {textTemplates.map((template) => (
+                        <div 
+                          key={template.id}
+                          className={`flex items-center justify-between p-2 rounded cursor-pointer hover:bg-muted/50 ${selectedTextTemplate === template.id ? 'bg-muted' : ''}`}
+                          onClick={() => saveSelectedTextTemplate(template.id)}
+                        >
+                          <span className="text-sm">{template.name}</span>
+                          {selectedTextTemplate === template.id && <Check className="h-4 w-4 text-foreground" />}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                  
+                  <Separator />
                   
                   {/* Text Template Creation/Edit Form */}
                   {isCreatingText && (
@@ -427,10 +519,10 @@ const SettingsMenu: React.FC<SettingsMenuProps> = ({ children }) => {
                     <HelpCircle className="h-4 w-4 text-muted-foreground" />
                     <span className="text-sm font-medium">CSV Upload Help</span>
                   </div>
-                  <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                  <ChevronDown className="h-4 w-4 text-muted-foreground" />
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent className="w-80 p-4" align="start">
+              <DropdownMenuContent className="w-96 p-4" align="start">
                 <div className="space-y-3">
                   <div className="space-y-2">
                     <h5 className="font-medium text-sm">CSV Upload Guide</h5>

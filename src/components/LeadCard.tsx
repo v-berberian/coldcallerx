@@ -41,8 +41,10 @@ const LeadCard: React.FC<LeadCardProps> = ({
 }) => {
   const [emailTemplates, setEmailTemplates] = useState<EmailTemplate[]>([]);
   const [textTemplates, setTextTemplates] = useState<TextTemplate[]>([]);
+  const [selectedEmailTemplateId, setSelectedEmailTemplateId] = useState<string>('');
+  const [selectedTextTemplateId, setSelectedTextTemplateId] = useState<string>('');
 
-  // Load templates from localStorage
+  // Load templates and selections from localStorage
   useEffect(() => {
     const savedEmailTemplates = localStorage.getItem('emailTemplates');
     if (savedEmailTemplates) {
@@ -52,6 +54,16 @@ const LeadCard: React.FC<LeadCardProps> = ({
     const savedTextTemplates = localStorage.getItem('textTemplates');
     if (savedTextTemplates) {
       setTextTemplates(JSON.parse(savedTextTemplates));
+    }
+
+    const savedSelectedEmailTemplate = localStorage.getItem('selectedEmailTemplate');
+    if (savedSelectedEmailTemplate) {
+      setSelectedEmailTemplateId(savedSelectedEmailTemplate);
+    }
+
+    const savedSelectedTextTemplate = localStorage.getItem('selectedTextTemplate');
+    if (savedSelectedTextTemplate) {
+      setSelectedTextTemplateId(savedSelectedTextTemplate);
     }
   }, []);
 
@@ -141,16 +153,23 @@ const LeadCard: React.FC<LeadCardProps> = ({
     onCall(); // The original onCall function will handle the actual calling logic
   };
 
+  // Get the selected templates
+  const selectedEmailTemplate = emailTemplates.find(t => t.id === selectedEmailTemplateId);
+  const selectedTextTemplate = textTemplates.find(t => t.id === selectedTextTemplateId);
+
   // Create mailto link with template
   const createMailtoLink = (template?: EmailTemplate) => {
     if (!hasValidEmail) return '';
     
-    if (template) {
+    // Use selected template if no specific template provided and we have a default selected
+    const templateToUse = template || selectedEmailTemplate;
+    
+    if (templateToUse) {
       // Replace placeholders in template
-      const subject = template.subject
+      const subject = templateToUse.subject
         .replace('{name}', lead.name)
         .replace('{company}', lead.company || '');
-      const body = template.body
+      const body = templateToUse.body
         .replace('{name}', lead.name)
         .replace('{company}', lead.company || '')
         .replace('{phone}', selectedPhone);
@@ -165,8 +184,11 @@ const LeadCard: React.FC<LeadCardProps> = ({
   const createSmsLink = (template?: TextTemplate) => {
     const cleanPhone = selectedPhone.replace(/\D/g, '');
     
-    if (template) {
-      const message = template.message
+    // Use selected template if no specific template provided and we have a default selected
+    const templateToUse = template || selectedTextTemplate;
+    
+    if (templateToUse) {
+      const message = templateToUse.message
         .replace('{name}', lead.name)
         .replace('{company}', lead.company || '');
         
@@ -177,12 +199,14 @@ const LeadCard: React.FC<LeadCardProps> = ({
   };
 
   const handleEmailClick = (template?: EmailTemplate) => {
-    console.log('Email clicked for:', emailValue, template ? `with template: ${template.name}` : 'without template');
+    const templateToUse = template || selectedEmailTemplate;
+    console.log('Email clicked for:', emailValue, templateToUse ? `with template: ${templateToUse.name}` : 'without template');
     window.location.href = createMailtoLink(template);
   };
 
   const handleTextClick = (template?: TextTemplate) => {
-    console.log('Text clicked for:', selectedPhone, template ? `with template: ${template.name}` : 'without template');
+    const templateToUse = template || selectedTextTemplate;
+    console.log('Text clicked for:', selectedPhone, templateToUse ? `with template: ${templateToUse.name}` : 'without template');
     window.location.href = createSmsLink(template);
   };
 
