@@ -112,7 +112,7 @@ const LeadCard: React.FC<LeadCardProps> = ({
 
   return (
     <Card className="shadow-2xl border-border/50 rounded-3xl bg-card h-[480px] flex flex-col">
-      <CardContent className="p-6 space-y-4 flex-1 flex flex-col">
+      <CardContent className="p-6 space-y-3 flex-1 flex flex-col">
         {/* Top row with lead count and file name */}
         <div className="flex items-center justify-between">
           <p className="text-sm text-muted-foreground opacity-40">
@@ -131,7 +131,7 @@ const LeadCard: React.FC<LeadCardProps> = ({
           </p>
           
           {/* Contact name and company - grouped closer together */}
-          <div className="space-y-2">
+          <div className="space-y-1">
             <div className="flex items-center justify-center px-2">
               <h2 className="text-3xl font-bold text-foreground text-center break-words leading-tight">
                 {lead.name}
@@ -201,8 +201,20 @@ const LeadCard: React.FC<LeadCardProps> = ({
               </div>
             )}
           </div>
+        </div>
+
+        {/* Action Buttons */}
+        <div className="space-y-3">
+          {/* Main Call Button */}
+          <Button 
+            onClick={handleCall} 
+            size="lg" 
+            className="w-full h-16 text-lg font-semibold bg-green-600 hover:bg-green-600 text-white rounded-2xl shadow-lg"
+          >
+            Call
+          </Button>
           
-          {/* Last called section - flows naturally without fixed height */}
+          {/* Last called section - now appears under the call button */}
           {lead.lastCalled && (
             <div className="flex items-center justify-center">
               <div className="flex items-center">
@@ -219,18 +231,6 @@ const LeadCard: React.FC<LeadCardProps> = ({
               </div>
             </div>
           )}
-        </div>
-
-        {/* Action Buttons - reduced spacing above */}
-        <div className="space-y-3">
-          {/* Main Call Button */}
-          <Button 
-            onClick={handleCall} 
-            size="lg" 
-            className="w-full h-16 text-lg font-semibold bg-green-600 hover:bg-green-600 text-white rounded-2xl shadow-lg"
-          >
-            Call
-          </Button>
         </div>
       </CardContent>
     </Card>
