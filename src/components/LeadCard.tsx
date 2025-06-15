@@ -2,7 +2,7 @@
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { X } from 'lucide-react';
+import { X, Phone } from 'lucide-react';
 import { formatPhoneNumber } from '../utils/phoneUtils';
 import { getStateFromAreaCode } from '../utils/timezoneUtils';
 
@@ -70,7 +70,11 @@ const LeadCard: React.FC<LeadCardProps> = ({
             </div>
           )}
           
-          <p className="text-lg text-muted-foreground text-center">{formatPhoneNumber(lead.phone)}</p>
+          {/* Phone number with icon */}
+          <div className="relative flex items-center justify-center">
+            <Phone className="absolute -left-6 h-4 w-4 text-muted-foreground" />
+            <p className="text-lg text-muted-foreground text-center">{formatPhoneNumber(lead.phone)}</p>
+          </div>
           
           {/* Email - displayed underneath phone number */}
           {lead.email && (
