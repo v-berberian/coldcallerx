@@ -156,24 +156,22 @@ const LeadCard: React.FC<LeadCardProps> = ({
                     <p className="text-lg text-muted-foreground">{selectedPhone}</p>
                     <ChevronDown className="h-4 w-4 text-muted-foreground" />
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent side="bottom" align="center">
-                    <div className="max-h-60 overflow-y-auto">
-                      {allPhones.map((phoneData, index) => (
-                        <DropdownMenuItem 
-                          key={index}
-                          onClick={() => handlePhoneSelect(phoneData.phone)}
-                        >
-                          <div className="flex justify-between items-center w-full">
-                            <span className={`text-foreground ${phoneData.isPrimary ? 'font-bold' : 'font-medium'}`}>
-                              {phoneData.phone}
-                            </span>
-                            {selectedPhone === phoneData.phone && !phoneData.isPrimary && (
-                              <div className="w-2 h-2 bg-black rounded-full ml-2"></div>
-                            )}
-                          </div>
-                        </DropdownMenuItem>
-                      ))}
-                    </div>
+                  <DropdownMenuContent side="bottom" align="center" className="max-h-60 overflow-y-auto">
+                    {allPhones.map((phoneData, index) => (
+                      <DropdownMenuItem 
+                        key={index}
+                        onClick={() => handlePhoneSelect(phoneData.phone)}
+                      >
+                        <div className="flex justify-between items-center w-full">
+                          <span className={`text-foreground ${phoneData.isPrimary ? 'font-bold' : 'font-medium'}`}>
+                            {phoneData.phone}
+                          </span>
+                          {selectedPhone === phoneData.phone && !phoneData.isPrimary && (
+                            <div className="w-2 h-2 bg-black rounded-full ml-2"></div>
+                          )}
+                        </div>
+                      </DropdownMenuItem>
+                    ))}
                   </DropdownMenuContent>
                 </DropdownMenu>
               ) : (
@@ -182,7 +180,7 @@ const LeadCard: React.FC<LeadCardProps> = ({
             </div>
           </div>
           
-          {/* Email with icon positioned to the left - now clickable */}
+          {/* Email with icon positioned to the left - now clickable without blue highlighting */}
           {hasValidEmail && (
             <div className="flex items-center justify-center">
               <div className="relative">
@@ -190,7 +188,7 @@ const LeadCard: React.FC<LeadCardProps> = ({
                 <a
                   href={createMailtoLink()}
                   onClick={handleEmailClick}
-                  className="text-sm text-muted-foreground text-center break-words hover:text-blue-600 hover:underline transition-colors duration-200 cursor-pointer"
+                  className="text-sm text-muted-foreground text-center break-words hover:text-muted-foreground/80 hover:underline transition-colors duration-200 cursor-pointer"
                   title="Click to send email"
                 >
                   {emailValue}
