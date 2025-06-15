@@ -71,10 +71,26 @@ const Index = () => {
         </div>
         
         {/* Centered content */}
-        <div className="flex-1 flex items-center justify-center">
-          <div className="text-center space-y-4">
-            <p className="text-lg text-muted-foreground">No Leads Imported</p>
-            <p className="text-sm text-muted-foreground">Click the upload icon above to import a CSV file</p>
+        <div className="flex-1 flex items-center justify-center p-4">
+          <div className="text-center space-y-6 max-w-md">
+            <div className="space-y-2">
+              <p className="text-lg text-muted-foreground">No Leads Imported</p>
+              <p className="text-sm text-muted-foreground">Click the upload icon above to import a CSV file</p>
+            </div>
+            
+            <div className="bg-muted/30 rounded-lg p-4 space-y-3">
+              <p className="text-sm font-medium text-foreground">CSV Column Order:</p>
+              <div className="text-xs text-muted-foreground space-y-1 text-left">
+                <div><span className="font-medium">Company:</span> optional</div>
+                <div><span className="font-medium">Name:</span> required</div>
+                <div><span className="font-medium">Phone:</span> required</div>
+                <div><span className="font-medium">Additional Phones:</span> optional</div>
+                <div><span className="font-medium">Email:</span> optional</div>
+              </div>
+              <p className="text-xs text-muted-foreground italic">
+                Note: Use commas for empty columns
+              </p>
+            </div>
           </div>
         </div>
       </div>
