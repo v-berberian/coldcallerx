@@ -32,9 +32,12 @@ const LeadCard: React.FC<LeadCardProps> = ({
   const emailValue = lead.email?.trim() ?? '';
   const hasValidEmail = emailValue && emailValue.includes('@');
   
-  // Fix phone parsing - split on commas first, then clean up each phone
+  // Fix phone parsing - properly split multiple phone numbers
   const additionalPhones = lead.additionalPhones
-    ? lead.additionalPhones.split(',').map(phone => phone.trim()).filter(phone => phone !== '')
+    ? lead.additionalPhones
+        .split(/[,\s]+/) // Split on commas and/or spaces
+        .map(phone => phone.trim())
+        .filter(phone => phone !== '' && phone.length >= 10) // Filter out empty strings and incomplete numbers
     : [];
   const hasAdditionalPhones = additionalPhones.length > 0;
 
