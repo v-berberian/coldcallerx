@@ -36,11 +36,11 @@ const SearchAutocomplete: React.FC<SearchAutocompleteProps> = ({
       setIsAnimating(true);
     } else if (shouldRender) {
       setIsAnimating(false);
-      // Smoother close animation timing
+      // Even faster close animation - reduced from 50ms to 30ms
       const timer = setTimeout(() => {
         setShouldRender(false);
         onAnimationComplete?.();
-      }, 200); // Match smooth animation duration
+      }, 30); // Match even faster animation duration
       return () => clearTimeout(timer);
     }
   }, [isVisible, shouldRender, onAnimationComplete]);
@@ -49,24 +49,24 @@ const SearchAutocomplete: React.FC<SearchAutocompleteProps> = ({
     return null;
   }
 
-  const animationClass = isAnimating ? 'animate-slide-down-smooth' : 'animate-slide-up-smooth';
+  const animationClass = isAnimating ? 'animate-slide-down-fast' : 'animate-slide-up-fastest';
 
   if (leads.length === 0) {
     return (
-      <div className={`absolute top-full left-0 right-0 z-50 mt-1 p-4 text-center text-muted-foreground rounded-xl shadow-lg ${animationClass} bg-background/95 backdrop-blur-md border border-border/20`}>
+      <div className={`absolute top-full left-0 right-0 z-50 mt-1 p-4 text-center text-muted-foreground rounded-xl shadow-lg ${animationClass} bg-background/15 backdrop-blur-sm border border-border/15`}>
         No leads found
       </div>
     );
   }
 
   return (
-    <div className={`absolute top-full left-0 right-0 z-50 mt-1 rounded-xl shadow-lg overflow-hidden ${animationClass} bg-background/95 backdrop-blur-md border border-border/20`}>
+    <div className={`absolute top-full left-0 right-0 z-50 mt-1 rounded-xl shadow-lg overflow-hidden ${animationClass} bg-background/15 backdrop-blur-sm border border-border/15`}>
       <div className="max-h-60 overflow-y-auto">
         {leads.map((lead, index) => (
           <button
             key={`${lead.name}-${lead.phone}-${index}`}
             onClick={() => onLeadSelect(lead)}
-            className="w-full px-4 py-3 text-left border-b border-border/10 last:border-b-0 transition-all duration-200 cursor-default hover:bg-muted/50 hover:scale-[0.998] active:scale-[0.996]"
+            className="w-full px-4 py-3 text-left border-b border-border/10 last:border-b-0 transition-colors duration-75 cursor-default hover:bg-muted/50"
           >
             <div className="flex justify-between items-start">
               <div className="flex-1 min-w-0">
