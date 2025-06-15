@@ -138,14 +138,12 @@ const LeadCard: React.FC<LeadCardProps> = ({
                           onClick={() => handlePhoneSelect(phoneData.phone)}
                         >
                           <div className="flex justify-between items-center w-full">
-                            <div className="flex items-center gap-2">
-                              {selectedPhone === phoneData.phone && (
-                                <div className="w-2 h-2 bg-black rounded-full"></div>
-                              )}
-                              <span className="font-medium text-foreground">
-                                {phoneData.phone} {phoneData.isPrimary && '(Primary)'}
-                              </span>
-                            </div>
+                            <span className="font-medium text-foreground">
+                              {phoneData.phone} {phoneData.isPrimary && '(Primary)'}
+                            </span>
+                            {selectedPhone === phoneData.phone && !phoneData.isPrimary && (
+                              <div className="w-2 h-2 bg-black rounded-full ml-2"></div>
+                            )}
                           </div>
                         </DropdownMenuItem>
                       ))}
