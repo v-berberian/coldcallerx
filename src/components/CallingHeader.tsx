@@ -38,10 +38,10 @@ const CallingHeader: React.FC<CallingHeaderProps> = ({
     if (showAutocomplete) {
       setIsAutocompleteVisible(true);
     } else {
-      // Delay hiding to allow slide-up animation
+      // Longer delay for smoother animation
       const timer = setTimeout(() => {
         setIsAutocompleteVisible(false);
-      }, 50);
+      }, 200);
       return () => clearTimeout(timer);
     }
   }, [showAutocomplete]);
@@ -54,16 +54,10 @@ const CallingHeader: React.FC<CallingHeaderProps> = ({
         </div>
         
         <div className="flex items-center space-x-2 sm:space-x-3 flex-1 justify-center min-w-0">
-          <img 
-            src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==" 
-            alt="Cold Caller X" 
-            className="h-6 sm:h-8 w-auto object-contain"
-            onError={(e) => {
-              // Fallback to text if image fails to load
-              e.currentTarget.style.display = 'none';
-              e.currentTarget.parentElement!.innerHTML = '<h1 class="text-xl sm:text-2xl font-bold"><span class="text-blue-500">Cold Caller X</span></h1>';
-            }}
-          />
+          <h1 className="text-xl sm:text-2xl font-bold truncate">
+            <span className="text-blue-500">ColdCall </span>
+            <span className="text-blue-500">X</span>
+          </h1>
         </div>
         
         <div className="w-8 sm:w-8 flex-shrink-0"></div>
