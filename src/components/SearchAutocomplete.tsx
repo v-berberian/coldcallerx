@@ -36,11 +36,11 @@ const SearchAutocomplete: React.FC<SearchAutocompleteProps> = ({
       setIsAnimating(true);
     } else if (shouldRender) {
       setIsAnimating(false);
-      // Faster close animation - reduced from 100ms to 50ms
+      // Even faster close animation - reduced from 50ms to 30ms
       const timer = setTimeout(() => {
         setShouldRender(false);
         onAnimationComplete?.();
-      }, 50); // Match faster animation duration
+      }, 30); // Match even faster animation duration
       return () => clearTimeout(timer);
     }
   }, [isVisible, shouldRender, onAnimationComplete]);

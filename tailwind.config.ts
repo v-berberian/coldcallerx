@@ -203,10 +203,10 @@ export default {
 				'fade-in': 'fade-in 0.2s ease-out',
 				'fade-out': 'fade-out 0.2s ease-out',
 				'slide-down': 'slide-down 0.2s ease-out',
-				'slide-down-fast': 'slide-down-fast 0.1s ease-out',
+				'slide-down-fast': 'slide-down-fast 0.05s ease-out',
 				'slide-up': 'slide-up 0.2s ease-out',
-				'slide-up-fast': 'slide-up-fast 0.05s ease-out',
-				'slide-up-fastest': 'slide-up-fastest 0.05s ease-out',
+				'slide-up-fast': 'slide-up-fast 0.03s ease-out',
+				'slide-up-fastest': 'slide-up-fastest 0.03s ease-out',
 				'content-change': 'content-change 0.15s ease-out',
 				'content-change-fast': 'content-change-fast 0.08s ease-out',
 				'button-switch': 'button-switch 0.1s ease-out'
