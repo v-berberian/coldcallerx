@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -158,7 +157,7 @@ const LeadCard: React.FC<LeadCardProps> = ({
   const selectedEmailTemplate = emailTemplates.find(t => t.id === selectedEmailTemplateId);
   const selectedTextTemplate = textTemplates.find(t => t.id === selectedTextTemplateId);
 
-  // Create mailto link with template
+  // Create mailto link with template - fixed for iPhone
   const createMailtoLink = (template?: EmailTemplate) => {
     if (!hasValidEmail) return '';
     
@@ -181,7 +180,7 @@ const LeadCard: React.FC<LeadCardProps> = ({
     return `mailto:${emailValue}`;
   };
 
-  // Create SMS link with template
+  // Create SMS link with template - fixed for iPhone
   const createSmsLink = (template?: TextTemplate) => {
     const cleanPhone = selectedPhone.replace(/\D/g, '');
     
@@ -193,7 +192,8 @@ const LeadCard: React.FC<LeadCardProps> = ({
         .replace('{name}', lead.name)
         .replace('{company}', lead.company || '');
         
-      return `sms:${cleanPhone}?body=${encodeURIComponent(message)}`;
+      // For iPhone, use both sms: and the body parameter
+      return `sms:${cleanPhone}&body=${encodeURIComponent(message)}`;
     }
     
     return `sms:${cleanPhone}`;
@@ -202,13 +202,17 @@ const LeadCard: React.FC<LeadCardProps> = ({
   const handleEmailClick = (template?: EmailTemplate) => {
     const templateToUse = template || selectedEmailTemplate;
     console.log('Email clicked for:', emailValue, templateToUse ? `with template: ${templateToUse.name}` : 'without template');
-    window.location.href = createMailtoLink(template);
+    const mailtoLink = createMailtoLink(template);
+    console.log('Opening mailto link:', mailtoLink);
+    window.open(mailtoLink, '_self');
   };
 
   const handleTextClick = (template?: TextTemplate) => {
     const templateToUse = template || selectedTextTemplate;
     console.log('Text clicked for:', selectedPhone, templateToUse ? `with template: ${templateToUse.name}` : 'without template');
-    window.location.href = createSmsLink(template);
+    const smsLink = createSmsLink(template);
+    console.log('Opening SMS link:', smsLink);
+    window.open(smsLink, '_self');
   };
 
   return (
@@ -349,15 +353,8 @@ const LeadCard: React.FC<LeadCardProps> = ({
             </div>
           )}
           
-          {/* Action Buttons - Call and Text */}
+          {/* Action Buttons - Text and Call (switched positions) */}
           <div className="flex gap-3">
-            <Button 
-              onClick={handleCall} 
-              size="lg" 
-              className="flex-1 h-16 sm:h-20 text-xl font-semibold bg-green-600 hover:bg-green-600 text-white rounded-2xl shadow-lg"
-            >
-              Call
-            </Button>
             <Button 
               onClick={() => handleTextClick()} 
               size="lg" 
@@ -365,6 +362,13 @@ const LeadCard: React.FC<LeadCardProps> = ({
               className="flex-1 h-16 sm:h-20 text-xl font-semibold rounded-2xl shadow-lg"
             >
               Text
+            </Button>
+            <Button 
+              onClick={handleCall} 
+              size="lg" 
+              className="flex-1 h-16 sm:h-20 text-xl font-semibold bg-green-600 hover:bg-green-600 text-white rounded-2xl shadow-lg"
+            >
+              Call
             </Button>
           </div>
         </div>
