@@ -1,17 +1,12 @@
+
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { X, Phone, Mail } from 'lucide-react';
+import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from '@/components/ui/dropdown-menu';
+import { X, Phone, Mail, ChevronDown } from 'lucide-react';
 import { formatPhoneNumber } from '../utils/phoneUtils';
 import { getStateFromAreaCode } from '../utils/timezoneUtils';
-
-interface Lead {
-  name: string;
-  phone: string;
-  company?: string;
-  email?: string;
-  lastCalled?: string;
-}
+import { Lead } from '@/types/lead';
 
 interface LeadCardProps {
   lead: Lead;
@@ -37,6 +32,11 @@ const LeadCard: React.FC<LeadCardProps> = ({
   const emailValue = lead.email?.trim() ?? '';
   const hasValidEmail = emailValue && emailValue.includes('@');
   
+  const additionalPhones = lead.additionalPhones
+    ? lead.additionalPhones.split(/[\s,]+/).filter(phone => phone.trim() !== '')
+    : [];
+  const hasAdditionalPhones = additionalPhones.length > 0;
+
   return (
     <Card className="shadow-2xl border-border/50 rounded-3xl bg-card h-[480px] flex flex-col">
       <CardContent className="p-8 space-y-6 flex-1 flex flex-col">
@@ -77,7 +77,22 @@ const LeadCard: React.FC<LeadCardProps> = ({
           <div className="flex items-center justify-center">
             <div className="relative">
               <Phone className="absolute -left-6 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <p className="text-lg text-muted-foreground">{formatPhoneNumber(lead.phone)}</p>
+              {hasAdditionalPhones ? (
+                <DropdownMenu>
+                  <DropdownMenuTrigger className="flex items-center gap-1 cursor-pointer">
+                    <p className="text-lg text-muted-foreground">{formatPhoneNumber(lead.phone)}</p>
+                    <ChevronDown className="h-4 w-4 text-muted-foreground" />
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent>
+                    <DropdownMenuItem>{formatPhoneNumber(lead.phone)} (Primary)</DropdownMenuItem>
+                    {additionalPhones.map((phone, index) => (
+                      <DropdownMenuItem key={index}>{formatPhoneNumber(phone)}</DropdownMenuItem>
+                    ))}
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              ) : (
+                <p className="text-lg text-muted-foreground">{formatPhoneNumber(lead.phone)}</p>
+              )}
             </div>
           </div>
           
