@@ -1,8 +1,9 @@
+
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from '@/components/ui/dropdown-menu';
-import { X, Phone, Mail, ChevronDown, Check, MessageSquare } from 'lucide-react';
+import { X, Phone, Mail, ChevronDown, Check } from 'lucide-react';
 import { formatPhoneNumber } from '../utils/phoneUtils';
 import { getStateFromAreaCode } from '../utils/timezoneUtils';
 import { Lead } from '@/types/lead';
@@ -249,7 +250,7 @@ const LeadCard: React.FC<LeadCardProps> = ({
           
           {/* Group 2: Phone and Email */}
           <div className="space-y-2">
-            {/* Phone number with icons positioned to the left and right */}
+            {/* Phone number with icon positioned to the left */}
             <div className="flex items-center justify-center">
               <div className="relative">
                 <Phone className="absolute -left-6 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -286,34 +287,6 @@ const LeadCard: React.FC<LeadCardProps> = ({
                   </DropdownMenu>
                 ) : (
                   <p className="text-base sm:text-lg text-muted-foreground">{selectedPhone}</p>
-                )}
-                {/* Text/Message icon on the right */}
-                {textTemplates.length > 0 ? (
-                  <DropdownMenu>
-                    <DropdownMenuTrigger className="absolute -right-6 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground cursor-pointer hover:text-foreground transition-colors">
-                      <MessageSquare className="h-4 w-4" />
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent side="bottom" align="center" className="z-50 min-w-[200px]">
-                      <DropdownMenuItem onClick={() => handleTextClick()}>
-                        <MessageSquare className="h-4 w-4 mr-2" />
-                        Send without template
-                      </DropdownMenuItem>
-                      {textTemplates.map((template) => (
-                        <DropdownMenuItem key={template.id} onClick={() => handleTextClick(template)}>
-                          <MessageSquare className="h-4 w-4 mr-2" />
-                          {template.name}
-                        </DropdownMenuItem>
-                      ))}
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                ) : (
-                  <button
-                    onClick={() => handleTextClick()}
-                    className="absolute -right-6 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground cursor-pointer hover:text-foreground transition-colors"
-                    title="Send text message"
-                  >
-                    <MessageSquare className="h-4 w-4" />
-                  </button>
                 )}
               </div>
             </div>
@@ -356,9 +329,9 @@ const LeadCard: React.FC<LeadCardProps> = ({
           </div>
         </div>
 
-        {/* Group 3: Last Called and Call Button */}
+        {/* Group 3: Last Called and Action Buttons */}
         <div className="space-y-3">
-          {/* Last called section above button */}
+          {/* Last called section above buttons */}
           {lead.lastCalled && (
             <div className="flex items-center justify-center">
               <div className="flex items-center">
@@ -376,14 +349,24 @@ const LeadCard: React.FC<LeadCardProps> = ({
             </div>
           )}
           
-          {/* Main Call Button - Made bigger */}
-          <Button 
-            onClick={handleCall} 
-            size="lg" 
-            className="w-full h-16 sm:h-20 text-xl font-semibold bg-green-600 hover:bg-green-600 text-white rounded-2xl shadow-lg"
-          >
-            Call
-          </Button>
+          {/* Action Buttons - Call and Text */}
+          <div className="flex gap-3">
+            <Button 
+              onClick={handleCall} 
+              size="lg" 
+              className="flex-1 h-16 sm:h-20 text-xl font-semibold bg-green-600 hover:bg-green-600 text-white rounded-2xl shadow-lg"
+            >
+              Call
+            </Button>
+            <Button 
+              onClick={() => handleTextClick()} 
+              size="lg" 
+              variant="outline"
+              className="flex-1 h-16 sm:h-20 text-xl font-semibold rounded-2xl shadow-lg"
+            >
+              Text
+            </Button>
+          </div>
         </div>
       </CardContent>
     </Card>
