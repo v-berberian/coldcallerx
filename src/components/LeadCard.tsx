@@ -85,9 +85,9 @@ const LeadCard: React.FC<LeadCardProps> = ({
                   </DropdownMenuTrigger>
                   <DropdownMenuContent side="bottom" align="center" className="w-max">
                     <ScrollArea className="max-h-[160px]">
-                      <DropdownMenuItem>{formatPhoneNumber(lead.phone)} (Primary)</DropdownMenuItem>
+                      <DropdownMenuItem className="whitespace-nowrap">{formatPhoneNumber(lead.phone)} (Primary)</DropdownMenuItem>
                       {additionalPhones.map((phone, index) => (
-                        <DropdownMenuItem key={index}>{formatPhoneNumber(phone)}</DropdownMenuItem>
+                        <DropdownMenuItem key={index} className="whitespace-nowrap">{formatPhoneNumber(phone)}</DropdownMenuItem>
                       ))}
                     </ScrollArea>
                   </DropdownMenuContent>
