@@ -1,4 +1,5 @@
 
+
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -111,22 +112,19 @@ const LeadCard: React.FC<LeadCardProps> = ({
                   <DropdownMenuContent 
                     side="bottom" 
                     align="center" 
-                    className="!w-[350px] !min-w-[350px] p-0"
-                    style={{ width: '350px', minWidth: '350px' }}
+                    className="p-0"
                   >
                     <div className="max-h-[200px] overflow-y-auto">
                       <div className="py-1">
                         <div 
-                          className="px-4 py-2 text-sm font-medium border-b bg-muted/50"
-                          style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}
+                          className="px-4 py-2 text-sm font-medium border-b bg-muted/50 whitespace-nowrap"
                         >
                           {formatPhoneNumber(lead.phone)} (Primary)
                         </div>
                         {additionalPhones.map((phone, index) => (
                           <div 
                             key={index} 
-                            className="px-4 py-2 text-sm hover:bg-accent cursor-pointer"
-                            style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}
+                            className="px-4 py-2 text-sm hover:bg-accent cursor-pointer whitespace-nowrap"
                           >
                             {phone}
                           </div>
@@ -191,3 +189,4 @@ const LeadCard: React.FC<LeadCardProps> = ({
 };
 
 export default LeadCard;
+
