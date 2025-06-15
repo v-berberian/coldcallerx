@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -164,56 +163,6 @@ const CallingScreenContainer: React.FC<CallingScreenContainerProps> = ({
       </div>
     );
   }
-  
-  if (!currentLead) {
-    return (
-      <div className="h-[100dvh] bg-background flex flex-col overflow-hidden fixed inset-0">
-        {/* Header */}
-        <CallingHeader
-          searchQuery={searchQuery}
-          showAutocomplete={showAutocomplete}
-          searchResults={searchResults}
-          leadsData={leadsData}
-          fileName={fileName}
-          onSearchChange={setSearchQuery}
-          onSearchFocus={handleSearchFocus}
-          onSearchBlur={handleSearchBlur}
-          onClearSearch={clearSearch}
-          onLeadSelect={handleLeadSelect}
-          onLeadsImported={handleLeadsImported}
-        />
-
-        {/* Main Content with No Leads Card */}
-        <div className="flex-1 flex items-start justify-center pt-1 p-4 min-h-0 px-6">
-          <div className="w-full max-w-sm">
-            <Card className="shadow-2xl border-border/50 rounded-3xl bg-card h-[480px] flex flex-col">
-              <CardContent className="p-6 space-y-6 flex-1 flex flex-col justify-center">
-                <div className="text-center space-y-6">
-                  <h2 className="text-2xl font-bold text-foreground">No Leads Found</h2>
-                  <p className="text-lg text-muted-foreground">
-                    No leads match your current filters
-                  </p>
-                  <div className="space-y-3">
-                    <Button 
-                      onClick={() => {
-                        toggleTimezoneFilter();
-                        toggleCallFilter();
-                        setSearchQuery('');
-                      }} 
-                      className="w-full h-12 text-base font-medium rounded-2xl"
-                      variant="outline"
-                    >
-                      Clear All Filters
-                    </Button>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        </div>
-      </div>
-    );
-  }
 
   const totalLeadCount = currentLeads.length;
 
@@ -263,6 +212,7 @@ const CallingScreenContainer: React.FC<CallingScreenContainerProps> = ({
           canGoPrevious={currentLeads.length > 1}
           canGoNext={currentLeads.length > 1}
           getDelayDisplayType={getDelayDisplayType}
+          noLeadsMessage={!currentLead ? "No Leads Found" : undefined}
         />
       </div>
     </div>
