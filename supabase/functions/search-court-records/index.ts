@@ -1,26 +1,160 @@
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2"
+import { DOMParser } from "https://deno.land/x/deno_dom@v0.1.38/deno-dom-wasm.ts"
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 }
 
-interface CourtListenerResponse {
-  count: number;
-  results: Array<{
-    id: number;
-    case_name: string;
-    docket_number: string;
-    court: {
-      full_name: string;
-    };
-    date_filed: string;
-    absolute_url: string;
-    snippet?: string;
-  }>;
+interface NYSCEFResult {
+  caseNumber: string;
+  caseName: string;
+  court: string;
+  filingDate: string;
+  caseUrl: string;
+  snippet?: string;
 }
+
+const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+
+const scrapeNYSCEF = async (businessName: string): Promise<NYSCEFResult[]> => {
+  const userAgents = [
+    'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
+    'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
+    'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:89.0) Gecko/20100101 Firefox/89.0'
+  ];
+  
+  const randomUserAgent = userAgents[Math.floor(Math.random() * userAgents.length)];
+  
+  try {
+    console.log(`Starting NYSCEF search for: ${businessName}`);
+    
+    // First, get the search form page to extract any required tokens
+    const formResponse = await fetch('https://iapps.courts.state.ny.us/nyscef/CaseSearch', {
+      headers: {
+        'User-Agent': randomUserAgent,
+        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+        'Accept-Language': 'en-US,en;q=0.5',
+        'Accept-Encoding': 'gzip, deflate, br',
+        'Connection': 'keep-alive',
+        'Upgrade-Insecure-Requests': '1',
+      },
+    });
+
+    if (!formResponse.ok) {
+      throw new Error(`Failed to load search form: ${formResponse.status}`);
+    }
+
+    const formHtml = await formResponse.text();
+    const formDoc = new DOMParser().parseFromString(formHtml, 'text/html');
+    
+    // Extract any form tokens or required fields
+    const viewStateElement = formDoc?.querySelector('input[name="__VIEWSTATE"]');
+    const viewStateValue = viewStateElement?.getAttribute('value') || '';
+    
+    const eventValidationElement = formDoc?.querySelector('input[name="__EVENTVALIDATION"]');
+    const eventValidationValue = eventValidationElement?.getAttribute('value') || '';
+    
+    console.log('Extracted form tokens, preparing search request');
+    
+    // Add delay to be respectful
+    await delay(2000 + Math.random() * 1000);
+    
+    // Prepare search form data
+    const formData = new URLSearchParams();
+    formData.append('__VIEWSTATE', viewStateValue);
+    formData.append('__EVENTVALIDATION', eventValidationValue);
+    formData.append('ctl00$MainContent$txtCaseName', businessName);
+    formData.append('ctl00$MainContent$btnSearch', 'Search');
+    
+    // Submit the search
+    const searchResponse = await fetch('https://iapps.courts.state.ny.us/nyscef/CaseSearch', {
+      method: 'POST',
+      headers: {
+        'User-Agent': randomUserAgent,
+        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+        'Accept-Language': 'en-US,en;q=0.5',
+        'Accept-Encoding': 'gzip, deflate, br',
+        'Content-Type': 'application/x-www-form-urlencoded',
+        'Connection': 'keep-alive',
+        'Referer': 'https://iapps.courts.state.ny.us/nyscef/CaseSearch',
+        'Upgrade-Insecure-Requests': '1',
+      },
+      body: formData.toString(),
+    });
+
+    if (!searchResponse.ok) {
+      throw new Error(`Search request failed: ${searchResponse.status}`);
+    }
+
+    const resultsHtml = await searchResponse.text();
+    console.log('Received search results, parsing HTML');
+    
+    // Check for CAPTCHA or blocking
+    if (resultsHtml.includes('captcha') || resultsHtml.includes('blocked') || resultsHtml.includes('robot')) {
+      throw new Error('CAPTCHA or access restriction detected');
+    }
+    
+    const resultsDoc = new DOMParser().parseFromString(resultsHtml, 'text/html');
+    const results: NYSCEFResult[] = [];
+    
+    // Parse the results table
+    const resultRows = resultsDoc?.querySelectorAll('table.GridView tr');
+    
+    if (!resultRows || resultRows.length <= 1) {
+      console.log('No results found in the table');
+      return results;
+    }
+    
+    // Skip header row (index 0)
+    for (let i = 1; i < resultRows.length; i++) {
+      const row = resultRows[i];
+      const cells = row.querySelectorAll('td');
+      
+      if (cells.length >= 4) {
+        try {
+          const caseNumberCell = cells[0];
+          const caseNameCell = cells[1];
+          const courtCell = cells[2];
+          const filingDateCell = cells[3];
+          
+          // Extract case number and link
+          const caseLink = caseNumberCell.querySelector('a');
+          const caseNumber = caseLink?.textContent?.trim() || caseNumberCell.textContent?.trim() || '';
+          const caseHref = caseLink?.getAttribute('href') || '';
+          const caseUrl = caseHref.startsWith('http') ? caseHref : `https://iapps.courts.state.ny.us/nyscef/${caseHref}`;
+          
+          const caseName = caseNameCell.textContent?.trim() || '';
+          const court = courtCell.textContent?.trim() || '';
+          const filingDate = filingDateCell.textContent?.trim() || '';
+          
+          if (caseNumber && caseName) {
+            results.push({
+              caseNumber,
+              caseName,
+              court,
+              filingDate,
+              caseUrl,
+              snippet: `${caseName.substring(0, 200)}${caseName.length > 200 ? '...' : ''}`
+            });
+          }
+        } catch (parseError) {
+          console.error('Error parsing row:', parseError);
+          continue;
+        }
+      }
+    }
+    
+    console.log(`Successfully parsed ${results.length} results`);
+    return results;
+    
+  } catch (error) {
+    console.error('NYSCEF scraping error:', error);
+    throw error;
+  }
+};
 
 serve(async (req) => {
   // Handle CORS preflight requests
@@ -96,47 +230,25 @@ serve(async (req) => {
       );
     }
 
-    // Search CourtListener API
-    const searchQuery = encodeURIComponent(`"${businessName}"`);
-    const courtListenerUrl = `https://www.courtlistener.com/api/rest/v3/search/?type=o&q=${searchQuery}&court=nysd,nyed,nynd,nywd,nysupct&format=json`;
+    // Scrape NYSCEF for new results
+    const nyscefResults = await scrapeNYSCEF(businessName);
     
-    console.log(`Searching CourtListener: ${courtListenerUrl}`);
-    
-    const response = await fetch(courtListenerUrl, {
-      headers: {
-        'User-Agent': 'ColdCaller-App/1.0 (Legal Research Tool)',
-        'Accept': 'application/json',
-      },
-    });
-
-    if (!response.ok) {
-      console.error(`CourtListener API error: ${response.status}`);
-      return new Response(
-        JSON.stringify({ error: 'Court records service unavailable' }),
-        { 
-          status: 503, 
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
-        }
-      );
-    }
-
-    const data: CourtListenerResponse = await response.json();
-    console.log(`Found ${data.count} results from CourtListener`);
+    console.log(`Found ${nyscefResults.length} results from NYSCEF`);
 
     // Process and store results
     const courtRecords = [];
     
-    for (const result of data.results.slice(0, 10)) { // Limit to first 10 results
+    for (const result of nyscefResults.slice(0, 10)) { // Limit to first 10 results
       const recordData = {
         user_id: user.id,
         business_name: businessName,
-        case_name: result.case_name,
-        case_number: result.docket_number,
-        court_name: result.court.full_name,
-        case_date: result.date_filed ? new Date(result.date_filed).toISOString().split('T')[0] : null,
-        case_url: `https://www.courtlistener.com${result.absolute_url}`,
+        case_name: result.caseName,
+        case_number: result.caseNumber,
+        court_name: result.court,
+        case_date: result.filingDate ? new Date(result.filingDate).toISOString().split('T')[0] : null,
+        case_url: result.caseUrl,
         case_summary: result.snippet || null,
-        search_query: searchQuery,
+        search_query: businessName,
       };
 
       // Insert into database
@@ -157,7 +269,7 @@ serve(async (req) => {
       JSON.stringify({ 
         success: true, 
         records: courtRecords,
-        totalFound: data.count,
+        totalFound: nyscefResults.length,
         cached: false 
       }),
       { 
@@ -167,8 +279,17 @@ serve(async (req) => {
 
   } catch (error) {
     console.error('Error in search-court-records function:', error);
+    
+    // Return a more specific error message
+    let errorMessage = 'Internal server error';
+    if (error.message.includes('CAPTCHA')) {
+      errorMessage = 'Access temporarily restricted. Please try again later.';
+    } else if (error.message.includes('Failed to load')) {
+      errorMessage = 'Court records service temporarily unavailable.';
+    }
+    
     return new Response(
-      JSON.stringify({ error: 'Internal server error' }),
+      JSON.stringify({ error: errorMessage }),
       { 
         status: 500, 
         headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
