@@ -191,7 +191,6 @@ const CallingScreenContainer: React.FC<CallingScreenContainerProps> = ({
         searchResults={searchResults}
         leadsData={leadsData}
         fileName={fileName}
-        isOnline={isOnline}
         onSearchChange={setSearchQuery}
         onSearchFocus={handleSearchFocus}
         onSearchBlur={handleSearchBlur}
