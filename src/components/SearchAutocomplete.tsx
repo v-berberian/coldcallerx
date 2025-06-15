@@ -29,20 +29,20 @@ const SearchAutocomplete: React.FC<SearchAutocompleteProps> = ({
 
   if (leads.length === 0) {
     return (
-      <div className={`absolute top-full left-0 right-0 z-50 mt-1 p-4 text-center text-muted-foreground rounded-xl shadow-lg ${animationClass} bg-background/15 backdrop-blur-sm border border-border/15`}>
+      <div className={`absolute top-full left-0 right-0 z-50 mt-1 p-4 text-center text-muted-foreground rounded-xl shadow-lg ${animationClass} bg-background/25 backdrop-blur-sm border border-border/20`}>
         No leads found
       </div>
     );
   }
 
   return (
-    <div className={`absolute top-full left-0 right-0 z-50 mt-1 rounded-xl shadow-lg overflow-hidden ${animationClass} bg-background/15 backdrop-blur-sm border border-border/15`}>
+    <div className={`absolute top-full left-0 right-0 z-50 mt-1 rounded-xl shadow-lg overflow-hidden ${animationClass} bg-background/25 backdrop-blur-sm border border-border/20`}>
       <div className="max-h-60 overflow-y-auto">
         {leads.map((lead, index) => (
           <button
             key={`${lead.name}-${lead.phone}-${index}`}
             onClick={() => onLeadSelect(lead)}
-            className="w-full px-4 py-3 text-left border-b border-border/10 last:border-b-0 transition-colors duration-150 cursor-default"
+            className="w-full px-4 py-3 text-left border-b border-border/15 last:border-b-0 transition-colors duration-150 cursor-default"
           >
             <div className="flex justify-between items-start">
               <div className="flex-1 min-w-0">

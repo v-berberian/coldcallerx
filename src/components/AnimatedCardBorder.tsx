@@ -30,27 +30,11 @@ const AnimatedCardBorder: React.FC<AnimatedCardBorderProps> = ({
           strokeLinecap="round"
           strokeDasharray="100"
           strokeDashoffset="100"
-          className="animate-border-draw"
           style={{
             animation: `border-draw ${duration}s linear forwards`
           }}
         />
       </svg>
-      
-      {/* CSS animation keyframes */}
-      <style jsx>{`
-        @keyframes border-draw {
-          from {
-            stroke-dashoffset: 100;
-          }
-          to {
-            stroke-dashoffset: 0;
-          }
-        }
-        .animate-border-draw {
-          animation: border-draw ${duration}s linear forwards;
-        }
-      `}</style>
     </div>
   );
 };
