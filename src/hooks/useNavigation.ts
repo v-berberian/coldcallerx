@@ -34,11 +34,9 @@ export const useNavigation = (
       return;
     }
 
-    // Mark current lead as called when navigating away (for uncalled filter behavior)
+    // DO NOT mark current lead as called here - this will be handled by the wrapper
+    // that checks if callMadeToCurrentLead is true
     const currentLead = baseLeads[currentIndex];
-    if (currentLead) {
-      markLeadAsCalledOnNavigation(currentLead);
-    }
     
     let nextIndex: number;
     
@@ -48,11 +46,13 @@ export const useNavigation = (
       nextIndex = result.index;
       
       // Add the current lead to shown leads in shuffle
-      const leadKey = `${currentLead.name}-${currentLead.phone}`;
-      const newShownLeads = new Set(shownLeadsInShuffle);
-      newShownLeads.add(leadKey);
-      setShownLeadsInShuffle(newShownLeads);
-      console.log('Added lead to shown leads in shuffle:', leadKey);
+      if (currentLead) {
+        const leadKey = `${currentLead.name}-${currentLead.phone}`;
+        const newShownLeads = new Set(shownLeadsInShuffle);
+        newShownLeads.add(leadKey);
+        setShownLeadsInShuffle(newShownLeads);
+        console.log('Added lead to shown leads in shuffle:', leadKey);
+      }
     } else {
       console.log('Using sequential mode for navigation');
       const result = getNextLeadInSequential(baseLeads, currentIndex);

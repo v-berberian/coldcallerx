@@ -20,6 +20,7 @@ interface UseLeadNavigationActionsProps {
   autoCall: boolean;
   setShouldAutoCall: (should: boolean) => void;
   goToPrevious: () => boolean;
+  callMadeToCurrentLead: boolean;
 }
 
 export const useLeadNavigationActions = ({
@@ -34,20 +35,24 @@ export const useLeadNavigationActions = ({
   autoCall,
   setShouldAutoCall,
   goToPrevious,
-  markLeadAsCalledOnNavigation
+  markLeadAsCalledOnNavigation,
+  callMadeToCurrentLead
 }: UseLeadNavigationActionsProps) => {
 
   const handleNextWrapper = (baseLeads: Lead[]) => {
     // Get current lead before navigation
     const currentLead = baseLeads[currentIndex];
     
+    // Only mark current lead as called if a call was actually made
+    if (currentLead && callMadeToCurrentLead) {
+      console.log('Marking lead as called on next navigation:', currentLead.name);
+      markLeadAsCalledOnNavigation(currentLead);
+    } else if (currentLead) {
+      console.log('NOT marking lead as called - no call was made to:', currentLead.name);
+    }
+    
     // Navigate to next lead
     handleNext(baseLeads);
-    
-    // Mark current lead as called if a call was made (this will update lastCalled timestamp)
-    if (currentLead) {
-      markLeadAsCalledOnNavigation(currentLead);
-    }
     
     // Reset call state after navigation
     setCallMadeToCurrentLead(false);
@@ -70,6 +75,14 @@ export const useLeadNavigationActions = ({
     // Get current lead before navigation for potential call marking
     const currentLead = baseLeads[currentIndex];
     
+    // Only mark current lead as called if a call was actually made
+    if (currentLead && callMadeToCurrentLead) {
+      console.log('Marking lead as called on previous navigation:', currentLead.name);
+      markLeadAsCalledOnNavigation(currentLead);
+    } else if (currentLead) {
+      console.log('NOT marking lead as called - no call was made to:', currentLead.name);
+    }
+    
     if (shuffleMode) {
       // In shuffle mode, use navigation history to go to previously shown lead
       const didGoBack = goToPrevious();
@@ -85,11 +98,6 @@ export const useLeadNavigationActions = ({
       updateNavigation(prevIndex);
     }
     
-    // Mark current lead as called if a call was made (this will update lastCalled timestamp)
-    if (currentLead) {
-      markLeadAsCalledOnNavigation(currentLead);
-    }
-    
     // Reset call state after navigation
     setCallMadeToCurrentLead(false);
   };
@@ -98,13 +106,16 @@ export const useLeadNavigationActions = ({
     // Get current lead before selection for potential call marking
     const currentLead = baseLeads[currentIndex];
     
+    // Only mark previous lead as called if a call was actually made
+    if (currentLead && callMadeToCurrentLead) {
+      console.log('Marking lead as called on lead selection:', currentLead.name);
+      markLeadAsCalledOnNavigation(currentLead);
+    } else if (currentLead) {
+      console.log('NOT marking lead as called - no call was made to:', currentLead.name);
+    }
+    
     // Select the new lead
     selectLead(lead, baseLeads, leadsData);
-    
-    // Mark previous lead as called if a call was made
-    if (currentLead) {
-      markLeadAsCalledOnNavigation(currentLead);
-    }
     
     // Reset call state after selection
     setCallMadeToCurrentLead(false);

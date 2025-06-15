@@ -57,12 +57,9 @@ export const useCallingScreenNavigation = ({
     isFilterChanging,
     isAutoCallInProgress,
     shouldBlockNavigation(),
-    // Only mark as called if a call was made to current lead
-    (lead: Lead) => {
-      if (callMadeToCurrentLead) {
-        markLeadAsCalledOnNavigation(lead);
-      }
-    },
+    // Pass the markLeadAsCalledOnNavigation function but don't call it here
+    // The wrapper functions will handle the conditional calling
+    markLeadAsCalledOnNavigation,
     shownLeadsInShuffle,
     setShownLeadsInShuffle
   );

@@ -77,12 +77,8 @@ export const useLeadNavigation = (initialLeads: Lead[]) => {
     isFilterChanging,
     isAutoCallInProgress,
     shouldBlockNavigation(),
-    // Only mark as called if a call was made to current lead
-    (lead: Lead) => {
-      if (callMadeToCurrentLead) {
-        markLeadAsCalledOnNavigation(lead);
-      }
-    },
+    // Pass the markLeadAsCalledOnNavigation function but don't call it unconditionally
+    markLeadAsCalledOnNavigation,
     shownLeadsInShuffle,
     setShownLeadsInShuffle
   );
@@ -105,7 +101,8 @@ export const useLeadNavigation = (initialLeads: Lead[]) => {
     setCallMadeToCurrentLead,
     autoCall,
     setShouldAutoCall,
-    goToPrevious
+    goToPrevious,
+    callMadeToCurrentLead
   });
 
   const { makeCallWrapper, handleCountdownCompleteWrapper } = useLeadNavigationEffects({
