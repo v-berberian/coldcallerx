@@ -65,8 +65,8 @@ const MainContent: React.FC<MainContentProps> = ({
   noLeadsMessage
 }) => {
   return (
-    <div className="flex-1 flex items-start justify-center pt-1 p-3 sm:p-4 min-h-0 px-4 sm:px-6">
-      <div className="w-full max-w-sm space-y-1">
+    <div className="flex-1 flex items-start justify-center pt-1 p-3 sm:p-4 min-h-0 px-4 sm:px-6" style={{ minHeight: 'calc(100dvh - 120px)' }}>
+      <div className="w-full max-w-sm space-y-1 flex flex-col min-h-full">
         {/* Filter Buttons */}
         <FilterButtons
           timezoneFilter={timezoneFilter}
@@ -87,7 +87,7 @@ const MainContent: React.FC<MainContentProps> = ({
         />
 
         {/* Current Lead Card or No Leads Message */}
-        <div className="animate-content-change-fast">
+        <div className="animate-content-change-fast flex-1 flex flex-col">
           <LeadCard
             lead={currentLead}
             currentIndex={currentIndex}

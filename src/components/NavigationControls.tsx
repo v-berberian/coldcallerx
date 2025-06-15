@@ -18,7 +18,6 @@ const NavigationControls: React.FC<NavigationControlsProps> = ({
 }) => {
   return (
     <div className="flex gap-3 sm:gap-4 w-full pb-8 sm:pb-6" style={{ paddingBottom: 'max(2rem, calc(env(safe-area-inset-bottom) + 1rem))' }}>
-      {// ... keep existing code (Button components)}
       <Button 
         variant="outline" 
         onClick={onPrevious} 

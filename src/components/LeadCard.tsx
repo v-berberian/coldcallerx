@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -29,7 +30,7 @@ const LeadCard: React.FC<LeadCardProps> = ({
   // If we have a noLeadsMessage, show the empty state
   if (noLeadsMessage) {
     return (
-      <Card className="shadow-2xl border-border/50 rounded-3xl bg-card h-[480px] flex flex-col">
+      <Card className="shadow-2xl border-border/50 rounded-3xl bg-card min-h-[400px] max-h-[500px] sm:min-h-[420px] sm:max-h-[550px] flex flex-col">
         <CardContent className="p-6 space-y-6 flex-1 flex flex-col justify-center">
           <div className="text-center">
             <h2 className="text-2xl font-bold text-foreground">{noLeadsMessage}</h2>
@@ -124,20 +125,20 @@ const LeadCard: React.FC<LeadCardProps> = ({
   };
 
   return (
-    <Card className="shadow-2xl border-border/50 rounded-3xl bg-card h-[480px] flex flex-col">
-      <CardContent className="p-6 space-y-6 flex-1 flex flex-col">
+    <Card className="shadow-2xl border-border/50 rounded-3xl bg-card min-h-[400px] max-h-[500px] sm:min-h-[420px] sm:max-h-[550px] flex flex-col">
+      <CardContent className="p-4 sm:p-6 space-y-4 sm:space-y-6 flex-1 flex flex-col">
         {/* Top row with lead count and file name */}
         <div className="flex items-center justify-between">
           <p className="text-sm text-muted-foreground opacity-40">
             {currentIndex + 1}/{totalCount}
           </p>
-          <p className="text-sm text-muted-foreground opacity-40">
+          <p className="text-sm text-muted-foreground opacity-40 truncate">
             {fileName}
           </p>
         </div>
 
         {/* Lead info - Main content area with animation */}
-        <div key={leadKey} className="text-center space-y-6 flex-1 flex flex-col justify-center animate-fade-in">
+        <div key={leadKey} className="text-center space-y-4 sm:space-y-6 flex-1 flex flex-col justify-center animate-fade-in">
           {/* State and timezone - always show, with fallback */}
           <p className="text-sm text-muted-foreground">
             {leadState || 'Unknown State'}
@@ -146,14 +147,14 @@ const LeadCard: React.FC<LeadCardProps> = ({
           {/* Group 1: Name and Company */}
           <div className="space-y-1">
             <div className="flex items-center justify-center px-2">
-              <h2 className="text-3xl font-bold text-foreground text-center break-words leading-tight">
+              <h2 className="text-2xl sm:text-3xl font-bold text-foreground text-center break-words leading-tight">
                 {lead.name}
               </h2>
             </div>
             
             {lead.company && (
               <div className="flex items-center justify-center px-2">
-                <p className="text-lg text-muted-foreground font-medium text-center break-words leading-relaxed">
+                <p className="text-base sm:text-lg text-muted-foreground font-medium text-center break-words leading-relaxed">
                   {lead.company}
                 </p>
               </div>
@@ -169,7 +170,7 @@ const LeadCard: React.FC<LeadCardProps> = ({
                 {hasAdditionalPhones ? (
                   <DropdownMenu>
                     <DropdownMenuTrigger className="flex items-center gap-1 cursor-pointer hover:text-foreground transition-colors">
-                      <p className="text-lg text-muted-foreground">{selectedPhone}</p>
+                      <p className="text-base sm:text-lg text-muted-foreground">{selectedPhone}</p>
                       <ChevronDown className="h-4 w-4 text-muted-foreground" />
                     </DropdownMenuTrigger>
                     <DropdownMenuContent 
@@ -198,7 +199,7 @@ const LeadCard: React.FC<LeadCardProps> = ({
                     </DropdownMenuContent>
                   </DropdownMenu>
                 ) : (
-                  <p className="text-lg text-muted-foreground">{selectedPhone}</p>
+                  <p className="text-base sm:text-lg text-muted-foreground">{selectedPhone}</p>
                 )}
               </div>
             </div>
@@ -246,7 +247,7 @@ const LeadCard: React.FC<LeadCardProps> = ({
           <Button 
             onClick={handleCall} 
             size="lg" 
-            className="w-full h-16 text-lg font-semibold bg-green-600 hover:bg-green-600 text-white rounded-2xl shadow-lg"
+            className="w-full h-14 sm:h-16 text-lg font-semibold bg-green-600 hover:bg-green-600 text-white rounded-2xl shadow-lg"
           >
             Call
           </Button>
