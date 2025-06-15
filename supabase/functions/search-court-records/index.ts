@@ -19,116 +19,210 @@ interface NYSCEFResult {
 
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
-const scrapeNYSCEF = async (businessName: string): Promise<NYSCEFResult[]> => {
+const getRandomUserAgent = () => {
   const userAgents = [
-    'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
-    'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
-    'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:89.0) Gecko/20100101 Firefox/89.0'
+    'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+    'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36',
+    'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+    'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:120.0) Gecko/20100101 Firefox/120.0',
+    'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.1 Safari/605.1.15'
   ];
+  return userAgents[Math.floor(Math.random() * userAgents.length)];
+};
+
+const createRealisticHeaders = (userAgent: string, referer?: string) => {
+  const headers: Record<string, string> = {
+    'User-Agent': userAgent,
+    'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',
+    'Accept-Language': 'en-US,en;q=0.9',
+    'Accept-Encoding': 'gzip, deflate, br',
+    'Cache-Control': 'max-age=0',
+    'Connection': 'keep-alive',
+    'Upgrade-Insecure-Requests': '1',
+    'Sec-Fetch-Dest': 'document',
+    'Sec-Fetch-Mode': 'navigate',
+    'Sec-Fetch-Site': 'none',
+    'Sec-Ch-Ua': '"Not_A Brand";v="8", "Chromium";v="120", "Google Chrome";v="120"',
+    'Sec-Ch-Ua-Mobile': '?0',
+    'Sec-Ch-Ua-Platform': '"Windows"',
+    'DNT': '1'
+  };
   
-  const randomUserAgent = userAgents[Math.floor(Math.random() * userAgents.length)];
+  if (referer) {
+    headers['Referer'] = referer;
+    headers['Sec-Fetch-Site'] = 'same-origin';
+  }
+  
+  return headers;
+};
+
+const scrapeNYSCEF = async (businessName: string): Promise<NYSCEFResult[]> => {
+  const userAgent = getRandomUserAgent();
   
   try {
     console.log(`Starting NYSCEF search for: ${businessName}`);
     
-    // First, get the search form page to extract any required tokens
-    const formResponse = await fetch('https://iapps.courts.state.ny.us/nyscef/CaseSearch', {
-      headers: {
-        'User-Agent': randomUserAgent,
-        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
-        'Accept-Language': 'en-US,en;q=0.5',
-        'Accept-Encoding': 'gzip, deflate, br',
-        'Connection': 'keep-alive',
-        'Upgrade-Insecure-Requests': '1',
-      },
+    // Add initial delay to seem more human-like
+    await delay(1000 + Math.random() * 2000);
+    
+    const baseUrl = 'https://iapps.courts.state.ny.us';
+    const searchUrl = `${baseUrl}/nyscef/CaseSearch`;
+    
+    // Step 1: Get the search form page
+    console.log('Fetching search form page...');
+    const formResponse = await fetch(searchUrl, {
+      method: 'GET',
+      headers: createRealisticHeaders(userAgent),
     });
 
+    console.log(`Form page response status: ${formResponse.status}`);
+    
     if (!formResponse.ok) {
+      if (formResponse.status === 403) {
+        throw new Error('Access blocked by NYSCEF - may need to retry later');
+      }
       throw new Error(`Failed to load search form: ${formResponse.status}`);
     }
 
     const formHtml = await formResponse.text();
+    console.log(`Form HTML length: ${formHtml.length}`);
+    
+    // Check if we got blocked or redirected
+    if (formHtml.includes('Access Denied') || formHtml.includes('blocked') || formHtml.includes('captcha')) {
+      throw new Error('Access denied by NYSCEF security measures');
+    }
+    
     const formDoc = new DOMParser().parseFromString(formHtml, 'text/html');
     
-    // Extract any form tokens or required fields
-    const viewStateElement = formDoc?.querySelector('input[name="__VIEWSTATE"]');
+    if (!formDoc) {
+      throw new Error('Failed to parse form HTML');
+    }
+    
+    // Extract form tokens
+    const viewStateElement = formDoc.querySelector('input[name="__VIEWSTATE"]');
     const viewStateValue = viewStateElement?.getAttribute('value') || '';
     
-    const eventValidationElement = formDoc?.querySelector('input[name="__EVENTVALIDATION"]');
+    const eventValidationElement = formDoc.querySelector('input[name="__EVENTVALIDATION"]');
     const eventValidationValue = eventValidationElement?.getAttribute('value') || '';
     
-    console.log('Extracted form tokens, preparing search request');
+    const viewStateGeneratorElement = formDoc.querySelector('input[name="__VIEWSTATEGENERATOR"]');
+    const viewStateGeneratorValue = viewStateGeneratorElement?.getAttribute('value') || '';
     
-    // Add delay to be respectful
-    await delay(2000 + Math.random() * 1000);
+    console.log(`Extracted tokens - ViewState: ${viewStateValue ? 'present' : 'missing'}, EventValidation: ${eventValidationValue ? 'present' : 'missing'}`);
     
-    // Prepare search form data
+    // Add longer delay before submitting search
+    await delay(2000 + Math.random() * 3000);
+    
+    // Step 2: Submit the search
+    console.log('Submitting search request...');
+    
     const formData = new URLSearchParams();
     formData.append('__VIEWSTATE', viewStateValue);
+    formData.append('__VIEWSTATEGENERATOR', viewStateGeneratorValue);
     formData.append('__EVENTVALIDATION', eventValidationValue);
     formData.append('ctl00$MainContent$txtCaseName', businessName);
     formData.append('ctl00$MainContent$btnSearch', 'Search');
     
-    // Submit the search
-    const searchResponse = await fetch('https://iapps.courts.state.ny.us/nyscef/CaseSearch', {
+    const searchResponse = await fetch(searchUrl, {
       method: 'POST',
       headers: {
-        'User-Agent': randomUserAgent,
-        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
-        'Accept-Language': 'en-US,en;q=0.5',
-        'Accept-Encoding': 'gzip, deflate, br',
+        ...createRealisticHeaders(userAgent, searchUrl),
         'Content-Type': 'application/x-www-form-urlencoded',
-        'Connection': 'keep-alive',
-        'Referer': 'https://iapps.courts.state.ny.us/nyscef/CaseSearch',
-        'Upgrade-Insecure-Requests': '1',
+        'Origin': baseUrl,
       },
       body: formData.toString(),
     });
 
+    console.log(`Search response status: ${searchResponse.status}`);
+
     if (!searchResponse.ok) {
+      if (searchResponse.status === 403) {
+        throw new Error('Search blocked by NYSCEF - may be rate limited');
+      }
       throw new Error(`Search request failed: ${searchResponse.status}`);
     }
 
     const resultsHtml = await searchResponse.text();
-    console.log('Received search results, parsing HTML');
+    console.log(`Results HTML length: ${resultsHtml.length}`);
     
-    // Check for CAPTCHA or blocking
-    if (resultsHtml.includes('captcha') || resultsHtml.includes('blocked') || resultsHtml.includes('robot')) {
-      throw new Error('CAPTCHA or access restriction detected');
+    // Check for blocking or CAPTCHA
+    if (resultsHtml.includes('Access Denied') || 
+        resultsHtml.includes('captcha') || 
+        resultsHtml.includes('blocked') || 
+        resultsHtml.includes('robot') ||
+        resultsHtml.includes('security')) {
+      throw new Error('CAPTCHA or security restriction detected');
     }
     
     const resultsDoc = new DOMParser().parseFromString(resultsHtml, 'text/html');
+    
+    if (!resultsDoc) {
+      throw new Error('Failed to parse results HTML');
+    }
+    
     const results: NYSCEFResult[] = [];
     
-    // Parse the results table
-    const resultRows = resultsDoc?.querySelectorAll('table.GridView tr');
+    // Look for different possible table selectors
+    const possibleSelectors = [
+      'table.GridView tr',
+      'table[id*="GridView"] tr',
+      'table[class*="grid"] tr',
+      '.results-table tr',
+      'table tr'
+    ];
+    
+    let resultRows = null;
+    for (const selector of possibleSelectors) {
+      resultRows = resultsDoc.querySelectorAll(selector);
+      if (resultRows && resultRows.length > 1) {
+        console.log(`Found results table with selector: ${selector}`);
+        break;
+      }
+    }
     
     if (!resultRows || resultRows.length <= 1) {
-      console.log('No results found in the table');
+      console.log('No results found - checking for "no results" messages');
+      
+      // Check if there's a "no results" message
+      const noResultsText = resultsHtml.toLowerCase();
+      if (noResultsText.includes('no cases found') || 
+          noResultsText.includes('no results') || 
+          noResultsText.includes('0 records')) {
+        console.log('No cases found for the search term');
+        return results; // Return empty array
+      }
+      
+      console.log('Could not find results table - page structure may have changed');
       return results;
     }
     
+    console.log(`Processing ${resultRows.length - 1} result rows`);
+    
     // Skip header row (index 0)
-    for (let i = 1; i < resultRows.length; i++) {
+    for (let i = 1; i < resultRows.length && i <= 11; i++) { // Limit to 10 results
       const row = resultRows[i];
       const cells = row.querySelectorAll('td');
       
-      if (cells.length >= 4) {
+      if (cells.length >= 3) {
         try {
           const caseNumberCell = cells[0];
           const caseNameCell = cells[1];
-          const courtCell = cells[2];
-          const filingDateCell = cells[3];
+          const courtCell = cells.length > 2 ? cells[2] : null;
+          const filingDateCell = cells.length > 3 ? cells[3] : null;
           
           // Extract case number and link
           const caseLink = caseNumberCell.querySelector('a');
-          const caseNumber = caseLink?.textContent?.trim() || caseNumberCell.textContent?.trim() || '';
+          const caseNumber = (caseLink?.textContent || caseNumberCell.textContent || '').trim();
           const caseHref = caseLink?.getAttribute('href') || '';
-          const caseUrl = caseHref.startsWith('http') ? caseHref : `https://iapps.courts.state.ny.us/nyscef/${caseHref}`;
           
-          const caseName = caseNameCell.textContent?.trim() || '';
-          const court = courtCell.textContent?.trim() || '';
-          const filingDate = filingDateCell.textContent?.trim() || '';
+          let caseUrl = '';
+          if (caseHref) {
+            caseUrl = caseHref.startsWith('http') ? caseHref : `${baseUrl}${caseHref.startsWith('/') ? '' : '/'}${caseHref}`;
+          }
+          
+          const caseName = (caseNameCell.textContent || '').trim();
+          const court = courtCell ? (courtCell.textContent || '').trim() : 'New York Supreme Court';
+          const filingDate = filingDateCell ? (filingDateCell.textContent || '').trim() : '';
           
           if (caseNumber && caseName) {
             results.push({
@@ -137,8 +231,10 @@ const scrapeNYSCEF = async (businessName: string): Promise<NYSCEFResult[]> => {
               court,
               filingDate,
               caseUrl,
-              snippet: `${caseName.substring(0, 200)}${caseName.length > 200 ? '...' : ''}`
+              snippet: caseName.length > 200 ? `${caseName.substring(0, 200)}...` : caseName
             });
+            
+            console.log(`Parsed case: ${caseNumber} - ${caseName}`);
           }
         } catch (parseError) {
           console.error('Error parsing row:', parseError);
@@ -147,7 +243,7 @@ const scrapeNYSCEF = async (businessName: string): Promise<NYSCEFResult[]> => {
       }
     }
     
-    console.log(`Successfully parsed ${results.length} results`);
+    console.log(`Successfully parsed ${results.length} court records`);
     return results;
     
   } catch (error) {
@@ -280,18 +376,25 @@ serve(async (req) => {
   } catch (error) {
     console.error('Error in search-court-records function:', error);
     
-    // Return a more specific error message
+    // Return more specific error messages based on the error type
     let errorMessage = 'Internal server error';
-    if (error.message.includes('CAPTCHA')) {
-      errorMessage = 'Access temporarily restricted. Please try again later.';
-    } else if (error.message.includes('Failed to load')) {
-      errorMessage = 'Court records service temporarily unavailable.';
+    let statusCode = 500;
+    
+    if (error.message.includes('Access blocked') || error.message.includes('blocked by NYSCEF')) {
+      errorMessage = 'Court records service temporarily unavailable due to access restrictions. Please try again in a few minutes.';
+      statusCode = 503;
+    } else if (error.message.includes('CAPTCHA') || error.message.includes('security restriction')) {
+      errorMessage = 'Access temporarily restricted by security measures. Please try again later.';
+      statusCode = 503;
+    } else if (error.message.includes('Failed to load') || error.message.includes('rate limited')) {
+      errorMessage = 'Court records service is busy. Please try again in a moment.';
+      statusCode = 503;
     }
     
     return new Response(
       JSON.stringify({ error: errorMessage }),
       { 
-        status: 500, 
+        status: statusCode, 
         headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
       }
     );
