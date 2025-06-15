@@ -177,7 +177,7 @@ const LeadCard: React.FC<LeadCardProps> = ({
                     <DropdownMenuContent 
                       side="bottom" 
                       align="center" 
-                      className="z-50 min-w-[200px] rounded-xl shadow-lg overflow-hidden animate-fade-in data-[state=closed]:animate-fade-out bg-background/90 backdrop-blur-sm border border-border/15"
+                      className="z-50 min-w-[200px] rounded-xl shadow-lg overflow-hidden animate-fade-in data-[state=closed]:animate-fade-out bg-background/75 backdrop-blur-sm border border-border/15"
                     >
                       <div className="max-h-60 overflow-y-auto">
                         {allPhones.map((phoneData, index) => (
