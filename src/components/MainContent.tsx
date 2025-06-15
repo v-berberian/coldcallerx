@@ -31,6 +31,7 @@ interface MainContentProps {
   isCountdownActive?: boolean;
   countdownTime?: number;
   getDelayDisplayType?: () => 'timer' | 'rocket' | '5s' | '10s';
+  showAutocomplete?: boolean;
 }
 
 const MainContent: React.FC<MainContentProps> = ({
@@ -58,7 +59,8 @@ const MainContent: React.FC<MainContentProps> = ({
   canGoNext,
   isCountdownActive,
   countdownTime,
-  getDelayDisplayType
+  getDelayDisplayType,
+  showAutocomplete = false
 }) => {
   return (
     <div className="flex-1 flex items-start justify-center pt-1 p-4 min-h-0 px-6">
@@ -72,13 +74,13 @@ const MainContent: React.FC<MainContentProps> = ({
           callDelay={callDelay}
           isCountdownActive={isCountdownActive}
           countdownTime={countdownTime}
-          onToggleTimezone={onToggleTimezone}
-          onToggleCallFilter={onToggleCallFilter}
-          onToggleShuffle={onToggleShuffle}
-          onToggleAutoCall={onToggleAutoCall}
-          onToggleCallDelay={onToggleCallDelay}
-          onResetCallDelay={onResetCallDelay}
-          onResetAllCalls={onResetAllCalls}
+          onToggleTimezone={showAutocomplete ? () => {} : onToggleTimezone}
+          onToggleCallFilter={showAutocomplete ? () => {} : onToggleCallFilter}
+          onToggleShuffle={showAutocomplete ? () => {} : onToggleShuffle}
+          onToggleAutoCall={showAutocomplete ? () => {} : onToggleAutoCall}
+          onToggleCallDelay={showAutocomplete ? () => {} : onToggleCallDelay}
+          onResetCallDelay={showAutocomplete ? () => {} : onResetCallDelay}
+          onResetAllCalls={showAutocomplete ? () => {} : onResetAllCalls}
           getDelayDisplayType={getDelayDisplayType}
         />
 
@@ -88,17 +90,17 @@ const MainContent: React.FC<MainContentProps> = ({
           currentIndex={currentIndex}
           totalCount={totalCount}
           fileName={fileName}
-          onCall={onCall}
-          onResetCallCount={onResetCallCount}
+          onCall={showAutocomplete ? () => {} : onCall}
+          onResetCallCount={showAutocomplete ? () => {} : onResetCallCount}
         />
 
         {/* Navigation Controls */}
         <div className="pt-4">
           <NavigationControls
-            onPrevious={onPrevious}
-            onNext={onNext}
-            canGoPrevious={canGoPrevious}
-            canGoNext={canGoNext}
+            onPrevious={showAutocomplete ? () => {} : onPrevious}
+            onNext={showAutocomplete ? () => {} : onNext}
+            canGoPrevious={!showAutocomplete && canGoPrevious}
+            canGoNext={!showAutocomplete && canGoNext}
           />
         </div>
       </div>

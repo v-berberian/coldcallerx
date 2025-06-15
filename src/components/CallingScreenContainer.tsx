@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -199,6 +198,7 @@ const CallingScreenContainer: React.FC<CallingScreenContainerProps> = ({
           callDelay={callDelay}
           isCountdownActive={isCountdownActive}
           countdownTime={countdownTime}
+          showAutocomplete={showAutocomplete}
           onCall={handleCallClick}
           onResetCallCount={() => handleResetCallCount(currentLead)}
           onToggleTimezone={toggleTimezoneFilter}
