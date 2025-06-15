@@ -7,13 +7,26 @@ interface SearchAutocompleteProps {
   results: Lead[];
   onLeadSelect: (lead: Lead) => void;
   leadsData: Lead[];
+  isVisible: boolean;
+  onClose?: () => void;
 }
 
 const SearchAutocomplete: React.FC<SearchAutocompleteProps> = ({ 
   results, 
   onLeadSelect, 
-  leadsData
+  leadsData,
+  isVisible,
+  onClose
 }) => {
+  if (!isVisible) {
+    return null;
+  }
+
+  const handleLeadSelect = (lead: Lead) => {
+    onLeadSelect(lead);
+    onClose?.();
+  };
+
   if (results.length === 0) {
     return (
       <div className="absolute top-full left-0 right-0 z-50 mt-1 p-4 text-center text-muted-foreground rounded-xl shadow-lg bg-background/15 backdrop-blur-sm border border-border/15">
@@ -28,7 +41,7 @@ const SearchAutocomplete: React.FC<SearchAutocompleteProps> = ({
         {results.map((lead, index) => (
           <button
             key={`${lead.name}-${lead.phone}-${index}`}
-            onClick={() => onLeadSelect(lead)}
+            onClick={() => handleLeadSelect(lead)}
             className="w-full px-4 py-3 text-left border-b border-border/10 last:border-b-0 transition-colors duration-150 cursor-default hover:bg-muted/50"
           >
             <div className="flex justify-between items-start">

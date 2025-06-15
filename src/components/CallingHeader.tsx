@@ -34,6 +34,11 @@ const CallingHeader: React.FC<CallingHeaderProps> = ({
   onLeadSelect,
   onLeadsImported
 }) => {
+  const handleLeadSelect = (lead: Lead) => {
+    onLeadSelect(lead);
+    onClearSearch(); // This will close the autocomplete
+  };
+
   return (
     <div className="bg-background border-b border-border p-4" style={{ paddingTop: 'max(1rem, env(safe-area-inset-top))' }}>
       <div className="flex items-center justify-between mb-4">
@@ -76,13 +81,13 @@ const CallingHeader: React.FC<CallingHeaderProps> = ({
         </div>
 
         {/* Autocomplete Results */}
-        {showAutocomplete && searchResults.length > 0 && (
-          <SearchAutocomplete
-            results={searchResults}
-            onLeadSelect={onLeadSelect}
-            leadsData={leadsData}
-          />
-        )}
+        <SearchAutocomplete
+          results={searchResults}
+          onLeadSelect={handleLeadSelect}
+          leadsData={leadsData}
+          isVisible={showAutocomplete && searchQuery.length > 0}
+          onClose={onClearSearch}
+        />
       </div>
     </div>
   );
