@@ -17,7 +17,7 @@ const NavigationControls: React.FC<NavigationControlsProps> = ({
   canGoNext
 }) => {
   return (
-    <div className="flex gap-3 sm:gap-4 w-full">
+    <div className="flex gap-3 sm:gap-4 w-full pb-safe" style={{ paddingBottom: 'max(1rem, env(safe-area-inset-bottom))' }}>
       <Button 
         variant="outline" 
         onClick={onPrevious} 
