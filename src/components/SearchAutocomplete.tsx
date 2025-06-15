@@ -29,14 +29,14 @@ const SearchAutocomplete: React.FC<SearchAutocompleteProps> = ({
 
   if (leads.length === 0) {
     return (
-      <div className={`absolute top-full left-0 right-0 z-50 mt-1 p-4 text-center text-muted-foreground rounded-xl shadow-lg ${animationClass} bg-background/95 backdrop-blur-sm border border-border/20`}>
+      <div className={`absolute top-full left-0 right-0 z-50 mt-1 p-4 text-center text-muted-foreground rounded-xl shadow-lg ${animationClass} bg-background/15 backdrop-blur-sm border border-border/15`}>
         No leads found
       </div>
     );
   }
 
   return (
-    <div className={`absolute top-full left-0 right-0 z-50 mt-1 rounded-xl shadow-lg overflow-hidden ${animationClass} bg-background/95 backdrop-blur-sm border border-border/20`}>
+    <div className={`absolute top-full left-0 right-0 z-50 mt-1 rounded-xl shadow-lg overflow-hidden ${animationClass} bg-background/15 backdrop-blur-sm border border-border/15`}>
       <div className="max-h-60 overflow-y-auto">
         {leads.map((lead, index) => (
           <button
