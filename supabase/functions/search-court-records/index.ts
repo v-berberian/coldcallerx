@@ -30,18 +30,19 @@ const getRandomUserAgent = () => {
   return userAgents[Math.floor(Math.random() * userAgents.length)];
 };
 
-const createRealisticHeaders = (userAgent: string, referer?: string) => {
+const createRealisticHeaders = (userAgent: string, referer?: string, cookie?: string) => {
   const headers: Record<string, string> = {
     'User-Agent': userAgent,
     'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',
     'Accept-Language': 'en-US,en;q=0.9',
     'Accept-Encoding': 'gzip, deflate, br',
-    'Cache-Control': 'max-age=0',
+    'Cache-Control': 'no-cache',
     'Connection': 'keep-alive',
     'Upgrade-Insecure-Requests': '1',
     'Sec-Fetch-Dest': 'document',
     'Sec-Fetch-Mode': 'navigate',
     'Sec-Fetch-Site': 'none',
+    'Sec-Fetch-User': '?1',
     'Sec-Ch-Ua': '"Not_A Brand";v="8", "Chromium";v="120", "Google Chrome";v="120"',
     'Sec-Ch-Ua-Mobile': '?0',
     'Sec-Ch-Ua-Platform': '"Windows"',
@@ -53,33 +54,59 @@ const createRealisticHeaders = (userAgent: string, referer?: string) => {
     headers['Sec-Fetch-Site'] = 'same-origin';
   }
   
+  if (cookie) {
+    headers['Cookie'] = cookie;
+  }
+  
   return headers;
 };
 
 const scrapeNYSCEF = async (businessName: string): Promise<NYSCEFResult[]> => {
   const userAgent = getRandomUserAgent();
+  let sessionCookie = '';
   
   try {
     console.log(`Starting NYSCEF search for: ${businessName}`);
     
-    // Add initial delay to seem more human-like
-    await delay(1000 + Math.random() * 2000);
+    // Add longer initial delay
+    await delay(2000 + Math.random() * 3000);
     
     const baseUrl = 'https://iapps.courts.state.ny.us';
     const searchUrl = `${baseUrl}/nyscef/CaseSearch`;
     
-    // Step 1: Get the search form page
+    // Step 1: Visit homepage first to establish session
+    console.log('Establishing session...');
+    const homeResponse = await fetch(baseUrl, {
+      method: 'GET',
+      headers: createRealisticHeaders(userAgent),
+    });
+
+    if (!homeResponse.ok) {
+      throw new Error(`Failed to establish session: ${homeResponse.status}`);
+    }
+
+    // Extract session cookies
+    const setCookieHeaders = homeResponse.headers.get('set-cookie');
+    if (setCookieHeaders) {
+      sessionCookie = setCookieHeaders.split(';')[0];
+      console.log('Session established with cookies');
+    }
+
+    // Longer delay before accessing search page
+    await delay(3000 + Math.random() * 4000);
+    
+    // Step 2: Get the search form page with session
     console.log('Fetching search form page...');
     const formResponse = await fetch(searchUrl, {
       method: 'GET',
-      headers: createRealisticHeaders(userAgent),
+      headers: createRealisticHeaders(userAgent, baseUrl, sessionCookie),
     });
 
     console.log(`Form page response status: ${formResponse.status}`);
     
     if (!formResponse.ok) {
-      if (formResponse.status === 403) {
-        throw new Error('Access blocked by NYSCEF - may need to retry later');
+      if (formResponse.status === 403 || formResponse.status === 429) {
+        throw new Error('Rate limited or blocked by NYSCEF - please try again later');
       }
       throw new Error(`Failed to load search form: ${formResponse.status}`);
     }
@@ -87,9 +114,17 @@ const scrapeNYSCEF = async (businessName: string): Promise<NYSCEFResult[]> => {
     const formHtml = await formResponse.text();
     console.log(`Form HTML length: ${formHtml.length}`);
     
-    // Check if we got blocked or redirected
-    if (formHtml.includes('Access Denied') || formHtml.includes('blocked') || formHtml.includes('captcha')) {
-      throw new Error('Access denied by NYSCEF security measures');
+    // More thorough blocking detection
+    const blockingIndicators = [
+      'access denied', 'blocked', 'captcha', 'robot', 'security',
+      'unauthorized', 'forbidden', 'too many requests', 'rate limit'
+    ];
+    
+    const htmlLower = formHtml.toLowerCase();
+    for (const indicator of blockingIndicators) {
+      if (htmlLower.includes(indicator)) {
+        throw new Error(`Access restriction detected: ${indicator}`);
+      }
     }
     
     const formDoc = new DOMParser().parseFromString(formHtml, 'text/html');
@@ -98,7 +133,7 @@ const scrapeNYSCEF = async (businessName: string): Promise<NYSCEFResult[]> => {
       throw new Error('Failed to parse form HTML');
     }
     
-    // Extract form tokens
+    // Extract form tokens with better selectors
     const viewStateElement = formDoc.querySelector('input[name="__VIEWSTATE"]');
     const viewStateValue = viewStateElement?.getAttribute('value') || '';
     
@@ -108,12 +143,17 @@ const scrapeNYSCEF = async (businessName: string): Promise<NYSCEFResult[]> => {
     const viewStateGeneratorElement = formDoc.querySelector('input[name="__VIEWSTATEGENERATOR"]');
     const viewStateGeneratorValue = viewStateGeneratorElement?.getAttribute('value') || '';
     
-    console.log(`Extracted tokens - ViewState: ${viewStateValue ? 'present' : 'missing'}, EventValidation: ${eventValidationValue ? 'present' : 'missing'}`);
+    console.log(`Extracted tokens - ViewState: ${viewStateValue.length > 0 ? 'present' : 'missing'}, EventValidation: ${eventValidationValue.length > 0 ? 'present' : 'missing'}`);
     
-    // Add longer delay before submitting search
-    await delay(2000 + Math.random() * 3000);
+    if (!viewStateValue || !eventValidationValue) {
+      console.log('Missing required form tokens - page structure may have changed');
+      // Try to continue anyway
+    }
     
-    // Step 2: Submit the search
+    // Much longer delay before submitting search
+    await delay(4000 + Math.random() * 5000);
+    
+    // Step 3: Submit the search with all tokens
     console.log('Submitting search request...');
     
     const formData = new URLSearchParams();
@@ -126,7 +166,7 @@ const scrapeNYSCEF = async (businessName: string): Promise<NYSCEFResult[]> => {
     const searchResponse = await fetch(searchUrl, {
       method: 'POST',
       headers: {
-        ...createRealisticHeaders(userAgent, searchUrl),
+        ...createRealisticHeaders(userAgent, searchUrl, sessionCookie),
         'Content-Type': 'application/x-www-form-urlencoded',
         'Origin': baseUrl,
       },
@@ -136,8 +176,8 @@ const scrapeNYSCEF = async (businessName: string): Promise<NYSCEFResult[]> => {
     console.log(`Search response status: ${searchResponse.status}`);
 
     if (!searchResponse.ok) {
-      if (searchResponse.status === 403) {
-        throw new Error('Search blocked by NYSCEF - may be rate limited');
+      if (searchResponse.status === 403 || searchResponse.status === 429) {
+        throw new Error('Search blocked or rate limited by NYSCEF');
       }
       throw new Error(`Search request failed: ${searchResponse.status}`);
     }
@@ -145,13 +185,12 @@ const scrapeNYSCEF = async (businessName: string): Promise<NYSCEFResult[]> => {
     const resultsHtml = await searchResponse.text();
     console.log(`Results HTML length: ${resultsHtml.length}`);
     
-    // Check for blocking or CAPTCHA
-    if (resultsHtml.includes('Access Denied') || 
-        resultsHtml.includes('captcha') || 
-        resultsHtml.includes('blocked') || 
-        resultsHtml.includes('robot') ||
-        resultsHtml.includes('security')) {
-      throw new Error('CAPTCHA or security restriction detected');
+    // Check for blocking in results
+    const resultsLower = resultsHtml.toLowerCase();
+    for (const indicator of blockingIndicators) {
+      if (resultsLower.includes(indicator)) {
+        throw new Error(`Access restriction in results: ${indicator}`);
+      }
     }
     
     const resultsDoc = new DOMParser().parseFromString(resultsHtml, 'text/html');
@@ -162,8 +201,10 @@ const scrapeNYSCEF = async (businessName: string): Promise<NYSCEFResult[]> => {
     
     const results: NYSCEFResult[] = [];
     
-    // Look for different possible table selectors
+    // Try multiple selectors for the results table
     const possibleSelectors = [
+      'table#ctl00_MainContent_gvResults tr',
+      'table[id*="gvResults"] tr',
       'table.GridView tr',
       'table[id*="GridView"] tr',
       'table[class*="grid"] tr',
@@ -175,35 +216,46 @@ const scrapeNYSCEF = async (businessName: string): Promise<NYSCEFResult[]> => {
     for (const selector of possibleSelectors) {
       resultRows = resultsDoc.querySelectorAll(selector);
       if (resultRows && resultRows.length > 1) {
-        console.log(`Found results table with selector: ${selector}`);
+        console.log(`Found results table with selector: ${selector}, rows: ${resultRows.length}`);
         break;
       }
     }
     
     if (!resultRows || resultRows.length <= 1) {
-      console.log('No results found - checking for "no results" messages');
+      console.log('No results table found - checking for messages');
       
-      // Check if there's a "no results" message
-      const noResultsText = resultsHtml.toLowerCase();
-      if (noResultsText.includes('no cases found') || 
-          noResultsText.includes('no results') || 
-          noResultsText.includes('0 records')) {
-        console.log('No cases found for the search term');
-        return results; // Return empty array
+      // Check for "no results" or other messages
+      const messageSelectors = [
+        '.no-results', '.message', '.alert', 
+        '[id*="Label"]', '[id*="Message"]',
+        '.info', '.warning'
+      ];
+      
+      for (const selector of messageSelectors) {
+        const messageElement = resultsDoc.querySelector(selector);
+        if (messageElement) {
+          const messageText = messageElement.textContent?.toLowerCase() || '';
+          console.log(`Found message: ${messageText}`);
+          if (messageText.includes('no cases found') || 
+              messageText.includes('no results') || 
+              messageText.includes('0 records')) {
+            return results; // Return empty array for no results
+          }
+        }
       }
       
-      console.log('Could not find results table - page structure may have changed');
+      console.log('Could not determine results status - returning empty array');
       return results;
     }
     
     console.log(`Processing ${resultRows.length - 1} result rows`);
     
-    // Skip header row (index 0)
-    for (let i = 1; i < resultRows.length && i <= 11; i++) { // Limit to 10 results
+    // Process results (skip header row)
+    for (let i = 1; i < resultRows.length && i <= 11; i++) {
       const row = resultRows[i];
       const cells = row.querySelectorAll('td');
       
-      if (cells.length >= 3) {
+      if (cells.length >= 2) {
         try {
           const caseNumberCell = cells[0];
           const caseNameCell = cells[1];
@@ -234,7 +286,7 @@ const scrapeNYSCEF = async (businessName: string): Promise<NYSCEFResult[]> => {
               snippet: caseName.length > 200 ? `${caseName.substring(0, 200)}...` : caseName
             });
             
-            console.log(`Parsed case: ${caseNumber} - ${caseName}`);
+            console.log(`Parsed case: ${caseNumber} - ${caseName.substring(0, 50)}${caseName.length > 50 ? '...' : ''}`);
           }
         } catch (parseError) {
           console.error('Error parsing row:', parseError);
@@ -303,13 +355,13 @@ serve(async (req) => {
       );
     }
 
-    // Check if we already have recent results for this business name
+    // Check for cached results
     const { data: existingRecords } = await supabase
       .from('court_records')
       .select('*')
       .eq('user_id', user.id)
       .eq('business_name', businessName)
-      .gte('created_at', new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString()) // 24 hours ago
+      .gte('created_at', new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString())
       .order('created_at', { ascending: false });
 
     if (existingRecords && existingRecords.length > 0) {
@@ -334,7 +386,7 @@ serve(async (req) => {
     // Process and store results
     const courtRecords = [];
     
-    for (const result of nyscefResults.slice(0, 10)) { // Limit to first 10 results
+    for (const result of nyscefResults.slice(0, 10)) {
       const recordData = {
         user_id: user.id,
         business_name: businessName,
@@ -347,7 +399,6 @@ serve(async (req) => {
         search_query: businessName,
       };
 
-      // Insert into database
       const { data: insertedRecord, error: insertError } = await supabase
         .from('court_records')
         .insert(recordData)
@@ -376,18 +427,18 @@ serve(async (req) => {
   } catch (error) {
     console.error('Error in search-court-records function:', error);
     
-    // Return more specific error messages based on the error type
+    // Return specific error messages
     let errorMessage = 'Internal server error';
     let statusCode = 500;
     
-    if (error.message.includes('Access blocked') || error.message.includes('blocked by NYSCEF')) {
-      errorMessage = 'Court records service temporarily unavailable due to access restrictions. Please try again in a few minutes.';
+    if (error.message.includes('Rate limited') || 
+        error.message.includes('blocked') || 
+        error.message.includes('restriction')) {
+      errorMessage = 'Court records service temporarily unavailable. The website may be blocking automated requests. Please try again in a few minutes.';
       statusCode = 503;
-    } else if (error.message.includes('CAPTCHA') || error.message.includes('security restriction')) {
-      errorMessage = 'Access temporarily restricted by security measures. Please try again later.';
-      statusCode = 503;
-    } else if (error.message.includes('Failed to load') || error.message.includes('rate limited')) {
-      errorMessage = 'Court records service is busy. Please try again in a moment.';
+    } else if (error.message.includes('Failed to establish session') || 
+               error.message.includes('Failed to load')) {
+      errorMessage = 'Unable to connect to court records service. Please try again later.';
       statusCode = 503;
     }
     
