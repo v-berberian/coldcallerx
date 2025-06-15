@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -150,10 +151,11 @@ const CallingScreenContainer: React.FC<CallingScreenContainerProps> = ({
         <div className="bg-background border-b border-border p-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-3">
-              <h1 className="text-2xl font-bold">
-                <span className="text-blue-500">ColdCall </span>
-                <span className="text-blue-500">X</span>
-              </h1>
+              <img 
+                src="/lovable-uploads/7c8eb58b-d1b7-4c3b-b789-9806d216303f.png" 
+                alt="ColdCall X" 
+                className="h-8 w-auto bg-white rounded px-2 py-1"
+              />
             </div>
           </div>
         </div>
