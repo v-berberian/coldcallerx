@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -83,13 +84,24 @@ const LeadCard: React.FC<LeadCardProps> = ({
                     <p className="text-lg text-muted-foreground">{formatPhoneNumber(lead.phone)}</p>
                     <ChevronDown className="h-4 w-4 text-muted-foreground" />
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent side="bottom" align="center" className="min-w-[250px] w-auto">
-                    <ScrollArea className="max-h-[160px]">
-                      <DropdownMenuItem className="whitespace-nowrap px-3 py-2">{formatPhoneNumber(lead.phone)} (Primary)</DropdownMenuItem>
+                  <DropdownMenuContent 
+                    side="bottom" 
+                    align="center" 
+                    className="w-fit min-w-[280px] p-0"
+                  >
+                    <div className="py-1">
+                      <div className="px-4 py-2 text-sm font-medium border-b bg-muted/50">
+                        {formatPhoneNumber(lead.phone)} (Primary)
+                      </div>
                       {additionalPhones.map((phone, index) => (
-                        <DropdownMenuItem key={index} className="whitespace-nowrap px-3 py-2">{formatPhoneNumber(phone.trim())}</DropdownMenuItem>
+                        <div 
+                          key={index} 
+                          className="px-4 py-2 text-sm hover:bg-accent cursor-pointer whitespace-nowrap"
+                        >
+                          {formatPhoneNumber(phone.trim())}
+                        </div>
                       ))}
-                    </ScrollArea>
+                    </div>
                   </DropdownMenuContent>
                 </DropdownMenu>
               ) : (
