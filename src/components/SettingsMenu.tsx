@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { Mail, HelpCircle, ChevronRight, Plus, Edit, Trash2 } from 'lucide-react';
+import { Mail, HelpCircle, ChevronRight, Plus, Edit, Trash2, MessageSquare } from 'lucide-react';
 import {
   Popover,
   PopoverContent,
@@ -25,90 +25,167 @@ interface EmailTemplate {
   body: string;
 }
 
+interface TextTemplate {
+  id: string;
+  name: string;
+  message: string;
+}
+
 interface SettingsMenuProps {
   children: React.ReactNode;
 }
 
 const SettingsMenu: React.FC<SettingsMenuProps> = ({ children }) => {
   const [emailTemplates, setEmailTemplates] = useState<EmailTemplate[]>([]);
-  const [editingTemplate, setEditingTemplate] = useState<EmailTemplate | null>(null);
-  const [isCreating, setIsCreating] = useState(false);
-  const [templateName, setTemplateName] = useState('');
-  const [templateSubject, setTemplateSubject] = useState('');
-  const [templateBody, setTemplateBody] = useState('');
+  const [textTemplates, setTextTemplates] = useState<TextTemplate[]>([]);
+  const [editingEmailTemplate, setEditingEmailTemplate] = useState<EmailTemplate | null>(null);
+  const [editingTextTemplate, setEditingTextTemplate] = useState<TextTemplate | null>(null);
+  const [isCreatingEmail, setIsCreatingEmail] = useState(false);
+  const [isCreatingText, setIsCreatingText] = useState(false);
+  const [emailTemplateName, setEmailTemplateName] = useState('');
+  const [emailTemplateSubject, setEmailTemplateSubject] = useState('');
+  const [emailTemplateBody, setEmailTemplateBody] = useState('');
+  const [textTemplateName, setTextTemplateName] = useState('');
+  const [textTemplateMessage, setTextTemplateMessage] = useState('');
 
   // Load templates from localStorage on mount
   useEffect(() => {
-    const savedTemplates = localStorage.getItem('emailTemplates');
-    if (savedTemplates) {
-      setEmailTemplates(JSON.parse(savedTemplates));
+    const savedEmailTemplates = localStorage.getItem('emailTemplates');
+    if (savedEmailTemplates) {
+      setEmailTemplates(JSON.parse(savedEmailTemplates));
+    }
+
+    const savedTextTemplates = localStorage.getItem('textTemplates');
+    if (savedTextTemplates) {
+      setTextTemplates(JSON.parse(savedTextTemplates));
     }
   }, []);
 
-  // Save templates to localStorage
-  const saveTemplates = (templates: EmailTemplate[]) => {
+  // Save email templates to localStorage
+  const saveEmailTemplates = (templates: EmailTemplate[]) => {
     localStorage.setItem('emailTemplates', JSON.stringify(templates));
     setEmailTemplates(templates);
   };
 
-  const handleCreateTemplate = () => {
-    if (!templateName.trim() || !templateSubject.trim()) return;
+  // Save text templates to localStorage
+  const saveTextTemplates = (templates: TextTemplate[]) => {
+    localStorage.setItem('textTemplates', JSON.stringify(templates));
+    setTextTemplates(templates);
+  };
+
+  const handleCreateEmailTemplate = () => {
+    if (!emailTemplateName.trim() || !emailTemplateSubject.trim()) return;
     
     const newTemplate: EmailTemplate = {
       id: Date.now().toString(),
-      name: templateName,
-      subject: templateSubject,
-      body: templateBody
+      name: emailTemplateName,
+      subject: emailTemplateSubject,
+      body: emailTemplateBody
     };
     
     const updatedTemplates = [...emailTemplates, newTemplate];
-    saveTemplates(updatedTemplates);
+    saveEmailTemplates(updatedTemplates);
     
     // Reset form
-    setTemplateName('');
-    setTemplateSubject('');
-    setTemplateBody('');
-    setIsCreating(false);
+    setEmailTemplateName('');
+    setEmailTemplateSubject('');
+    setEmailTemplateBody('');
+    setIsCreatingEmail(false);
   };
 
-  const handleEditTemplate = (template: EmailTemplate) => {
-    setEditingTemplate(template);
-    setTemplateName(template.name);
-    setTemplateSubject(template.subject);
-    setTemplateBody(template.body);
-    setIsCreating(true);
+  const handleCreateTextTemplate = () => {
+    if (!textTemplateName.trim() || !textTemplateMessage.trim()) return;
+    
+    const newTemplate: TextTemplate = {
+      id: Date.now().toString(),
+      name: textTemplateName,
+      message: textTemplateMessage
+    };
+    
+    const updatedTemplates = [...textTemplates, newTemplate];
+    saveTextTemplates(updatedTemplates);
+    
+    // Reset form
+    setTextTemplateName('');
+    setTextTemplateMessage('');
+    setIsCreatingText(false);
   };
 
-  const handleUpdateTemplate = () => {
-    if (!editingTemplate || !templateName.trim() || !templateSubject.trim()) return;
+  const handleEditEmailTemplate = (template: EmailTemplate) => {
+    setEditingEmailTemplate(template);
+    setEmailTemplateName(template.name);
+    setEmailTemplateSubject(template.subject);
+    setEmailTemplateBody(template.body);
+    setIsCreatingEmail(true);
+  };
+
+  const handleEditTextTemplate = (template: TextTemplate) => {
+    setEditingTextTemplate(template);
+    setTextTemplateName(template.name);
+    setTextTemplateMessage(template.message);
+    setIsCreatingText(true);
+  };
+
+  const handleUpdateEmailTemplate = () => {
+    if (!editingEmailTemplate || !emailTemplateName.trim() || !emailTemplateSubject.trim()) return;
     
     const updatedTemplates = emailTemplates.map(t => 
-      t.id === editingTemplate.id 
-        ? { ...editingTemplate, name: templateName, subject: templateSubject, body: templateBody }
+      t.id === editingEmailTemplate.id 
+        ? { ...editingEmailTemplate, name: emailTemplateName, subject: emailTemplateSubject, body: emailTemplateBody }
         : t
     );
     
-    saveTemplates(updatedTemplates);
+    saveEmailTemplates(updatedTemplates);
     
     // Reset form
-    setTemplateName('');
-    setTemplateSubject('');
-    setTemplateBody('');
-    setIsCreating(false);
-    setEditingTemplate(null);
+    setEmailTemplateName('');
+    setEmailTemplateSubject('');
+    setEmailTemplateBody('');
+    setIsCreatingEmail(false);
+    setEditingEmailTemplate(null);
   };
 
-  const handleDeleteTemplate = (templateId: string) => {
+  const handleUpdateTextTemplate = () => {
+    if (!editingTextTemplate || !textTemplateName.trim() || !textTemplateMessage.trim()) return;
+    
+    const updatedTemplates = textTemplates.map(t => 
+      t.id === editingTextTemplate.id 
+        ? { ...editingTextTemplate, name: textTemplateName, message: textTemplateMessage }
+        : t
+    );
+    
+    saveTextTemplates(updatedTemplates);
+    
+    // Reset form
+    setTextTemplateName('');
+    setTextTemplateMessage('');
+    setIsCreatingText(false);
+    setEditingTextTemplate(null);
+  };
+
+  const handleDeleteEmailTemplate = (templateId: string) => {
     const updatedTemplates = emailTemplates.filter(t => t.id !== templateId);
-    saveTemplates(updatedTemplates);
+    saveEmailTemplates(updatedTemplates);
   };
 
-  const cancelEditing = () => {
-    setTemplateName('');
-    setTemplateSubject('');
-    setTemplateBody('');
-    setIsCreating(false);
-    setEditingTemplate(null);
+  const handleDeleteTextTemplate = (templateId: string) => {
+    const updatedTemplates = textTemplates.filter(t => t.id !== templateId);
+    saveTextTemplates(updatedTemplates);
+  };
+
+  const cancelEmailEditing = () => {
+    setEmailTemplateName('');
+    setEmailTemplateSubject('');
+    setEmailTemplateBody('');
+    setIsCreatingEmail(false);
+    setEditingEmailTemplate(null);
+  };
+
+  const cancelTextEditing = () => {
+    setTextTemplateName('');
+    setTextTemplateMessage('');
+    setIsCreatingText(false);
+    setEditingTextTemplate(null);
   };
 
   return (
@@ -120,102 +197,220 @@ const SettingsMenu: React.FC<SettingsMenuProps> = ({ children }) => {
         <div className="space-y-4">
           <div className="space-y-2">
             <h4 className="font-medium leading-none">Settings</h4>
-            <p className="text-sm text-muted-foreground">
-              Manage your app preferences
-            </p>
           </div>
           
           <Separator />
           
-          {/* Email Templates */}
+          {/* Email Templates Submenu */}
           <div className="space-y-3">
-            <div className="flex items-center justify-between">
-              <Label className="text-sm font-medium">Email Templates</Label>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setIsCreating(true)}
-                className="h-8 px-3"
-              >
-                <Plus className="h-4 w-4 mr-1" />
-                Add
-              </Button>
-            </div>
-            
-            {/* Template Creation/Edit Form */}
-            {isCreating && (
-              <div className="bg-muted/30 rounded-lg p-3 space-y-3">
-                <Input
-                  placeholder="Template name"
-                  value={templateName}
-                  onChange={(e) => setTemplateName(e.target.value)}
-                  className="text-sm"
-                />
-                <Input
-                  placeholder="Email subject"
-                  value={templateSubject}
-                  onChange={(e) => setTemplateSubject(e.target.value)}
-                  className="text-sm"
-                />
-                <Textarea
-                  placeholder="Email body"
-                  value={templateBody}
-                  onChange={(e) => setTemplateBody(e.target.value)}
-                  className="text-sm min-h-[80px]"
-                />
-                <div className="flex gap-2">
-                  <Button
-                    size="sm"
-                    onClick={editingTemplate ? handleUpdateTemplate : handleCreateTemplate}
-                    className="flex-1"
-                  >
-                    {editingTemplate ? 'Update' : 'Save'}
-                  </Button>
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={cancelEditing}
-                  >
-                    Cancel
-                  </Button>
-                </div>
-              </div>
-            )}
-            
-            {/* Templates List */}
-            <div className="space-y-2 max-h-48 overflow-y-auto">
-              {emailTemplates.map((template) => (
-                <div key={template.id} className="flex items-center justify-between p-2 bg-muted/20 rounded">
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium truncate">{template.name}</p>
-                    <p className="text-xs text-muted-foreground truncate">{template.subject}</p>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="ghost"
+                  className="w-full justify-between h-auto p-3 border border-border/20 hover:bg-muted/30"
+                >
+                  <div className="flex items-center space-x-2">
+                    <Mail className="h-4 w-4 text-muted-foreground" />
+                    <span className="text-sm font-medium">Email Templates</span>
                   </div>
-                  <div className="flex gap-1">
+                  <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent className="w-80 p-4" align="start">
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <Label className="text-sm font-medium">Email Templates</Label>
                     <Button
+                      variant="outline"
                       size="sm"
-                      variant="ghost"
-                      onClick={() => handleEditTemplate(template)}
-                      className="h-6 w-6 p-0"
+                      onClick={() => setIsCreatingEmail(true)}
+                      className="h-8 px-3"
                     >
-                      <Edit className="h-3 w-3" />
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      onClick={() => handleDeleteTemplate(template.id)}
-                      className="h-6 w-6 p-0 text-destructive hover:text-destructive"
-                    >
-                      <Trash2 className="h-3 w-3" />
+                      <Plus className="h-4 w-4 mr-1" />
+                      Add
                     </Button>
                   </div>
+                  
+                  {/* Email Template Creation/Edit Form */}
+                  {isCreatingEmail && (
+                    <div className="bg-muted/30 rounded-lg p-3 space-y-3">
+                      <Input
+                        placeholder="Template name"
+                        value={emailTemplateName}
+                        onChange={(e) => setEmailTemplateName(e.target.value)}
+                        className="text-sm"
+                      />
+                      <Input
+                        placeholder="Email subject"
+                        value={emailTemplateSubject}
+                        onChange={(e) => setEmailTemplateSubject(e.target.value)}
+                        className="text-sm"
+                      />
+                      <Textarea
+                        placeholder="Email body"
+                        value={emailTemplateBody}
+                        onChange={(e) => setEmailTemplateBody(e.target.value)}
+                        className="text-sm min-h-[80px]"
+                      />
+                      <div className="flex gap-2">
+                        <Button
+                          size="sm"
+                          onClick={editingEmailTemplate ? handleUpdateEmailTemplate : handleCreateEmailTemplate}
+                          className="flex-1"
+                        >
+                          {editingEmailTemplate ? 'Update' : 'Save'}
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={cancelEmailEditing}
+                        >
+                          Cancel
+                        </Button>
+                      </div>
+                    </div>
+                  )}
+                  
+                  {/* Email Templates List */}
+                  <div className="space-y-2 max-h-48 overflow-y-auto">
+                    {emailTemplates.map((template) => (
+                      <div key={template.id} className="flex items-center justify-between p-2 bg-muted/20 rounded">
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-medium truncate">{template.name}</p>
+                          <p className="text-xs text-muted-foreground truncate">{template.subject}</p>
+                        </div>
+                        <div className="flex gap-1">
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            onClick={() => handleEditEmailTemplate(template)}
+                            className="h-6 w-6 p-0"
+                          >
+                            <Edit className="h-3 w-3" />
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            onClick={() => handleDeleteEmailTemplate(template.id)}
+                            className="h-6 w-6 p-0 text-destructive hover:text-destructive"
+                          >
+                            <Trash2 className="h-3 w-3" />
+                          </Button>
+                        </div>
+                      </div>
+                    ))}
+                    {emailTemplates.length === 0 && !isCreatingEmail && (
+                      <p className="text-xs text-muted-foreground text-center py-4">
+                        No email templates created yet
+                      </p>
+                    )}
+                  </div>
                 </div>
-              ))}
-              {emailTemplates.length === 0 && !isCreating && (
-                <p className="text-xs text-muted-foreground text-center py-4">
-                  No email templates created yet
-                </p>
-              )}
-            </div>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+
+          {/* Text Templates Submenu */}
+          <div className="space-y-3">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="ghost"
+                  className="w-full justify-between h-auto p-3 border border-border/20 hover:bg-muted/30"
+                >
+                  <div className="flex items-center space-x-2">
+                    <MessageSquare className="h-4 w-4 text-muted-foreground" />
+                    <span className="text-sm font-medium">Text Templates</span>
+                  </div>
+                  <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent className="w-80 p-4" align="start">
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <Label className="text-sm font-medium">Text Templates</Label>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setIsCreatingText(true)}
+                      className="h-8 px-3"
+                    >
+                      <Plus className="h-4 w-4 mr-1" />
+                      Add
+                    </Button>
+                  </div>
+                  
+                  {/* Text Template Creation/Edit Form */}
+                  {isCreatingText && (
+                    <div className="bg-muted/30 rounded-lg p-3 space-y-3">
+                      <Input
+                        placeholder="Template name"
+                        value={textTemplateName}
+                        onChange={(e) => setTextTemplateName(e.target.value)}
+                        className="text-sm"
+                      />
+                      <Textarea
+                        placeholder="Text message"
+                        value={textTemplateMessage}
+                        onChange={(e) => setTextTemplateMessage(e.target.value)}
+                        className="text-sm min-h-[80px]"
+                      />
+                      <div className="flex gap-2">
+                        <Button
+                          size="sm"
+                          onClick={editingTextTemplate ? handleUpdateTextTemplate : handleCreateTextTemplate}
+                          className="flex-1"
+                        >
+                          {editingTextTemplate ? 'Update' : 'Save'}
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={cancelTextEditing}
+                        >
+                          Cancel
+                        </Button>
+                      </div>
+                    </div>
+                  )}
+                  
+                  {/* Text Templates List */}
+                  <div className="space-y-2 max-h-48 overflow-y-auto">
+                    {textTemplates.map((template) => (
+                      <div key={template.id} className="flex items-center justify-between p-2 bg-muted/20 rounded">
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-medium truncate">{template.name}</p>
+                          <p className="text-xs text-muted-foreground truncate">{template.message}</p>
+                        </div>
+                        <div className="flex gap-1">
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            onClick={() => handleEditTextTemplate(template)}
+                            className="h-6 w-6 p-0"
+                          >
+                            <Edit className="h-3 w-3" />
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            onClick={() => handleDeleteTextTemplate(template.id)}
+                            className="h-6 w-6 p-0 text-destructive hover:text-destructive"
+                          >
+                            <Trash2 className="h-3 w-3" />
+                          </Button>
+                        </div>
+                      </div>
+                    ))}
+                    {textTemplates.length === 0 && !isCreatingText && (
+                      <p className="text-xs text-muted-foreground text-center py-4">
+                        No text templates created yet
+                      </p>
+                    )}
+                  </div>
+                </div>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
           
           <Separator />

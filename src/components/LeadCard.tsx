@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from '@/components/ui/dropdown-menu';
-import { X, Phone, Mail, ChevronDown, Check } from 'lucide-react';
+import { X, Phone, Mail, ChevronDown, Check, MessageSquare } from 'lucide-react';
 import { formatPhoneNumber } from '../utils/phoneUtils';
 import { getStateFromAreaCode } from '../utils/timezoneUtils';
 import { Lead } from '@/types/lead';
@@ -12,6 +12,12 @@ interface EmailTemplate {
   name: string;
   subject: string;
   body: string;
+}
+
+interface TextTemplate {
+  id: string;
+  name: string;
+  message: string;
 }
 
 interface LeadCardProps {
@@ -34,12 +40,18 @@ const LeadCard: React.FC<LeadCardProps> = ({
   noLeadsMessage
 }) => {
   const [emailTemplates, setEmailTemplates] = useState<EmailTemplate[]>([]);
+  const [textTemplates, setTextTemplates] = useState<TextTemplate[]>([]);
 
-  // Load email templates from localStorage
+  // Load templates from localStorage
   useEffect(() => {
-    const savedTemplates = localStorage.getItem('emailTemplates');
-    if (savedTemplates) {
-      setEmailTemplates(JSON.parse(savedTemplates));
+    const savedEmailTemplates = localStorage.getItem('emailTemplates');
+    if (savedEmailTemplates) {
+      setEmailTemplates(JSON.parse(savedEmailTemplates));
+    }
+
+    const savedTextTemplates = localStorage.getItem('textTemplates');
+    if (savedTextTemplates) {
+      setTextTemplates(JSON.parse(savedTextTemplates));
     }
   }, []);
 
@@ -149,9 +161,29 @@ const LeadCard: React.FC<LeadCardProps> = ({
     return `mailto:${emailValue}`;
   };
 
+  // Create SMS link with template
+  const createSmsLink = (template?: TextTemplate) => {
+    const cleanPhone = selectedPhone.replace(/\D/g, '');
+    
+    if (template) {
+      const message = template.message
+        .replace('{name}', lead.name)
+        .replace('{company}', lead.company || '');
+        
+      return `sms:${cleanPhone}?body=${encodeURIComponent(message)}`;
+    }
+    
+    return `sms:${cleanPhone}`;
+  };
+
   const handleEmailClick = (template?: EmailTemplate) => {
     console.log('Email clicked for:', emailValue, template ? `with template: ${template.name}` : 'without template');
     window.location.href = createMailtoLink(template);
+  };
+
+  const handleTextClick = (template?: TextTemplate) => {
+    console.log('Text clicked for:', selectedPhone, template ? `with template: ${template.name}` : 'without template');
+    window.location.href = createSmsLink(template);
   };
 
   return (
@@ -193,7 +225,7 @@ const LeadCard: React.FC<LeadCardProps> = ({
           
           {/* Group 2: Phone and Email */}
           <div className="space-y-2">
-            {/* Phone number with icon positioned to the left - with fade animation */}
+            {/* Phone number with icons positioned to the left and right */}
             <div className="flex items-center justify-center">
               <div className="relative">
                 <Phone className="absolute -left-6 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -231,10 +263,38 @@ const LeadCard: React.FC<LeadCardProps> = ({
                 ) : (
                   <p className="text-base sm:text-lg text-muted-foreground">{selectedPhone}</p>
                 )}
+                {/* Text/Message icon on the right */}
+                {textTemplates.length > 0 ? (
+                  <DropdownMenu>
+                    <DropdownMenuTrigger className="absolute -right-6 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground cursor-pointer hover:text-foreground transition-colors">
+                      <MessageSquare className="h-4 w-4" />
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent side="bottom" align="center" className="z-50 min-w-[200px]">
+                      <DropdownMenuItem onClick={() => handleTextClick()}>
+                        <MessageSquare className="h-4 w-4 mr-2" />
+                        Send without template
+                      </DropdownMenuItem>
+                      {textTemplates.map((template) => (
+                        <DropdownMenuItem key={template.id} onClick={() => handleTextClick(template)}>
+                          <MessageSquare className="h-4 w-4 mr-2" />
+                          {template.name}
+                        </DropdownMenuItem>
+                      ))}
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                ) : (
+                  <button
+                    onClick={() => handleTextClick()}
+                    className="absolute -right-6 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground cursor-pointer hover:text-foreground transition-colors"
+                    title="Send text message"
+                  >
+                    <MessageSquare className="h-4 w-4" />
+                  </button>
+                )}
               </div>
             </div>
             
-            {/* Email with icon positioned to the left - now with template dropdown */}
+            {/* Email with icon positioned to the left */}
             {hasValidEmail && (
               <div className="flex items-center justify-center">
                 <div className="relative">
