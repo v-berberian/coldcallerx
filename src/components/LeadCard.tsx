@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -35,6 +36,10 @@ const LeadCard: React.FC<LeadCardProps> = ({
     ? lead.additionalPhones.split(/[\s,]+/).filter(phone => phone.trim() !== '')
     : [];
   const hasAdditionalPhones = additionalPhones.length > 0;
+
+  // Debug logging
+  console.log('Primary phone:', formatPhoneNumber(lead.phone));
+  console.log('Additional phones:', additionalPhones.map(phone => formatPhoneNumber(phone.trim())));
 
   return (
     <Card className="shadow-2xl border-border/50 rounded-3xl bg-card h-[480px] flex flex-col">
@@ -85,17 +90,22 @@ const LeadCard: React.FC<LeadCardProps> = ({
                   <DropdownMenuContent 
                     side="bottom" 
                     align="center" 
-                    className="w-[350px] p-0"
+                    className="!w-[350px] !min-w-[350px] p-0 bg-red-100"
+                    style={{ width: '350px', minWidth: '350px' }}
                   >
                     <div className="max-h-[200px] overflow-y-auto">
                       <div className="py-1">
-                        <div className="px-4 py-2 text-sm font-medium border-b bg-muted/50 whitespace-nowrap overflow-hidden text-ellipsis block">
+                        <div 
+                          className="px-4 py-2 text-sm font-medium border-b bg-muted/50 flex flex-shrink-0"
+                          style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', display: 'block' }}
+                        >
                           {formatPhoneNumber(lead.phone)} (Primary)
                         </div>
                         {additionalPhones.map((phone, index) => (
                           <div 
                             key={index} 
-                            className="px-4 py-2 text-sm hover:bg-accent cursor-pointer whitespace-nowrap overflow-hidden text-ellipsis block"
+                            className="px-4 py-2 text-sm hover:bg-accent cursor-pointer flex flex-shrink-0"
+                            style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', display: 'block' }}
                           >
                             {formatPhoneNumber(phone.trim())}
                           </div>
