@@ -32,7 +32,6 @@ interface MainContentProps {
   countdownTime?: number;
   getDelayDisplayType?: () => 'timer' | 'rocket' | '5s' | '10s';
   showAutocomplete?: boolean;
-  noLeadsMessage?: string;
 }
 
 const MainContent: React.FC<MainContentProps> = ({
@@ -61,8 +60,7 @@ const MainContent: React.FC<MainContentProps> = ({
   isCountdownActive,
   countdownTime,
   getDelayDisplayType,
-  showAutocomplete = false,
-  noLeadsMessage
+  showAutocomplete = false
 }) => {
   return (
     <div className="flex-1 flex items-start justify-center pt-1 p-4 min-h-0 px-6">
@@ -86,7 +84,7 @@ const MainContent: React.FC<MainContentProps> = ({
           getDelayDisplayType={getDelayDisplayType}
         />
 
-        {/* Current Lead Card or No Leads Message */}
+        {/* Current Lead Card */}
         <div className="animate-content-change-fast">
           <LeadCard
             lead={currentLead}
@@ -95,7 +93,6 @@ const MainContent: React.FC<MainContentProps> = ({
             fileName={fileName}
             onCall={showAutocomplete ? () => {} : onCall}
             onResetCallCount={showAutocomplete ? () => {} : onResetCallCount}
-            noLeadsMessage={noLeadsMessage}
           />
         </div>
 
