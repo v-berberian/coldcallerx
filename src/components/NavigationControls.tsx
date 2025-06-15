@@ -22,7 +22,7 @@ const NavigationControls: React.FC<NavigationControlsProps> = ({
         variant="outline" 
         onClick={onPrevious} 
         disabled={!canGoPrevious} 
-        className="flex-1 h-16 sm:h-18 rounded-2xl shadow-lg active:scale-95 transition-all duration-100 select-none outline-none focus:outline-none focus-visible:ring-0 focus-visible:ring-offset-0 bg-background/20 backdrop-blur-xl border-white/20 hover:bg-background/30 hover:border-white/30 text-foreground disabled:opacity-50 disabled:backdrop-blur-sm touch-manipulation text-sm sm:text-base" 
+        className="flex-1 h-12 sm:h-14 rounded-2xl shadow-lg active:scale-95 transition-all duration-100 select-none outline-none focus:outline-none focus-visible:ring-0 focus-visible:ring-offset-0 bg-background/20 backdrop-blur-xl border-white/20 hover:bg-background/30 hover:border-white/30 text-foreground disabled:opacity-50 disabled:backdrop-blur-sm touch-manipulation text-sm sm:text-base" 
         style={{ WebkitTapHighlightColor: 'transparent' }} 
         onTouchStart={() => {}} 
         onTouchEnd={() => {}}
@@ -35,7 +35,7 @@ const NavigationControls: React.FC<NavigationControlsProps> = ({
         variant="outline" 
         onClick={onNext} 
         disabled={!canGoNext} 
-        className="flex-1 h-16 sm:h-18 rounded-2xl shadow-lg active:scale-95 transition-all duration-100 select-none outline-none focus:outline-none focus-visible:ring-0 focus-visible:ring-offset-0 bg-background/20 backdrop-blur-xl border-white/20 hover:bg-background/30 hover:border-white/30 text-foreground disabled:opacity-50 disabled:backdrop-blur-sm touch-manipulation text-sm sm:text-base" 
+        className="flex-1 h-12 sm:h-14 rounded-2xl shadow-lg active:scale-95 transition-all duration-100 select-none outline-none focus:outline-none focus-visible:ring-0 focus-visible:ring-offset-0 bg-background/20 backdrop-blur-xl border-white/20 hover:bg-background/30 hover:border-white/30 text-foreground disabled:opacity-50 disabled:backdrop-blur-sm touch-manipulation text-sm sm:text-base" 
         style={{ WebkitTapHighlightColor: 'transparent' }} 
         onTouchStart={() => {}} 
         onTouchEnd={() => {}}

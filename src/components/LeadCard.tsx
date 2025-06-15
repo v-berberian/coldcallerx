@@ -125,7 +125,7 @@ const LeadCard: React.FC<LeadCardProps> = ({
   };
 
   return (
-    <Card className="shadow-2xl border-border/50 rounded-3xl bg-card flex flex-col" style={{ minHeight: 'clamp(400px, 60vh, 600px)', maxHeight: 'clamp(500px, 70vh, 700px)' }}>
+    <Card className="shadow-2xl border-border/50 rounded-3xl bg-card min-h-[400px] max-h-[500px] sm:min-h-[420px] sm:max-h-[550px] flex flex-col">
       <CardContent className="p-4 sm:p-6 space-y-4 sm:space-y-6 flex-1 flex flex-col">
         {/* Top row with lead count and file name */}
         <div className="flex items-center justify-between">
@@ -247,7 +247,7 @@ const LeadCard: React.FC<LeadCardProps> = ({
           <Button 
             onClick={handleCall} 
             size="lg" 
-            className="w-full h-18 sm:h-20 text-lg font-semibold bg-green-600 hover:bg-green-600 text-white rounded-2xl shadow-lg"
+            className="w-full h-14 sm:h-16 text-lg font-semibold bg-green-600 hover:bg-green-600 text-white rounded-2xl shadow-lg"
           >
             Call
           </Button>
