@@ -18,7 +18,6 @@ export const useLeadNavigationReset = ({
   const resetLeadsData = (newLeads: Lead[]) => {
     const formattedLeads = newLeads.map(lead => ({
       ...lead,
-      called: lead.called || 0,
       lastCalled: lead.lastCalled || undefined
     }));
     setLeadsData(formattedLeads);

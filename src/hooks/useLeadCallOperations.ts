@@ -40,12 +40,12 @@ export const useLeadCallOperations = ({
       );
       setLeadsData(updatedLeads);
 
-      // Update database
+      // Update database - only pass the timestamp, not call count
       await leadService.updateLeadCallCount(
         currentLeadList.id,
         lead.name,
         lead.phone,
-        1,
+        1, // This parameter might need to be removed from leadService
         lastCalledString
       );
 
