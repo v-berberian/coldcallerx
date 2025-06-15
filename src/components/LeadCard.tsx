@@ -171,19 +171,27 @@ const LeadCard: React.FC<LeadCardProps> = ({
                 <Phone className="absolute -left-6 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 {hasAdditionalPhones ? (
                   <DropdownMenu>
-                    <DropdownMenuTrigger className="flex items-center gap-1 cursor-pointer">
+                    <DropdownMenuTrigger className="flex items-center gap-1 cursor-pointer hover:text-foreground transition-colors">
                       <p className="text-lg text-muted-foreground">{selectedPhone}</p>
                       <ChevronDown className="h-4 w-4 text-muted-foreground" />
                     </DropdownMenuTrigger>
-                    <DropdownMenuContent side="bottom" align="center" className="max-h-60 overflow-y-auto">
+                    <DropdownMenuContent 
+                      side="bottom" 
+                      align="center" 
+                      className="z-50 min-w-[200px] bg-background border border-border shadow-lg rounded-xl p-1"
+                    >
                       {allPhones.map((phoneData, index) => (
-                        <DropdownMenuItem key={index} onClick={() => handlePhoneSelect(phoneData.phone)}>
+                        <DropdownMenuItem 
+                          key={index} 
+                          onClick={() => handlePhoneSelect(phoneData.phone)}
+                          className="w-full px-4 py-3 text-left border-b border-border/10 last:border-b-0 transition-colors duration-150 cursor-pointer hover:bg-muted/50 relative"
+                        >
                           <div className="flex justify-between items-center w-full">
                             <span className={`text-foreground ${phoneData.isPrimary ? 'font-bold' : 'font-medium'}`}>
                               {phoneData.phone}
                             </span>
                             {selectedPhone === phoneData.phone && !phoneData.isPrimary && (
-                              <div className="w-2 h-2 bg-black rounded-full ml-2"></div>
+                              <div className="w-2 h-2 bg-foreground rounded-full ml-2"></div>
                             )}
                           </div>
                         </DropdownMenuItem>
