@@ -3,7 +3,7 @@ export interface Lead {
   name: string;
   phone: string;
   company?: string;
-  email?: string;
+  email?: string; // Explicitly ensure this is always a string, not an object
   lastCalled?: string;
   additionalPhones?: string;
 }

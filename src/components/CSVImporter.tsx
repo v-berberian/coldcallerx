@@ -1,4 +1,3 @@
-
 import React, { useState, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Upload } from 'lucide-react';
@@ -54,6 +53,33 @@ const CSVImporter: React.FC<CSVImporterProps> = ({ onLeadsImported }) => {
     }
     
     console.log('cleanCsvValue returning:', JSON.stringify(cleaned));
+    return cleaned;
+  };
+
+  // New function specifically for email validation to ensure it's always a string
+  const cleanEmailValue = (email: string | undefined): string | undefined => {
+    console.log('cleanEmailValue input:', JSON.stringify(email));
+    
+    if (!email || typeof email !== 'string') {
+      console.log('cleanEmailValue: email is not a valid string, returning undefined');
+      return undefined;
+    }
+    
+    const cleaned = email.trim().replace(/"/g, '');
+    console.log('cleanEmailValue cleaned:', JSON.stringify(cleaned));
+    
+    // Check for various "empty" states and invalid email patterns
+    if (cleaned === '' || 
+        cleaned.toLowerCase() === 'undefined' || 
+        cleaned.toLowerCase() === 'null' || 
+        cleaned === 'N/A' || 
+        cleaned === '-' ||
+        !cleaned.includes('@')) {
+      console.log('cleanEmailValue: detected empty/invalid state, returning undefined');
+      return undefined;
+    }
+    
+    console.log('cleanEmailValue returning string:', JSON.stringify(cleaned));
     return cleaned;
   };
 
@@ -116,18 +142,24 @@ const CSVImporter: React.FC<CSVImporterProps> = ({ onLeadsImported }) => {
         
         // Only create lead if we have required fields
         if (name && name.trim() && phone && phone.trim()) {
-          const cleanedEmail = cleanCsvValue(email);
-          console.log('Final cleaned email for lead:', JSON.stringify(cleanedEmail));
+          // Use the specialized email cleaning function
+          const cleanedEmail = cleanEmailValue(email);
+          console.log('Final cleaned email for lead (guaranteed string or undefined):', JSON.stringify(cleanedEmail));
           
+          // Explicitly ensure we're creating a proper Lead object with string email
           const lead: Lead = {
             name: name.trim(),
             phone: formatPhoneNumber(phone.trim()),
             company: cleanCsvValue(company),
-            email: cleanedEmail,
+            email: cleanedEmail, // This is guaranteed to be string | undefined
             additionalPhones: cleanCsvValue(additionalPhones)
           };
           
-          console.log('Created lead object:', lead);
+          console.log('Created lead object with email type check:', {
+            ...lead,
+            emailType: typeof lead.email,
+            emailValue: lead.email
+          });
           leads.push(lead);
         } else {
           console.log(`Skipping line ${i} - missing required fields (name: "${name}", phone: "${phone}")`);
@@ -160,6 +192,7 @@ const CSVImporter: React.FC<CSVImporterProps> = ({ onLeadsImported }) => {
           return;
         }
         const fileName = file.name.replace('.csv', '');
+        console.log('About to import leads with email types:', leads.map(l => ({ name: l.name, emailType: typeof l.email, email: l.email })));
         onLeadsImported(leads, fileName);
       };
       reader.onerror = () => {

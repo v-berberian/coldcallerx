@@ -34,13 +34,18 @@ const LeadCard: React.FC<LeadCardProps> = ({
   // Use stable key based on lead data instead of changing cardKey
   const leadKey = `${lead.name}-${lead.phone}`;
   
-  // Debug logging for email
-  console.log('LeadCard rendering:', {
+  // Ensure email is treated as a string
+  const emailValue = typeof lead.email === 'string' ? lead.email.trim() : '';
+  const hasValidEmail = emailValue && emailValue !== '' && emailValue.includes('@');
+  
+  // Enhanced debug logging for email
+  console.log('LeadCard rendering email analysis:', {
     name: lead.name,
-    email: lead.email,
+    rawEmail: lead.email,
     emailType: typeof lead.email,
-    emailLength: lead.email?.length,
-    emailValue: JSON.stringify(lead.email)
+    emailValue: emailValue,
+    hasValidEmail: hasValidEmail,
+    emailLength: emailValue?.length || 0
   });
   
   return (
@@ -87,22 +92,17 @@ const LeadCard: React.FC<LeadCardProps> = ({
             </div>
           </div>
           
-          {/* Email with icon positioned to the left - improved validation */}
-          {lead.email && typeof lead.email === 'string' && lead.email.trim() !== '' && (
+          {/* Email with icon positioned to the left - simplified string handling */}
+          {hasValidEmail && (
             <div className="flex items-center justify-center">
               <div className="relative">
                 <Mail className="absolute -left-6 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <p className="text-sm text-muted-foreground text-center break-words">
-                  {lead.email}
+                  {emailValue}
                 </p>
               </div>
             </div>
           )}
-          
-          {/* Debug email display - temporary for troubleshooting */}
-          <div className="text-xs text-red-500 border border-red-300 p-2 rounded">
-            Email debug: "{lead.email}" (type: {typeof lead.email}, length: {lead.email?.length || 0})
-          </div>
           
           <div className="relative flex flex-col items-center space-y-4">
             {/* Reserve space for last called text to prevent layout shift */}
