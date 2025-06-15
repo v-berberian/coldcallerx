@@ -71,10 +71,42 @@ const Index = () => {
         </div>
         
         {/* Centered content */}
-        <div className="flex-1 flex items-center justify-center">
-          <div className="text-center space-y-4">
-            <p className="text-lg text-muted-foreground">No Leads Imported</p>
-            <p className="text-sm text-muted-foreground">Click the upload icon above to import a CSV file</p>
+        <div className="flex-1 flex items-center justify-center p-6">
+          <div className="text-center space-y-6 max-w-md">
+            <div className="space-y-2">
+              <p className="text-lg text-muted-foreground">No Leads Imported</p>
+              <p className="text-sm text-muted-foreground">Click the upload icon above to import a CSV file</p>
+            </div>
+            
+            {/* CSV Format Information */}
+            <div className="bg-muted/30 rounded-lg p-4 text-left space-y-3">
+              <h3 className="font-medium text-sm text-foreground text-center">CSV Column Order:</h3>
+              <div className="space-y-1 text-xs">
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">1. Company:</span>
+                  <span className="text-muted-foreground italic">optional</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-foreground font-medium">2. Name:</span>
+                  <span className="text-red-500 font-medium">required</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-foreground font-medium">3. Phone:</span>
+                  <span className="text-red-500 font-medium">required</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">4. Additional Phones:</span>
+                  <span className="text-muted-foreground italic">optional</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">5. Email:</span>
+                  <span className="text-muted-foreground italic">optional</span>
+                </div>
+              </div>
+              <p className="text-xs text-muted-foreground text-center mt-3 pt-2 border-t border-border/20">
+                Use commas for empty columns (e.g., ,John Doe,555-1234,,john@email.com)
+              </p>
+            </div>
           </div>
         </div>
       </div>
