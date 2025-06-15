@@ -36,11 +36,11 @@ const SearchAutocomplete: React.FC<SearchAutocompleteProps> = ({
       setIsAnimating(true);
     } else if (shouldRender) {
       setIsAnimating(false);
-      // Even faster close animation - reduced from 50ms to 30ms
+      // Fade out animation duration
       const timer = setTimeout(() => {
         setShouldRender(false);
         onAnimationComplete?.();
-      }, 30); // Match even faster animation duration
+      }, 150); // Match fade animation duration
       return () => clearTimeout(timer);
     }
   }, [isVisible, shouldRender, onAnimationComplete]);
@@ -49,7 +49,7 @@ const SearchAutocomplete: React.FC<SearchAutocompleteProps> = ({
     return null;
   }
 
-  const animationClass = isAnimating ? 'animate-slide-down-fast' : 'animate-slide-up-fastest';
+  const animationClass = isAnimating ? 'animate-fade-in' : 'animate-fade-out';
 
   if (leads.length === 0) {
     return (
