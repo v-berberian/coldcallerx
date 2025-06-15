@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
@@ -6,7 +5,6 @@ import { Loader2 } from 'lucide-react';
 import CallingScreen from '@/components/CallingScreen';
 import UserProfile from '@/components/UserProfile';
 import CSVImporter from '@/components/CSVImporter';
-import PWAInstallPrompt from '@/components/PWAInstallPrompt';
 
 const Index = () => {
   const { user, loading: authLoading, signOut } = useAuth();
@@ -96,7 +94,6 @@ const Index = () => {
   if (leadsData.length === 0) {
     return (
       <div className={`h-[100vh] h-[100dvh] h-[100svh] bg-background overflow-hidden fixed inset-0 transition-opacity duration-300 ${showContent ? 'opacity-100' : 'opacity-0'}`}>
-        <PWAInstallPrompt />
         
         {/* Header with user info and import */}
         <div className="flex items-center justify-between p-4 border-b border-border pt-safe" style={{ paddingTop: 'max(1rem, env(safe-area-inset-top))' }}>
@@ -124,7 +121,6 @@ const Index = () => {
 
   return (
     <div className={`transition-opacity duration-300 ${showContent ? 'opacity-100' : 'opacity-0'}`}>
-      <PWAInstallPrompt />
       <CallingScreen 
         leads={leadsData} 
         fileName={currentFileName}
