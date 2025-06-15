@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -120,7 +119,7 @@ const LeadCard: React.FC<LeadCardProps> = ({
             </div>
           )}
           
-          {/* Phone number with icon positioned to the left */}
+          {/* Phone number with icon positioned to the left - updated dropdown styling */}
           <div className="flex items-center justify-center">
             <div className="relative">
               <Phone className="absolute -left-6 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -130,40 +129,25 @@ const LeadCard: React.FC<LeadCardProps> = ({
                     <p className="text-lg text-muted-foreground">{selectedPhone}</p>
                     <ChevronDown className="h-4 w-4 text-muted-foreground" />
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent 
-                    side="bottom" 
-                    align="center"
-                    className="!z-[9999] !bg-transparent !border-white/20"
-                    style={{
-                      backgroundColor: 'rgba(255, 255, 255, 0.08) !important',
-                      backdropFilter: 'blur(25px)',
-                      WebkitBackdropFilter: 'blur(25px)',
-                      boxShadow: '0 12px 40px 0 rgba(31, 38, 135, 0.5)',
-                      border: '1px solid rgba(255, 255, 255, 0.25)',
-                      borderRadius: '12px'
-                    }}
-                  >
-                    <div className="max-h-[200px] overflow-y-auto">
-                      <div className="py-1">
-                        {allPhones.map((phoneData, index) => (
-                          <DropdownMenuItem 
-                            key={index}
-                            className="px-4 py-2 text-sm cursor-pointer whitespace-nowrap flex items-center justify-between transition-all duration-200 !bg-transparent hover:!bg-white/15 focus:!bg-white/15 data-[highlighted]:!bg-white/15"
-                            onClick={() => handlePhoneSelect(phoneData.phone)}
-                            style={{
-                              backgroundColor: 'transparent',
-                              color: 'inherit'
-                            }}
-                          >
-                            <span>
-                              {phoneData.phone} {phoneData.isPrimary && '(Primary)'}
-                            </span>
+                  <DropdownMenuContent side="bottom" align="center">
+                    <div className="max-h-60 overflow-y-auto">
+                      {allPhones.map((phoneData, index) => (
+                        <DropdownMenuItem 
+                          key={index}
+                          onClick={() => handlePhoneSelect(phoneData.phone)}
+                        >
+                          <div className="flex justify-between items-start w-full">
+                            <div className="flex-1 min-w-0">
+                              <span className="font-medium text-foreground">
+                                {phoneData.phone} {phoneData.isPrimary && '(Primary)'}
+                              </span>
+                            </div>
                             {selectedPhone === phoneData.phone && (
-                              <Check className="h-4 w-4 text-primary" />
+                              <Check className="h-4 w-4 text-primary ml-2" />
                             )}
-                          </DropdownMenuItem>
-                        ))}
-                      </div>
+                          </div>
+                        </DropdownMenuItem>
+                      ))}
                     </div>
                   </DropdownMenuContent>
                 </DropdownMenu>
