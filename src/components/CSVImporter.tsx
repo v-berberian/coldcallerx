@@ -32,6 +32,23 @@ const CSVImporter: React.FC<CSVImporterProps> = ({ onLeadsImported }) => {
     return phone; // Return original if not 10 digits
   };
 
+  const cleanCsvValue = (value: string): string | undefined => {
+    if (!value) return undefined;
+    
+    const cleaned = value.trim().replace(/"/g, '');
+    
+    // Check for various "empty" states
+    if (cleaned === '' || 
+        cleaned.toLowerCase() === 'undefined' || 
+        cleaned.toLowerCase() === 'null' || 
+        cleaned === 'N/A' || 
+        cleaned === '-') {
+      return undefined;
+    }
+    
+    return cleaned;
+  };
+
   const parseCSV = (text: string): Lead[] => {
     const lines = text.split('\n');
     const leads: Lead[] = [];
@@ -42,16 +59,15 @@ const CSVImporter: React.FC<CSVImporterProps> = ({ onLeadsImported }) => {
       const line = lines[i].trim();
       if (line) {
         const [company, name, phone, additionalPhones, email] = line.split(',').map(cell => cell.trim().replace(/"/g, ''));
-        console.log('Parsing lead:', { company, name, phone, additionalPhones, email });
+        
         if (name && phone) {
           const lead = {
-            name,
+            name: name.trim(),
             phone: formatPhoneNumber(phone),
-            company: company || undefined,
-            email: email || undefined,
-            additionalPhones: additionalPhones || undefined
+            company: cleanCsvValue(company),
+            email: cleanCsvValue(email),
+            additionalPhones: cleanCsvValue(additionalPhones)
           };
-          console.log('Created lead with email:', lead.email);
           leads.push(lead);
         }
       }

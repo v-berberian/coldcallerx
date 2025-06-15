@@ -34,9 +34,6 @@ const LeadCard: React.FC<LeadCardProps> = ({
   // Use stable key based on lead data instead of changing cardKey
   const leadKey = `${lead.name}-${lead.phone}`;
   
-  // Debug logging for email
-  console.log('LeadCard rendering lead:', lead.name, 'with email:', lead.email);
-  
   return (
     <Card className="shadow-2xl border-border/50 rounded-3xl bg-card h-[480px] flex flex-col">
       <CardContent className="p-8 space-y-6 flex-1 flex flex-col">
@@ -92,11 +89,6 @@ const LeadCard: React.FC<LeadCardProps> = ({
               </div>
             </div>
           )}
-          
-          {/* Debug email display */}
-          <div className="text-xs text-red-500">
-            Email debug: "{lead.email}" (length: {lead.email?.length || 0})
-          </div>
           
           <div className="relative flex flex-col items-center space-y-4">
             {/* Reserve space for last called text to prevent layout shift */}
