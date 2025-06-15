@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Lead } from '../types/lead';
 import SearchAutocomplete from './SearchAutocomplete';
 import SearchBar from './SearchBar';
@@ -12,7 +12,6 @@ interface CallingHeaderProps {
   searchResults: Lead[];
   leadsData: Lead[];
   fileName: string;
-  isOnline?: boolean;
   onSearchChange: (query: string) => void;
   onSearchFocus: () => void;
   onSearchBlur: () => void;
@@ -27,7 +26,6 @@ const CallingHeader: React.FC<CallingHeaderProps> = ({
   searchResults,
   leadsData,
   fileName,
-  isOnline = true,
   onSearchChange,
   onSearchFocus,
   onSearchBlur,
@@ -35,6 +33,20 @@ const CallingHeader: React.FC<CallingHeaderProps> = ({
   onLeadSelect,
   onLeadsImported
 }) => {
+  const [isAutocompleteVisible, setIsAutocompleteVisible] = useState(showAutocomplete);
+
+  React.useEffect(() => {
+    if (showAutocomplete) {
+      setIsAutocompleteVisible(true);
+    } else {
+      // Delay hiding to allow slide-up animation
+      const timer = setTimeout(() => {
+        setIsAutocompleteVisible(false);
+      }, 50);
+      return () => clearTimeout(timer);
+    }
+  }, [showAutocomplete]);
+
   return (
     <div className="bg-background border-b border-border p-4 pt-safe flex-shrink-0" style={{ paddingTop: 'max(1rem, env(safe-area-inset-top))' }}>
       <div className="flex items-center justify-between mb-4">
@@ -62,17 +74,16 @@ const CallingHeader: React.FC<CallingHeaderProps> = ({
         />
         
         {/* Autocomplete Dropdown */}
-        {showAutocomplete && (
-          <SearchAutocomplete 
-            leads={searchResults} 
-            onLeadSelect={onLeadSelect} 
-            searchQuery={searchQuery} 
-            actualIndices={searchResults.map(lead => 
-              leadsData.findIndex(l => l.name === lead.name && l.phone === lead.phone) + 1
-            )} 
-            totalLeads={leadsData.length} 
-          />
-        )}
+        <SearchAutocomplete 
+          leads={searchResults} 
+          onLeadSelect={onLeadSelect} 
+          searchQuery={searchQuery} 
+          actualIndices={searchResults.map(lead => 
+            leadsData.findIndex(l => l.name === lead.name && l.phone === lead.phone) + 1
+          )} 
+          totalLeads={leadsData.length}
+          isVisible={showAutocomplete}
+        />
       </div>
     </div>
   );

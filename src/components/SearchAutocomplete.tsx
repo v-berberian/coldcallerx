@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Card } from '@/components/ui/card';
 
 interface Lead {
@@ -14,7 +14,8 @@ interface SearchAutocompleteProps {
   searchQuery: string;
   actualIndices: number[];
   totalLeads: number;
-  isClosing?: boolean;
+  isVisible: boolean;
+  onAnimationComplete?: () => void;
 }
 
 const SearchAutocomplete: React.FC<SearchAutocompleteProps> = ({ 
@@ -23,9 +24,32 @@ const SearchAutocomplete: React.FC<SearchAutocompleteProps> = ({
   searchQuery, 
   actualIndices,
   totalLeads,
-  isClosing = false
+  isVisible,
+  onAnimationComplete
 }) => {
-  const animationClass = isClosing ? 'animate-slide-up' : 'animate-slide-down';
+  const [isAnimating, setIsAnimating] = useState(false);
+  const [shouldRender, setShouldRender] = useState(false);
+
+  useEffect(() => {
+    if (isVisible) {
+      setShouldRender(true);
+      setIsAnimating(true);
+    } else if (shouldRender) {
+      setIsAnimating(false);
+      // Wait for animation to complete before unmounting
+      const timer = setTimeout(() => {
+        setShouldRender(false);
+        onAnimationComplete?.();
+      }, 200); // Match animation duration
+      return () => clearTimeout(timer);
+    }
+  }, [isVisible, shouldRender, onAnimationComplete]);
+
+  if (!shouldRender) {
+    return null;
+  }
+
+  const animationClass = isAnimating ? 'animate-slide-down' : 'animate-slide-up';
 
   if (leads.length === 0) {
     return (
