@@ -3,7 +3,7 @@
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent } from '@/components/ui/dropdown-menu';
+import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from '@/components/ui/dropdown-menu';
 import { X, Phone, Mail, ChevronDown } from 'lucide-react';
 import { formatPhoneNumber } from '../utils/phoneUtils';
 import { getStateFromAreaCode } from '../utils/timezoneUtils';
@@ -116,18 +116,16 @@ const LeadCard: React.FC<LeadCardProps> = ({
                   >
                     <div className="max-h-[200px] overflow-y-auto">
                       <div className="py-1">
-                        <div 
-                          className="px-4 py-2 text-sm font-medium border-b bg-muted/50 whitespace-nowrap"
-                        >
+                        <DropdownMenuItem className="px-4 py-2 text-sm font-medium border-b bg-muted/50 whitespace-nowrap">
                           {formatPhoneNumber(lead.phone)} (Primary)
-                        </div>
+                        </DropdownMenuItem>
                         {additionalPhones.map((phone, index) => (
-                          <div 
+                          <DropdownMenuItem 
                             key={index} 
                             className="px-4 py-2 text-sm hover:bg-accent cursor-pointer whitespace-nowrap"
                           >
                             {phone}
-                          </div>
+                          </DropdownMenuItem>
                         ))}
                       </div>
                     </div>
