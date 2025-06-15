@@ -70,10 +70,10 @@ const LeadCard: React.FC<LeadCardProps> = ({
             </div>
           )}
           
-          {/* Phone number with icon */}
+          {/* Phone number with icon positioned to the left */}
           <div className="flex items-center justify-center">
-            <div className="flex items-center gap-2">
-              <Phone className="h-4 w-4 text-muted-foreground" />
+            <div className="relative">
+              <Phone className="absolute -left-6 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <p className="text-lg text-muted-foreground">{formatPhoneNumber(lead.phone)}</p>
             </div>
           </div>
