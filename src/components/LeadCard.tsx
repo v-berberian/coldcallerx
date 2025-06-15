@@ -1,8 +1,8 @@
+
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent } from '@/components/ui/dropdown-menu';
-import { ScrollArea } from '@/components/ui/scroll-area';
 import { X, Phone, Mail, ChevronDown } from 'lucide-react';
 import { formatPhoneNumber } from '../utils/phoneUtils';
 import { getStateFromAreaCode } from '../utils/timezoneUtils';
@@ -86,23 +86,23 @@ const LeadCard: React.FC<LeadCardProps> = ({
                   <DropdownMenuContent 
                     side="bottom" 
                     align="center" 
-                    className="w-fit min-w-[280px] p-0"
+                    className="w-fit min-w-[320px] p-0"
                   >
-                    <ScrollArea className="max-h-[200px] rounded-md">
-                      <div className="py-1">
-                        <div className="px-4 py-2 text-sm font-medium border-b bg-muted/50">
+                    <div className="max-h-[200px] overflow-y-auto w-full">
+                      <div className="py-1 w-full">
+                        <div className="px-4 py-2 text-sm font-medium border-b bg-muted/50 whitespace-nowrap">
                           {formatPhoneNumber(lead.phone)} (Primary)
                         </div>
                         {additionalPhones.map((phone, index) => (
                           <div 
                             key={index} 
-                            className="px-4 py-2 text-sm hover:bg-accent cursor-pointer whitespace-nowrap"
+                            className="px-4 py-2 text-sm hover:bg-accent cursor-pointer whitespace-nowrap w-full"
                           >
                             {formatPhoneNumber(phone.trim())}
                           </div>
                         ))}
                       </div>
-                    </ScrollArea>
+                    </div>
                   </DropdownMenuContent>
                 </DropdownMenu>
               ) : (
