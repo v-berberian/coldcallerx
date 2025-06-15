@@ -179,24 +179,26 @@ const LeadCard: React.FC<LeadCardProps> = ({
                     <DropdownMenuContent 
                       side="bottom" 
                       align="center" 
-                      className="z-50 min-w-[200px] bg-background/95 backdrop-blur-sm border border-border/30 shadow-lg rounded-xl p-1 animate-fade-in data-[state=closed]:animate-fade-out"
+                      className="z-50 min-w-[200px] rounded-xl shadow-lg overflow-hidden animate-fade-in data-[state=closed]:animate-fade-out bg-background/15 backdrop-blur-sm border border-border/15"
                     >
-                      {allPhones.map((phoneData, index) => (
-                        <DropdownMenuItem 
-                          key={index} 
-                          onClick={() => handlePhoneSelect(phoneData.phone)}
-                          className="w-full px-4 py-3 text-left border-b border-border/10 last:border-b-0 transition-colors duration-150 cursor-pointer hover:bg-muted/50 relative"
-                        >
-                          <div className="flex justify-between items-center w-full">
-                            <span className={`text-foreground ${phoneData.isPrimary ? 'font-bold' : 'font-medium'}`}>
-                              {phoneData.phone}
-                            </span>
-                            {selectedPhone === phoneData.phone && !phoneData.isPrimary && (
-                              <div className="w-2 h-2 bg-foreground rounded-full ml-2"></div>
-                            )}
-                          </div>
-                        </DropdownMenuItem>
-                      ))}
+                      <div className="max-h-60 overflow-y-auto">
+                        {allPhones.map((phoneData, index) => (
+                          <DropdownMenuItem 
+                            key={index} 
+                            onClick={() => handlePhoneSelect(phoneData.phone)}
+                            className="w-full px-4 py-3 text-left border-b border-border/10 last:border-b-0 transition-colors duration-75 cursor-pointer hover:bg-muted/50 relative"
+                          >
+                            <div className="flex justify-between items-center w-full">
+                              <span className={`text-foreground ${phoneData.isPrimary ? 'font-bold' : 'font-medium'}`}>
+                                {phoneData.phone}
+                              </span>
+                              {selectedPhone === phoneData.phone && !phoneData.isPrimary && (
+                                <div className="w-2 h-2 bg-foreground rounded-full ml-2"></div>
+                              )}
+                            </div>
+                          </DropdownMenuItem>
+                        ))}
+                      </div>
                     </DropdownMenuContent>
                   </DropdownMenu>
                 ) : (
@@ -259,4 +261,3 @@ const LeadCard: React.FC<LeadCardProps> = ({
 };
 
 export default LeadCard;
-
