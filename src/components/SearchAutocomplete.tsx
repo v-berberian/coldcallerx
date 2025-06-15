@@ -14,6 +14,7 @@ interface SearchAutocompleteProps {
   searchQuery: string;
   actualIndices: number[];
   totalLeads: number;
+  isClosing?: boolean;
 }
 
 const SearchAutocomplete: React.FC<SearchAutocompleteProps> = ({ 
@@ -21,18 +22,21 @@ const SearchAutocomplete: React.FC<SearchAutocompleteProps> = ({
   onLeadSelect, 
   searchQuery, 
   actualIndices,
-  totalLeads
+  totalLeads,
+  isClosing = false
 }) => {
+  const animationClass = isClosing ? 'animate-fade-out' : 'animate-fade-in';
+
   if (leads.length === 0) {
     return (
-      <div className="absolute top-full left-0 right-0 z-50 mt-1 p-4 text-center text-muted-foreground rounded-xl shadow-lg animate-fade-in bg-background/1 backdrop-blur-md border border-border/1">
+      <div className={`absolute top-full left-0 right-0 z-50 mt-1 p-4 text-center text-muted-foreground rounded-xl shadow-lg ${animationClass} bg-background/1 backdrop-blur-md border border-border/1`}>
         No leads found
       </div>
     );
   }
 
   return (
-    <div className="absolute top-full left-0 right-0 z-50 mt-1 rounded-xl shadow-lg overflow-hidden animate-fade-in bg-background/1 backdrop-blur-md border border-border/1">
+    <div className={`absolute top-full left-0 right-0 z-50 mt-1 rounded-xl shadow-lg overflow-hidden ${animationClass} bg-background/1 backdrop-blur-md border border-border/1`}>
       <div className="max-h-60 overflow-y-auto">
         {leads.map((lead, index) => (
           <button
