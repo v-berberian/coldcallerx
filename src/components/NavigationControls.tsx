@@ -22,12 +22,12 @@ const NavigationControls: React.FC<NavigationControlsProps> = ({
         variant="outline" 
         onClick={onPrevious} 
         disabled={!canGoPrevious} 
-        className="flex-1 h-16 sm:h-20 rounded-2xl shadow-lg active:scale-95 transition-all duration-100 select-none outline-none focus:outline-none focus-visible:ring-0 focus-visible:ring-offset-0 bg-background/20 backdrop-blur-xl border-white/20 hover:bg-background/30 hover:border-white/30 text-foreground disabled:opacity-50 disabled:backdrop-blur-sm touch-manipulation text-base sm:text-lg" 
+        className="flex-1 h-12 sm:h-14 rounded-2xl shadow-lg active:scale-95 transition-all duration-100 select-none outline-none focus:outline-none focus-visible:ring-0 focus-visible:ring-offset-0 bg-background/20 backdrop-blur-xl border-white/20 hover:bg-background/30 hover:border-white/30 text-foreground disabled:opacity-50 disabled:backdrop-blur-sm touch-manipulation text-sm sm:text-base" 
         style={{ WebkitTapHighlightColor: 'transparent' }} 
         onTouchStart={() => {}} 
         onTouchEnd={() => {}}
       >
-        <ArrowLeft className="h-5 w-5 sm:h-6 sm:w-6 mr-2" />
+        <ArrowLeft className="h-4 w-4 sm:h-5 sm:w-5 mr-1 sm:mr-2" />
         <span className="truncate">Previous</span>
       </Button>
       
@@ -35,13 +35,13 @@ const NavigationControls: React.FC<NavigationControlsProps> = ({
         variant="outline" 
         onClick={onNext} 
         disabled={!canGoNext} 
-        className="flex-1 h-16 sm:h-20 rounded-2xl shadow-lg active:scale-95 transition-all duration-100 select-none outline-none focus:outline-none focus-visible:ring-0 focus-visible:ring-offset-0 bg-background/20 backdrop-blur-xl border-white/20 hover:bg-background/30 hover:border-white/30 text-foreground disabled:opacity-50 disabled:backdrop-blur-sm touch-manipulation text-base sm:text-lg" 
+        className="flex-1 h-12 sm:h-14 rounded-2xl shadow-lg active:scale-95 transition-all duration-100 select-none outline-none focus:outline-none focus-visible:ring-0 focus-visible:ring-offset-0 bg-background/20 backdrop-blur-xl border-white/20 hover:bg-background/30 hover:border-white/30 text-foreground disabled:opacity-50 disabled:backdrop-blur-sm touch-manipulation text-sm sm:text-base" 
         style={{ WebkitTapHighlightColor: 'transparent' }} 
         onTouchStart={() => {}} 
         onTouchEnd={() => {}}
       >
         <span className="truncate">Next</span>
-        <ArrowRight className="h-5 w-5 sm:h-6 sm:w-6 ml-2" />
+        <ArrowRight className="h-4 w-4 sm:h-5 sm:w-5 ml-1 sm:ml-2" />
       </Button>
     </div>
   );

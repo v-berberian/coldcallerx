@@ -54,11 +54,10 @@ const CallingHeader: React.FC<CallingHeaderProps> = ({
         </div>
         
         <div className="flex items-center space-x-2 sm:space-x-3 flex-1 justify-center min-w-0">
-          <img 
-            src="/lovable-uploads/7c8eb58b-d1b7-4c3b-b789-9806d216303f.png" 
-            alt="ColdCall X" 
-            className="h-8 sm:h-10 w-auto bg-white rounded px-2 py-1"
-          />
+          <h1 className="text-xl sm:text-2xl font-bold truncate">
+            <span className="text-blue-500">ColdCall </span>
+            <span className="text-blue-500">X</span>
+          </h1>
         </div>
         
         <div className="w-8 sm:w-8 flex-shrink-0"></div>
