@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Settings } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -6,6 +5,7 @@ import { Lead } from '../types/lead';
 import SearchAutocomplete from './SearchAutocomplete';
 import SearchBar from './SearchBar';
 import CSVImporter from './CSVImporter';
+import SettingsMenu from './SettingsMenu';
 
 interface CallingHeaderProps {
   searchQuery: string;
@@ -63,14 +63,16 @@ const CallingHeader: React.FC<CallingHeaderProps> = ({
         </div>
         
         <div className="w-8 sm:w-8 flex-shrink-0">
-          <Button 
-            variant="ghost" 
-            size="sm" 
-            className="h-8 w-8 rounded-full"
-            style={{ WebkitTapHighlightColor: 'transparent' }}
-          >
-            <Settings className="h-4 w-4" />
-          </Button>
+          <SettingsMenu>
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              className="h-8 w-8 rounded-full"
+              style={{ WebkitTapHighlightColor: 'transparent' }}
+            >
+              <Settings className="h-4 w-4" />
+            </Button>
+          </SettingsMenu>
         </div>
       </div>
       

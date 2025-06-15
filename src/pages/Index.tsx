@@ -4,6 +4,7 @@ import { Loader2, Settings } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import CallingScreen from '@/components/CallingScreen';
 import CSVImporter from '@/components/CSVImporter';
+import SettingsMenu from '@/components/SettingsMenu';
 import { useLocalLeadOperations } from '@/hooks/useLocalLeadOperations';
 
 const Index = () => {
@@ -68,14 +69,16 @@ const Index = () => {
             <span className="text-blue-500">X</span>
           </h1>
           
-          <Button 
-            variant="ghost" 
-            size="sm" 
-            className="h-8 w-8 rounded-full"
-            style={{ WebkitTapHighlightColor: 'transparent' }}
-          >
-            <Settings className="h-4 w-4" />
-          </Button>
+          <SettingsMenu>
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              className="h-8 w-8 rounded-full"
+              style={{ WebkitTapHighlightColor: 'transparent' }}
+            >
+              <Settings className="h-4 w-4" />
+            </Button>
+          </SettingsMenu>
         </div>
         
         {/* Centered content */}
