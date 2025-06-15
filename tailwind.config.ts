@@ -1,4 +1,3 @@
-
 import type { Config } from "tailwindcss";
 
 export default {
@@ -131,7 +130,7 @@ export default {
 				'accordion-down': 'accordion-down 0.2s ease-out',
 				'accordion-up': 'accordion-up 0.2s ease-out',
 				'fade-in': 'fade-in 0.2s ease-out',
-				'fade-out': 'fade-out 0.15s ease-out',
+				'fade-out': 'fade-out 0.2s ease-out',
 				'content-change': 'content-change 0.15s ease-out',
 				'button-switch': 'button-switch 0.1s ease-out'
 			}
