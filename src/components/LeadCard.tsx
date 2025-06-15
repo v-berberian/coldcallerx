@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -6,6 +7,7 @@ import { X, Phone, Mail, ChevronDown, Check } from 'lucide-react';
 import { formatPhoneNumber } from '../utils/phoneUtils';
 import { getStateFromAreaCode } from '../utils/timezoneUtils';
 import { Lead } from '@/types/lead';
+
 interface LeadCardProps {
   lead: Lead;
   currentIndex: number;
@@ -14,6 +16,7 @@ interface LeadCardProps {
   onCall: () => void;
   onResetCallCount: () => void;
 }
+
 const LeadCard: React.FC<LeadCardProps> = ({
   lead,
   currentIndex,
@@ -96,12 +99,15 @@ const LeadCard: React.FC<LeadCardProps> = ({
     const body = encodeURIComponent(`Hi ${lead.name},\n\nI hope this email finds you well. I wanted to follow up regarding our recent conversation.\n\n${lead.company ? `I understand you work at ${lead.company} and ` : ''}I believe we could discuss some opportunities that might be of interest to you.\n\nWould you be available for a brief call to explore this further?\n\nBest regards,\n[Your Name]\n[Your Contact Information]`);
     return `mailto:${emailValue}?subject=${subject}&body=${body}`;
   };
+
   const handleEmailClick = () => {
     console.log('Email clicked for:', emailValue);
     // The mailto link will handle opening the email client
   };
-  return <Card className="shadow-2xl border-border/50 rounded-3xl bg-card h-[480px] flex flex-col">
-      <CardContent className="p-6 space-y-4 flex-1 flex flex-col">
+
+  return (
+    <Card className="shadow-2xl border-border/50 rounded-3xl bg-card h-[480px] flex flex-col">
+      <CardContent className="p-6 space-y-6 flex-1 flex flex-col">
         {/* Top row with lead count and file name */}
         <div className="flex items-center justify-between">
           <p className="text-sm text-muted-foreground opacity-40">
@@ -113,85 +119,113 @@ const LeadCard: React.FC<LeadCardProps> = ({
         </div>
 
         {/* Lead info - Main content area with animation */}
-        <div key={leadKey} className="text-center space-y-3 flex-1 flex flex-col justify-center animate-fade-in">
+        <div key={leadKey} className="text-center space-y-6 flex-1 flex flex-col justify-center animate-fade-in">
           {/* State and timezone */}
           <p className="text-sm text-muted-foreground">
             {getStateFromAreaCode(lead.phone)}
           </p>
           
-          {/* Contact name and company - grouped closer together */}
-          <div className="space-y-2">
+          {/* Group 1: Name and Company */}
+          <div className="space-y-1">
             <div className="flex items-center justify-center px-2">
               <h2 className="text-3xl font-bold text-foreground text-center break-words leading-tight">
                 {lead.name}
               </h2>
             </div>
             
-            {/* Company name */}
-            {lead.company && <div className="flex items-center justify-center px-2">
+            {lead.company && (
+              <div className="flex items-center justify-center px-2">
                 <p className="text-lg text-muted-foreground font-medium text-center break-words leading-relaxed">
                   {lead.company}
                 </p>
-              </div>}
+              </div>
+            )}
           </div>
           
-          {/* Contact information group - phone and email closer together */}
+          {/* Group 2: Phone and Email */}
           <div className="space-y-2">
             {/* Phone number with icon positioned to the left - updated dropdown styling */}
             <div className="flex items-center justify-center">
               <div className="relative">
                 <Phone className="absolute -left-6 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                {hasAdditionalPhones ? <DropdownMenu>
+                {hasAdditionalPhones ? (
+                  <DropdownMenu>
                     <DropdownMenuTrigger className="flex items-center gap-1 cursor-pointer">
                       <p className="text-lg text-muted-foreground">{selectedPhone}</p>
                       <ChevronDown className="h-4 w-4 text-muted-foreground" />
                     </DropdownMenuTrigger>
                     <DropdownMenuContent side="bottom" align="center" className="max-h-60 overflow-y-auto">
-                      {allPhones.map((phoneData, index) => <DropdownMenuItem key={index} onClick={() => handlePhoneSelect(phoneData.phone)}>
+                      {allPhones.map((phoneData, index) => (
+                        <DropdownMenuItem key={index} onClick={() => handlePhoneSelect(phoneData.phone)}>
                           <div className="flex justify-between items-center w-full">
                             <span className={`text-foreground ${phoneData.isPrimary ? 'font-bold' : 'font-medium'}`}>
                               {phoneData.phone}
                             </span>
-                            {selectedPhone === phoneData.phone && !phoneData.isPrimary && <div className="w-2 h-2 bg-black rounded-full ml-2"></div>}
+                            {selectedPhone === phoneData.phone && !phoneData.isPrimary && (
+                              <div className="w-2 h-2 bg-black rounded-full ml-2"></div>
+                            )}
                           </div>
-                        </DropdownMenuItem>)}
+                        </DropdownMenuItem>
+                      ))}
                     </DropdownMenuContent>
-                  </DropdownMenu> : <p className="text-lg text-muted-foreground">{selectedPhone}</p>}
+                  </DropdownMenu>
+                ) : (
+                  <p className="text-lg text-muted-foreground">{selectedPhone}</p>
+                )}
               </div>
             </div>
             
             {/* Email with icon positioned to the left - now clickable without blue highlighting */}
-            {hasValidEmail && <div className="flex items-center justify-center">
+            {hasValidEmail && (
+              <div className="flex items-center justify-center">
                 <div className="relative">
                   <Mail className="absolute -left-6 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                  <a href={createMailtoLink()} onClick={handleEmailClick} className="text-sm text-muted-foreground text-center break-words hover:text-muted-foreground/80 hover:underline transition-colors duration-200 cursor-pointer" title="Click to send email">
+                  <a
+                    href={createMailtoLink()}
+                    onClick={handleEmailClick}
+                    className="text-sm text-muted-foreground text-center break-words hover:text-muted-foreground/80 hover:underline transition-colors duration-200 cursor-pointer"
+                    title="Click to send email"
+                  >
                     {emailValue}
                   </a>
                 </div>
-              </div>}
+              </div>
+            )}
           </div>
+        </div>
+
+        {/* Group 3: Call Button and Last Called */}
+        <div className="space-y-3">
+          {/* Main Call Button */}
+          <Button 
+            onClick={handleCall} 
+            size="lg" 
+            className="w-full h-16 text-lg font-semibold bg-green-600 hover:bg-green-600 text-white rounded-2xl shadow-lg"
+          >
+            Call
+          </Button>
           
-          {/* Last called section - flows naturally without fixed height */}
-          {lead.lastCalled && <div className="flex items-center justify-center">
+          {/* Last called section below button */}
+          {lead.lastCalled && (
+            <div className="flex items-center justify-center">
               <div className="flex items-center">
                 <p className="text-sm text-muted-foreground transition-opacity duration-300 ease-in-out opacity-100 whitespace-nowrap my-0 py-0">
                   Last called: {lead.lastCalled}
                 </p>
-                <button onClick={onResetCallCount} className="ml-2 p-1 bg-muted rounded transition-colors" title="Clear last called">
+                <button
+                  onClick={onResetCallCount}
+                  className="ml-2 p-1 bg-muted rounded transition-colors"
+                  title="Clear last called"
+                >
                   <X className="h-3 w-3 text-muted-foreground" />
                 </button>
               </div>
-            </div>}
-        </div>
-
-        {/* Action Buttons - reduced spacing above */}
-        <div className="space-y-3">
-          {/* Main Call Button */}
-          <Button onClick={handleCall} size="lg" className="w-full h-16 text-lg font-semibold bg-green-600 hover:bg-green-600 text-white rounded-2xl shadow-lg">
-            Call
-          </Button>
+            </div>
+          )}
         </div>
       </CardContent>
-    </Card>;
+    </Card>
+  );
 };
+
 export default LeadCard;
