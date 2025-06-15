@@ -1,6 +1,7 @@
 
 import React, { useEffect, useState } from 'react';
-import { Loader2 } from 'lucide-react';
+import { Loader2, Settings } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 import CallingScreen from '@/components/CallingScreen';
 import CSVImporter from '@/components/CSVImporter';
 import { useLocalLeadOperations } from '@/hooks/useLocalLeadOperations';
@@ -67,7 +68,14 @@ const Index = () => {
             <span className="text-blue-500">X</span>
           </h1>
           
-          <div className="w-8"></div>
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            className="h-8 w-8 rounded-full"
+            style={{ WebkitTapHighlightColor: 'transparent' }}
+          >
+            <Settings className="h-4 w-4" />
+          </Button>
         </div>
         
         {/* Centered content */}
