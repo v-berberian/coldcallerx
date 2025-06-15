@@ -1,3 +1,4 @@
+
 import type { Config } from "tailwindcss";
 
 export default {
@@ -105,6 +106,30 @@ export default {
 						transform: 'translateY(-8px) scale(0.95)'
 					}
 				},
+				'slide-down': {
+					'0%': {
+						opacity: '0',
+						transform: 'translateY(-10px)',
+						maxHeight: '0'
+					},
+					'100%': {
+						opacity: '1',
+						transform: 'translateY(0)',
+						maxHeight: '240px'
+					}
+				},
+				'slide-up': {
+					'0%': {
+						opacity: '1',
+						transform: 'translateY(0)',
+						maxHeight: '240px'
+					},
+					'100%': {
+						opacity: '0',
+						transform: 'translateY(-10px)',
+						maxHeight: '0'
+					}
+				},
 				'content-change': {
 					'0%': {
 						opacity: '0.8',
@@ -131,6 +156,8 @@ export default {
 				'accordion-up': 'accordion-up 0.2s ease-out',
 				'fade-in': 'fade-in 0.2s ease-out',
 				'fade-out': 'fade-out 0.2s ease-out',
+				'slide-down': 'slide-down 0.2s ease-out',
+				'slide-up': 'slide-up 0.2s ease-out',
 				'content-change': 'content-change 0.15s ease-out',
 				'button-switch': 'button-switch 0.1s ease-out'
 			}
