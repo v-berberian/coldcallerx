@@ -56,10 +56,10 @@ const Index = () => {
   // If no leads, show empty state with proper header
   if (leadsData.length === 0) {
     return (
-      <div className={`h-[100vh] h-[100dvh] h-[100svh] bg-background overflow-hidden fixed inset-0 transition-opacity duration-300 ${showContent ? 'opacity-100' : 'opacity-0'}`}>
+      <div className={`h-[100vh] h-[100dvh] h-[100svh] bg-background overflow-hidden fixed inset-0 transition-opacity duration-300 ${showContent ? 'opacity-100' : 'opacity-0'} flex flex-col`}>
         
         {/* Header with import */}
-        <div className="flex items-center justify-between p-4 border-b border-border pt-safe" style={{ paddingTop: 'max(1rem, env(safe-area-inset-top))' }}>
+        <div className="flex items-center justify-between p-4 border-b border-border pt-safe flex-shrink-0" style={{ paddingTop: 'max(1rem, env(safe-area-inset-top))' }}>
           <CSVImporter onLeadsImported={handleLeadsImported} />
           
           <h1 className="text-2xl font-bold">
@@ -70,7 +70,8 @@ const Index = () => {
           <div className="w-8"></div>
         </div>
         
-        <div className="flex items-center justify-center h-full">
+        {/* Centered content */}
+        <div className="flex-1 flex items-center justify-center">
           <div className="text-center space-y-4">
             <p className="text-lg text-muted-foreground">No Leads Imported</p>
             <p className="text-sm text-muted-foreground">Click the upload icon above to import a CSV file</p>
