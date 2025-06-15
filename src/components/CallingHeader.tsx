@@ -38,10 +38,10 @@ const CallingHeader: React.FC<CallingHeaderProps> = ({
     if (showAutocomplete) {
       setIsAutocompleteVisible(true);
     } else {
-      // Longer delay for smoother animation
+      // Delay hiding to allow slide-up animation
       const timer = setTimeout(() => {
         setIsAutocompleteVisible(false);
-      }, 200);
+      }, 50);
       return () => clearTimeout(timer);
     }
   }, [showAutocomplete]);
