@@ -34,18 +34,28 @@ const LeadCard: React.FC<LeadCardProps> = ({
   // Use stable key based on lead data instead of changing cardKey
   const leadKey = `${lead.name}-${lead.phone}`;
   
-  // Ensure email is treated as a string
-  const emailValue = typeof lead.email === 'string' ? lead.email.trim() : '';
-  const hasValidEmail = emailValue && emailValue !== '' && emailValue.includes('@');
+  // Safely extract email string, handling both string and old object formats from localStorage
+  let emailString: string | undefined;
+  if (typeof lead.email === 'string') {
+    emailString = lead.email;
+  } else if (lead.email && typeof lead.email === 'object' && 'value' in (lead.email as object)) {
+    // Backwards compatibility for old data in localStorage
+    const maybeEmail = (lead.email as any).value;
+    if (typeof maybeEmail === 'string' && maybeEmail.toLowerCase() !== 'undefined' && maybeEmail.toLowerCase() !== 'null') {
+      emailString = maybeEmail;
+    }
+  }
+
+  const emailValue = emailString?.trim() ?? '';
+  const hasValidEmail = emailValue && emailValue.includes('@');
   
   // Enhanced debug logging for email
   console.log('LeadCard rendering email analysis:', {
     name: lead.name,
     rawEmail: lead.email,
-    emailType: typeof lead.email,
-    emailValue: emailValue,
+    resolvedEmailString: emailString,
+    finalEmailValue: emailValue,
     hasValidEmail: hasValidEmail,
-    emailLength: emailValue?.length || 0
   });
   
   return (
