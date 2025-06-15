@@ -36,11 +36,11 @@ const SearchAutocomplete: React.FC<SearchAutocompleteProps> = ({
       setIsAnimating(true);
     } else if (shouldRender) {
       setIsAnimating(false);
-      // Wait for animation to complete before unmounting
+      // Faster close animation - reduced from 200ms to 100ms
       const timer = setTimeout(() => {
         setShouldRender(false);
         onAnimationComplete?.();
-      }, 200); // Match animation duration
+      }, 100); // Match faster animation duration
       return () => clearTimeout(timer);
     }
   }, [isVisible, shouldRender, onAnimationComplete]);
@@ -49,7 +49,7 @@ const SearchAutocomplete: React.FC<SearchAutocompleteProps> = ({
     return null;
   }
 
-  const animationClass = isAnimating ? 'animate-slide-down' : 'animate-slide-up';
+  const animationClass = isAnimating ? 'animate-slide-down' : 'animate-slide-up-fast';
 
   if (leads.length === 0) {
     return (

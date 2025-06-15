@@ -85,14 +85,16 @@ const MainContent: React.FC<MainContentProps> = ({
         />
 
         {/* Current Lead Card */}
-        <LeadCard
-          lead={currentLead}
-          currentIndex={currentIndex}
-          totalCount={totalCount}
-          fileName={fileName}
-          onCall={showAutocomplete ? () => {} : onCall}
-          onResetCallCount={showAutocomplete ? () => {} : onResetCallCount}
-        />
+        <div className="animate-content-change-fast">
+          <LeadCard
+            lead={currentLead}
+            currentIndex={currentIndex}
+            totalCount={totalCount}
+            fileName={fileName}
+            onCall={showAutocomplete ? () => {} : onCall}
+            onResetCallCount={showAutocomplete ? () => {} : onResetCallCount}
+          />
+        </div>
 
         {/* Navigation Controls */}
         <div className="pt-4">
