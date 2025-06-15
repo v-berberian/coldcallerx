@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -94,6 +93,23 @@ const LeadCard: React.FC<LeadCardProps> = ({
     onCall(); // The original onCall function will handle the actual calling logic
   };
 
+  // Create mailto link with pre-populated content
+  const createMailtoLink = () => {
+    if (!hasValidEmail) return '';
+    
+    const subject = encodeURIComponent(`Following up - ${lead.name}${lead.company ? ` from ${lead.company}` : ''}`);
+    const body = encodeURIComponent(
+      `Hi ${lead.name},\n\nI hope this email finds you well. I wanted to follow up regarding our recent conversation.\n\n${lead.company ? `I understand you work at ${lead.company} and ` : ''}I believe we could discuss some opportunities that might be of interest to you.\n\nWould you be available for a brief call to explore this further?\n\nBest regards,\n[Your Name]\n[Your Contact Information]`
+    );
+    
+    return `mailto:${emailValue}?subject=${subject}&body=${body}`;
+  };
+
+  const handleEmailClick = () => {
+    console.log('Email clicked for:', emailValue);
+    // The mailto link will handle opening the email client
+  };
+
   return (
     <Card className="shadow-2xl border-border/50 rounded-3xl bg-card h-[480px] flex flex-col">
       <CardContent className="p-8 space-y-6 flex-1 flex flex-col">
@@ -166,14 +182,19 @@ const LeadCard: React.FC<LeadCardProps> = ({
             </div>
           </div>
           
-          {/* Email with icon positioned to the left - simplified string handling */}
+          {/* Email with icon positioned to the left - now clickable */}
           {hasValidEmail && (
             <div className="flex items-center justify-center">
               <div className="relative">
                 <Mail className="absolute -left-6 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <p className="text-sm text-muted-foreground text-center break-words">
+                <a
+                  href={createMailtoLink()}
+                  onClick={handleEmailClick}
+                  className="text-sm text-muted-foreground text-center break-words hover:text-blue-600 hover:underline transition-colors duration-200 cursor-pointer"
+                  title="Click to send email"
+                >
                   {emailValue}
-                </p>
+                </a>
               </div>
             </div>
           )}
