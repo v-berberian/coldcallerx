@@ -1,5 +1,4 @@
-
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from '@/components/ui/dropdown-menu';
@@ -60,6 +59,13 @@ const LeadCard: React.FC<LeadCardProps> = ({
   
   // State to track selected phone number - defaults to primary phone
   const [selectedPhone, setSelectedPhone] = useState(formatPhoneNumber(lead.phone));
+  
+  // Reset selectedPhone to primary phone when lead changes
+  useEffect(() => {
+    const primaryPhone = formatPhoneNumber(lead.phone);
+    console.log('Lead changed, resetting selectedPhone to primary:', primaryPhone);
+    setSelectedPhone(primaryPhone);
+  }, [lead.phone, lead.name]); // Reset when lead changes (using phone and name as dependencies)
   
   // All available phones (primary + additional)
   const allPhones = [
