@@ -1,7 +1,6 @@
 
-import React from 'react';
-import { Moon, Sun, Monitor, HelpCircle, ChevronRight } from 'lucide-react';
-import { useTheme } from 'next-themes';
+import React, { useState, useEffect } from 'react';
+import { Mail, HelpCircle, ChevronRight, Plus, Edit, Trash2 } from 'lucide-react';
 import {
   Popover,
   PopoverContent,
@@ -16,32 +15,100 @@ import {
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+
+interface EmailTemplate {
+  id: string;
+  name: string;
+  subject: string;
+  body: string;
+}
 
 interface SettingsMenuProps {
   children: React.ReactNode;
 }
 
 const SettingsMenu: React.FC<SettingsMenuProps> = ({ children }) => {
-  const { theme, setTheme } = useTheme();
+  const [emailTemplates, setEmailTemplates] = useState<EmailTemplate[]>([]);
+  const [editingTemplate, setEditingTemplate] = useState<EmailTemplate | null>(null);
+  const [isCreating, setIsCreating] = useState(false);
+  const [templateName, setTemplateName] = useState('');
+  const [templateSubject, setTemplateSubject] = useState('');
+  const [templateBody, setTemplateBody] = useState('');
 
-  const getThemeIcon = () => {
-    switch (theme) {
-      case 'light':
-        return <Sun className="h-4 w-4" />;
-      case 'dark':
-        return <Moon className="h-4 w-4" />;
-      case 'system':
-        return <Monitor className="h-4 w-4" />;
-      default:
-        return <Sun className="h-4 w-4" />;
+  // Load templates from localStorage on mount
+  useEffect(() => {
+    const savedTemplates = localStorage.getItem('emailTemplates');
+    if (savedTemplates) {
+      setEmailTemplates(JSON.parse(savedTemplates));
     }
+  }, []);
+
+  // Save templates to localStorage
+  const saveTemplates = (templates: EmailTemplate[]) => {
+    localStorage.setItem('emailTemplates', JSON.stringify(templates));
+    setEmailTemplates(templates);
   };
 
-  const cycleTheme = () => {
-    const themes = ['light', 'dark', 'system'];
-    const currentIndex = themes.indexOf(theme || 'light');
-    const nextIndex = (currentIndex + 1) % themes.length;
-    setTheme(themes[nextIndex]);
+  const handleCreateTemplate = () => {
+    if (!templateName.trim() || !templateSubject.trim()) return;
+    
+    const newTemplate: EmailTemplate = {
+      id: Date.now().toString(),
+      name: templateName,
+      subject: templateSubject,
+      body: templateBody
+    };
+    
+    const updatedTemplates = [...emailTemplates, newTemplate];
+    saveTemplates(updatedTemplates);
+    
+    // Reset form
+    setTemplateName('');
+    setTemplateSubject('');
+    setTemplateBody('');
+    setIsCreating(false);
+  };
+
+  const handleEditTemplate = (template: EmailTemplate) => {
+    setEditingTemplate(template);
+    setTemplateName(template.name);
+    setTemplateSubject(template.subject);
+    setTemplateBody(template.body);
+    setIsCreating(true);
+  };
+
+  const handleUpdateTemplate = () => {
+    if (!editingTemplate || !templateName.trim() || !templateSubject.trim()) return;
+    
+    const updatedTemplates = emailTemplates.map(t => 
+      t.id === editingTemplate.id 
+        ? { ...editingTemplate, name: templateName, subject: templateSubject, body: templateBody }
+        : t
+    );
+    
+    saveTemplates(updatedTemplates);
+    
+    // Reset form
+    setTemplateName('');
+    setTemplateSubject('');
+    setTemplateBody('');
+    setIsCreating(false);
+    setEditingTemplate(null);
+  };
+
+  const handleDeleteTemplate = (templateId: string) => {
+    const updatedTemplates = emailTemplates.filter(t => t.id !== templateId);
+    saveTemplates(updatedTemplates);
+  };
+
+  const cancelEditing = () => {
+    setTemplateName('');
+    setTemplateSubject('');
+    setTemplateBody('');
+    setIsCreating(false);
+    setEditingTemplate(null);
   };
 
   return (
@@ -49,7 +116,7 @@ const SettingsMenu: React.FC<SettingsMenuProps> = ({ children }) => {
       <PopoverTrigger asChild>
         {children}
       </PopoverTrigger>
-      <PopoverContent className="w-80 p-4" align="end">
+      <PopoverContent className="w-96 p-4" align="end">
         <div className="space-y-4">
           <div className="space-y-2">
             <h4 className="font-medium leading-none">Settings</h4>
@@ -60,21 +127,94 @@ const SettingsMenu: React.FC<SettingsMenuProps> = ({ children }) => {
           
           <Separator />
           
-          {/* Theme Control */}
+          {/* Email Templates */}
           <div className="space-y-3">
             <div className="flex items-center justify-between">
-              <Label htmlFor="theme-mode" className="text-sm font-medium">
-                Theme Mode
-              </Label>
+              <Label className="text-sm font-medium">Email Templates</Label>
               <Button
                 variant="outline"
                 size="sm"
-                onClick={cycleTheme}
+                onClick={() => setIsCreating(true)}
                 className="h-8 px-3"
               >
-                {getThemeIcon()}
-                <span className="ml-2 capitalize">{theme || 'light'}</span>
+                <Plus className="h-4 w-4 mr-1" />
+                Add
               </Button>
+            </div>
+            
+            {/* Template Creation/Edit Form */}
+            {isCreating && (
+              <div className="bg-muted/30 rounded-lg p-3 space-y-3">
+                <Input
+                  placeholder="Template name"
+                  value={templateName}
+                  onChange={(e) => setTemplateName(e.target.value)}
+                  className="text-sm"
+                />
+                <Input
+                  placeholder="Email subject"
+                  value={templateSubject}
+                  onChange={(e) => setTemplateSubject(e.target.value)}
+                  className="text-sm"
+                />
+                <Textarea
+                  placeholder="Email body"
+                  value={templateBody}
+                  onChange={(e) => setTemplateBody(e.target.value)}
+                  className="text-sm min-h-[80px]"
+                />
+                <div className="flex gap-2">
+                  <Button
+                    size="sm"
+                    onClick={editingTemplate ? handleUpdateTemplate : handleCreateTemplate}
+                    className="flex-1"
+                  >
+                    {editingTemplate ? 'Update' : 'Save'}
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={cancelEditing}
+                  >
+                    Cancel
+                  </Button>
+                </div>
+              </div>
+            )}
+            
+            {/* Templates List */}
+            <div className="space-y-2 max-h-48 overflow-y-auto">
+              {emailTemplates.map((template) => (
+                <div key={template.id} className="flex items-center justify-between p-2 bg-muted/20 rounded">
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium truncate">{template.name}</p>
+                    <p className="text-xs text-muted-foreground truncate">{template.subject}</p>
+                  </div>
+                  <div className="flex gap-1">
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      onClick={() => handleEditTemplate(template)}
+                      className="h-6 w-6 p-0"
+                    >
+                      <Edit className="h-3 w-3" />
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      onClick={() => handleDeleteTemplate(template.id)}
+                      className="h-6 w-6 p-0 text-destructive hover:text-destructive"
+                    >
+                      <Trash2 className="h-3 w-3" />
+                    </Button>
+                  </div>
+                </div>
+              ))}
+              {emailTemplates.length === 0 && !isCreating && (
+                <p className="text-xs text-muted-foreground text-center py-4">
+                  No email templates created yet
+                </p>
+              )}
             </div>
           </div>
           

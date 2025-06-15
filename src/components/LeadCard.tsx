@@ -7,6 +7,13 @@ import { formatPhoneNumber } from '../utils/phoneUtils';
 import { getStateFromAreaCode } from '../utils/timezoneUtils';
 import { Lead } from '@/types/lead';
 
+interface EmailTemplate {
+  id: string;
+  name: string;
+  subject: string;
+  body: string;
+}
+
 interface LeadCardProps {
   lead: Lead;
   currentIndex: number;
@@ -26,6 +33,16 @@ const LeadCard: React.FC<LeadCardProps> = ({
   onResetCallCount,
   noLeadsMessage
 }) => {
+  const [emailTemplates, setEmailTemplates] = useState<EmailTemplate[]>([]);
+
+  // Load email templates from localStorage
+  useEffect(() => {
+    const savedTemplates = localStorage.getItem('emailTemplates');
+    if (savedTemplates) {
+      setEmailTemplates(JSON.parse(savedTemplates));
+    }
+  }, []);
+
   // If we have a noLeadsMessage, show the empty state
   if (noLeadsMessage) {
     return (
@@ -112,15 +129,29 @@ const LeadCard: React.FC<LeadCardProps> = ({
     onCall(); // The original onCall function will handle the actual calling logic
   };
 
-  // Create mailto link with pre-populated content
-  const createMailtoLink = () => {
+  // Create mailto link with template
+  const createMailtoLink = (template?: EmailTemplate) => {
     if (!hasValidEmail) return '';
+    
+    if (template) {
+      // Replace placeholders in template
+      const subject = template.subject
+        .replace('{name}', lead.name)
+        .replace('{company}', lead.company || '');
+      const body = template.body
+        .replace('{name}', lead.name)
+        .replace('{company}', lead.company || '')
+        .replace('{phone}', selectedPhone);
+        
+      return `mailto:${emailValue}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+    }
+    
     return `mailto:${emailValue}`;
   };
 
-  const handleEmailClick = () => {
-    console.log('Email clicked for:', emailValue);
-    // The mailto link will handle opening the email client
+  const handleEmailClick = (template?: EmailTemplate) => {
+    console.log('Email clicked for:', emailValue, template ? `with template: ${template.name}` : 'without template');
+    window.location.href = createMailtoLink(template);
   };
 
   return (
@@ -203,19 +234,38 @@ const LeadCard: React.FC<LeadCardProps> = ({
               </div>
             </div>
             
-            {/* Email with icon positioned to the left - now clickable without blue highlighting */}
+            {/* Email with icon positioned to the left - now with template dropdown */}
             {hasValidEmail && (
               <div className="flex items-center justify-center">
                 <div className="relative">
                   <Mail className="absolute -left-6 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                  <a
-                    href={createMailtoLink()}
-                    onClick={handleEmailClick}
-                    className="text-sm text-muted-foreground text-center break-words hover:text-muted-foreground/80 hover:underline transition-colors duration-200 cursor-pointer"
-                    title="Click to send email"
-                  >
-                    {emailValue}
-                  </a>
+                  {emailTemplates.length > 0 ? (
+                    <DropdownMenu>
+                      <DropdownMenuTrigger className="text-sm text-muted-foreground text-center break-words hover:text-muted-foreground/80 hover:underline transition-colors duration-200 cursor-pointer">
+                        {emailValue}
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent side="bottom" align="center" className="z-50 min-w-[200px]">
+                        <DropdownMenuItem onClick={() => handleEmailClick()}>
+                          <Mail className="h-4 w-4 mr-2" />
+                          Send without template
+                        </DropdownMenuItem>
+                        {emailTemplates.map((template) => (
+                          <DropdownMenuItem key={template.id} onClick={() => handleEmailClick(template)}>
+                            <Mail className="h-4 w-4 mr-2" />
+                            {template.name}
+                          </DropdownMenuItem>
+                        ))}
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  ) : (
+                    <button
+                      onClick={() => handleEmailClick()}
+                      className="text-sm text-muted-foreground text-center break-words hover:text-muted-foreground/80 hover:underline transition-colors duration-200 cursor-pointer"
+                      title="Click to send email"
+                    >
+                      {emailValue}
+                    </button>
+                  )}
                 </div>
               </div>
             )}
