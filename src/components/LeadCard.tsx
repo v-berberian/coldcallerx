@@ -135,7 +135,7 @@ const LeadCard: React.FC<LeadCardProps> = ({
                     align="center"
                     className="!z-[9999] !bg-transparent !border-white/20"
                     style={{
-                      backgroundColor: 'rgba(255, 255, 255, 0.15) !important',
+                      backgroundColor: 'rgba(255, 255, 255, 0.08) !important',
                       backdropFilter: 'blur(25px)',
                       WebkitBackdropFilter: 'blur(25px)',
                       boxShadow: '0 12px 40px 0 rgba(31, 38, 135, 0.5)',
@@ -148,7 +148,7 @@ const LeadCard: React.FC<LeadCardProps> = ({
                         {allPhones.map((phoneData, index) => (
                           <DropdownMenuItem 
                             key={index}
-                            className="px-4 py-2 text-sm cursor-pointer whitespace-nowrap flex items-center justify-between transition-all duration-200 !bg-transparent hover:!bg-white/20 focus:!bg-white/20 data-[highlighted]:!bg-white/20"
+                            className="px-4 py-2 text-sm cursor-pointer whitespace-nowrap flex items-center justify-between transition-all duration-200 !bg-transparent hover:!bg-white/15 focus:!bg-white/15 data-[highlighted]:!bg-white/15"
                             onClick={() => handlePhoneSelect(phoneData.phone)}
                             style={{
                               backgroundColor: 'transparent',

@@ -68,7 +68,7 @@ const DropdownMenuContent = React.forwardRef<
         className
       )}
       style={{
-        backgroundColor: 'rgba(255, 255, 255, 0.1)',
+        backgroundColor: 'rgba(255, 255, 255, 0.05)',
         backdropFilter: 'blur(20px)',
         WebkitBackdropFilter: 'blur(20px)',
         boxShadow: '0 8px 32px 0 rgba(31, 38, 135, 0.37)',
