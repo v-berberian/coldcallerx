@@ -42,14 +42,17 @@ const CSVImporter: React.FC<CSVImporterProps> = ({ onLeadsImported }) => {
       const line = lines[i].trim();
       if (line) {
         const [company, name, phone, additionalPhones, email] = line.split(',').map(cell => cell.trim().replace(/"/g, ''));
+        console.log('Parsing lead:', { company, name, phone, additionalPhones, email });
         if (name && phone) {
-          leads.push({
+          const lead = {
             name,
             phone: formatPhoneNumber(phone),
             company: company || undefined,
             email: email || undefined,
             additionalPhones: additionalPhones || undefined
-          });
+          };
+          console.log('Created lead with email:', lead.email);
+          leads.push(lead);
         }
       }
     }
