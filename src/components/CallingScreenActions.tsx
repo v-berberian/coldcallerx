@@ -48,7 +48,7 @@ export const useCallingScreenActions = ({
     setShowAutocomplete(false);
   };
 
-  // Handle manual call button click - now updates last called timestamp immediately
+  // Handle manual call button click - only makes the call, doesn't mark as called yet
   const handleCallClick = async () => {
     try {
       const currentLeads = getBaseLeads();
@@ -56,22 +56,23 @@ export const useCallingScreenActions = ({
       
       console.log('CallingScreenActions: Manual call button clicked for:', currentLead.name);
       
-      // First, update the last called timestamp
-      const updatedLeads = updateLeadCallCount(leadsData, currentLead);
-      onLeadsDataUpdate(updatedLeads);
-      
-      // Then make the actual call
+      // Just make the call, don't update lastCalled timestamp yet
+      // The lead will be marked as called when navigation happens
       makeCall(currentLead);
     } catch (error) {
       console.error('CallingScreenActions: Error in handleCallClick:', error);
     }
   };
 
-  // Create wrapper functions for navigation that pass the required baseLeads parameter
+  // Create wrapper functions for navigation that mark lead as called if call was made
   const handleNextWrapper = () => {
     try {
       const currentLeads = getBaseLeads();
+      const currentLead = currentLeads[currentIndex];
+      
       console.log('CallingScreenActions: Next button clicked, triggering navigation with', currentLeads.length, 'leads');
+      
+      // The navigation logic will handle marking the lead as called if a call was made
       handleNext(currentLeads);
     } catch (error) {
       console.error('CallingScreenActions: Error in handleNextWrapper:', error);

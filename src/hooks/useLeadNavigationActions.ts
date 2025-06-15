@@ -33,13 +33,23 @@ export const useLeadNavigationActions = ({
   setCallMadeToCurrentLead,
   autoCall,
   setShouldAutoCall,
-  goToPrevious
+  goToPrevious,
+  markLeadAsCalledOnNavigation
 }: UseLeadNavigationActionsProps) => {
 
   const handleNextWrapper = (baseLeads: Lead[]) => {
+    // Get current lead before navigation
+    const currentLead = baseLeads[currentIndex];
+    
+    // Navigate to next lead
     handleNext(baseLeads);
     
-    // Reset call state when navigating
+    // Mark current lead as called if a call was made (this will update lastCalled timestamp)
+    if (currentLead) {
+      markLeadAsCalledOnNavigation(currentLead);
+    }
+    
+    // Reset call state after navigation
     setCallMadeToCurrentLead(false);
     
     // Set flag to trigger auto-call after navigation
@@ -57,6 +67,9 @@ export const useLeadNavigationActions = ({
       return;
     }
     
+    // Get current lead before navigation for potential call marking
+    const currentLead = baseLeads[currentIndex];
+    
     if (shuffleMode) {
       // In shuffle mode, use navigation history to go to previously shown lead
       const didGoBack = goToPrevious();
@@ -72,13 +85,28 @@ export const useLeadNavigationActions = ({
       updateNavigation(prevIndex);
     }
     
-    // Reset call state when navigating
+    // Mark current lead as called if a call was made (this will update lastCalled timestamp)
+    if (currentLead) {
+      markLeadAsCalledOnNavigation(currentLead);
+    }
+    
+    // Reset call state after navigation
     setCallMadeToCurrentLead(false);
   };
 
   const selectLeadWrapper = (lead: Lead, baseLeads: Lead[], leadsData: Lead[]) => {
+    // Get current lead before selection for potential call marking
+    const currentLead = baseLeads[currentIndex];
+    
+    // Select the new lead
     selectLead(lead, baseLeads, leadsData);
-    // Reset call state when selecting a new lead
+    
+    // Mark previous lead as called if a call was made
+    if (currentLead) {
+      markLeadAsCalledOnNavigation(currentLead);
+    }
+    
+    // Reset call state after selection
     setCallMadeToCurrentLead(false);
   };
 
