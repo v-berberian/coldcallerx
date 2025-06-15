@@ -76,17 +76,21 @@ const Index = () => {
       total_leads: importedLeads.length
     };
 
-    // Save to localStorage
-    setCurrentLeadList(leadList);
-    setLeadsData(importedLeads);
-    
+    // Save to localStorage first
     try {
       localStorage.setItem('currentLeadList', JSON.stringify(leadList));
       localStorage.setItem('leadsData', JSON.stringify(importedLeads));
       console.log('Index: Successfully saved to localStorage');
     } catch (error) {
       console.error('Index: Error saving to localStorage:', error);
+      return;
     }
+
+    // Then update state
+    setCurrentLeadList(leadList);
+    setLeadsData(importedLeads);
+    
+    console.log('Index: State updated with', importedLeads.length, 'leads');
   };
 
   const handleBack = async () => {

@@ -107,22 +107,24 @@ const CSVImporter: React.FC<CSVImporterProps> = ({ onLeadsImported }) => {
         if (leads.length === 0) {
           setError('No valid leads found in the CSV file');
           console.error('CSVImporter: No leads found in file');
+          setLoading(false);
           return;
         }
         
         const fileName = file.name.replace('.csv', '');
-        console.log('CSVImporter: Importing', leads.length, 'leads with filename:', fileName);
+        console.log('CSVImporter: Calling onLeadsImported with', leads.length, 'leads and filename:', fileName);
         onLeadsImported(leads, fileName);
+        setLoading(false);
       };
       reader.onerror = () => {
         setError('Error reading file');
         console.error('CSVImporter: Error reading file');
+        setLoading(false);
       };
       reader.readAsText(file);
     } catch (error) {
       setError('Error processing file');
       console.error('CSVImporter: File processing error:', error);
-    } finally {
       setLoading(false);
     }
   };
