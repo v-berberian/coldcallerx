@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -31,41 +32,35 @@ const LeadCard: React.FC<LeadCardProps> = ({
   const emailValue = lead.email?.trim() ?? '';
   const hasValidEmail = emailValue && emailValue.includes('@');
   
-  // Fix phone parsing - handle the actual format: "773) 643-4644 (773) 643-9346"
+  // Completely rewrite phone parsing - handle format: "773) 643-4644 (773) 643-9346"
   const additionalPhones = lead.additionalPhones
-    ? lead.additionalPhones
-        .split(/\)\s+\(/g) // Split on ") (" pattern globally
-        .map((phone, index, array) => {
-          let cleanPhone = phone.trim();
-          
-          // Add opening parenthesis to all but the first phone
-          if (index > 0 && !cleanPhone.startsWith('(')) {
-            cleanPhone = '(' + cleanPhone;
-          }
-          
-          // Add closing parenthesis to all but the last phone
-          if (index < array.length - 1 && !cleanPhone.includes(')')) {
-            cleanPhone = cleanPhone.replace(/^(\d{3})/, '($1)');
-          }
-          
-          // For the first phone, it might be missing the opening parenthesis
-          if (index === 0 && !cleanPhone.startsWith('(')) {
-            cleanPhone = '(' + cleanPhone;
-          }
-          
-          return cleanPhone;
-        })
-        .filter(phone => {
-          const digits = phone.replace(/\D/g, '');
-          return digits.length >= 10;
-        })
+    ? (() => {
+        const rawString = lead.additionalPhones.trim();
+        console.log('Raw additional phones string:', rawString);
+        
+        // Use regex to find all phone patterns like "(123) 456-7890" or "123) 456-7890"
+        const phonePattern = /\(?(\d{3})\)?\s*(\d{3})-?(\d{4})/g;
+        const foundPhones = [];
+        let match;
+        
+        while ((match = phonePattern.exec(rawString)) !== null) {
+          const formattedPhone = `(${match[1]}) ${match[2]}-${match[3]}`;
+          foundPhones.push(formattedPhone);
+        }
+        
+        console.log('Found phones:', foundPhones);
+        
+        // Remove the primary phone if it appears in the additional phones
+        const primaryPhoneFormatted = formatPhoneNumber(lead.phone);
+        return foundPhones.filter(phone => phone !== primaryPhoneFormatted);
+      })()
     : [];
+  
   const hasAdditionalPhones = additionalPhones.length > 0;
 
   // Debug logging
-  console.log('Raw additional phones string:', lead.additionalPhones);
   console.log('Primary phone:', formatPhoneNumber(lead.phone));
-  console.log('Additional phones after parsing:', additionalPhones.map(phone => formatPhoneNumber(phone)));
+  console.log('Additional phones after parsing:', additionalPhones);
 
   return (
     <Card className="shadow-2xl border-border/50 rounded-3xl bg-card h-[480px] flex flex-col">
@@ -133,7 +128,7 @@ const LeadCard: React.FC<LeadCardProps> = ({
                             className="px-4 py-2 text-sm hover:bg-accent cursor-pointer"
                             style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}
                           >
-                            {formatPhoneNumber(phone)}
+                            {phone}
                           </div>
                         ))}
                       </div>
