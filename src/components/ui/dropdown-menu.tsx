@@ -1,4 +1,3 @@
-
 import * as React from "react"
 import * as DropdownMenuPrimitive from "@radix-ui/react-dropdown-menu"
 import { Check, ChevronRight, Circle } from "lucide-react"
@@ -64,7 +63,7 @@ const DropdownMenuContent = React.forwardRef<
       ref={ref}
       sideOffset={sideOffset}
       className={cn(
-        "z-50 min-w-[8rem] rounded-xl shadow-lg overflow-hidden bg-background/70 backdrop-blur-sm border border-border/15",
+        "z-50 min-w-[8rem] rounded-xl shadow-lg overflow-hidden bg-background/70 backdrop-blur-sm border border-border/15 animate-slide-down",
         className
       )}
       {...props}
