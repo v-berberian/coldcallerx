@@ -138,8 +138,8 @@ const LeadCard: React.FC<LeadCardProps> = ({
                           onClick={() => handlePhoneSelect(phoneData.phone)}
                         >
                           <div className="flex justify-between items-center w-full">
-                            <span className="font-medium text-foreground">
-                              {phoneData.phone} {phoneData.isPrimary && '(Primary)'}
+                            <span className={`text-foreground ${phoneData.isPrimary ? 'font-bold' : 'font-medium'}`}>
+                              {phoneData.phone}
                             </span>
                             {selectedPhone === phoneData.phone && !phoneData.isPrimary && (
                               <div className="w-2 h-2 bg-black rounded-full ml-2"></div>
