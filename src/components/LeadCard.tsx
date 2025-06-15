@@ -11,7 +11,6 @@ interface Lead {
   phone: string;
   company?: string;
   email?: string;
-  called?: number;
   lastCalled?: string;
 }
 
@@ -50,7 +49,7 @@ const LeadCard: React.FC<LeadCardProps> = ({
 
         {/* Lead info - Main content area with animation */}
         <div key={leadKey} className="text-center space-y-4 flex-1 flex flex-col justify-center animate-fade-in">
-          {/* State and timezone - moved to top with same font size as "Called: times" */}
+          {/* State and timezone - moved to top */}
           <p className="text-sm text-muted-foreground">
             {getStateFromAreaCode(lead.phone)}
           </p>
@@ -81,26 +80,21 @@ const LeadCard: React.FC<LeadCardProps> = ({
           )}
           
           <div className="relative flex flex-col items-center space-y-4">
-            <div className="flex items-center justify-center">
-              <p className="text-sm text-muted-foreground">
-                Called: {lead.called || 0} times
-              </p>
-              {(lead.called || 0) > 0 && (
-                <button
-                  onClick={onResetCallCount}
-                  className="ml-2 p-1 bg-muted rounded transition-colors"
-                  title="Reset call count"
-                >
-                  <X className="h-3 w-3 text-muted-foreground" />
-                </button>
-              )}
-            </div>
             {/* Reserve space for last called text to prevent layout shift */}
             <div className="h-5 flex items-center justify-center">
               {lead.lastCalled && (
-                <p className="text-sm text-muted-foreground transition-opacity duration-300 ease-in-out opacity-100 whitespace-nowrap">
-                  Last called: {lead.lastCalled}
-                </p>
+                <div className="flex items-center">
+                  <p className="text-sm text-muted-foreground transition-opacity duration-300 ease-in-out opacity-100 whitespace-nowrap">
+                    Last called: {lead.lastCalled}
+                  </p>
+                  <button
+                    onClick={onResetCallCount}
+                    className="ml-2 p-1 bg-muted rounded transition-colors"
+                    title="Clear last called"
+                  >
+                    <X className="h-3 w-3 text-muted-foreground" />
+                  </button>
+                </div>
               )}
             </div>
           </div>

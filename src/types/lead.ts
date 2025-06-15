@@ -4,7 +4,6 @@ export interface Lead {
   phone: string;
   company?: string;
   email?: string;
-  called?: number;
   lastCalled?: string;
 }
 

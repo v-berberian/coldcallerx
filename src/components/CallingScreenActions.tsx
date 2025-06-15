@@ -48,7 +48,7 @@ export const useCallingScreenActions = ({
     setShowAutocomplete(false);
   };
 
-  // Handle manual call button click - now updates call count immediately
+  // Handle manual call button click - now updates last called timestamp immediately
   const handleCallClick = async () => {
     try {
       const currentLeads = getBaseLeads();
@@ -56,7 +56,7 @@ export const useCallingScreenActions = ({
       
       console.log('CallingScreenActions: Manual call button clicked for:', currentLead.name);
       
-      // First, update the call count and timestamp
+      // First, update the last called timestamp
       const updatedLeads = updateLeadCallCount(leadsData, currentLead);
       onLeadsDataUpdate(updatedLeads);
       

@@ -49,7 +49,7 @@ export const useLocalLeadOperations = () => {
     }
   };
 
-  // Updated to work with external leads data and return updated data
+  // Updated to only set last called timestamp
   const updateLeadCallCount = useCallback((currentLeadsData: Lead[], lead: Lead): Lead[] => {
     try {
       const now = new Date();
@@ -60,15 +60,13 @@ export const useLocalLeadOperations = () => {
         hour12: true
       });
       const lastCalledString = `${dateString} at ${timeString}`;
-      const newCallCount = (lead.called || 0) + 1;
 
-      console.log('Updating call count for:', lead.name, 'to:', newCallCount);
+      console.log('Updating last called for:', lead.name, 'to:', lastCalledString);
 
-      // Update the leads data
+      // Update the leads data - only set lastCalled
       const updatedLeads = currentLeadsData.map(l => 
         l.name === lead.name && l.phone === lead.phone ? {
           ...l,
-          called: newCallCount,
           lastCalled: lastCalledString
         } : l
       );
@@ -78,41 +76,40 @@ export const useLocalLeadOperations = () => {
       
       return updatedLeads;
     } catch (error) {
-      console.error('Error updating call count:', error);
+      console.error('Error updating last called:', error);
       return currentLeadsData;
     }
   }, []);
 
   const resetCallCount = useCallback((currentLeadsData: Lead[], lead: Lead): Lead[] => {
     try {
-      // Update the leads data
+      // Update the leads data - only clear lastCalled
       const updatedLeads = currentLeadsData.map(l => 
         l.name === lead.name && l.phone === lead.phone 
-          ? { ...l, called: 0, lastCalled: undefined }
+          ? { ...l, lastCalled: undefined }
           : l
       );
       
       localStorage.setItem('leadsData', JSON.stringify(updatedLeads));
       return updatedLeads;
     } catch (error) {
-      console.error('Error resetting call count:', error);
+      console.error('Error resetting last called:', error);
       return currentLeadsData;
     }
   }, []);
 
   const resetAllCallCounts = useCallback((currentLeadsData: Lead[]): Lead[] => {
     try {
-      // Update the leads data
+      // Update the leads data - only clear lastCalled for all
       const updatedLeads = currentLeadsData.map(l => ({
         ...l,
-        called: 0,
         lastCalled: undefined
       }));
       
       localStorage.setItem('leadsData', JSON.stringify(updatedLeads));
       return updatedLeads;
     } catch (error) {
-      console.error('Error resetting all call counts:', error);
+      console.error('Error resetting all last called timestamps:', error);
       return currentLeadsData;
     }
   }, []);
