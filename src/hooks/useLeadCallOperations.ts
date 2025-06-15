@@ -31,13 +31,10 @@ export const useLeadCallOperations = ({
       });
       const lastCalledString = `${dateString} at ${timeString}`;
 
-      const newCallCount = (lead.called || 0) + 1;
-
       // Update local state
       const updatedLeads = leadsData.map(l => 
         l.name === lead.name && l.phone === lead.phone ? {
           ...l,
-          called: newCallCount,
           lastCalled: lastCalledString
         } : l
       );
@@ -48,7 +45,7 @@ export const useLeadCallOperations = ({
         currentLeadList.id,
         lead.name,
         lead.phone,
-        newCallCount,
+        1,
         lastCalledString
       );
 
@@ -71,7 +68,7 @@ export const useLeadCallOperations = ({
     // Update local state
     const updatedLeads = leadsData.map(l => 
       l.name === lead.name && l.phone === lead.phone 
-        ? { ...l, called: 0, lastCalled: undefined }
+        ? { ...l, lastCalled: undefined }
         : l
     );
     setLeadsData(updatedLeads);
@@ -88,7 +85,6 @@ export const useLeadCallOperations = ({
     // Update local state
     const updatedLeads = leadsData.map(l => ({
       ...l,
-      called: 0,
       lastCalled: undefined
     }));
     setLeadsData(updatedLeads);

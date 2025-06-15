@@ -62,7 +62,6 @@ export const useHybridLeadOperations = () => {
               phone: lead.phone,
               company: lead.company || undefined,
               email: lead.email || undefined,
-              called: lead.called_count || 0,
               lastCalled: lead.last_called || undefined
             }));
             setLeadsData(formattedLeads);
@@ -143,7 +142,7 @@ export const useHybridLeadOperations = () => {
               phone: lead.phone,
               company: lead.company || null,
               email: lead.email || null,
-              called_count: lead.called || 0,
+              called_count: 0,
               last_called: lead.lastCalled || null
             }));
 
@@ -179,13 +178,11 @@ export const useHybridLeadOperations = () => {
         hour12: true
       });
       const lastCalledString = `${dateString} at ${timeString}`;
-      const newCallCount = (lead.called || 0) + 1;
 
       // Update local state immediately
       const updatedLeads = leadsData.map(l => 
         l.name === lead.name && l.phone === lead.phone ? {
           ...l,
-          called: newCallCount,
           lastCalled: lastCalledString
         } : l
       );
@@ -198,7 +195,6 @@ export const useHybridLeadOperations = () => {
           const { error } = await supabase
             .from('leads')
             .update({
-              called_count: newCallCount,
               last_called: lastCalledString,
               last_called_at: now.toISOString()
             })
@@ -225,7 +221,7 @@ export const useHybridLeadOperations = () => {
       // Update local state immediately
       const updatedLeads = leadsData.map(l => 
         l.name === lead.name && l.phone === lead.phone 
-          ? { ...l, called: 0, lastCalled: undefined }
+          ? { ...l, lastCalled: undefined }
           : l
       );
       setLeadsData(updatedLeads);
@@ -237,7 +233,6 @@ export const useHybridLeadOperations = () => {
           const { error } = await supabase
             .from('leads')
             .update({
-              called_count: 0,
               last_called: null,
               last_called_at: null
             })
@@ -264,7 +259,6 @@ export const useHybridLeadOperations = () => {
       // Update local state immediately
       const updatedLeads = leadsData.map(l => ({
         ...l,
-        called: 0,
         lastCalled: undefined
       }));
       setLeadsData(updatedLeads);
@@ -276,7 +270,6 @@ export const useHybridLeadOperations = () => {
           const { error } = await supabase
             .from('leads')
             .update({
-              called_count: 0,
               last_called: null,
               last_called_at: null
             })

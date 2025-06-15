@@ -7,7 +7,6 @@ export const useLeadsData = (initialLeads: Lead[]) => {
   const [leadsData, setLeadsData] = useState<Lead[]>(
     initialLeads.map(lead => ({
       ...lead,
-      called: lead.called || 0,
       lastCalled: lead.lastCalled || undefined
     }))
   );
@@ -16,7 +15,6 @@ export const useLeadsData = (initialLeads: Lead[]) => {
   useEffect(() => {
     setLeadsData(initialLeads.map(lead => ({
       ...lead,
-      called: lead.called || 0,
       lastCalled: lead.lastCalled || undefined
     })));
   }, [initialLeads]);
@@ -54,7 +52,6 @@ export const useLeadsData = (initialLeads: Lead[]) => {
       const updatedLeads = leadsData.map(l => 
         l.name === lead.name && l.phone === lead.phone ? {
           ...l,
-          called: (l.called || 0) + 1,
           lastCalled: lastCalledString
         } : l
       );
@@ -76,7 +73,7 @@ export const useLeadsData = (initialLeads: Lead[]) => {
     try {
       const updatedLeads = leadsData.map(l => 
         l.name === lead.name && l.phone === lead.phone 
-          ? { ...l, called: 0, lastCalled: undefined }
+          ? { ...l, lastCalled: undefined }
           : l
       );
       setLeadsData(updatedLeads);
@@ -96,7 +93,6 @@ export const useLeadsData = (initialLeads: Lead[]) => {
     try {
       const updatedLeads = leadsData.map(l => ({
         ...l,
-        called: 0,
         lastCalled: undefined
       }));
       setLeadsData(updatedLeads);
