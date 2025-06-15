@@ -9,6 +9,51 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      court_records: {
+        Row: {
+          business_name: string
+          case_date: string | null
+          case_name: string | null
+          case_number: string | null
+          case_summary: string | null
+          case_url: string | null
+          court_name: string | null
+          created_at: string
+          id: string
+          search_query: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          business_name: string
+          case_date?: string | null
+          case_name?: string | null
+          case_number?: string | null
+          case_summary?: string | null
+          case_url?: string | null
+          court_name?: string | null
+          created_at?: string
+          id?: string
+          search_query: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          business_name?: string
+          case_date?: string | null
+          case_name?: string | null
+          case_number?: string | null
+          case_summary?: string | null
+          case_url?: string | null
+          court_name?: string | null
+          created_at?: string
+          id?: string
+          search_query?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       daily_call_stats: {
         Row: {
           call_count: number | null
