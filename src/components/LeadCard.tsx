@@ -71,9 +71,11 @@ const LeadCard: React.FC<LeadCardProps> = ({
           )}
           
           {/* Phone number with icon */}
-          <div className="relative flex items-center justify-center">
-            <Phone className="absolute -left-0.5 h-4 w-4 text-muted-foreground" />
-            <p className="text-lg text-muted-foreground text-center">{formatPhoneNumber(lead.phone)}</p>
+          <div className="flex items-center justify-center">
+            <div className="flex items-center gap-2">
+              <Phone className="h-4 w-4 text-muted-foreground" />
+              <p className="text-lg text-muted-foreground">{formatPhoneNumber(lead.phone)}</p>
+            </div>
           </div>
           
           {/* Email - displayed underneath phone number */}
