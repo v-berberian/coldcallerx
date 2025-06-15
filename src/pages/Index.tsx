@@ -62,11 +62,9 @@ const Index = () => {
         <div className="flex items-center justify-between p-4 border-b border-border pt-safe flex-shrink-0" style={{ paddingTop: 'max(1rem, env(safe-area-inset-top))' }}>
           <CSVImporter onLeadsImported={handleLeadsImported} />
           
-          <img 
-            src="/lovable-uploads/664ca8e4-0033-4faf-9c3d-9b585dc1de97.png" 
-            alt="Cold Caller X" 
-            className="h-8 w-auto object-contain"
-          />
+          <h1 className="text-2xl font-bold">
+            <span className="text-blue-500">Cold Caller X</span>
+          </h1>
           
           <div className="w-8"></div>
         </div>

@@ -55,9 +55,14 @@ const CallingHeader: React.FC<CallingHeaderProps> = ({
         
         <div className="flex items-center space-x-2 sm:space-x-3 flex-1 justify-center min-w-0">
           <img 
-            src="/lovable-uploads/664ca8e4-0033-4faf-9c3d-9b585dc1de97.png" 
+            src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==" 
             alt="Cold Caller X" 
             className="h-6 sm:h-8 w-auto object-contain"
+            onError={(e) => {
+              // Fallback to text if image fails to load
+              e.currentTarget.style.display = 'none';
+              e.currentTarget.parentElement!.innerHTML = '<h1 class="text-xl sm:text-2xl font-bold"><span class="text-blue-500">Cold Caller X</span></h1>';
+            }}
           />
         </div>
         

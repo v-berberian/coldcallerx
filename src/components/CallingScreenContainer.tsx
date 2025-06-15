@@ -150,11 +150,9 @@ const CallingScreenContainer: React.FC<CallingScreenContainerProps> = ({
         <div className="bg-background border-b border-border p-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-3">
-              <img 
-                src="/lovable-uploads/664ca8e4-0033-4faf-9c3d-9b585dc1de97.png" 
-                alt="Cold Caller X" 
-                className="h-8 w-auto object-contain"
-              />
+              <h1 className="text-2xl font-bold">
+                <span className="text-blue-500">Cold Caller X</span>
+              </h1>
             </div>
           </div>
         </div>
