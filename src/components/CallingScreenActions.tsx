@@ -11,6 +11,9 @@ interface CallingScreenActionsProps {
   leadsData: Lead[];
   setSearchQuery: (query: string) => void;
   setShowAutocomplete: (show: boolean) => void;
+  updateLeadCallCount: (lead: Lead) => Promise<boolean>;
+  resetCallCount: (lead: Lead) => Promise<boolean>;
+  resetAllCallCounts: () => Promise<boolean>;
 }
 
 export const useCallingScreenActions = ({
@@ -22,7 +25,10 @@ export const useCallingScreenActions = ({
   selectLead,
   leadsData,
   setSearchQuery,
-  setShowAutocomplete
+  setShowAutocomplete,
+  updateLeadCallCount,
+  resetCallCount,
+  resetAllCallCounts
 }: CallingScreenActionsProps) => {
   
   const handleLeadSelect = (lead: Lead) => {
@@ -40,13 +46,18 @@ export const useCallingScreenActions = ({
     setShowAutocomplete(false);
   };
 
-  // Handle manual call button click
+  // Handle manual call button click - now updates call count immediately
   const handleCallClick = async () => {
     try {
       const currentLeads = getBaseLeads();
       const currentLead = currentLeads[currentIndex];
       
       console.log('CallingScreenActions: Manual call button clicked for:', currentLead.name);
+      
+      // First, update the call count and timestamp
+      await updateLeadCallCount(currentLead);
+      
+      // Then make the actual call
       makeCall(currentLead);
     } catch (error) {
       console.error('CallingScreenActions: Error in handleCallClick:', error);
@@ -74,21 +85,21 @@ export const useCallingScreenActions = ({
     }
   };
 
-  // Handle reset call count - local only now
+  // Handle reset call count
   const handleResetCallCount = async (lead: Lead) => {
     try {
-      console.log('CallingScreenActions: Reset call count for:', lead.name, '(local only)');
-      // This would reset the local call count only
+      console.log('CallingScreenActions: Reset call count for:', lead.name);
+      await resetCallCount(lead);
     } catch (error) {
       console.error('CallingScreenActions: Error in handleResetCallCount:', error);
     }
   };
 
-  // Handle reset all call counts - local only now
+  // Handle reset all call counts
   const handleResetAllCallCounts = async () => {
     try {
-      console.log('CallingScreenActions: Reset all call counts (local only)');
-      // This would reset all local call counts only
+      console.log('CallingScreenActions: Reset all call counts');
+      await resetAllCallCounts();
     } catch (error) {
       console.error('CallingScreenActions: Error in handleResetAllCallCounts:', error);
     }

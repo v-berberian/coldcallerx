@@ -23,7 +23,7 @@ const CallingScreenContainer: React.FC<CallingScreenContainerProps> = ({
   onBack,
   onLeadsImported
 }) => {
-  const { importLeadsFromCSV } = useLocalLeadOperations();
+  const { importLeadsFromCSV, updateLeadCallCount, resetCallCount, resetAllCallCounts } = useLocalLeadOperations();
 
   const {
     componentReady,
@@ -57,8 +57,6 @@ const CallingScreenContainer: React.FC<CallingScreenContainerProps> = ({
     toggleCallDelay,
     resetCallDelay,
     memoizedResetLeadsData,
-    resetCallCount: localResetCallCount,
-    resetAllCallCounts: localResetAllCallCounts,
     searchQuery,
     setSearchQuery,
     searchResults,
@@ -104,7 +102,10 @@ const CallingScreenContainer: React.FC<CallingScreenContainerProps> = ({
     selectLead,
     leadsData,
     setSearchQuery,
-    setShowAutocomplete
+    setShowAutocomplete,
+    updateLeadCallCount,
+    resetCallCount,
+    resetAllCallCounts
   });
 
   // Handle CSV import locally

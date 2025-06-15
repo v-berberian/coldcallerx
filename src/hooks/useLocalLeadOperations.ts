@@ -61,6 +61,8 @@ export const useLocalLeadOperations = () => {
       const lastCalledString = `${dateString} at ${timeString}`;
       const newCallCount = (lead.called || 0) + 1;
 
+      console.log('Updating call count for:', lead.name, 'to:', newCallCount);
+
       // Update local state
       const updatedLeads = leadsData.map(l => 
         l.name === lead.name && l.phone === lead.phone ? {
