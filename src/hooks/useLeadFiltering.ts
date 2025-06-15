@@ -10,7 +10,7 @@ export const useLeadFiltering = (
   const getBaseLeads = () => {
     let filtered = filterLeadsByTimezone(leadsData, timezoneFilter);
     if (callFilter === 'UNCALLED') {
-      filtered = filtered.filter(lead => !lead.called || lead.called === 0);
+      filtered = filtered.filter(lead => !lead.lastCalled);
     }
     return filtered;
   };
