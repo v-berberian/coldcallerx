@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -74,26 +75,39 @@ const LeadCard: React.FC<LeadCardProps> = ({
           )}
           
           {/* Phone number with icon positioned to the left */}
-          <div className="flex items-center justify-center">
-            <div className="relative">
-              <Phone className="absolute -left-6 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <div className="flex items-center justify-center px-4">
+            <div className="relative w-full">
               {hasAdditionalPhones ? (
                 <DropdownMenu>
-                  <DropdownMenuTrigger className="flex items-center gap-1 cursor-pointer">
-                    <p className="text-lg text-muted-foreground">{formatPhoneNumber(lead.phone)}</p>
-                    <ChevronDown className="h-4 w-4 text-muted-foreground" />
+                  <DropdownMenuTrigger asChild>
+                    <button className="relative w-full text-left flex items-center px-4 py-2 bg-white/5 backdrop-blur-md rounded-xl border border-white/10 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 transition-all duration-200 shadow-lg cursor-pointer">
+                      <Phone className="h-4 w-4 text-muted-foreground mr-3 flex-shrink-0" />
+                      <span className="flex-1 text-lg text-muted-foreground truncate">{formatPhoneNumber(lead.phone)}</span>
+                      <ChevronDown className="h-4 w-4 text-muted-foreground ml-3 flex-shrink-0" />
+                    </button>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent side="bottom" align="center" className="w-max">
+                  <DropdownMenuContent 
+                    side="bottom" 
+                    align="center" 
+                    className="mt-1 rounded-xl shadow-lg overflow-hidden bg-background/15 backdrop-blur-sm border border-border/15 w-[var(--radix-dropdown-menu-trigger-width)]"
+                  >
                     <ScrollArea className="max-h-[160px]">
-                      <DropdownMenuItem className="whitespace-nowrap">{formatPhoneNumber(lead.phone)} (Primary)</DropdownMenuItem>
+                      <DropdownMenuItem className="w-full px-4 py-3 text-left border-b border-border/10 last:border-b-0 transition-colors duration-150 hover:bg-muted/50 focus:bg-muted/50 whitespace-nowrap cursor-default">
+                        {formatPhoneNumber(lead.phone)} (Primary)
+                      </DropdownMenuItem>
                       {additionalPhones.map((phone, index) => (
-                        <DropdownMenuItem key={index} className="whitespace-nowrap">{formatPhoneNumber(phone)}</DropdownMenuItem>
+                        <DropdownMenuItem key={index} className="w-full px-4 py-3 text-left border-b border-border/10 last:border-b-0 transition-colors duration-150 hover:bg-muted/50 focus:bg-muted/50 whitespace-nowrap cursor-default">
+                          {formatPhoneNumber(phone)}
+                        </DropdownMenuItem>
                       ))}
                     </ScrollArea>
                   </DropdownMenuContent>
                 </DropdownMenu>
               ) : (
-                <p className="text-lg text-muted-foreground">{formatPhoneNumber(lead.phone)}</p>
+                <div className="relative w-full text-left flex items-center px-4 py-2 bg-white/5 backdrop-blur-md rounded-xl border border-white/10 shadow-lg">
+                    <Phone className="h-4 w-4 text-muted-foreground mr-3 flex-shrink-0" />
+                    <p className="text-lg text-muted-foreground truncate">{formatPhoneNumber(lead.phone)}</p>
+                </div>
               )}
             </div>
           </div>
