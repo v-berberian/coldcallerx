@@ -1,3 +1,4 @@
+
 import React, { useState, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Upload } from 'lucide-react';
@@ -38,14 +39,29 @@ const CSVImporter: React.FC<CSVImporterProps> = ({ onLeadsImported }) => {
     for (let i = 1; i < lines.length; i++) {
       const line = lines[i].trim();
       if (line) {
-        const [name, phone, company, email] = line.split(',').map(cell => cell.trim().replace(/"/g, ''));
+        const [name, company, phone, additionalPhones] = line.split(',').map(cell => cell.trim().replace(/"/g, ''));
+        
         if (name && phone) {
+          // Add the primary lead
           leads.push({
             name,
             phone: formatPhoneNumber(phone),
-            company: company || undefined,
-            email: email || undefined
+            company: company || undefined
           });
+
+          // If there are additional phone numbers, create separate leads for each
+          if (additionalPhones) {
+            const additionalNumbers = additionalPhones.split(';').map(num => num.trim()).filter(num => num);
+            additionalNumbers.forEach(additionalPhone => {
+              if (additionalPhone) {
+                leads.push({
+                  name: `${name} (Alt)`,
+                  phone: formatPhoneNumber(additionalPhone),
+                  company: company || undefined
+                });
+              }
+            });
+          }
         }
       }
     }
