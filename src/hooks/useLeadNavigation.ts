@@ -185,6 +185,7 @@ export const useLeadNavigation = (initialLeads: Lead[]) => {
     toggleCallDelay,
     resetCallDelay,
     resetLeadsData,
+    updateLeadsDataDirectly: setLeadsData, // Expose direct leads data update
     restoreFromLocalStorage,
     syncFromCloudSession,
     countdownTime
