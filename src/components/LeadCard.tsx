@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -164,7 +165,7 @@ const LeadCard: React.FC<LeadCardProps> = ({
           
           {/* Group 2: Phone and Email */}
           <div className="space-y-2">
-            {/* Phone number with icon positioned to the left - restored glassmorphism dropdown styling */}
+            {/* Phone number with icon positioned to the left - removed animation class */}
             <div className="flex items-center justify-center">
               <div className="relative">
                 <Phone className="absolute -left-6 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -177,7 +178,7 @@ const LeadCard: React.FC<LeadCardProps> = ({
                     <DropdownMenuContent 
                       side="bottom" 
                       align="center" 
-                      className="z-50 min-w-[200px] bg-background/85 backdrop-blur-sm border border-border/30 shadow-lg rounded-xl p-1"
+                      className="z-50 min-w-[200px] bg-background/95 backdrop-blur-sm border border-border/30 shadow-lg rounded-xl p-1"
                     >
                       {allPhones.map((phoneData, index) => (
                         <DropdownMenuItem 
