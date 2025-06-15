@@ -63,7 +63,7 @@ const DropdownMenuContent = React.forwardRef<
       ref={ref}
       sideOffset={sideOffset}
       className={cn(
-        "z-50 min-w-[8rem] rounded-xl shadow-lg bg-background border border-border/15 animate-slide-down p-1",
+        "z-50 min-w-[8rem] rounded-xl shadow-lg bg-background border border-border/15 animate-slide-down-fast p-1",
         className
       )}
       {...props}
@@ -81,7 +81,7 @@ const DropdownMenuItem = React.forwardRef<
   <DropdownMenuPrimitive.Item
     ref={ref}
     className={cn(
-      "w-full px-4 py-3 text-left border-b border-border/10 last:border-b-0 transition-colors duration-150 cursor-default hover:bg-muted/50 relative",
+      "w-full px-4 py-3 text-left border-b border-border/10 last:border-b-0 transition-colors duration-75 cursor-default hover:bg-muted/50 relative",
       inset && "pl-8",
       className
     )}

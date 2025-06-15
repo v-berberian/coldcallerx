@@ -36,11 +36,11 @@ const SearchAutocomplete: React.FC<SearchAutocompleteProps> = ({
       setIsAnimating(true);
     } else if (shouldRender) {
       setIsAnimating(false);
-      // Faster close animation - reduced from 200ms to 100ms
+      // Faster close animation - reduced from 100ms to 50ms
       const timer = setTimeout(() => {
         setShouldRender(false);
         onAnimationComplete?.();
-      }, 100); // Match faster animation duration
+      }, 50); // Match faster animation duration
       return () => clearTimeout(timer);
     }
   }, [isVisible, shouldRender, onAnimationComplete]);
@@ -49,7 +49,7 @@ const SearchAutocomplete: React.FC<SearchAutocompleteProps> = ({
     return null;
   }
 
-  const animationClass = isAnimating ? 'animate-slide-down' : 'animate-slide-up-fast';
+  const animationClass = isAnimating ? 'animate-slide-down-fast' : 'animate-slide-up-fastest';
 
   if (leads.length === 0) {
     return (
@@ -66,7 +66,7 @@ const SearchAutocomplete: React.FC<SearchAutocompleteProps> = ({
           <button
             key={`${lead.name}-${lead.phone}-${index}`}
             onClick={() => onLeadSelect(lead)}
-            className="w-full px-4 py-3 text-left border-b border-border/10 last:border-b-0 transition-colors duration-150 cursor-default hover:bg-muted/50"
+            className="w-full px-4 py-3 text-left border-b border-border/10 last:border-b-0 transition-colors duration-75 cursor-default hover:bg-muted/50"
           >
             <div className="flex justify-between items-start">
               <div className="flex-1 min-w-0">
