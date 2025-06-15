@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 import { Lead } from '@/types/lead';
 
@@ -95,7 +94,7 @@ export const leadService = {
         lead_list_id: leadListId,
         name: lead.name,
         phone: lead.phone,
-        called_count: lead.called || 0,
+        called_count: 0,
         last_called_at: lastCalledAt
       };
     });
@@ -147,7 +146,6 @@ export const leadService = {
     return data.map(lead => ({
       name: lead.name,
       phone: lead.phone,
-      called: lead.called_count,
       lastCalled: lead.last_called_at ? new Date(lead.last_called_at).toLocaleString() : undefined
     }));
   },
