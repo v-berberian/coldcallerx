@@ -1,4 +1,3 @@
-
 import type { Config } from "tailwindcss";
 
 export default {
@@ -70,20 +69,40 @@ export default {
 				sm: 'calc(var(--radius) - 4px)'
 			},
 			keyframes: {
-				'accordion-down': {
-					from: {
-						height: '0'
+				"accordion-down": {
+					from: { height: "0" },
+					to: { height: "var(--radix-accordion-content-height)" },
+				},
+				"accordion-up": {
+					from: { height: "var(--radix-accordion-content-height)" },
+					to: { height: "0" },
+				},
+				"template-down": {
+					"0%": { 
+						opacity: "0",
+						height: "0",
+						marginTop: "0",
+						transform: "scale(0.95)"
 					},
-					to: {
-						height: 'var(--radix-accordion-content-height)'
+					"100%": { 
+						opacity: "1",
+						height: "var(--radix-collapsible-content-height)",
+						marginTop: "0.5rem",
+						transform: "scale(1)"
 					}
 				},
-				'accordion-up': {
-					from: {
-						height: 'var(--radix-accordion-content-height)'
+				"template-up": {
+					"0%": { 
+						opacity: "1",
+						height: "var(--radix-collapsible-content-height)",
+						marginTop: "0.5rem",
+						transform: "scale(1)"
 					},
-					to: {
-						height: '0'
+					"100%": { 
+						opacity: "0",
+						height: "0",
+						marginTop: "0",
+						transform: "scale(0.95)"
 					}
 				},
 				'fade-in': {
@@ -107,16 +126,8 @@ export default {
 					}
 				},
 				'slide-down': {
-					'0%': {
-						opacity: '0',
-						transform: 'translateY(-10px)',
-						maxHeight: '0'
-					},
-					'100%': {
-						opacity: '1',
-						transform: 'translateY(0)',
-						maxHeight: '240px'
-					}
+					'0%': { transform: 'translateY(-8px)', opacity: '0' },
+					'100%': { transform: 'translateY(0)', opacity: '1' },
 				},
 				'slide-down-fast': {
 					'0%': {
@@ -131,16 +142,8 @@ export default {
 					}
 				},
 				'slide-up': {
-					'0%': {
-						opacity: '1',
-						transform: 'translateY(0)',
-						maxHeight: '240px'
-					},
-					'100%': {
-						opacity: '0',
-						transform: 'translateY(-10px)',
-						maxHeight: '0'
-					}
+					'0%': { transform: 'translateY(0)', opacity: '1' },
+					'100%': { transform: 'translateY(-8px)', opacity: '0' },
 				},
 				'slide-up-fast': {
 					'0%': {
@@ -195,21 +198,33 @@ export default {
 						transform: 'scale(1)',
 						opacity: '1'
 					}
-				}
+				},
+				'collapsible-down': {
+					from: { height: "0", opacity: "0" },
+					to: { height: "var(--radix-collapsible-content-height)", opacity: "1" },
+				},
+				'collapsible-up': {
+					from: { height: "var(--radix-collapsible-content-height)", opacity: "1" },
+					to: { height: "0", opacity: "0" },
+				},
 			},
 			animation: {
-				'accordion-down': 'accordion-down 0.2s ease-out',
-				'accordion-up': 'accordion-up 0.2s ease-out',
+				"accordion-down": "accordion-down 0.2s ease-out",
+				"accordion-up": "accordion-up 0.2s ease-out",
+				"template-down": "template-down 0.15s cubic-bezier(0.16, 1, 0.3, 1)",
+				"template-up": "template-up 0.15s cubic-bezier(0.16, 1, 0.3, 1)",
 				'fade-in': 'fade-in 0.15s ease-out',
 				'fade-out': 'fade-out 0.15s ease-out',
-				'slide-down': 'slide-down 0.2s ease-out',
+				'slide-down': 'slide-down 0.2s cubic-bezier(0.16, 1, 0.3, 1)',
 				'slide-down-fast': 'slide-down-fast 0.05s ease-out',
-				'slide-up': 'slide-up 0.2s ease-out',
+				'slide-up': 'slide-up 0.2s cubic-bezier(0.16, 1, 0.3, 1)',
 				'slide-up-fast': 'slide-up-fast 0.03s ease-out',
 				'slide-up-fastest': 'slide-up-fastest 0.03s ease-out',
 				'content-change': 'content-change 0.15s ease-out',
 				'content-change-fast': 'content-change-fast 0.08s ease-out',
-				'button-switch': 'button-switch 0.1s ease-out'
+				'button-switch': 'button-switch 0.1s ease-out',
+				'collapsible-down': 'collapsible-down 0.2s ease-out',
+				'collapsible-up': 'collapsible-up 0.2s ease-out',
 			}
 		}
 	},

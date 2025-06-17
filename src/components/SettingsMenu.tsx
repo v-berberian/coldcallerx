@@ -42,6 +42,17 @@ const SettingsMenu: React.FC<SettingsMenuProps> = ({ children }) => {
   const [emailOpen, setEmailOpen] = useState(false);
   const [textOpen, setTextOpen] = useState(false);
 
+  // Handle template open/close
+  const handleEmailOpen = (open: boolean) => {
+    setEmailOpen(open);
+    if (open) setTextOpen(false);
+  };
+
+  const handleTextOpen = (open: boolean) => {
+    setTextOpen(open);
+    if (open) setEmailOpen(false);
+  };
+
   // Load templates from localStorage on mount
   useEffect(() => {
     const savedEmailSubject = localStorage.getItem('emailTemplateSubject');
@@ -83,7 +94,7 @@ const SettingsMenu: React.FC<SettingsMenuProps> = ({ children }) => {
             {/* Email Template */}
             <Collapsible.Root 
               open={emailOpen} 
-              onOpenChange={setEmailOpen}
+              onOpenChange={handleEmailOpen}
               className="space-y-2"
             >
               <Collapsible.Trigger asChild>
@@ -95,7 +106,9 @@ const SettingsMenu: React.FC<SettingsMenuProps> = ({ children }) => {
                   <ChevronDown className={`h-4 w-4 text-muted-foreground transition-transform duration-200 ${emailOpen ? 'rotate-180' : ''}`} />
                 </button>
               </Collapsible.Trigger>
-              <Collapsible.Content className="space-y-3 pt-2">
+              <Collapsible.Content 
+                className="space-y-3 data-[state=open]:animate-template-down data-[state=closed]:animate-template-up overflow-hidden"
+              >
                 <div className="space-y-2">
                   <Label htmlFor="emailSubject">Subject</Label>
                   <Input
@@ -122,7 +135,7 @@ const SettingsMenu: React.FC<SettingsMenuProps> = ({ children }) => {
             {/* Text Template */}
             <Collapsible.Root 
               open={textOpen} 
-              onOpenChange={setTextOpen}
+              onOpenChange={handleTextOpen}
               className="space-y-2"
             >
               <Collapsible.Trigger asChild>
@@ -134,7 +147,9 @@ const SettingsMenu: React.FC<SettingsMenuProps> = ({ children }) => {
                   <ChevronDown className={`h-4 w-4 text-muted-foreground transition-transform duration-200 ${textOpen ? 'rotate-180' : ''}`} />
                 </button>
               </Collapsible.Trigger>
-              <Collapsible.Content className="space-y-3 pt-2">
+              <Collapsible.Content 
+                className="space-y-3 data-[state=open]:animate-template-down data-[state=closed]:animate-template-up overflow-hidden"
+              >
                 <div className="space-y-2">
                   <Label htmlFor="textMessage">Message</Label>
                   <Textarea

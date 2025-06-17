@@ -66,18 +66,16 @@ const Index = () => {
           <h1 className="text-2xl font-bold">
             <span style={{ color: '#6EC6F1' }}>ColdCall </span>
             <span style={{ color: '#6EC6F1' }}>X</span>
-            <span className="text-blue-500">ColdCall </span>
-            <span className="text-blue-500">X</span>
           </h1>
           
           <SettingsMenu>
             <Button 
               variant="ghost" 
-              size="sm" 
-              className="h-8 w-8 rounded-full"
+              size="icon" 
+              className="h-8 w-8 text-base hover:bg-transparent focus:bg-transparent active:bg-transparent"
               style={{ WebkitTapHighlightColor: 'transparent' }}
             >
-              <Settings className="h-4 w-4" />
+              <Settings className="h-5 w-5" />
             </Button>
           </SettingsMenu>
         </div>
@@ -91,17 +89,14 @@ const Index = () => {
             </div>
             
             <div className="bg-muted/30 rounded-lg p-4 space-y-3">
-              <p className="text-sm font-medium text-foreground">CSV Column Order:</p>
-              <div className="text-xs text-muted-foreground space-y-1 text-left">
-                <div><span className="font-medium">Company:</span> optional</div>
-                <div><span className="font-medium">Name:</span> required</div>
-                <div><span className="font-medium">Phone:</span> required</div>
-                <div><span className="font-medium">Additional Phones:</span> optional</div>
-                <div><span className="font-medium">Email:</span> optional</div>
+              <p className="text-sm font-medium text-foreground text-center">CSV Column Order:</p>
+              <div className="text-xs text-muted-foreground space-y-1 text-center">
+                <div><span className="font-medium">A:</span> Company (optional)</div>
+                <div><span className="font-medium">B:</span> Name (required)</div>
+                <div><span className="font-medium">C:</span> Phone (required)</div>
+                <div><span className="font-medium">D:</span> Additional Phones (optional)</div>
+                <div><span className="font-medium">E:</span> Email (optional)</div>
               </div>
-              <p className="text-xs text-muted-foreground italic">
-                Note: Use commas for empty columns
-              </p>
             </div>
           </div>
         </div>
