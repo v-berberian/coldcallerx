@@ -1,4 +1,3 @@
-
 import { Lead } from '../types/lead';
 
 interface CallingScreenActionsProps {
@@ -49,16 +48,15 @@ export const useCallingScreenActions = ({
   };
 
   // Handle manual call button click - only makes the call, doesn't mark as called yet
-  const handleCallClick = async () => {
+  const handleCallClick = async (phone?: string) => {
     try {
       const currentLeads = getBaseLeads();
       const currentLead = currentLeads[currentIndex];
-      
-      console.log('CallingScreenActions: Manual call button clicked for:', currentLead.name);
-      
-      // Just make the call, don't update lastCalled timestamp yet
-      // The lead will be marked as called when navigation happens
-      makeCall(currentLead);
+      if (!currentLead) return;
+      const phoneToCall = phone || currentLead.phone;
+      console.log('CallingScreenActions: Manual call button clicked for:', currentLead.name, 'phone:', phoneToCall);
+      // Use the provided phone number for the call
+      makeCall({ ...currentLead, phone: phoneToCall });
     } catch (error) {
       console.error('CallingScreenActions: Error in handleCallClick:', error);
     }
