@@ -16,6 +16,7 @@ import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
+import { Popover as SubPopover, PopoverContent as SubPopoverContent, PopoverTrigger as SubPopoverTrigger } from '@/components/ui/popover';
 
 interface EmailTemplate {
   id: string;
@@ -38,6 +39,8 @@ const SettingsMenu: React.FC<SettingsMenuProps> = ({ children }) => {
   const [emailTemplateSubject, setEmailTemplateSubject] = useState('');
   const [emailTemplateBody, setEmailTemplateBody] = useState('');
   const [textTemplateMessage, setTextTemplateMessage] = useState('');
+  const [emailEditOpen, setEmailEditOpen] = useState(false);
+  const [textEditOpen, setTextEditOpen] = useState(false);
 
   // Load templates from localStorage on mount
   useEffect(() => {
@@ -71,8 +74,9 @@ const SettingsMenu: React.FC<SettingsMenuProps> = ({ children }) => {
             <h4 className="font-medium leading-none">Settings</h4>
           </div>
           <Separator />
-          {/* Email Template (singular) */}
+          {/* Email Template Row with Edit Submenu */}
           <div className="space-y-3">
+            <div className="flex items-center justify-between">
             <Label className="text-sm font-medium flex items-center gap-2"><Mail className="h-4 w-4 text-muted-foreground" /> Email Template</Label>
             <Input
               placeholder="Email subject"
