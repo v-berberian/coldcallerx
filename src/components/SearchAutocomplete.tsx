@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { Card } from '@/components/ui/card';
 
@@ -49,7 +48,7 @@ const SearchAutocomplete: React.FC<SearchAutocompleteProps> = ({
     return null;
   }
 
-  const animationClass = isAnimating ? 'animate-fade-in' : 'animate-fade-out';
+  const animationClass = isAnimating ? 'animate-slide-down' : 'animate-fade-out';
 
   if (leads.length === 0) {
     return (
