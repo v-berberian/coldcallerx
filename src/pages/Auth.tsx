@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
@@ -56,7 +55,7 @@ const Auth = () => {
     return (
       <div className={`h-[100vh] h-[100dvh] h-[100svh] w-full bg-background flex items-center justify-center fixed inset-0 overflow-hidden transition-opacity duration-300 ${fadeOut ? 'opacity-0' : 'opacity-100'}`}>
         <div className="text-center space-y-4">
-          <Loader2 className="h-12 w-12 animate-spin mx-auto text-blue-500" />
+          <Loader2 className="h-12 w-12 animate-spin mx-auto" style={{ color: '#6EC6F1' }} />
           <p className="text-lg text-muted-foreground">Signing you in...</p>
         </div>
       </div>
@@ -69,8 +68,8 @@ const Auth = () => {
         <div className="w-full max-w-sm space-y-6">
           <div className="text-center">
             <h1 className="text-3xl sm:text-4xl font-bold mb-8 sm:mb-12">
-              <span className="text-blue-500">ColdCall </span>
-              <span className="text-blue-500">X</span>
+              <span style={{ color: '#6EC6F1' }}>ColdCall </span>
+              <span style={{ color: '#6EC6F1' }}>X</span>
             </h1>
           </div>
 
@@ -89,6 +88,7 @@ const Auth = () => {
                 placeholder="Email"
                 required
                 className="h-12 sm:h-14 text-base sm:text-lg rounded-2xl border-2 focus:border-blue-500 transition-colors text-center placeholder:text-center"
+                style={{ borderColor: '#6EC6F1' }}
                 disabled={loading}
               />
               <Input
@@ -99,6 +99,7 @@ const Auth = () => {
                 required
                 minLength={6}
                 className="h-12 sm:h-14 text-base sm:text-lg rounded-2xl border-2 focus:border-blue-500 transition-colors text-center placeholder:text-center"
+                style={{ borderColor: '#6EC6F1' }}
                 disabled={loading}
               />
               
@@ -113,7 +114,7 @@ const Auth = () => {
                 className="w-full h-12 sm:h-14 text-base sm:text-lg font-semibold rounded-2xl bg-blue-500 hover:bg-blue-600 transition-colors" 
                 disabled={loading}
               >
-                {loading && <Loader2 className="mr-2 h-4 w-4 sm:h-5 sm:w-5 animate-spin" />}
+                {loading && <Loader2 className="mr-2 h-4 w-4 sm:h-5 sm:w-5 animate-spin" style={{ color: '#6EC6F1' }} />}
                 Sign In
               </Button>
             </form>
