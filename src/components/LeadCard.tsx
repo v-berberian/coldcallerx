@@ -349,19 +349,19 @@ const LeadCard: React.FC<LeadCardProps> = ({
           )}
           
           {/* Action Buttons - Call and Text */}
-          <div className="flex gap-3">
+          <div className="flex gap-4 justify-center">
             <Button 
               onClick={() => handleTextClick()} 
               size="lg" 
               variant="outline"
-              className="flex-1 h-16 sm:h-20 aspect-square rounded-full shadow-lg border-2 border-gray-200 hover:border-gray-300 transition-all duration-200"
+              className="w-16 h-16 sm:w-20 sm:h-20 rounded-full shadow-lg border-2 border-gray-200 hover:border-gray-300 transition-all duration-200 flex items-center justify-center p-0"
             >
               <MessageSquare className="h-8 w-8" />
             </Button>
             <Button 
               onClick={handleCall} 
               size="lg" 
-              className="flex-1 h-16 sm:h-20 aspect-square rounded-full shadow-lg bg-green-500 hover:bg-green-600 text-white transition-all duration-200"
+              className="w-16 h-16 sm:w-20 sm:h-20 rounded-full shadow-lg bg-green-500 hover:bg-green-600 text-white transition-all duration-200 flex items-center justify-center p-0"
             >
               <Phone className="h-8 w-8" />
             </Button>
