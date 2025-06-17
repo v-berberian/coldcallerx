@@ -84,15 +84,34 @@ const CallingHeader: React.FC<CallingHeaderProps> = ({
         
         {/* Autocomplete Dropdown */}
         <SearchAutocomplete 
-          leads={searchResults} 
-          onLeadSelect={onLeadSelect} 
-          searchQuery={searchQuery} 
-          actualIndices={searchResults.map(lead => 
-            leadsData.findIndex(l => l.name === lead.name && l.phone === lead.phone) + 1
-          )} 
-          totalLeads={leadsData.length}
           isVisible={showAutocomplete}
-        />
+        >
+          <div className="max-h-60 overflow-y-auto">
+            {searchResults.length === 0 ? (
+              <div className="p-4 text-center text-muted-foreground">
+                No leads found
+              </div>
+            ) : (
+              searchResults.map((lead, index) => (
+                <button
+                  key={`${lead.name}-${lead.phone}-${index}`}
+                  onClick={() => onLeadSelect(lead)}
+                  className="w-full px-4 py-3 text-left border-b border-border/10 last:border-b-0 transition-colors duration-75 cursor-default hover:bg-muted/50"
+                >
+                  <div className="flex justify-between items-start">
+                    <div className="flex-1 min-w-0">
+                      <p className="font-medium text-foreground truncate">{lead.name}</p>
+                      <p className="text-sm text-muted-foreground">{lead.phone}</p>
+                    </div>
+                    <div className="ml-2 text-xs text-muted-foreground">
+                      {leadsData.findIndex(l => l.name === lead.name && l.phone === lead.phone) + 1}/{leadsData.length}
+                    </div>
+                  </div>
+                </button>
+              ))
+            )}
+          </div>
+        </SearchAutocomplete>
       </div>
     </div>
   );
