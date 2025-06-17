@@ -30,6 +30,7 @@ const CSVImporter: React.FC<CSVImporterProps> = ({ onLeadsImported, buttonClassN
       variant="ghost" 
       onClick={handleButtonClick} 
       disabled={loading}
+      size="icon"
       className={`h-8 w-8 text-base hover:bg-transparent focus:bg-transparent active:bg-transparent ${buttonClassName}`}
       style={{ WebkitTapHighlightColor: 'transparent' }}
     >
