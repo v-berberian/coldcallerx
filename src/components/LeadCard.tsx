@@ -354,16 +354,16 @@ const LeadCard: React.FC<LeadCardProps> = ({
               onClick={() => handleTextClick()} 
               size="lg" 
               variant="outline"
-              className="flex-1 h-16 sm:h-20 text-xl font-semibold rounded-full shadow-lg"
+              className="flex-1 h-16 sm:h-20 aspect-square rounded-full shadow-lg border-2 border-gray-200 hover:border-gray-300 transition-all duration-200"
             >
-              <MessageSquare className="h-6 w-6" />
+              <MessageSquare className="h-8 w-8" />
             </Button>
             <Button 
               onClick={handleCall} 
               size="lg" 
-              className="flex-1 h-16 sm:h-20 text-xl font-semibold bg-green-600 hover:bg-green-600 text-white rounded-full shadow-lg"
+              className="flex-1 h-16 sm:h-20 aspect-square rounded-full shadow-lg bg-green-500 hover:bg-green-600 text-white transition-all duration-200"
             >
-              <Phone className="h-6 w-6" />
+              <Phone className="h-8 w-8" />
             </Button>
           </div>
         </div>
