@@ -39,7 +39,7 @@ const SearchAutocomplete: React.FC<SearchAutocompleteProps> = ({
   const animationClass = isAnimating ? 'animate-slide-down' : 'animate-fade-out';
 
   return (
-    <div className={`absolute top-full left-0 right-0 z-50 mt-1 rounded-xl shadow-lg overflow-hidden ${animationClass} bg-background/30 backdrop-blur-md border border-border/20`}>
+    <div className={`absolute top-full left-0 right-0 z-50 mt-1 rounded-xl shadow-lg overflow-hidden ${animationClass} bg-background/15 backdrop-blur-sm border border-border/15`}>
       {children}
     </div>
   );
