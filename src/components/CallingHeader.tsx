@@ -52,7 +52,7 @@ const CallingHeader: React.FC<CallingHeaderProps> = ({
     <div className="bg-background border-b border-border p-3 sm:p-4 pt-safe flex-shrink-0 w-full" style={{ paddingTop: 'max(0.75rem, env(safe-area-inset-top))' }}>
       <div className="flex items-center justify-between mb-3 sm:mb-4 w-full">
         <div className="min-w-0 flex-shrink-0">
-          <CSVImporter onLeadsImported={onLeadsImported} />
+          <CSVImporter onLeadsImported={onLeadsImported} buttonClassName="w-16 h-16 sm:w-20 sm:h-20 rounded-full" iconClassName="h-8 w-8 sm:h-10 sm:w-10" />
         </div>
         
         <div className="flex items-center space-x-2 sm:space-x-3 flex-1 justify-center min-w-0">
@@ -62,15 +62,14 @@ const CallingHeader: React.FC<CallingHeaderProps> = ({
           </h1>
         </div>
         
-        <div className="w-8 sm:w-8 flex-shrink-0">
+        <div className="w-16 sm:w-20 flex-shrink-0">
           <SettingsMenu>
             <Button 
               variant="ghost" 
-              size="sm" 
-              className="h-8 w-8 rounded-full"
+              className="w-16 h-16 sm:w-20 sm:h-20 rounded-full"
               style={{ WebkitTapHighlightColor: 'transparent' }}
             >
-              <Settings className="h-4 w-4" />
+              <Settings className="h-8 w-8 sm:h-10 sm:w-10" />
             </Button>
           </SettingsMenu>
         </div>
