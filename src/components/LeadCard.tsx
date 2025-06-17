@@ -25,7 +25,7 @@ interface LeadCardProps {
   currentIndex: number;
   totalCount: number;
   fileName: string;
-  onCall: () => void;
+  onCall: (phone: string) => void;
   onResetCallCount: () => void;
   noLeadsMessage?: string;
 }
@@ -150,7 +150,7 @@ const LeadCard: React.FC<LeadCardProps> = ({
   // Modified onCall to use selected phone
   const handleCall = () => {
     console.log('Making call to selected phone:', selectedPhone);
-    onCall(); // The original onCall function will handle the actual calling logic
+    onCall(selectedPhone);
   };
 
   // Get the selected templates
