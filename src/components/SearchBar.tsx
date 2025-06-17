@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { X } from 'lucide-react';
 
@@ -37,7 +36,7 @@ const SearchBar: React.FC<SearchBarProps> = ({
     <div className="relative">
       <input 
         type="text" 
-        placeholder={staticPlaceholder}
+        placeholder={searchQuery ? "" : staticPlaceholder}
         value={searchQuery} 
         onChange={e => onSearchChange(e.target.value)} 
         onFocus={handleFocus} 
