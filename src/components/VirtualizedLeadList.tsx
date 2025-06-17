@@ -106,6 +106,7 @@ const VirtualizedLeadList: React.FC<VirtualizedLeadListProps> = ({
     <div className="h-full">
       <List
         height={600}
+        width="100%"
         itemCount={filteredLeads.length}
         itemSize={120}
         itemData={itemData}

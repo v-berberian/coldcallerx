@@ -42,10 +42,12 @@ const OptimizedCallingScreen: React.FC<OptimizedCallingScreenProps> = ({
     callFilter,
     shuffleMode,
     autoCall,
+    callDelay,
     toggleTimezoneFilter,
     toggleCallFilter,
     toggleShuffle,
-    toggleAutoCall
+    toggleAutoCall,
+    toggleCallDelay
   } = useFilters();
 
   const { getBaseLeads } = useOptimizedLeadFiltering(leadsData, timezoneFilter, callFilter);
@@ -153,10 +155,13 @@ const OptimizedCallingScreen: React.FC<OptimizedCallingScreenProps> = ({
           callFilter={callFilter}
           shuffleMode={shuffleMode}
           autoCall={autoCall}
+          callDelay={callDelay}
           onToggleTimezone={toggleTimezoneFilter}
           onToggleCallFilter={toggleCallFilter}
           onToggleShuffle={toggleShuffle}
           onToggleAutoCall={toggleAutoCall}
+          onToggleCallDelay={toggleCallDelay}
+          onResetAllCalls={resetAllCallCounts}
         />
       </div>
 
@@ -174,7 +179,6 @@ const OptimizedCallingScreen: React.FC<OptimizedCallingScreenProps> = ({
             />
             
             <NavigationControls
-              currentIndex={currentIndex}
               totalCount={currentLeads.length}
               onPrevious={handlePrevious}
               onNext={handleNext}
