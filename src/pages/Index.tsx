@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { Loader2, Settings } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -48,7 +47,7 @@ const Index = () => {
     return (
       <div className="h-[100vh] h-[100dvh] h-[100svh] bg-background flex items-center justify-center fixed inset-0 overflow-hidden">
         <div className="text-center space-y-4">
-          <Loader2 className="h-12 w-12 animate-spin mx-auto text-blue-500" />
+          <Loader2 className="h-12 w-12 animate-spin mx-auto" style={{ color: '#6EC6F1' }} />
           <p className="text-lg text-muted-foreground">Initializing app...</p>
         </div>
       </div>
@@ -65,6 +64,8 @@ const Index = () => {
           <CSVImporter onLeadsImported={handleLeadsImported} />
           
           <h1 className="text-2xl font-bold">
+            <span style={{ color: '#6EC6F1' }}>ColdCall </span>
+            <span style={{ color: '#6EC6F1' }}>X</span>
             <span className="text-blue-500">ColdCall </span>
             <span className="text-blue-500">X</span>
           </h1>
