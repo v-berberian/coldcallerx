@@ -16,6 +16,7 @@ import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
+import * as PopoverPrimitive from '@radix-ui/react-popover';
 
 interface EmailTemplate {
   id: string;
@@ -67,7 +68,7 @@ const SettingsMenu: React.FC<SettingsMenuProps> = ({ children }) => {
       <PopoverTrigger asChild>
         {children}
       </PopoverTrigger>
-      <PopoverContent className="w-96 p-4" align="end">
+      <PopoverContent className="w-80 p-4">
         <div className="space-y-4">
           <div className="space-y-2">
             <h4 className="font-medium leading-none">Settings</h4>
@@ -75,44 +76,41 @@ const SettingsMenu: React.FC<SettingsMenuProps> = ({ children }) => {
           <Separator />
           {/* Email Template Row with Edit Submenu */}
           <div className="space-y-3">
-            <Popover>
-              {({ open }) => (
-                <>
-                  <PopoverTrigger asChild>
-                    <div className="flex items-center justify-between cursor-pointer hover:bg-accent/50 p-2 rounded-md transition-colors">
-                      <div className="flex items-center gap-2">
-                        <Mail className="h-4 w-4 text-muted-foreground" />
-                        <Label className="text-sm font-medium">Email Template</Label>
-                      </div>
-                      <ChevronDown className={`h-4 w-4 text-muted-foreground transition-transform duration-200 ${open ? 'rotate-180' : ''}`} />
-                    </div>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-4 bg-card border-2 border-border/50 shadow-lg">
-                    <div className="space-y-4">
-                      <div className="space-y-2">
-                        <Label className="text-base font-medium">Subject</Label>
-                        <Input
-                          value={emailTemplateSubject}
-                          onChange={(e) => setEmailTemplateSubject(e.target.value)}
-                          placeholder="Enter email subject"
-                          className="bg-background/50"
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <Label className="text-base font-medium">Body</Label>
-                        <Textarea
-                          value={emailTemplateBody}
-                          onChange={(e) => setEmailTemplateBody(e.target.value)}
-                          placeholder="Enter email body"
-                          rows={8}
-                          className="min-h-[200px] bg-background/50"
-                        />
-                      </div>
-                    </div>
-                  </PopoverContent>
-                </>
-              )}
-            </Popover>
+            <PopoverPrimitive.Root>
+              <PopoverPrimitive.Trigger asChild>
+                <div className="flex items-center justify-between cursor-pointer hover:bg-accent/50 p-2 rounded-md transition-colors">
+                  <div className="flex items-center gap-2">
+                    <Mail className="h-4 w-4 text-muted-foreground" />
+                    <Label className="text-sm font-medium">Email Template</Label>
+                  </div>
+                  <PopoverPrimitive.Arrow className="fill-border/50" />
+                  <ChevronDown className="h-4 w-4 text-muted-foreground transition-transform duration-200 data-[state=open]:rotate-180" />
+                </div>
+              </PopoverPrimitive.Trigger>
+              <PopoverPrimitive.Content className="w-[var(--radix-popover-trigger-width)] p-4 bg-card border-2 border-border/50 shadow-lg">
+                <div className="space-y-4">
+                  <div className="space-y-2">
+                    <Label className="text-base font-medium">Subject</Label>
+                    <Input
+                      value={emailTemplateSubject}
+                      onChange={(e) => setEmailTemplateSubject(e.target.value)}
+                      placeholder="Enter email subject"
+                      className="bg-background/50"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="text-base font-medium">Body</Label>
+                    <Textarea
+                      value={emailTemplateBody}
+                      onChange={(e) => setEmailTemplateBody(e.target.value)}
+                      placeholder="Enter email body"
+                      rows={8}
+                      className="min-h-[200px] bg-background/50"
+                    />
+                  </div>
+                </div>
+              </PopoverPrimitive.Content>
+            </PopoverPrimitive.Root>
             <div className="text-sm text-muted-foreground px-2">
               {emailTemplateSubject || 'No subject set'}
             </div>
@@ -120,35 +118,32 @@ const SettingsMenu: React.FC<SettingsMenuProps> = ({ children }) => {
           <Separator />
           {/* Text Template (singular) */}
           <div className="space-y-3">
-            <Popover>
-              {({ open }) => (
-                <>
-                  <PopoverTrigger asChild>
-                    <div className="flex items-center justify-between cursor-pointer hover:bg-accent/50 p-2 rounded-md transition-colors">
-                      <div className="flex items-center gap-2">
-                        <MessageSquare className="h-4 w-4 text-muted-foreground" />
-                        <Label className="text-sm font-medium">Text Template</Label>
-                      </div>
-                      <ChevronDown className={`h-4 w-4 text-muted-foreground transition-transform duration-200 ${open ? 'rotate-180' : ''}`} />
-                    </div>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-4 bg-card border-2 border-border/50 shadow-lg">
-                    <div className="space-y-4">
-                      <div className="space-y-2">
-                        <Label className="text-base font-medium">Message</Label>
-                        <Textarea
-                          value={textTemplateMessage}
-                          onChange={(e) => setTextTemplateMessage(e.target.value)}
-                          placeholder="Enter text message"
-                          rows={8}
-                          className="min-h-[200px] bg-background/50"
-                        />
-                      </div>
-                    </div>
-                  </PopoverContent>
-                </>
-              )}
-            </Popover>
+            <PopoverPrimitive.Root>
+              <PopoverPrimitive.Trigger asChild>
+                <div className="flex items-center justify-between cursor-pointer hover:bg-accent/50 p-2 rounded-md transition-colors">
+                  <div className="flex items-center gap-2">
+                    <MessageSquare className="h-4 w-4 text-muted-foreground" />
+                    <Label className="text-sm font-medium">Text Template</Label>
+                  </div>
+                  <PopoverPrimitive.Arrow className="fill-border/50" />
+                  <ChevronDown className="h-4 w-4 text-muted-foreground transition-transform duration-200 data-[state=open]:rotate-180" />
+                </div>
+              </PopoverPrimitive.Trigger>
+              <PopoverPrimitive.Content className="w-[var(--radix-popover-trigger-width)] p-4 bg-card border-2 border-border/50 shadow-lg">
+                <div className="space-y-4">
+                  <div className="space-y-2">
+                    <Label className="text-base font-medium">Message</Label>
+                    <Textarea
+                      value={textTemplateMessage}
+                      onChange={(e) => setTextTemplateMessage(e.target.value)}
+                      placeholder="Enter text message"
+                      rows={8}
+                      className="min-h-[200px] bg-background/50"
+                    />
+                  </div>
+                </div>
+              </PopoverPrimitive.Content>
+            </PopoverPrimitive.Root>
             <div className="text-sm text-muted-foreground px-2">
               {textTemplateMessage || 'No message set'}
             </div>
