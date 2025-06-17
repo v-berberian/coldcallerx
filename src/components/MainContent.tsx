@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Lead } from '../types/lead';
 import FilterButtons from './FilterButtons';
@@ -15,7 +14,7 @@ interface MainContentProps {
   shuffleMode: boolean;
   autoCall: boolean;
   callDelay: number;
-  onCall: () => void;
+  onCall: (phone: string) => void;
   onResetCallCount: () => void;
   onToggleTimezone: () => void;
   onToggleCallFilter: () => void;
@@ -93,8 +92,8 @@ const MainContent: React.FC<MainContentProps> = ({
             currentIndex={currentIndex}
             totalCount={totalCount}
             fileName={fileName}
-            onCall={showAutocomplete ? () => {} : onCall}
-            onResetCallCount={showAutocomplete ? () => {} : onResetCallCount}
+            onCall={onCall}
+            onResetCallCount={onResetCallCount}
             noLeadsMessage={noLeadsMessage}
           />
         </div>
