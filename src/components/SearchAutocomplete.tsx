@@ -38,7 +38,9 @@ const SearchAutocomplete: React.FC<SearchAutocompleteProps> = ({
       // Fade out animation duration
       const timer = setTimeout(() => {
         setShouldRender(false);
-        onAnimationComplete?.();
+        if (onAnimationComplete) {
+          onAnimationComplete();
+        }
       }, 20); // Reduced from 50ms to 20ms for even faster disappearance
       return () => clearTimeout(timer);
     }
