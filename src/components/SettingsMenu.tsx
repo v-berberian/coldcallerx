@@ -85,24 +85,25 @@ const SettingsMenu: React.FC<SettingsMenuProps> = ({ children }) => {
                   <ChevronDown className="h-4 w-4 text-muted-foreground" />
                 </div>
               </PopoverTrigger>
-              <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-4">
+              <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-4 bg-card border-2 border-border/50 shadow-lg">
                 <div className="space-y-4">
                   <div className="space-y-2">
-                    <Label>Subject</Label>
+                    <Label className="text-base font-medium">Subject</Label>
                     <Input
                       value={emailTemplateSubject}
                       onChange={(e) => setEmailTemplateSubject(e.target.value)}
                       placeholder="Enter email subject"
+                      className="bg-background/50"
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label>Body</Label>
+                    <Label className="text-base font-medium">Body</Label>
                     <Textarea
                       value={emailTemplateBody}
                       onChange={(e) => setEmailTemplateBody(e.target.value)}
                       placeholder="Enter email body"
                       rows={8}
-                      className="min-h-[200px]"
+                      className="min-h-[200px] bg-background/50"
                     />
                   </div>
                 </div>
@@ -125,16 +126,16 @@ const SettingsMenu: React.FC<SettingsMenuProps> = ({ children }) => {
                   <ChevronDown className="h-4 w-4 text-muted-foreground" />
                 </div>
               </PopoverTrigger>
-              <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-4">
+              <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-4 bg-card border-2 border-border/50 shadow-lg">
                 <div className="space-y-4">
                   <div className="space-y-2">
-                    <Label>Message</Label>
+                    <Label className="text-base font-medium">Message</Label>
                     <Textarea
                       value={textTemplateMessage}
                       onChange={(e) => setTextTemplateMessage(e.target.value)}
                       placeholder="Enter text message"
                       rows={8}
-                      className="min-h-[200px]"
+                      className="min-h-[200px] bg-background/50"
                     />
                   </div>
                 </div>
