@@ -349,21 +349,25 @@ const LeadCard: React.FC<LeadCardProps> = ({
           )}
           
           {/* Action Buttons - Call and Text */}
-          <div className="flex gap-6 justify-center">
-            <Button 
-              onClick={() => handleTextClick()} 
-              size="lg" 
-              className="w-24 h-24 sm:w-32 sm:h-32 rounded-full shadow-lg bg-[#007AFF] hover:bg-[#0066CC] text-white transition-all duration-200 flex items-center justify-center p-0"
-            >
-              <MessageSquare className="h-[32px] w-[32px] sm:h-[40px] sm:w-[40px]" />
-            </Button>
-            <Button 
-              onClick={handleCall} 
-              size="lg" 
-              className="w-24 h-24 sm:w-32 sm:h-32 rounded-full shadow-lg bg-green-500 hover:bg-green-600 text-white transition-all duration-200 flex items-center justify-center p-0"
-            >
-              <Phone className="h-[32px] w-[32px] sm:h-[40px] sm:w-[40px]" />
-            </Button>
+          <div className="flex gap-6 justify-center relative">
+            <div className="absolute left-1/2 -translate-x-[calc(50%+3rem)]">
+              <Button 
+                onClick={() => handleTextClick()} 
+                size="lg" 
+                className="w-24 h-24 sm:w-32 sm:h-32 rounded-full shadow-lg bg-[#007AFF] hover:bg-[#0066CC] text-white transition-all duration-200 flex items-center justify-center p-0"
+              >
+                <MessageSquare className="h-[32px] w-[32px] sm:h-[40px] sm:w-[40px]" />
+              </Button>
+            </div>
+            <div className="absolute left-1/2 translate-x-[calc(50%+3rem)]">
+              <Button 
+                onClick={handleCall} 
+                size="lg" 
+                className="w-24 h-24 sm:w-32 sm:h-32 rounded-full shadow-lg bg-green-500 hover:bg-green-600 text-white transition-all duration-200 flex items-center justify-center p-0"
+              >
+                <Phone className="h-[32px] w-[32px] sm:h-[40px] sm:w-[40px]" />
+              </Button>
+            </div>
           </div>
         </div>
       </CardContent>
