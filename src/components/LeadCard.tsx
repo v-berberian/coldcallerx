@@ -211,7 +211,7 @@ const LeadCard: React.FC<LeadCardProps> = ({
   };
 
   return (
-    <Card className="shadow-2xl border-border/50 rounded-3xl bg-card min-h-[400px] max-h-[500px] sm:min-h-[420px] sm:max-h-[550px] flex flex-col mb-8">
+    <Card className="shadow-2xl border-border/50 rounded-3xl bg-card min-h-[400px] max-h-[500px] sm:min-h-[420px] sm:max-h-[550px] flex flex-col mb-4">
       <CardContent className="p-4 sm:p-6 space-y-4 sm:space-y-6 flex-1 flex flex-col">
         {/* Top row with lead count and file name */}
         <div className="flex items-center justify-between">
