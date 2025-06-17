@@ -1,4 +1,3 @@
-
 import React, { useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Upload } from 'lucide-react';
@@ -7,9 +6,11 @@ import { Lead } from '@/types/lead';
 
 interface CSVImporterProps {
   onLeadsImported: (leads: Lead[], fileName: string) => void;
+  buttonClassName?: string;
+  iconClassName?: string;
 }
 
-const CSVImporter: React.FC<CSVImporterProps> = ({ onLeadsImported }) => {
+const CSVImporter: React.FC<CSVImporterProps> = ({ onLeadsImported, buttonClassName = '', iconClassName = '' }) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { loading, handleFileProcess } = useCsvImporter({ onLeadsImported });
 
@@ -27,13 +28,12 @@ const CSVImporter: React.FC<CSVImporterProps> = ({ onLeadsImported }) => {
   return (
     <Button 
       variant="ghost" 
-      size="sm" 
       onClick={handleButtonClick} 
       disabled={loading}
-      className="h-8 w-8 rounded-full"
+      className={`rounded-full ${buttonClassName}`}
       style={{ WebkitTapHighlightColor: 'transparent' }}
     >
-      <Upload className="h-4 w-4" />
+      <Upload className={iconClassName} />
       <input
         ref={fileInputRef}
         type="file"
