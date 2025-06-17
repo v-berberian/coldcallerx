@@ -355,14 +355,14 @@ const LeadCard: React.FC<LeadCardProps> = ({
               size="lg" 
               className="w-24 h-24 sm:w-32 sm:h-32 rounded-full shadow-lg bg-[#007AFF] hover:bg-[#0066CC] text-white transition-all duration-200 flex items-center justify-center p-0"
             >
-              <MessageSquare className="h-[72px] w-[72px] sm:h-[96px] sm:w-[96px]" />
+              <MessageSquare className="h-[32px] w-[32px] sm:h-[40px] sm:w-[40px]" />
             </Button>
             <Button 
               onClick={handleCall} 
               size="lg" 
               className="w-24 h-24 sm:w-32 sm:h-32 rounded-full shadow-lg bg-green-500 hover:bg-green-600 text-white transition-all duration-200 flex items-center justify-center p-0"
             >
-              <Phone className="h-[72px] w-[72px] sm:h-[96px] sm:w-[96px]" />
+              <Phone className="h-[32px] w-[32px] sm:h-[40px] sm:w-[40px]" />
             </Button>
           </div>
         </div>
