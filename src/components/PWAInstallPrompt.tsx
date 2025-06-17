@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { X, Download } from 'lucide-react';
@@ -47,14 +46,14 @@ const PWAInstallPrompt: React.FC = () => {
   if (!showPrompt) return null;
 
   return (
-    <div className="fixed top-4 left-4 right-4 z-50 bg-blue-50 border border-blue-200 rounded-xl p-4 shadow-lg">
+    <div className="fixed top-4 left-4 right-4 z-50 rounded-xl p-4 shadow-lg" style={{ background: '#E6F6FD', border: '1px solid #B3E4FA' }}>
       <div className="flex items-start justify-between">
         <div className="flex-1">
           <div className="flex items-center space-x-2 mb-2">
-            <Download className="h-5 w-5 text-blue-600" />
-            <h3 className="font-medium text-blue-900">Install ColdCall X</h3>
+            <Download className="h-5 w-5" style={{ color: '#6EC6F1' }} />
+            <h3 className="font-medium" style={{ color: '#1B4B5A' }}>Install ColdCall X</h3>
           </div>
-          <p className="text-sm text-blue-700 mb-3">
+          <p className="text-sm mb-3" style={{ color: '#6EC6F1' }}>
             Add to your home screen for the best experience and to avoid browser bars.
           </p>
           <div className="flex space-x-2">
@@ -77,7 +76,8 @@ const PWAInstallPrompt: React.FC = () => {
         </div>
         <button
           onClick={handleDismiss}
-          className="ml-2 p-1 text-blue-400 hover:text-blue-600"
+          className="ml-2 p-1 hover:opacity-80"
+          style={{ color: '#6EC6F1' }}
         >
           <X className="h-4 w-4" />
         </button>
