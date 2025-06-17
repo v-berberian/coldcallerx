@@ -75,68 +75,72 @@ const SettingsMenu: React.FC<SettingsMenuProps> = ({ children }) => {
           <Separator />
           {/* Email Template Row with Edit Submenu */}
           <div className="space-y-3">
-            <div className="flex items-center justify-between">
-              <Label>Email Template</Label>
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button variant="ghost" size="sm" className="h-8 px-2">
-                    <Edit className="h-4 w-4" />
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-80">
-                  <div className="space-y-4">
-                    <div className="space-y-2">
-                      <Label>Subject</Label>
-                      <Input
-                        value={emailTemplateSubject}
-                        onChange={(e) => setEmailTemplateSubject(e.target.value)}
-                        placeholder="Enter email subject"
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label>Body</Label>
-                      <Textarea
-                        value={emailTemplateBody}
-                        onChange={(e) => setEmailTemplateBody(e.target.value)}
-                        placeholder="Enter email body"
-                        rows={4}
-                      />
-                    </div>
+            <Popover>
+              <PopoverTrigger asChild>
+                <div className="flex items-center justify-between cursor-pointer hover:bg-accent/50 p-2 rounded-md transition-colors">
+                  <div className="flex items-center gap-2">
+                    <Mail className="h-4 w-4 text-muted-foreground" />
+                    <Label className="text-sm font-medium">Email Template</Label>
                   </div>
-                </PopoverContent>
-              </Popover>
-            </div>
-            <div className="text-sm text-muted-foreground">
+                  <ChevronDown className="h-4 w-4 text-muted-foreground" />
+                </div>
+              </PopoverTrigger>
+              <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-4">
+                <div className="space-y-4">
+                  <div className="space-y-2">
+                    <Label>Subject</Label>
+                    <Input
+                      value={emailTemplateSubject}
+                      onChange={(e) => setEmailTemplateSubject(e.target.value)}
+                      placeholder="Enter email subject"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Body</Label>
+                    <Textarea
+                      value={emailTemplateBody}
+                      onChange={(e) => setEmailTemplateBody(e.target.value)}
+                      placeholder="Enter email body"
+                      rows={8}
+                      className="min-h-[200px]"
+                    />
+                  </div>
+                </div>
+              </PopoverContent>
+            </Popover>
+            <div className="text-sm text-muted-foreground px-2">
               {emailTemplateSubject || 'No subject set'}
             </div>
           </div>
           <Separator />
           {/* Text Template (singular) */}
           <div className="space-y-3">
-            <div className="flex items-center justify-between">
-              <Label>Text Template</Label>
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button variant="ghost" size="sm" className="h-8 px-2">
-                    <Edit className="h-4 w-4" />
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-80">
-                  <div className="space-y-4">
-                    <div className="space-y-2">
-                      <Label>Message</Label>
-                      <Textarea
-                        value={textTemplateMessage}
-                        onChange={(e) => setTextTemplateMessage(e.target.value)}
-                        placeholder="Enter text message"
-                        rows={4}
-                      />
-                    </div>
+            <Popover>
+              <PopoverTrigger asChild>
+                <div className="flex items-center justify-between cursor-pointer hover:bg-accent/50 p-2 rounded-md transition-colors">
+                  <div className="flex items-center gap-2">
+                    <MessageSquare className="h-4 w-4 text-muted-foreground" />
+                    <Label className="text-sm font-medium">Text Template</Label>
                   </div>
-                </PopoverContent>
-              </Popover>
-            </div>
-            <div className="text-sm text-muted-foreground">
+                  <ChevronDown className="h-4 w-4 text-muted-foreground" />
+                </div>
+              </PopoverTrigger>
+              <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-4">
+                <div className="space-y-4">
+                  <div className="space-y-2">
+                    <Label>Message</Label>
+                    <Textarea
+                      value={textTemplateMessage}
+                      onChange={(e) => setTextTemplateMessage(e.target.value)}
+                      placeholder="Enter text message"
+                      rows={8}
+                      className="min-h-[200px]"
+                    />
+                  </div>
+                </div>
+              </PopoverContent>
+            </Popover>
+            <div className="text-sm text-muted-foreground px-2">
               {textTemplateMessage || 'No message set'}
             </div>
           </div>
