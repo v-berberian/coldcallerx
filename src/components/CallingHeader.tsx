@@ -65,7 +65,7 @@ const CallingHeader: React.FC<CallingHeaderProps> = ({
         <div className="flex-shrink-0">
           <SettingsMenu>
             <Button variant="ghost" size="icon" className="h-8 w-8 text-base hover:bg-transparent focus:bg-transparent active:bg-transparent">
-              <Settings className="h-4 w-4" />
+              <Settings className="h-5 w-5" />
             </Button>
           </SettingsMenu>
         </div>
