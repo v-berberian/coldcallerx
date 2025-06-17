@@ -1,9 +1,8 @@
-
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from '@/components/ui/dropdown-menu';
-import { X, Phone, Mail, ChevronDown, Check } from 'lucide-react';
+import { X, Phone, Mail, ChevronDown, Check, MessageSquare } from 'lucide-react';
 import { formatPhoneNumber } from '../utils/phoneUtils';
 import { getStateFromAreaCode } from '../utils/timezoneUtils';
 import { Lead } from '@/types/lead';
@@ -352,19 +351,19 @@ const LeadCard: React.FC<LeadCardProps> = ({
           {/* Action Buttons - Call and Text */}
           <div className="flex gap-3">
             <Button 
-              onClick={handleCall} 
-              size="lg" 
-              className="flex-1 h-16 sm:h-20 text-xl font-semibold bg-green-600 hover:bg-green-600 text-white rounded-2xl shadow-lg"
-            >
-              Call
-            </Button>
-            <Button 
               onClick={() => handleTextClick()} 
               size="lg" 
               variant="outline"
-              className="flex-1 h-16 sm:h-20 text-xl font-semibold rounded-2xl shadow-lg"
+              className="flex-1 h-16 sm:h-20 text-xl font-semibold rounded-full shadow-lg"
             >
-              Text
+              <MessageSquare className="h-6 w-6" />
+            </Button>
+            <Button 
+              onClick={handleCall} 
+              size="lg" 
+              className="flex-1 h-16 sm:h-20 text-xl font-semibold bg-green-600 hover:bg-green-600 text-white rounded-full shadow-lg"
+            >
+              <Phone className="h-6 w-6" />
             </Button>
           </div>
         </div>
