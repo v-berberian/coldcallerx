@@ -151,6 +151,17 @@ body {
   }
 }
 
+@keyframes slide-down {
+  from {
+    opacity: 0;
+    transform: translateY(-12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 .animate-fade-in {
   animation: fade-in 0.3s ease-out;
 }
@@ -161,6 +172,10 @@ body {
 
 .animate-content-change {
   animation: content-change 0.3s ease-in-out;
+}
+
+.animate-slide-down {
+  animation: slide-down 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 /* Safe area support */
