@@ -96,6 +96,18 @@ const SettingsMenu: React.FC<SettingsMenuProps> = ({ children }) => {
     if (open) setEmailOpen(false);
   };
 
+  // Ensure only one main menu can be open at a time
+  const handleMainMenuChange = (menu: 'templates' | 'help', open: boolean) => {
+    if (open) {
+      setMainMenu(menu);
+      // Close all submenus when switching main menus
+      setEmailOpen(false);
+      setTextOpen(false);
+    } else {
+      setMainMenu(null);
+    }
+  };
+
   return (
     <Popover>
       <PopoverTrigger asChild>
@@ -108,13 +120,8 @@ const SettingsMenu: React.FC<SettingsMenuProps> = ({ children }) => {
       >
         <div className="space-y-4">
           <div className="space-y-4">
-            <div className="space-y-2">
-              <h3 className="text-sm font-medium">Templates</h3>
-              <p className="text-xs text-muted-foreground">Customize your email and text templates</p>
-            </div>
-
             {/* Templates Category as menu */}
-            <Collapsible.Root open={mainMenu === 'templates'} onOpenChange={open => setMainMenu(open ? 'templates' : null)} className="space-y-2 w-full">
+            <Collapsible.Root open={mainMenu === 'templates'} onOpenChange={open => handleMainMenuChange('templates', open)} className="space-y-2 w-full">
               <Collapsible.Trigger asChild>
                 <button className="w-full flex items-center justify-between p-3 rounded-lg border border-border/20 hover:bg-muted/50 transition-colors">
                   <div className="flex items-center gap-2">
@@ -203,7 +210,7 @@ const SettingsMenu: React.FC<SettingsMenuProps> = ({ children }) => {
               </Collapsible.Content>
             </Collapsible.Root>
             {/* Help Category as menu */}
-            <Collapsible.Root open={mainMenu === 'help'} onOpenChange={open => setMainMenu(open ? 'help' : null)} className="space-y-2 w-full">
+            <Collapsible.Root open={mainMenu === 'help'} onOpenChange={open => handleMainMenuChange('help', open)} className="space-y-2 w-full">
               <Collapsible.Trigger asChild>
                 <button className="w-full flex items-center justify-between p-3 rounded-lg border border-border/20 hover:bg-muted/50 transition-colors">
                   <div className="flex items-center gap-2">
