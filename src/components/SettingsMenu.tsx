@@ -68,79 +68,86 @@ const SettingsMenu: React.FC<SettingsMenuProps> = ({ children }) => {
       <PopoverTrigger asChild>
         {children}
       </PopoverTrigger>
-      <PopoverContent className="w-80 p-4 bg-background/80 backdrop-blur-md border border-border/20 shadow-lg">
-        <div className="space-y-4">
-          <div className="space-y-2">
-            <h4 className="font-medium">Templates</h4>
-            <p className="text-sm text-muted-foreground">Customize your email and text templates</p>
+      <PopoverContent 
+        className="w-[calc(100vw-2rem)] sm:w-[400px] p-0 border-border/20 shadow-lg"
+        sideOffset={5}
+        align="end"
+      >
+        <div className="p-4 space-y-4">
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <h3 className="text-sm font-medium">Templates</h3>
+              <p className="text-xs text-muted-foreground">Customize your email and text templates</p>
+            </div>
+
+            {/* Email Template */}
+            <Collapsible.Root 
+              open={emailOpen} 
+              onOpenChange={setEmailOpen}
+              className="space-y-2"
+            >
+              <Collapsible.Trigger asChild>
+                <button className="w-full flex items-center justify-between p-3 rounded-lg border border-border/20 hover:bg-muted/50 transition-colors">
+                  <div className="flex items-center gap-2">
+                    <Mail className="h-4 w-4 text-muted-foreground" />
+                    <span className="text-sm font-medium">Email Template</span>
+                  </div>
+                  <ChevronDown className={`h-4 w-4 text-muted-foreground transition-transform duration-200 ${emailOpen ? 'rotate-180' : ''}`} />
+                </button>
+              </Collapsible.Trigger>
+              <Collapsible.Content className="space-y-3 pt-2">
+                <div className="space-y-2">
+                  <Label htmlFor="emailSubject">Subject</Label>
+                  <Input
+                    id="emailSubject"
+                    value={emailTemplateSubject}
+                    onChange={(e) => setEmailTemplateSubject(e.target.value)}
+                    placeholder="Enter email subject"
+                    className="w-full"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="emailBody">Body</Label>
+                  <Textarea
+                    id="emailBody"
+                    value={emailTemplateBody}
+                    onChange={(e) => setEmailTemplateBody(e.target.value)}
+                    placeholder="Enter email body"
+                    className="w-full h-32 resize-none"
+                  />
+                </div>
+              </Collapsible.Content>
+            </Collapsible.Root>
+
+            {/* Text Template */}
+            <Collapsible.Root 
+              open={textOpen} 
+              onOpenChange={setTextOpen}
+              className="space-y-2"
+            >
+              <Collapsible.Trigger asChild>
+                <button className="w-full flex items-center justify-between p-3 rounded-lg border border-border/20 hover:bg-muted/50 transition-colors">
+                  <div className="flex items-center gap-2">
+                    <MessageSquare className="h-4 w-4 text-muted-foreground" />
+                    <span className="text-sm font-medium">Text Template</span>
+                  </div>
+                  <ChevronDown className={`h-4 w-4 text-muted-foreground transition-transform duration-200 ${textOpen ? 'rotate-180' : ''}`} />
+                </button>
+              </Collapsible.Trigger>
+              <Collapsible.Content className="space-y-3 pt-2">
+                <div className="space-y-2">
+                  <Label htmlFor="textMessage">Message</Label>
+                  <Textarea
+                    id="textMessage"
+                    value={textTemplateMessage}
+                    onChange={(e) => setTextTemplateMessage(e.target.value)}
+                    placeholder="Enter text message"
+                    className="w-full h-32 resize-none"
+                  />
+                </div>
+              </Collapsible.Content>
+            </Collapsible.Root>
           </div>
-
-          <Separator />
-
-          {/* Email Template Section */}
-          <Collapsible.Root 
-            open={emailOpen} 
-            onOpenChange={setEmailOpen}
-            className="space-y-2"
-          >
-            <Collapsible.Trigger className="flex w-full items-center justify-between rounded-md p-2 hover:bg-background/40 transition-colors">
-              <div className="flex items-center gap-2">
-                <Mail className="h-4 w-4 text-muted-foreground" />
-                <span className="text-sm font-medium">Email Template</span>
-              </div>
-              <ChevronDown className={`h-4 w-4 text-muted-foreground transition-transform duration-200 ${emailOpen ? 'rotate-180' : ''}`} />
-            </Collapsible.Trigger>
-            <Collapsible.Content className="space-y-4 pt-2">
-              <div className="space-y-2">
-                <Label>Subject</Label>
-                <Input
-                  value={emailTemplateSubject}
-                  onChange={(e) => setEmailTemplateSubject(e.target.value)}
-                  placeholder="Enter email subject"
-                  className="bg-background/50 backdrop-blur-sm"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label>Body</Label>
-                <Textarea
-                  value={emailTemplateBody}
-                  onChange={(e) => setEmailTemplateBody(e.target.value)}
-                  placeholder="Enter email body"
-                  rows={8}
-                  className="min-h-[200px] bg-background/50 backdrop-blur-sm"
-                />
-              </div>
-            </Collapsible.Content>
-          </Collapsible.Root>
-
-          <Separator />
-
-          {/* Text Template Section */}
-          <Collapsible.Root 
-            open={textOpen} 
-            onOpenChange={setTextOpen}
-            className="space-y-2"
-          >
-            <Collapsible.Trigger className="flex w-full items-center justify-between rounded-md p-2 hover:bg-background/40 transition-colors">
-              <div className="flex items-center gap-2">
-                <MessageSquare className="h-4 w-4 text-muted-foreground" />
-                <span className="text-sm font-medium">Text Template</span>
-              </div>
-              <ChevronDown className={`h-4 w-4 text-muted-foreground transition-transform duration-200 ${textOpen ? 'rotate-180' : ''}`} />
-            </Collapsible.Trigger>
-            <Collapsible.Content className="space-y-4 pt-2">
-              <div className="space-y-2">
-                <Label>Message</Label>
-                <Textarea
-                  value={textTemplateMessage}
-                  onChange={(e) => setTextTemplateMessage(e.target.value)}
-                  placeholder="Enter text message"
-                  rows={8}
-                  className="min-h-[200px] bg-background/50 backdrop-blur-sm"
-                />
-              </div>
-            </Collapsible.Content>
-          </Collapsible.Root>
         </div>
       </PopoverContent>
     </Popover>
