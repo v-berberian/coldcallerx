@@ -49,7 +49,7 @@ const CallingHeader: React.FC<CallingHeaderProps> = ({
   }, [showAutocomplete]);
 
   return (
-    <div className="bg-background/80 backdrop-blur-md border-b border-border/20 p-3 sm:p-4 pt-safe flex-shrink-0 w-full" style={{ paddingTop: 'max(0.75rem, env(safe-area-inset-top))' }}>
+    <div className="bg-background border-b border-border p-3 sm:p-4 pt-safe flex-shrink-0 w-full" style={{ paddingTop: 'max(0.75rem, env(safe-area-inset-top))' }}>
       <div className="flex items-center justify-between mb-3 sm:mb-4 w-full">
         <div className="min-w-0 flex-shrink-0">
           <CSVImporter onLeadsImported={onLeadsImported} />
@@ -96,7 +96,7 @@ const CallingHeader: React.FC<CallingHeaderProps> = ({
                 <button
                   key={`${lead.name}-${lead.phone}-${index}`}
                   onClick={() => onLeadSelect(lead)}
-                  className="w-full px-4 py-3 text-left border-b border-border/10 last:border-b-0 transition-colors duration-75 cursor-default hover:bg-background/40"
+                  className="w-full px-4 py-3 text-left border-b border-border/10 last:border-b-0 transition-colors duration-75 cursor-default hover:bg-muted/50"
                 >
                   <div className="flex justify-between items-start">
                     <div className="flex-1 min-w-0">
