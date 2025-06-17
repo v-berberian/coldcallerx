@@ -62,15 +62,10 @@ const CallingHeader: React.FC<CallingHeaderProps> = ({
           </h1>
         </div>
         
-        <div className="w-8 sm:w-8 flex-shrink-0">
+        <div className="flex-shrink-0">
           <SettingsMenu>
-            <Button 
-              variant="ghost" 
-              size="sm" 
-              className="h-8 w-8 rounded-full"
-              style={{ WebkitTapHighlightColor: 'transparent' }}
-            >
-              <Settings className="h-4 w-4" />
+            <Button>
+              <Settings />
             </Button>
           </SettingsMenu>
         </div>
