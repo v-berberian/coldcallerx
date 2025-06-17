@@ -70,7 +70,7 @@ const LeadCard: React.FC<LeadCardProps> = ({
   // If we have a noLeadsMessage, show the empty state
   if (noLeadsMessage) {
     return (
-      <Card className="shadow-2xl border-border/50 rounded-3xl bg-card min-h-[400px] max-h-[500px] sm:min-h-[420px] sm:max-h-[550px] flex flex-col">
+      <Card className="shadow-2xl border-border/50 rounded-3xl bg-card min-h-[400px] max-h-[500px] sm:min-h-[420px] sm:max-h-[550px] flex flex-col mb-8">
         <CardContent className="p-6 space-y-6 flex-1 flex flex-col justify-center">
           <div className="text-center">
             <h2 className="text-2xl font-bold text-foreground">{noLeadsMessage}</h2>
@@ -211,98 +211,7 @@ const LeadCard: React.FC<LeadCardProps> = ({
   };
 
   return (
-    <Card className="w-full max-w-2xl mx-auto mb-8">
-      <CardHeader>
-        <CardContent className="p-4 sm:p-6 space-y-4 sm:space-y-6 flex-1 flex flex-col">
-          {/* Top row with lead count and file name */}
-          <div className="flex items-center justify-between">
-            <p className="text-sm text-muted-foreground opacity-40">
-              {currentIndex + 1}/{totalCount}
-            </p>
-            <p className="text-sm text-muted-foreground opacity-40 truncate">
-              {fileName}
-            </p>
-          </div>
-
-          {/* Lead info - Main content area with animation */}
-          <div key={leadKey} className="text-center space-y-4 sm:space-y-6 flex-1 flex flex-col justify-center animate-fade-in">
-            {/* State and timezone - always show, with fallback */}
-            <p className="text-sm text-muted-foreground">
-              {leadState || 'Unknown State'}
-            </p>
-            
-            {/* Group 1: Name and Company */}
-            <div className="space-y-1">
-              <div className="flex items-center justify-center px-2">
-                <h2 className="text-2xl sm:text-3xl font-bold text-foreground text-center break-words leading-tight">
-                  {lead.name}
-                </h2>
-              </div>
-              
-              {lead.company && (
-                <div className="flex items-center justify-center px-2">
-                  <p className="text-base sm:text-lg text-muted-foreground font-medium text-center break-words leading-relaxed">
-                    {lead.company}
-                  </p>
-                </div>
-              )}
-            </div>
-            
-            {/* Group 2: Phone and Email */}
-            <div className="space-y-2">
-              {/* Phone number with icon positioned to the left */}
-              <div className="flex items-center justify-center">
-                <div className="relative">
-                  <Phone className="absolute -left-6 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                  {hasAdditionalPhones ? (
-                    <DropdownMenu>
-                      <DropdownMenuTrigger className="flex items-center gap-1 cursor-pointer hover:text-foreground transition-colors">
-                        <p className="text-base sm:text-lg text-muted-foreground">{selectedPhone}</p>
-                        <ChevronDown className="h-4 w-4 text-muted-foreground" />
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent 
-                        side="bottom" 
-                        align="center" 
-                        className="z-50 min-w-[200px] rounded-xl shadow-lg overflow-hidden animate-fade-in data-[state=closed]:animate-fade-out bg-background/60 backdrop-blur-sm border border-border/15"
-                      >
-                        <div className="max-h-60 overflow-y-auto">
-                          {allPhones.map((phoneData, index) => (
-                            <DropdownMenuItem 
-                              key={index} 
-                              onClick={() => handlePhoneSelect(phoneData.phone)}
-                              className="w-full px-4 py-3 text-left border-b border-border/10 last:border-b-0 transition-colors duration-75 cursor-pointer hover:bg-muted/50 relative"
-                            >
-                              <div className="flex justify-between items-center w-full">
-                                <span className={`text-foreground ${phoneData.isPrimary ? 'font-bold' : 'font-medium'}`}>
-                                  {phoneData.phone}
-                                </span>
-                                {selectedPhone === phoneData.phone && !phoneData.isPrimary && (
-                                  <div className="w-2 h-2 bg-foreground rounded-full ml-2"></div>
-                                )}
-                              </div>
-                            </DropdownMenuItem>
-                          ))}
-                        </div>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  ) : (
-                    <p className="text-base sm:text-lg text-muted-foreground">{selectedPhone}</p>
-                  )}
-                </div>
-              </div>
-              
-              {/* Email with icon positioned to the left */}
-              {hasValidEmail && (
-                <div className="flex items-center justify-center">
-                  <div className="relative">
-                    <Mail className="absolute -left-6 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                    {emailTemplates.length > 0 ? (
-                      <DropdownMenu>
-                        <DropdownMenuTrigger className="text-sm text-muted-foreground text-center break-words hover:text-muted-foreground/80 hover:underline transition-colors duration-200 cursor-pointer">
-                          {emailValue}
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent side="bottom" align="center" className="z-50 min-w-[200px]">
-    <Card className="shadow-2xl border-border/50 rounded-3xl bg-card min-h-[400px] max-h-[500px] sm:min-h-[420px] sm:max-h-[550px] flex flex-col">
+    <Card className="shadow-2xl border-border/50 rounded-3xl bg-card min-h-[400px] max-h-[500px] sm:min-h-[420px] sm:max-h-[550px] flex flex-col mb-8">
       <CardContent className="p-4 sm:p-6 space-y-4 sm:space-y-6 flex-1 flex flex-col">
         {/* Top row with lead count and file name */}
         <div className="flex items-center justify-between">
