@@ -68,7 +68,7 @@ const SettingsMenu: React.FC<SettingsMenuProps> = ({ children }) => {
       <PopoverTrigger asChild>
         {children}
       </PopoverTrigger>
-      <PopoverContent className="w-80 p-4">
+      <PopoverContent className="w-80 p-4 bg-background/80 backdrop-blur-md border border-border/20 shadow-lg">
         <div className="space-y-4">
           <div className="space-y-2">
             <h4 className="font-medium">Templates</h4>
@@ -83,7 +83,7 @@ const SettingsMenu: React.FC<SettingsMenuProps> = ({ children }) => {
             onOpenChange={setEmailOpen}
             className="space-y-2"
           >
-            <Collapsible.Trigger className="flex w-full items-center justify-between rounded-md p-2 hover:bg-accent/50 transition-colors">
+            <Collapsible.Trigger className="flex w-full items-center justify-between rounded-md p-2 hover:bg-background/40 transition-colors">
               <div className="flex items-center gap-2">
                 <Mail className="h-4 w-4 text-muted-foreground" />
                 <span className="text-sm font-medium">Email Template</span>
@@ -97,7 +97,7 @@ const SettingsMenu: React.FC<SettingsMenuProps> = ({ children }) => {
                   value={emailTemplateSubject}
                   onChange={(e) => setEmailTemplateSubject(e.target.value)}
                   placeholder="Enter email subject"
-                  className="bg-background/50"
+                  className="bg-background/50 backdrop-blur-sm"
                 />
               </div>
               <div className="space-y-2">
@@ -107,7 +107,7 @@ const SettingsMenu: React.FC<SettingsMenuProps> = ({ children }) => {
                   onChange={(e) => setEmailTemplateBody(e.target.value)}
                   placeholder="Enter email body"
                   rows={8}
-                  className="min-h-[200px] bg-background/50"
+                  className="min-h-[200px] bg-background/50 backdrop-blur-sm"
                 />
               </div>
             </Collapsible.Content>
@@ -121,7 +121,7 @@ const SettingsMenu: React.FC<SettingsMenuProps> = ({ children }) => {
             onOpenChange={setTextOpen}
             className="space-y-2"
           >
-            <Collapsible.Trigger className="flex w-full items-center justify-between rounded-md p-2 hover:bg-accent/50 transition-colors">
+            <Collapsible.Trigger className="flex w-full items-center justify-between rounded-md p-2 hover:bg-background/40 transition-colors">
               <div className="flex items-center gap-2">
                 <MessageSquare className="h-4 w-4 text-muted-foreground" />
                 <span className="text-sm font-medium">Text Template</span>
@@ -136,7 +136,7 @@ const SettingsMenu: React.FC<SettingsMenuProps> = ({ children }) => {
                   onChange={(e) => setTextTemplateMessage(e.target.value)}
                   placeholder="Enter text message"
                   rows={8}
-                  className="min-h-[200px] bg-background/50"
+                  className="min-h-[200px] bg-background/50 backdrop-blur-sm"
                 />
               </div>
             </Collapsible.Content>
