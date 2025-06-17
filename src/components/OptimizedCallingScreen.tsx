@@ -1,4 +1,3 @@
-
 import React, { useState, useCallback, useMemo } from 'react';
 import { Lead } from '../types/lead';
 import { Card, CardContent } from '@/components/ui/card';
@@ -180,6 +179,7 @@ const OptimizedCallingScreen: React.FC<OptimizedCallingScreenProps> = ({
             <LeadCard
               lead={currentLead}
               currentIndex={currentIndex}
+              totalCount={currentLeads.length}
               fileName={fileName}
               onCall={handleCallClick}
               onResetCallCount={() => resetCallCount(currentLead)}
