@@ -57,8 +57,8 @@ const CallingHeader: React.FC<CallingHeaderProps> = ({
         
         <div className="flex items-center space-x-2 sm:space-x-3 flex-1 justify-center min-w-0">
           <h1 className="text-xl sm:text-2xl font-bold truncate">
-            <span className="text-blue-500">ColdCall </span>
-            <span className="text-blue-500">X</span>
+            <span style={{ color: '#6EC6F1' }}>ColdCall </span>
+            <span style={{ color: '#6EC6F1' }}>X</span>
           </h1>
         </div>
         
