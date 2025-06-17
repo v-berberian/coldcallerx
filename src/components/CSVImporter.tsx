@@ -34,7 +34,7 @@ const CSVImporter: React.FC<CSVImporterProps> = ({ onLeadsImported, buttonClassN
       className={`h-8 w-8 text-base hover:bg-transparent focus:bg-transparent active:bg-transparent ${buttonClassName}`}
       style={{ WebkitTapHighlightColor: 'transparent' }}
     >
-      <Upload className={`h-5 w-5 ${iconClassName}`} />
+      <Upload className={`h-4 w-4 ${iconClassName}`} />
       <input
         ref={fileInputRef}
         type="file"
