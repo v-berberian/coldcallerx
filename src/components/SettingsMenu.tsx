@@ -16,7 +16,6 @@ import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { Popover as SubPopover, PopoverContent as SubPopoverContent, PopoverTrigger as SubPopoverTrigger } from '@/components/ui/popover';
 
 interface EmailTemplate {
   id: string;
