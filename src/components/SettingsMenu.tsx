@@ -1,20 +1,13 @@
+
 import React, { useState, useEffect } from 'react';
-import { Mail, HelpCircle, ChevronDown, Plus, Edit, Trash2, MessageSquare, Check } from 'lucide-react';
-import { Share } from '@capacitor/share';
+import { Mail, HelpCircle, ChevronDown, MessageSquare } from 'lucide-react';
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
-import { Separator } from '@/components/ui/separator';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import * as Collapsible from '@radix-ui/react-collapsible';
@@ -62,11 +55,16 @@ const SettingsMenu: React.FC<SettingsMenuProps> = ({ children }) => {
 
   const handleShareEmail = async () => {
     try {
-      await Share.share({
-        title: emailTemplateSubject,
-        text: emailTemplateBody,
-        dialogTitle: 'Share via Email',
-      });
+      if (navigator.share) {
+        await navigator.share({
+          title: emailTemplateSubject,
+          text: emailTemplateBody,
+        });
+      } else {
+        // Fallback for browsers that don't support Web Share API
+        navigator.clipboard.writeText(`${emailTemplateSubject}\n\n${emailTemplateBody}`);
+        console.log('Email template copied to clipboard');
+      }
     } catch (error) {
       console.error('Error sharing email:', error);
     }
@@ -74,10 +72,15 @@ const SettingsMenu: React.FC<SettingsMenuProps> = ({ children }) => {
 
   const handleShareSMS = async () => {
     try {
-      await Share.share({
-        text: textTemplateMessage,
-        dialogTitle: 'Share via Message',
-      });
+      if (navigator.share) {
+        await navigator.share({
+          text: textTemplateMessage,
+        });
+      } else {
+        // Fallback for browsers that don't support Web Share API
+        navigator.clipboard.writeText(textTemplateMessage);
+        console.log('Text template copied to clipboard');
+      }
     } catch (error) {
       console.error('Error sharing SMS:', error);
     }
