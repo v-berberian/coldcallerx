@@ -115,8 +115,9 @@ const SettingsMenu: React.FC<SettingsMenuProps> = ({ children }) => {
       </PopoverTrigger>
       <PopoverContent 
         className="w-[calc(100vw-2rem)] sm:w-[400px] p-4 border-border/20 shadow-lg"
-        sideOffset={5}
+        sideOffset={8}
         align="center"
+        alignOffset={0}
       >
         <div className="space-y-4">
           <div className="space-y-4">
