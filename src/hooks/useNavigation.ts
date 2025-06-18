@@ -34,17 +34,16 @@ export const useNavigation = (
       return;
     }
 
-    // Get current lead before navigation
+    // DO NOT mark current lead as called here - this will be handled by the wrapper
+    // that checks if callMadeToCurrentLead is true
     const currentLead = baseLeads[currentIndex];
     
     let nextIndex: number;
-    let nextLead: Lead | null = null;
     
     if (shuffleMode) {
       console.log('Using shuffle mode for navigation');
       const result = getNextLeadInShuffle(baseLeads, currentIndex, callFilter, shownLeadsInShuffle);
       nextIndex = result.index;
-      nextLead = result.lead;
       
       // Add the current lead to shown leads in shuffle
       if (currentLead) {
@@ -58,16 +57,10 @@ export const useNavigation = (
       console.log('Using sequential mode for navigation');
       const result = getNextLeadInSequential(baseLeads, currentIndex);
       nextIndex = result.index;
-      nextLead = result.lead;
     }
     
-    // Only navigate if we have a valid lead
-    if (nextLead) {
-      console.log('Navigation to next index:', nextIndex, 'from current:', currentIndex, 'shuffle mode:', shuffleMode);
-      updateNavigation(nextIndex);
-    } else {
-      console.log('No valid lead found for navigation');
-    }
+    console.log('Navigation to next index:', nextIndex, 'from current:', currentIndex, 'shuffle mode:', shuffleMode);
+    updateNavigation(nextIndex);
   };
 
   const handlePrevious = () => {

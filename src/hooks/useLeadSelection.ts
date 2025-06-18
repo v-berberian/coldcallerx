@@ -3,13 +3,6 @@ import { Lead, CallFilter } from '../types/lead';
 
 export const useLeadSelection = () => {
   const getNextLeadInSequential = (baseLeads: Lead[], currentIndex: number) => {
-    if (baseLeads.length === 0) {
-      return {
-        index: 0,
-        lead: null
-      };
-    }
-    
     const nextIndex = (currentIndex + 1) % baseLeads.length;
     return {
       index: nextIndex,
@@ -25,8 +18,8 @@ export const useLeadSelection = () => {
   ) => {
     if (baseLeads.length === 0) {
       return {
-        index: 0,
-        lead: null
+        index: currentIndex,
+        lead: baseLeads[currentIndex]
       };
     }
 
