@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react';
 import { Loader2, Settings } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import CallingScreen from '@/components/CallingScreen';
-import OptimizedCallingScreen from '@/components/OptimizedCallingScreen';
 import CSVImporter from '@/components/CSVImporter';
 import SettingsMenu from '@/components/SettingsMenu';
 import { useLocalLeadOperations } from '@/hooks/useLocalLeadOperations';
@@ -105,26 +104,14 @@ const Index = () => {
     );
   }
 
-  // Use optimized calling screen for large datasets (>5000 leads)
-  const useOptimizedScreen = leadsData.length > 5000;
-
   return (
     <div className={`transition-opacity duration-300 ${showContent ? 'opacity-100' : 'opacity-0'}`}>
-      {useOptimizedScreen ? (
-        <OptimizedCallingScreen 
-          leads={leadsData} 
-          fileName={currentLeadList?.name || 'Imported Leads'}
-          onBack={() => {}}
-          onLeadsImported={handleLeadsImported}
-        />
-      ) : (
-        <CallingScreen 
-          leads={leadsData} 
-          fileName={currentLeadList?.name || 'Imported Leads'}
-          onBack={() => {}}
-          onLeadsImported={handleLeadsImported}
-        />
-      )}
+      <CallingScreen 
+        leads={leadsData} 
+        fileName={currentLeadList?.name || 'Imported Leads'}
+        onBack={() => {}}
+        onLeadsImported={handleLeadsImported}
+      />
     </div>
   );
 };
