@@ -86,7 +86,7 @@ const SettingsMenu: React.FC<SettingsMenuProps> = ({ children }) => {
     }
   };
 
-  // Ensure only one submenu is open at a time
+  // Ensure only one submenu is open at a time within Templates
   const handleEmailOpen = (open: boolean) => {
     setEmailOpen(open);
     if (open) setTextOpen(false);
@@ -115,8 +115,9 @@ const SettingsMenu: React.FC<SettingsMenuProps> = ({ children }) => {
       </PopoverTrigger>
       <PopoverContent 
         className="w-[calc(100vw-2rem)] sm:w-[400px] p-4 border-border/20 shadow-lg"
-        sideOffset={5}
-        align="end"
+        sideOffset={8}
+        align="center"
+        alignOffset={0}
       >
         <div className="space-y-4">
           <div className="space-y-4">
@@ -133,7 +134,7 @@ const SettingsMenu: React.FC<SettingsMenuProps> = ({ children }) => {
               <Collapsible.Content className="space-y-4 data-[state=open]:animate-template-down data-[state=closed]:animate-template-up overflow-hidden">
                 <div className="space-y-4">
                   {/* Email Template */}
-                  <Collapsible.Root open={emailOpen} onOpenChange={setEmailOpen} className="space-y-2">
+                  <Collapsible.Root open={emailOpen} onOpenChange={handleEmailOpen} className="space-y-2">
                     <Collapsible.Trigger asChild>
                       <button className="w-full flex items-center justify-between p-3 rounded-lg border border-border/20 hover:bg-muted/50 transition-colors">
                         <div className="flex items-center gap-2">
@@ -175,7 +176,7 @@ const SettingsMenu: React.FC<SettingsMenuProps> = ({ children }) => {
                     </Collapsible.Content>
                   </Collapsible.Root>
                   {/* Text Template */}
-                  <Collapsible.Root open={textOpen} onOpenChange={setTextOpen} className="space-y-2">
+                  <Collapsible.Root open={textOpen} onOpenChange={handleTextOpen} className="space-y-2">
                     <Collapsible.Trigger asChild>
                       <button className="w-full flex items-center justify-between p-3 rounded-lg border border-border/20 hover:bg-muted/50 transition-colors">
                         <div className="flex items-center gap-2">
