@@ -1,3 +1,4 @@
+
 import React, { useState, useCallback, useMemo } from 'react';
 import { Lead } from '../types/lead';
 import { Card, CardContent } from '@/components/ui/card';
@@ -12,8 +13,8 @@ import { useOptimizedSearch } from '../hooks/useOptimizedSearch';
 import { useOptimizedLeadFiltering } from '../hooks/useOptimizedLeadFiltering';
 import { useFilters } from '../hooks/useFilters';
 import { useCallDelay } from '../hooks/useCallDelay';
-import { useNavigationState } from '../hooks/useNavigationState';
 import { useLeadsData } from '../hooks/useLeadsData';
+import { useCallingScreenNavigation } from '../hooks/useCallingScreenNavigation';
 
 interface OptimizedCallingScreenProps {
   leads: Lead[];
@@ -33,6 +34,7 @@ const OptimizedCallingScreen: React.FC<OptimizedCallingScreenProps> = ({
   const {
     leadsData,
     makeCall,
+    markLeadAsCalledOnNavigation,
     resetCallCount,
     resetAllCallCounts
   } = useLeadsData(leads);
@@ -42,6 +44,7 @@ const OptimizedCallingScreen: React.FC<OptimizedCallingScreenProps> = ({
     callFilter,
     shuffleMode,
     autoCall,
+    isFilterChanging,
     toggleTimezoneFilter,
     toggleCallFilter,
     toggleShuffle,
@@ -57,11 +60,22 @@ const OptimizedCallingScreen: React.FC<OptimizedCallingScreenProps> = ({
 
   const { getBaseLeads } = useOptimizedLeadFiltering(leadsData, timezoneFilter, callFilter);
 
+  // Use the proper navigation hook with shuffle support
   const {
     currentIndex,
-    setCurrentIndex,
-    updateNavigation
-  } = useNavigationState();
+    handleNext,
+    handlePrevious,
+    selectLead,
+    shouldBlockNavigation
+  } = useCallingScreenNavigation({
+    leadsData,
+    makeCall,
+    markLeadAsCalledOnNavigation,
+    callDelay,
+    shuffleMode,
+    callFilter,
+    isFilterChanging
+  });
 
   const {
     searchQuery,
@@ -77,20 +91,23 @@ const OptimizedCallingScreen: React.FC<OptimizedCallingScreenProps> = ({
   const currentLead = currentLeads[currentIndex];
 
   const handleLeadSelect = useCallback((index: number) => {
-    setCurrentIndex(index);
+    const lead = currentLeads[index];
+    if (lead) {
+      selectLead(lead, currentLeads, leadsData);
+    }
     setShowLeadList(false);
     clearSearch();
-  }, [setCurrentIndex, clearSearch]);
+  }, [currentLeads, leadsData, selectLead, clearSearch]);
 
-  const handleNext = useCallback(() => {
-    const nextIndex = Math.min(currentIndex + 1, currentLeads.length - 1);
-    setCurrentIndex(nextIndex);
-  }, [currentIndex, currentLeads.length, setCurrentIndex]);
+  const handleNextWrapper = useCallback(() => {
+    console.log('OptimizedCallingScreen: Next button clicked with shuffle mode:', shuffleMode);
+    handleNext(currentLeads);
+  }, [handleNext, currentLeads, shuffleMode]);
 
-  const handlePrevious = useCallback(() => {
-    const prevIndex = Math.max(currentIndex - 1, 0);
-    setCurrentIndex(prevIndex);
-  }, [currentIndex, setCurrentIndex]);
+  const handlePreviousWrapper = useCallback(() => {
+    console.log('OptimizedCallingScreen: Previous button clicked with shuffle mode:', shuffleMode);
+    handlePrevious(currentLeads);
+  }, [handlePrevious, currentLeads, shuffleMode]);
 
   const handleCallClick = useCallback((phone: string) => {
     if (currentLead) {
@@ -186,10 +203,10 @@ const OptimizedCallingScreen: React.FC<OptimizedCallingScreenProps> = ({
             />
             
             <NavigationControls
-              onPrevious={handlePrevious}
-              onNext={handleNext}
-              canGoPrevious={currentIndex > 0}
-              canGoNext={currentIndex < currentLeads.length - 1}
+              onPrevious={handlePreviousWrapper}
+              onNext={handleNextWrapper}
+              canGoPrevious={currentLeads.length > 1}
+              canGoNext={currentLeads.length > 1}
             />
           </>
         ) : (
