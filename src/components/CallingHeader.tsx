@@ -19,6 +19,9 @@ interface CallingHeaderProps {
   onClearSearch: () => void;
   onLeadSelect: (lead: Lead) => void;
   onLeadsImported: (leads: Lead[], fileName: string) => void;
+  loadMoreResults?: () => void;
+  loadedResultsCount?: number;
+  totalResultsCount?: number;
 }
 
 const CallingHeader: React.FC<CallingHeaderProps> = ({
@@ -32,7 +35,10 @@ const CallingHeader: React.FC<CallingHeaderProps> = ({
   onSearchBlur,
   onClearSearch,
   onLeadSelect,
-  onLeadsImported
+  onLeadsImported,
+  loadMoreResults,
+  loadedResultsCount,
+  totalResultsCount
 }) => {
   const [isAutocompleteVisible, setIsAutocompleteVisible] = useState(showAutocomplete);
 
@@ -85,6 +91,12 @@ const CallingHeader: React.FC<CallingHeaderProps> = ({
         {/* Autocomplete Dropdown */}
         <SearchAutocomplete 
           isVisible={showAutocomplete}
+          loadMoreResults={loadMoreResults}
+          loadedResultsCount={loadedResultsCount}
+          totalResultsCount={totalResultsCount}
+          searchResults={searchResults}
+          onLeadSelect={onLeadSelect}
+          leadsData={leadsData}
         >
           <div className="max-h-60 overflow-y-auto">
             {searchResults.length === 0 ? (

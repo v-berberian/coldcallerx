@@ -26,9 +26,13 @@ const useDebounce = (value: string, delay: number) => {
   return debouncedValue;
 };
 
+const INITIAL_RESULTS = 1000;
+const LOAD_MORE_INCREMENT = 1000;
+
 export const useSearchState = ({ leads, getBaseLeads, leadsData, timezoneFilter, callFilter }: UseSearchStateProps) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState<Lead[]>([]);
+  const [loadedResultsCount, setLoadedResultsCount] = useState(INITIAL_RESULTS);
   const [isSearching, setIsSearching] = useState(false);
   const [showAutocomplete, setShowAutocomplete] = useState(false);
 
@@ -40,49 +44,65 @@ export const useSearchState = ({ leads, getBaseLeads, leadsData, timezoneFilter,
     return getBaseLeads();
   }, [getBaseLeads]);
 
-  // Optimized search function with result limiting
+  // Ultra-optimized search function with incremental loading
   const performSearch = useCallback((query: string, leads: Lead[]) => {
     if (!query.trim()) {
-      return leads.slice(0, 100); // Limit initial results
+      return leads; // Show all leads when no search query
     }
 
     const searchTerm = query.toLowerCase();
     const results: Lead[] = [];
-    let count = 0;
-    const maxResults = 50; // Limit search results for performance
+    const length = leads.length;
 
-    for (const lead of leads) {
-      if (count >= maxResults) break;
+    // Use for loop for better performance - no limit here, we'll limit in the UI
+    for (let i = 0; i < length; i++) {
+      const lead = leads[i];
+      const name = lead.name.toLowerCase();
+      const phone = lead.phone;
       
-      if (
-        lead.name.toLowerCase().includes(searchTerm) || 
-        lead.phone.includes(searchTerm)
-      ) {
+      if (name.includes(searchTerm) || phone.includes(searchTerm)) {
         results.push(lead);
-        count++;
       }
     }
 
     return results;
   }, []);
 
-  // Memoized search results
-  const memoizedSearchResults = useMemo(() => {
+  // Memoized search results - get all matching results
+  const allSearchResults = useMemo(() => {
     if (!debouncedSearchQuery.trim()) {
-      return baseLeads.slice(0, 100); // Limit initial results
+      return baseLeads; // Show all leads when no search query
     }
     return performSearch(debouncedSearchQuery, baseLeads);
   }, [debouncedSearchQuery, baseLeads, performSearch]);
 
+  // Get only the loaded portion of results
+  const visibleSearchResults = useMemo(() => {
+    return allSearchResults.slice(0, loadedResultsCount);
+  }, [allSearchResults, loadedResultsCount]);
+
+  // Function to load more results
+  const loadMoreResults = useCallback(() => {
+    if (loadedResultsCount < allSearchResults.length) {
+      setLoadedResultsCount(prev => Math.min(prev + LOAD_MORE_INCREMENT, allSearchResults.length));
+    }
+  }, [loadedResultsCount, allSearchResults.length]);
+
+  // Reset loaded count when search query changes
+  useEffect(() => {
+    setLoadedResultsCount(INITIAL_RESULTS);
+  }, [debouncedSearchQuery]);
+
   // Update search results when memoized results change
   useEffect(() => {
-    setSearchResults(memoizedSearchResults);
+    setSearchResults(visibleSearchResults);
     setIsSearching(debouncedSearchQuery.trim().length > 0);
-  }, [memoizedSearchResults, debouncedSearchQuery]);
+  }, [visibleSearchResults, debouncedSearchQuery]);
 
   const clearSearch = useCallback(() => {
     setSearchQuery('');
     setShowAutocomplete(false);
+    setLoadedResultsCount(INITIAL_RESULTS);
   }, []);
 
   const handleSearchFocus = useCallback(() => {
@@ -97,6 +117,9 @@ export const useSearchState = ({ leads, getBaseLeads, leadsData, timezoneFilter,
     searchQuery,
     setSearchQuery,
     searchResults,
+    allSearchResults,
+    loadedResultsCount,
+    loadMoreResults,
     isSearching,
     showAutocomplete,
     setShowAutocomplete,

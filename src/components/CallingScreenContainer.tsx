@@ -60,6 +60,9 @@ const CallingScreenContainer: React.FC<CallingScreenContainerProps> = memo(({
     searchQuery,
     setSearchQuery,
     searchResults,
+    allSearchResults,
+    loadedResultsCount,
+    loadMoreResults,
     showAutocomplete,
     setShowAutocomplete,
     clearSearch,
@@ -187,6 +190,9 @@ const CallingScreenContainer: React.FC<CallingScreenContainerProps> = memo(({
         onClearSearch={clearSearch}
         onLeadSelect={handleLeadSelect}
         onLeadsImported={handleLeadsImported}
+        loadMoreResults={loadMoreResults}
+        loadedResultsCount={loadedResultsCount}
+        totalResultsCount={allSearchResults?.length || 0}
       />
 
       {/* Main Content - takes remaining space */}

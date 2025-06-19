@@ -1,4 +1,3 @@
-
 import { useState, useCallback, useRef, useEffect } from 'react';
 import { Lead } from '../types/lead';
 import { useSearchState } from '../components/SearchState';
@@ -51,6 +50,9 @@ export const useLocalCallingScreenState = ({ leads }: UseLocalCallingScreenState
     searchQuery,
     setSearchQuery,
     searchResults,
+    allSearchResults,
+    loadedResultsCount,
+    loadMoreResults,
     showAutocomplete,
     setShowAutocomplete,
     clearSearch,
@@ -137,6 +139,9 @@ export const useLocalCallingScreenState = ({ leads }: UseLocalCallingScreenState
     searchQuery,
     setSearchQuery,
     searchResults,
+    allSearchResults,
+    loadedResultsCount,
+    loadMoreResults,
     showAutocomplete,
     setShowAutocomplete,
     clearSearch,
