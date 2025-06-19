@@ -218,3 +218,14 @@ body {
 .pr-safe {
   padding-right: env(safe-area-inset-right);
 }
+
+/* Settings Menu Screen Width Centering */
+[data-radix-popper-content-wrapper] {
+  left: 50% !important;
+  transform: translateX(-50%) !important;
+  /* Position at the top edge of search input */
+  top: calc(env(safe-area-inset-top) + 2.75rem) !important;
+  position: fixed !important;
+}
+
+

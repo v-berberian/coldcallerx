@@ -80,9 +80,9 @@ const SettingsMenu: React.FC<SettingsMenuProps> = ({ children }) => {
         {children}
       </PopoverTrigger>
       <PopoverContent 
-        className="w-[calc(100vw-2rem)] sm:w-[400px] p-0 border-border/20 shadow-lg"
+        className="w-screen p-0 border-border/20 shadow-lg"
         sideOffset={5}
-        align="end"
+        align="center"
       >
         <div className="p-4 space-y-4">
           <div className="space-y-4">
