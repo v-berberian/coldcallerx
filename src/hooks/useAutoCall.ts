@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useRef } from 'react';
 import { Lead } from '../types/lead';
 
@@ -14,7 +13,6 @@ export const useAutoCall = (
 
   const executeAutoCall = (lead: Lead) => {
     if (!lead) {
-      console.log('AUTO-CALL: No lead provided for auto-call');
       return;
     }
     
@@ -40,11 +38,8 @@ export const useAutoCall = (
       actualDelay = Math.floor(Math.random() * 19) + 14; // 14 to 32 seconds
     }
     
-    console.log(`AUTO-CALL: Starting countdown for ${lead.name} ${lead.phone} with ${actualDelay}s delay (mode: ${callDelay})`);
-    
     if (actualDelay === 0) {
       // No delay, make call immediately
-      console.log('AUTO-CALL: Rocket mode - calling immediately');
       setIsAutoCallInProgress(true);
       makeCall(lead, false);
       setTimeout(() => {
@@ -52,7 +47,6 @@ export const useAutoCall = (
       }, 500);
     } else {
       // Start countdown with specified delay
-      console.log(`AUTO-CALL: Starting ${actualDelay}s countdown for ${lead.name}`);
       setPendingLead(lead);
       setIsCountdownActive(true);
       setIsAutoCallInProgress(true);
@@ -61,11 +55,7 @@ export const useAutoCall = (
       // Start the countdown timer
       intervalRef.current = setInterval(() => {
         setCountdownTime((prev) => {
-          console.log(`AUTO-CALL: Countdown tick - ${prev - 1}s remaining`);
-          
           if (prev <= 1) {
-            console.log('AUTO-CALL: Countdown complete, making call to:', lead.name, lead.phone);
-            
             // Clear interval
             if (intervalRef.current) {
               clearInterval(intervalRef.current);
@@ -93,8 +83,6 @@ export const useAutoCall = (
   };
 
   const resetAutoCall = () => {
-    console.log('AUTO-CALL: Resetting countdown and stopping auto-call');
-    
     // Clear any existing interval
     if (intervalRef.current) {
       clearInterval(intervalRef.current);
@@ -123,7 +111,6 @@ export const useAutoCall = (
 
   const handleCountdownComplete = (lead: Lead) => {
     // This function is no longer needed as the countdown automatically makes the call
-    console.log('AUTO-CALL: Manual countdown complete triggered');
     setIsCountdownActive(false);
     makeCall(lead, false);
     

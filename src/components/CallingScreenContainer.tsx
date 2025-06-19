@@ -91,13 +91,11 @@ const CallingScreenContainer: React.FC<CallingScreenContainerProps> = memo(({
 
   // Handle leads data updates without navigation reset
   const handleLeadsDataUpdate = (updatedLeads: Lead[]) => {
-    console.log('CallingScreenContainer: Updating leads data without navigation reset');
     updateLeadsDataDirectly(updatedLeads);
   };
 
   // Handle full leads data reset (for CSV import)
   const handleLeadsDataReset = (updatedLeads: Lead[]) => {
-    console.log('CallingScreenContainer: Full reset of leads data');
     memoizedResetLeadsData(updatedLeads);
   };
 
@@ -149,7 +147,6 @@ const CallingScreenContainer: React.FC<CallingScreenContainerProps> = memo(({
   
   // Safety check: if currentLead is undefined, reset to first lead
   if (!currentLead && currentLeads.length > 0) {
-    console.log('Current lead is undefined, resetting to first lead');
     // This will be handled by the navigation reset effect
   }
   

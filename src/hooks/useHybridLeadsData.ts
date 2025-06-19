@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Lead } from '../types/lead';
 import { getPhoneDigits } from '../utils/phoneUtils';
@@ -97,7 +96,6 @@ export const useHybridLeadsData = (initialLeads: Lead[]) => {
 
   // Function to mark a lead as called when navigating away
   const markLeadAsCalledOnNavigation = (lead: Lead) => {
-    console.log('Marking lead as called on navigation:', lead.name);
     markLeadAsCalledWrapper(lead);
   };
 

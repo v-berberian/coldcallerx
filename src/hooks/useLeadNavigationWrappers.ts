@@ -1,4 +1,3 @@
-
 import { Lead } from '../types/lead';
 
 interface UseLeadNavigationWrappersProps {
@@ -44,7 +43,6 @@ export const useLeadNavigationWrappers = ({
     // If turning auto-call OFF, reset any active countdown
     if (wasAutoCallOn) {
       resetAutoCall();
-      console.log('Auto-call disabled, resetting countdown');
     }
   };
 

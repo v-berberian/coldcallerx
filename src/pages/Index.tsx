@@ -20,13 +20,11 @@ const Index = () => {
 
   // Load saved data when component mounts
   useEffect(() => {
-    console.log('Index: Loading saved data');
     loadExistingData();
     
     // Initialize app
     const initializeApp = async () => {
       await new Promise(resolve => setTimeout(resolve, 200));
-      console.log('Index: App initialization complete');
       setAppReady(true);
       
       // Add fade-in effect
@@ -39,7 +37,6 @@ const Index = () => {
   }, [loadExistingData]);
 
   const handleLeadsImported = async (importedLeads: Lead[], fileName: string) => {
-    console.log('Index: Importing new leads locally:', importedLeads.length);
     try {
       const success = await importLeadsFromCSV(importedLeads, fileName);
       if (!success) {

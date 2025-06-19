@@ -71,7 +71,6 @@ const LeadCard: React.FC<LeadCardProps> = ({
   // Reset selectedPhone to primary phone when lead changes
   useEffect(() => {
     const primaryPhone = formatPhoneNumber(lead.phone);
-    console.log('Lead changed, resetting selectedPhone to primary:', primaryPhone);
     setSelectedPhone(primaryPhone);
   }, [lead.phone, lead.name]); // Reset when lead changes (using phone and name as dependencies)
 
@@ -98,7 +97,6 @@ const LeadCard: React.FC<LeadCardProps> = ({
   // Completely rewrite phone parsing - handle format: "773) 643-4644 (773) 643-9346"
   const additionalPhones = lead.additionalPhones ? (() => {
     const rawString = lead.additionalPhones.trim();
-    console.log('Raw additional phones string:', rawString);
 
     // Use regex to find all phone patterns like "(123) 456-7890" or "123) 456-7890"
     const phonePattern = /\(?(\d{3})\)?\s*(\d{3})-?(\d{4})/g;
@@ -108,7 +106,6 @@ const LeadCard: React.FC<LeadCardProps> = ({
       const formattedPhone = `(${match[1]}) ${match[2]}-${match[3]}`;
       foundPhones.push(formattedPhone);
     }
-    console.log('Found phones:', foundPhones);
 
     // Remove the primary phone if it appears in the additional phones
     const primaryPhoneFormatted = formatPhoneNumber(lead.phone);
@@ -132,22 +129,13 @@ const LeadCard: React.FC<LeadCardProps> = ({
   const cleanSelectedPhone = selectedPhone.replace(/\D/g, '');
   const leadState = getStateFromAreaCode(cleanSelectedPhone);
 
-  // Debug logging
-  console.log('Primary phone:', formatPhoneNumber(lead.phone));
-  console.log('Selected phone:', selectedPhone);
-  console.log('Clean selected phone for state:', cleanSelectedPhone);
-  console.log('Lead state from selected phone:', leadState);
-  console.log('Additional phones after parsing (limited to 3):', additionalPhones);
-
   // Handle phone selection
   const handlePhoneSelect = (phone: string) => {
-    console.log('Phone selected:', phone);
     setSelectedPhone(phone);
   };
 
   // Modified onCall to use selected phone
   const handleCall = () => {
-    console.log('Making call to selected phone:', selectedPhone);
     onCall(selectedPhone);
   };
 
@@ -198,13 +186,11 @@ const LeadCard: React.FC<LeadCardProps> = ({
 
   const handleEmailClick = (template?: EmailTemplate) => {
     const templateToUse = template || selectedEmailTemplate;
-    console.log('Email clicked for:', emailValue, templateToUse ? `with template: ${templateToUse.name}` : 'without template');
     window.location.href = createMailtoLink(template);
   };
 
   const handleTextClick = (template?: TextTemplate) => {
     const templateToUse = template || selectedTextTemplate;
-    console.log('Text clicked for:', selectedPhone, templateToUse ? `with template: ${templateToUse.name}` : 'without template');
     window.location.href = createSmsLink(template);
   };
 

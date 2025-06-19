@@ -22,18 +22,14 @@ export const useLocalLeadOperations = () => {
       if (savedLeads && savedLeadList) {
         setLeadsData(JSON.parse(savedLeads));
         setCurrentLeadList(JSON.parse(savedLeadList));
-        console.log('Loaded data from localStorage');
       }
     } catch (error) {
-      console.error('Error loading data from localStorage:', error);
     }
   }, []);
 
   const importLeadsFromCSV = async (leads: Lead[], fileName: string): Promise<boolean> => {
     setLoading(true);
     try {
-      console.log('Importing new leads:', leads.length);
-      
       // Create the new lead list first
       const leadList = { 
         id: Date.now().toString(), 
@@ -50,10 +46,8 @@ export const useLocalLeadOperations = () => {
       localStorage.setItem('currentLeadList', JSON.stringify(leadList));
       localStorage.setItem('leadsData', JSON.stringify(leads));
 
-      console.log('Successfully imported and saved leads locally');
       return true;
     } catch (error) {
-      console.error('Error importing leads:', error);
       return false;
     } finally {
       setLoading(false);
@@ -72,8 +66,6 @@ export const useLocalLeadOperations = () => {
       });
       const lastCalledString = `${dateString} at ${timeString}`;
 
-      console.log('Updating last called for:', lead.name, 'to:', lastCalledString);
-
       // Update the leads data - only set lastCalled
       const updatedLeads = currentLeadsData.map(l => 
         l.name === lead.name && l.phone === lead.phone ? {
@@ -87,7 +79,6 @@ export const useLocalLeadOperations = () => {
       
       return updatedLeads;
     } catch (error) {
-      console.error('Error updating last called:', error);
       return currentLeadsData;
     }
   }, []);
@@ -104,7 +95,6 @@ export const useLocalLeadOperations = () => {
       localStorage.setItem('leadsData', JSON.stringify(updatedLeads));
       return updatedLeads;
     } catch (error) {
-      console.error('Error resetting last called:', error);
       return currentLeadsData;
     }
   }, []);
@@ -120,7 +110,6 @@ export const useLocalLeadOperations = () => {
       localStorage.setItem('leadsData', JSON.stringify(updatedLeads));
       return updatedLeads;
     } catch (error) {
-      console.error('Error resetting all last called timestamps:', error);
       return currentLeadsData;
     }
   }, []);

@@ -25,7 +25,6 @@ export const useLeadNavigationEffects = ({
   const makeCallWrapper = (lead: Lead) => {
     makeCall(lead, false); // Don't mark as called immediately
     setCallMadeToCurrentLead(true); // Track that a call was made
-    console.log('Call made to lead:', lead.name, 'marked for call tracking on navigation');
   };
 
   const handleCountdownCompleteWrapper = () => {

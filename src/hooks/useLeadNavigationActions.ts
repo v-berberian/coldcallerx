@@ -1,4 +1,3 @@
-
 import { Lead } from '../types/lead';
 
 interface UseLeadNavigationActionsProps {
@@ -45,10 +44,7 @@ export const useLeadNavigationActions = ({
     
     // Only mark current lead as called if a call was actually made
     if (currentLead && callMadeToCurrentLead) {
-      console.log('Marking lead as called on next navigation:', currentLead.name);
       markLeadAsCalledOnNavigation(currentLead);
-    } else if (currentLead) {
-      console.log('NOT marking lead as called - no call was made to:', currentLead.name);
     }
     
     // Navigate to next lead
@@ -68,7 +64,6 @@ export const useLeadNavigationActions = ({
     
     // Check if navigation should be blocked
     if (shouldBlockNavigation) {
-      console.log('Previous navigation blocked due to countdown');
       return;
     }
     
@@ -77,24 +72,15 @@ export const useLeadNavigationActions = ({
     
     // Only mark current lead as called if a call was actually made
     if (currentLead && callMadeToCurrentLead) {
-      console.log('Marking lead as called on previous navigation:', currentLead.name);
       markLeadAsCalledOnNavigation(currentLead);
-    } else if (currentLead) {
-      console.log('NOT marking lead as called - no call was made to:', currentLead.name);
     }
     
     if (shuffleMode) {
       // In shuffle mode, use navigation history to go to previously shown lead
       const didGoBack = goToPrevious();
-      if (didGoBack) {
-        console.log('Shuffle mode: Used navigation history to go to previous lead');
-      } else {
-        console.log('Shuffle mode: No previous lead in history');
-      }
     } else {
       // In sequential mode, use simple list-based navigation
       const prevIndex = currentIndex === 0 ? baseLeads.length - 1 : currentIndex - 1;
-      console.log('Sequential mode: Previous navigation from index', currentIndex, 'to index', prevIndex);
       updateNavigation(prevIndex);
     }
     
@@ -108,10 +94,7 @@ export const useLeadNavigationActions = ({
     
     // Only mark previous lead as called if a call was actually made
     if (currentLead && callMadeToCurrentLead) {
-      console.log('Marking lead as called on lead selection:', currentLead.name);
       markLeadAsCalledOnNavigation(currentLead);
-    } else if (currentLead) {
-      console.log('NOT marking lead as called - no call was made to:', currentLead.name);
     }
     
     // Select the new lead

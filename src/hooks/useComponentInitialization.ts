@@ -1,4 +1,3 @@
-
 import { useEffect } from 'react';
 import { Lead } from '../types/lead';
 
@@ -20,7 +19,6 @@ export const useComponentInitialization = ({
   // Handle new CSV imports by resetting the leads data - only when leads actually change
   useEffect(() => {
     if (componentReady && !leadsInitialized) {
-      console.log('ComponentInitialization: Initializing leads data for first time');
       memoizedResetLeadsData(leads);
       setLeadsInitialized(true);
     }

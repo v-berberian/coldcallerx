@@ -1,4 +1,3 @@
-
 import { Lead, CallFilter } from '../types/lead';
 
 export const useLeadSelection = () => {
@@ -31,8 +30,6 @@ export const useLeadSelection = () => {
       !shownLeadsInShuffle.has(createLeadKey(lead))
     );
 
-    console.log('Shuffle selection - Total leads:', baseLeads.length, 'Unshown leads:', unshownLeads.length, 'Shown leads:', shownLeadsInShuffle.size);
-
     // If we have unshown leads, pick from them
     if (unshownLeads.length > 0) {
       const randomIndex = Math.floor(Math.random() * unshownLeads.length);
@@ -40,14 +37,12 @@ export const useLeadSelection = () => {
       const nextIndex = baseLeads.findIndex(lead => 
         lead.name === randomLead.name && lead.phone === randomLead.phone
       );
-      console.log('Selected unshown lead:', randomLead.name, 'at index:', nextIndex);
       return {
         index: nextIndex,
         lead: randomLead
       };
     } else {
       // All leads have been shown, pick any random lead (cycle complete)
-      console.log('All leads have been shown, cycling complete - picking any random lead');
       const randomIndex = Math.floor(Math.random() * baseLeads.length);
       const randomLead = baseLeads[randomIndex];
       const nextIndex = baseLeads.findIndex(lead => 

@@ -1,4 +1,3 @@
-
 import { Lead, CallFilter } from '../types/lead';
 import { useLeadSelection } from './useLeadSelection';
 
@@ -20,17 +19,14 @@ export const useNavigation = (
   const handleNext = (baseLeads: Lead[]) => {
     // Block navigation during filter changes or when countdown is 1 second or less
     if (isFilterChanging) {
-      console.log('Skipping navigation because filters are changing');
       return;
     }
     
     if (shouldBlockNavigation) {
-      console.log('Skipping navigation because countdown is less than 1 second');
       return;
     }
     
     if (baseLeads.length === 0) {
-      console.log('No leads available for navigation');
       return;
     }
 
@@ -41,7 +37,6 @@ export const useNavigation = (
     let nextIndex: number;
     
     if (shuffleMode) {
-      console.log('Using shuffle mode for navigation');
       const result = getNextLeadInShuffle(baseLeads, currentIndex, callFilter, shownLeadsInShuffle);
       nextIndex = result.index;
       
@@ -51,27 +46,22 @@ export const useNavigation = (
         const newShownLeads = new Set(shownLeadsInShuffle);
         newShownLeads.add(leadKey);
         setShownLeadsInShuffle(newShownLeads);
-        console.log('Added lead to shown leads in shuffle:', leadKey);
       }
     } else {
-      console.log('Using sequential mode for navigation');
       const result = getNextLeadInSequential(baseLeads, currentIndex);
       nextIndex = result.index;
     }
     
-    console.log('Navigation to next index:', nextIndex, 'from current:', currentIndex, 'shuffle mode:', shuffleMode);
     updateNavigation(nextIndex);
   };
 
   const handlePrevious = () => {
     // Block navigation during filter changes or when countdown is 1 second or less
     if (isFilterChanging) {
-      console.log('Skipping previous navigation because filters are changing');
       return;
     }
     
     if (shouldBlockNavigation) {
-      console.log('Skipping previous navigation because countdown is less than 1 second');
       return;
     }
     
@@ -82,19 +72,16 @@ export const useNavigation = (
   const selectLead = (lead: Lead, baseLeads: Lead[], allLeads: Lead[]) => {
     // Block selection during filter changes or when countdown is 1 second or less
     if (isFilterChanging) {
-      console.log('Skipping lead selection because filters are changing');
       return;
     }
     
     if (shouldBlockNavigation) {
-      console.log('Skipping lead selection because countdown is less than 1 second');
       return;
     }
     
     // Find the lead's index in the filtered baseLeads array for proper navigation context
     const leadIndex = baseLeads.findIndex(l => l.name === lead.name && l.phone === lead.phone);
     if (leadIndex !== -1) {
-      console.log('Selecting lead:', lead.name, 'at filtered array index:', leadIndex);
       updateNavigation(leadIndex);
       
       // If in shuffle mode, add this lead to shown leads
@@ -103,7 +90,6 @@ export const useNavigation = (
         const newShownLeads = new Set(shownLeadsInShuffle);
         newShownLeads.add(leadKey);
         setShownLeadsInShuffle(newShownLeads);
-        console.log('Added selected lead to shown leads:', leadKey);
       }
     }
   };

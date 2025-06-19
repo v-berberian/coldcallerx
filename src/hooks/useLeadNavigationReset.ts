@@ -1,4 +1,3 @@
-
 import { Lead } from '../types/lead';
 
 interface UseLeadNavigationResetProps {
@@ -27,8 +26,6 @@ export const useLeadNavigationReset = ({
     localStorage.removeItem('coldcaller-current-index');
     resetShownLeads();
     resetCallState();
-    
-    console.log('Reset leads data with', formattedLeads.length, 'leads');
   };
 
   return {

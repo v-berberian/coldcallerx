@@ -1,4 +1,3 @@
-
 import { useEffect } from 'react';
 import { Lead } from '../types/lead';
 
@@ -41,21 +40,12 @@ export const useCallingScreenEffects = ({
   
   // Progressive component initialization
   useEffect(() => {
-    console.log('CallingScreenLogic: Starting progressive initialization');
-    
-    const initializeComponent = async () => {
-      await new Promise(resolve => setTimeout(resolve, 50));
-      console.log('CallingScreenLogic: Component ready');
-      setComponentReady(true);
-    };
-
     initializeComponent();
   }, [setComponentReady]);
 
   // Handle new CSV imports by resetting the leads data - only when leads actually change
   useEffect(() => {
     if (componentReady && !leadsInitialized) {
-      console.log('CallingScreenLogic: Initializing leads data for first time');
       memoizedResetLeadsData(leads);
       setLeadsInitialized(true);
     }
@@ -63,26 +53,15 @@ export const useCallingScreenEffects = ({
 
   // Handle auto-call trigger - start countdown when conditions are met
   useEffect(() => {
-    console.log('AUTO-CALL EFFECT: Checking conditions', {
-      shouldAutoCall,
-      autoCall,
-      componentReady,
-      leadsInitialized,
-      currentIndex
-    });
-
     if (shouldAutoCall && autoCall && componentReady && leadsInitialized) {
       const currentLeads = getBaseLeads();
       const currentLead = currentLeads[currentIndex];
       
       if (currentLead) {
-        console.log('AUTO-CALL EFFECT: Triggering countdown for lead:', currentLead.name, currentLead.phone);
         setCurrentLeadForAutoCall(currentLead);
         
         // Execute auto-call with the current lead
         executeAutoCall(currentLead);
-      } else {
-        console.log('AUTO-CALL EFFECT: No current lead found');
       }
       
       // Reset the trigger flag
