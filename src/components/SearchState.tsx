@@ -43,7 +43,7 @@ export const useSearchState = ({ leads, getBaseLeads, leadsData, timezoneFilter,
   // Optimized search function with result limiting
   const performSearch = useCallback((query: string, leads: Lead[]) => {
     if (!query.trim()) {
-      return leads.slice(0, 100); // Limit initial results
+      return leads; // Show all leads when no search query
     }
 
     const searchTerm = query.toLowerCase();
@@ -69,7 +69,7 @@ export const useSearchState = ({ leads, getBaseLeads, leadsData, timezoneFilter,
   // Memoized search results
   const memoizedSearchResults = useMemo(() => {
     if (!debouncedSearchQuery.trim()) {
-      return baseLeads.slice(0, 100); // Limit initial results
+      return baseLeads; // Show all leads when no search query
     }
     return performSearch(debouncedSearchQuery, baseLeads);
   }, [debouncedSearchQuery, baseLeads, performSearch]);

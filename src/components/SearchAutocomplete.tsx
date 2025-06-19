@@ -5,14 +5,12 @@ interface SearchAutocompleteProps {
   isVisible: boolean;
   onAnimationComplete?: () => void;
   children: React.ReactNode;
-  maxItems?: number;
 }
 
 const SearchAutocomplete: React.FC<SearchAutocompleteProps> = ({ 
   isVisible,
   onAnimationComplete,
-  children,
-  maxItems = 50 // Limit items for performance
+  children
 }) => {
   const [isAnimating, setIsAnimating] = useState(false);
   const [shouldRender, setShouldRender] = useState(false);
@@ -24,16 +22,14 @@ const SearchAutocomplete: React.FC<SearchAutocompleteProps> = ({
         ? children.props.children 
         : [children.props.children];
       
-      // Limit the number of items rendered
-      const limitedChildren = childArray.slice(0, maxItems);
-      
+      // Show all children without limiting - let the scrollable container handle large lists
       return React.cloneElement(children, {
         ...children.props,
-        children: limitedChildren
+        children: childArray
       });
     }
     return children;
-  }, [children, maxItems]);
+  }, [children]);
 
   useEffect(() => {
     if (isVisible) {
@@ -60,7 +56,9 @@ const SearchAutocomplete: React.FC<SearchAutocompleteProps> = ({
 
   return (
     <div className={`absolute top-full left-0 right-0 z-50 mt-1 rounded-xl shadow-lg overflow-hidden ${animationClass} bg-background/15 backdrop-blur-sm border border-border/15`}>
-      {optimizedChildren}
+      <div className="max-h-80 overflow-y-auto">
+        {optimizedChildren}
+      </div>
     </div>
   );
 };

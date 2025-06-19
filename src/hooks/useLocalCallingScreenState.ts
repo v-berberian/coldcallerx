@@ -1,4 +1,3 @@
-
 import { useState, useCallback, useRef, useEffect } from 'react';
 import { Lead } from '../types/lead';
 import { useSearchState } from '../components/SearchState';

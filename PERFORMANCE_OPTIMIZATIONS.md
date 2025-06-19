@@ -13,7 +13,9 @@ This document outlines the performance optimizations implemented to handle large
 
 ### 2. Autocomplete Optimization (`src/components/SearchAutocomplete.tsx`)
 
-- **Item Limiting**: Limited rendered items to 50 by default
+- **Scrollable Container**: Added max-height (320px) with scrollable container for large result sets
+- **Initial Results**: Shows first 100 leads for browsing
+- **Search Limiting**: Limits search results to 50 items for performance when typing
 - **Memoized Children**: Optimized children rendering to prevent unnecessary re-renders
 
 ## Filtering Optimizations
@@ -77,11 +79,11 @@ This document outlines the performance optimizations implemented to handle large
 
 ### For 19k Leads:
 
-1. **Search**: Reduced from O(n) to O(1) for cached results, limited to 50 items
+1. **Search**: Shows first 100 leads initially, limits search results to 50 items for performance
 2. **Filtering**: Cached timezone calculations, optimized for large lists
 3. **CSV Import**: Batch processing prevents UI blocking
 4. **Storage**: Throttled saves prevent performance degradation
-5. **Memory**: Limited autocomplete items, optimized component rendering
+5. **Memory**: Scrollable autocomplete with limited initial results, optimized component rendering
 
 ### Expected Performance Gains:
 
