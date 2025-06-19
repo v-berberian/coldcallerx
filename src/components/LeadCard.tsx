@@ -210,7 +210,7 @@ const LeadCard: React.FC<LeadCardProps> = ({
 
   return (
     <Card className="shadow-2xl border-border/50 rounded-3xl bg-card min-h-[400px] max-h-[500px] sm:min-h-[420px] sm:max-h-[550px] flex flex-col mb-4">
-      <CardContent className="p-4 sm:p-6 space-y-4 sm:space-y-6 flex-1 flex flex-col">
+      <CardContent className="p-4 sm:p-6 space-y-5 sm:space-y-6 flex-1 flex flex-col">
         {/* Top row with lead count and file name */}
         <div className="flex items-center justify-between">
           <p className="text-sm text-muted-foreground opacity-40">
@@ -222,14 +222,14 @@ const LeadCard: React.FC<LeadCardProps> = ({
         </div>
 
         {/* Lead info - Main content area with animation */}
-        <div key={leadKey} className="text-center space-y-4 sm:space-y-6 flex-1 flex flex-col justify-center animate-fade-in">
+        <div key={leadKey} className="text-center space-y-5 sm:space-y-6 flex-1 flex flex-col justify-center animate-fade-in">
           {/* State and timezone - always show, with fallback */}
           <p className="text-sm text-muted-foreground">
             {leadState || 'Unknown State'}
           </p>
           
           {/* Group 1: Name and Company */}
-          <div className="space-y-1">
+          <div className="space-y-2">
             <div className="flex items-center justify-center px-2">
               <h2 className="text-2xl sm:text-3xl font-bold text-foreground text-center break-words leading-tight">
                 {lead.name}
@@ -246,7 +246,7 @@ const LeadCard: React.FC<LeadCardProps> = ({
           </div>
           
           {/* Group 2: Phone and Email */}
-          <div className="space-y-2">
+          <div className="space-y-3">
             {/* Phone number with icon positioned to the left */}
             <div className="flex items-center justify-center">
               <div className="relative">
@@ -293,33 +293,13 @@ const LeadCard: React.FC<LeadCardProps> = ({
               <div className="flex items-center justify-center">
                 <div className="relative">
                   <Mail className="absolute -left-6 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                  {emailTemplates.length > 0 ? (
-                    <DropdownMenu>
-                      <DropdownMenuTrigger className="text-sm text-muted-foreground text-center break-words hover:text-muted-foreground/80 hover:underline transition-colors duration-200 cursor-pointer">
-                        {emailValue}
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent side="bottom" align="center" className="z-50 w-auto max-w-[280px] min-w-[180px]">
-                        <DropdownMenuItem onClick={() => handleEmailClick()}>
-                          <Mail className="h-4 w-4 mr-2" />
-                          Send without template
-                        </DropdownMenuItem>
-                        {emailTemplates.map((template) => (
-                          <DropdownMenuItem key={template.id} onClick={() => handleEmailClick(template)}>
-                            <Mail className="h-4 w-4 mr-2" />
-                            {template.name}
-                          </DropdownMenuItem>
-                        ))}
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  ) : (
-                    <button
-                      onClick={() => handleEmailClick()}
-                      className="text-sm text-muted-foreground text-center break-words hover:text-muted-foreground/80 hover:underline transition-colors duration-200 cursor-pointer"
-                      title="Click to send email"
-                    >
-                      {emailValue}
-                    </button>
-                  )}
+                  <button
+                    onClick={() => handleEmailClick()}
+                    className="text-sm text-muted-foreground text-center break-words hover:text-muted-foreground/80 hover:underline transition-colors duration-200 cursor-pointer"
+                    title="Click to send email"
+                  >
+                    {emailValue}
+                  </button>
                 </div>
               </div>
             )}
@@ -327,7 +307,7 @@ const LeadCard: React.FC<LeadCardProps> = ({
         </div>
 
         {/* Group 3: Last Called and Action Buttons */}
-        <div className="space-y-3">
+        <div className="space-y-4">
           {/* Last called section above buttons */}
           {lead.lastCalled && (
             <div className="flex items-center justify-center">

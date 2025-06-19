@@ -101,6 +101,9 @@ const CallingHeader: React.FC<CallingHeaderProps> = ({
                   <div className="flex justify-between items-start">
                     <div className="flex-1 min-w-0">
                       <p className="font-medium text-foreground truncate">{lead.name}</p>
+                      {lead.company && (
+                        <p className="text-xs text-muted-foreground truncate">{lead.company}</p>
+                      )}
                       <p className="text-sm text-muted-foreground">{lead.phone}</p>
                     </div>
                     <div className="ml-2 text-xs text-muted-foreground">
