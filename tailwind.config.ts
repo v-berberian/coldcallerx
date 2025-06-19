@@ -211,8 +211,8 @@ export default {
 			animation: {
 				"accordion-down": "accordion-down 0.2s ease-out",
 				"accordion-up": "accordion-up 0.2s ease-out",
-				"template-down": "template-down 0.15s cubic-bezier(0.16, 1, 0.3, 1)",
-				"template-up": "template-up 0.15s cubic-bezier(0.16, 1, 0.3, 1)",
+				"template-down": "template-down 0.25s cubic-bezier(0.4, 0, 0.2, 1)",
+				"template-up": "template-up 0.2s cubic-bezier(0.4, 0, 0.2, 1)",
 				'fade-in': 'fade-in 0.15s ease-out',
 				'fade-out': 'fade-out 0.15s ease-out',
 				'slide-down': 'slide-down 0.2s cubic-bezier(0.16, 1, 0.3, 1)',
