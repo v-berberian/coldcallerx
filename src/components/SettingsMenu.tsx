@@ -88,6 +88,7 @@ const SettingsMenu: React.FC<SettingsMenuProps> = ({ children }) => {
         className="w-screen p-0 border-border/20 shadow-lg"
         sideOffset={5}
         align="center"
+        data-settings-menu="true"
       >
         <div className="p-4 space-y-4">
           <div className="space-y-4">

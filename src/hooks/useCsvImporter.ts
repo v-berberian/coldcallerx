@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { toast } from 'sonner';
 import { Lead } from '@/types/lead';
@@ -35,7 +34,9 @@ export const useCsvImporter = ({ onLeadsImported }: UseCsvImporterProps) => {
           }
           const fileName = file.name.replace('.csv', '');
           onLeadsImported(leads, fileName);
-          toast.success(`${leads.length} leads imported successfully!`);
+          toast.success(`${leads.length} leads imported successfully!`, {
+            duration: 1000
+          });
         } catch (parseError) {
           console.error('Error parsing CSV:', parseError);
           toast.error('Failed to parse CSV file. Please check the file content and format.');

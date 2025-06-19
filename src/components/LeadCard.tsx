@@ -260,6 +260,7 @@ const LeadCard: React.FC<LeadCardProps> = ({
                     <DropdownMenuContent 
                       side="bottom" 
                       align="center" 
+                      sideOffset={5}
                       className="z-50 w-auto max-w-[280px] min-w-[180px] rounded-xl shadow-lg overflow-hidden animate-fade-in data-[state=closed]:animate-fade-out bg-background/60 backdrop-blur-sm border border-border/15"
                     >
                       <div className="max-h-60 overflow-y-auto">

@@ -220,7 +220,7 @@ body {
 }
 
 /* Settings Menu Screen Width Centering */
-[data-radix-popper-content-wrapper] {
+[data-radix-popper-content-wrapper][data-settings-menu="true"] {
   left: 50% !important;
   transform: translateX(-50%) !important;
   /* Position at the top edge of search input */
