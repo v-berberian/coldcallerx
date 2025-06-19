@@ -43,6 +43,7 @@ const LeadCard: React.FC<LeadCardProps> = ({
   const [textTemplates, setTextTemplates] = useState<TextTemplate[]>([]);
   const [selectedEmailTemplateId, setSelectedEmailTemplateId] = useState<string>('');
   const [selectedTextTemplateId, setSelectedTextTemplateId] = useState<string>('');
+  const [selectedPhone, setSelectedPhone] = useState(formatPhoneNumber(lead.phone));
 
   // Load templates and selections from localStorage
   useEffect(() => {
@@ -66,6 +67,13 @@ const LeadCard: React.FC<LeadCardProps> = ({
       setSelectedTextTemplateId(savedSelectedTextTemplate);
     }
   }, []);
+
+  // Reset selectedPhone to primary phone when lead changes
+  useEffect(() => {
+    const primaryPhone = formatPhoneNumber(lead.phone);
+    console.log('Lead changed, resetting selectedPhone to primary:', primaryPhone);
+    setSelectedPhone(primaryPhone);
+  }, [lead.phone, lead.name]); // Reset when lead changes (using phone and name as dependencies)
 
   // If we have a noLeadsMessage, show the empty state
   if (noLeadsMessage) {
@@ -110,16 +118,6 @@ const LeadCard: React.FC<LeadCardProps> = ({
     return filteredPhones.slice(0, 3);
   })() : [];
   const hasAdditionalPhones = additionalPhones.length > 0;
-
-  // State to track selected phone number - defaults to primary phone
-  const [selectedPhone, setSelectedPhone] = useState(formatPhoneNumber(lead.phone));
-
-  // Reset selectedPhone to primary phone when lead changes
-  useEffect(() => {
-    const primaryPhone = formatPhoneNumber(lead.phone);
-    console.log('Lead changed, resetting selectedPhone to primary:', primaryPhone);
-    setSelectedPhone(primaryPhone);
-  }, [lead.phone, lead.name]); // Reset when lead changes (using phone and name as dependencies)
 
   // All available phones (primary + up to 3 additional)
   const allPhones = [{
@@ -262,7 +260,7 @@ const LeadCard: React.FC<LeadCardProps> = ({
                     <DropdownMenuContent 
                       side="bottom" 
                       align="center" 
-                      className="z-50 min-w-[200px] rounded-xl shadow-lg overflow-hidden animate-fade-in data-[state=closed]:animate-fade-out bg-background/60 backdrop-blur-sm border border-border/15"
+                      className="z-50 w-auto max-w-[280px] min-w-[180px] rounded-xl shadow-lg overflow-hidden animate-fade-in data-[state=closed]:animate-fade-out bg-background/60 backdrop-blur-sm border border-border/15"
                     >
                       <div className="max-h-60 overflow-y-auto">
                         {allPhones.map((phoneData, index) => (
@@ -300,7 +298,7 @@ const LeadCard: React.FC<LeadCardProps> = ({
                       <DropdownMenuTrigger className="text-sm text-muted-foreground text-center break-words hover:text-muted-foreground/80 hover:underline transition-colors duration-200 cursor-pointer">
                         {emailValue}
                       </DropdownMenuTrigger>
-                      <DropdownMenuContent side="bottom" align="center" className="z-50 min-w-[200px]">
+                      <DropdownMenuContent side="bottom" align="center" className="z-50 w-auto max-w-[280px] min-w-[180px]">
                         <DropdownMenuItem onClick={() => handleEmailClick()}>
                           <Mail className="h-4 w-4 mr-2" />
                           Send without template
