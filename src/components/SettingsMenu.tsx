@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Mail, HelpCircle, ChevronDown, Plus, Edit, Trash2, MessageSquare, Check } from 'lucide-react';
+import { Mail, HelpCircle, ChevronDown, Plus, Edit, Trash2, MessageSquare, Check, Upload, FileText } from 'lucide-react';
 import {
   Popover,
   PopoverContent,
@@ -42,10 +42,17 @@ const SettingsMenu: React.FC<SettingsMenuProps> = ({ children }) => {
   const [templatesOpen, setTemplatesOpen] = useState(false);
   const [emailOpen, setEmailOpen] = useState(false);
   const [textOpen, setTextOpen] = useState(false);
+  const [helpOpen, setHelpOpen] = useState(false);
+  const [csvGuideOpen, setCsvGuideOpen] = useState(false);
 
   // Handle template open/close
   const handleTemplatesOpen = (open: boolean) => {
     setTemplatesOpen(open);
+    if (!open) {
+      // Close all submenus when templates menu is closed
+      setEmailOpen(false);
+      setTextOpen(false);
+    }
   };
 
   const handleEmailOpen = (open: boolean) => {
@@ -56,6 +63,18 @@ const SettingsMenu: React.FC<SettingsMenuProps> = ({ children }) => {
   const handleTextOpen = (open: boolean) => {
     setTextOpen(open);
     if (open) setEmailOpen(false);
+  };
+
+  const handleHelpOpen = (open: boolean) => {
+    setHelpOpen(open);
+    if (!open) {
+      // Close all submenus when help menu is closed
+      setCsvGuideOpen(false);
+    }
+  };
+
+  const handleCsvGuideOpen = (open: boolean) => {
+    setCsvGuideOpen(open);
   };
 
   // Load templates from localStorage on mount
@@ -99,8 +118,9 @@ const SettingsMenu: React.FC<SettingsMenuProps> = ({ children }) => {
               className="space-y-2"
             >
               <Collapsible.Trigger asChild>
-                <button className="w-full flex items-center justify-between p-3 rounded-lg border border-border/20 hover:bg-muted/50 transition-colors">
+                <button className="w-full flex items-center justify-between p-3 rounded-lg border border-border/20 transition-colors">
                   <div className="flex items-center gap-2">
+                    <FileText className="h-4 w-4 text-muted-foreground" />
                     <span className="text-sm font-medium">Templates</span>
                   </div>
                   <ChevronDown className={`h-4 w-4 text-muted-foreground transition-transform duration-200 ${templatesOpen ? 'rotate-180' : ''}`} />
@@ -116,7 +136,7 @@ const SettingsMenu: React.FC<SettingsMenuProps> = ({ children }) => {
                   className="space-y-2"
                 >
                   <Collapsible.Trigger asChild>
-                    <button className="w-full flex items-center justify-between p-3 rounded-lg border border-border/20 hover:bg-muted/50 transition-colors">
+                    <button className="w-full flex items-center justify-between p-3 pl-8 rounded-lg border border-border/20 transition-colors">
                       <div className="flex items-center gap-2">
                         <Mail className="h-4 w-4 text-muted-foreground" />
                         <span className="text-sm font-medium">Email Template</span>
@@ -157,7 +177,7 @@ const SettingsMenu: React.FC<SettingsMenuProps> = ({ children }) => {
                   className="space-y-2"
                 >
                   <Collapsible.Trigger asChild>
-                    <button className="w-full flex items-center justify-between p-3 rounded-lg border border-border/20 hover:bg-muted/50 transition-colors">
+                    <button className="w-full flex items-center justify-between p-3 pl-8 rounded-lg border border-border/20 transition-colors">
                       <div className="flex items-center gap-2">
                         <MessageSquare className="h-4 w-4 text-muted-foreground" />
                         <span className="text-sm font-medium">Text Template</span>
@@ -177,6 +197,68 @@ const SettingsMenu: React.FC<SettingsMenuProps> = ({ children }) => {
                         placeholder="Enter text message"
                         className="w-full h-32 resize-none"
                       />
+                    </div>
+                  </Collapsible.Content>
+                </Collapsible.Root>
+              </Collapsible.Content>
+            </Collapsible.Root>
+
+            {/* Help Section */}
+            <Collapsible.Root 
+              open={helpOpen} 
+              onOpenChange={handleHelpOpen}
+              className="space-y-2"
+            >
+              <Collapsible.Trigger asChild>
+                <button className="w-full flex items-center justify-between p-3 rounded-lg border border-border/20 transition-colors">
+                  <div className="flex items-center gap-2">
+                    <HelpCircle className="h-4 w-4 text-muted-foreground" />
+                    <span className="text-sm font-medium">Help</span>
+                  </div>
+                  <ChevronDown className={`h-4 w-4 text-muted-foreground transition-transform duration-200 ${helpOpen ? 'rotate-180' : ''}`} />
+                </button>
+              </Collapsible.Trigger>
+              <Collapsible.Content 
+                className="space-y-2 data-[state=open]:animate-template-down data-[state=closed]:animate-template-up overflow-hidden"
+              >
+                {/* CSV Upload Guide */}
+                <Collapsible.Root 
+                  open={csvGuideOpen} 
+                  onOpenChange={handleCsvGuideOpen}
+                  className="space-y-2"
+                >
+                  <Collapsible.Trigger asChild>
+                    <button className="w-full flex items-center justify-between p-3 pl-8 rounded-lg border border-border/20 transition-colors">
+                      <div className="flex items-center gap-2">
+                        <Upload className="h-4 w-4 text-muted-foreground" />
+                        <span className="text-sm font-medium">CSV Upload Guide</span>
+                      </div>
+                      <ChevronDown className={`h-4 w-4 text-muted-foreground transition-transform duration-200 ${csvGuideOpen ? 'rotate-180' : ''}`} />
+                    </button>
+                  </Collapsible.Trigger>
+                  <Collapsible.Content 
+                    className="space-y-3 data-[state=open]:animate-template-down data-[state=closed]:animate-template-up overflow-hidden"
+                  >
+                    <div className="space-y-3 p-3 bg-muted/30 rounded-lg">
+                      <div className="space-y-2">
+                        <p className="text-sm font-medium text-foreground">CSV Column Order:</p>
+                        <div className="text-xs text-muted-foreground space-y-1">
+                          <div><span className="font-medium">A:</span> Company (optional)</div>
+                          <div><span className="font-medium">B:</span> Name (required)</div>
+                          <div><span className="font-medium">C:</span> Phone (required)</div>
+                          <div><span className="font-medium">D:</span> Additional Phones (optional)</div>
+                          <div><span className="font-medium">E:</span> Email (optional)</div>
+                        </div>
+                      </div>
+                      <div className="space-y-2">
+                        <p className="text-sm font-medium text-foreground">Tips:</p>
+                        <div className="text-xs text-muted-foreground space-y-1">
+                          <div>• Phone numbers should include area code</div>
+                          <div>• Additional phones can be separated by spaces or commas</div>
+                          <div>• Email addresses should be valid format</div>
+                          <div>• First row can be headers (will be skipped)</div>
+                        </div>
+                      </div>
                     </div>
                   </Collapsible.Content>
                 </Collapsible.Root>
