@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { memo } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import CallingHeader from './CallingHeader';
@@ -16,7 +16,7 @@ interface CallingScreenContainerProps {
   onLeadsImported: (leads: Lead[], fileName: string) => void;
 }
 
-const CallingScreenContainer: React.FC<CallingScreenContainerProps> = ({
+const CallingScreenContainer: React.FC<CallingScreenContainerProps> = memo(({
   leads,
   fileName,
   onBack,
@@ -223,6 +223,6 @@ const CallingScreenContainer: React.FC<CallingScreenContainerProps> = ({
       </div>
     </div>
   );
-};
+});
 
 export default CallingScreenContainer;

@@ -1,9 +1,15 @@
-
 import { useState } from 'react';
 import { Lead } from '../types/lead';
 
+interface LeadList {
+  id: string;
+  name: string;
+  file_name?: string;
+  total_leads?: number;
+}
+
 export const useLeadListOperations = () => {
-  const [currentLeadList, setCurrentLeadList] = useState<any>(null);
+  const [currentLeadList, setCurrentLeadList] = useState<LeadList | null>(null);
   const [leadsData, setLeadsData] = useState<Lead[]>([]);
   const [loading, setLoading] = useState(false);
 
@@ -13,7 +19,7 @@ export const useLeadListOperations = () => {
       console.log('useLeadListOperations: Importing leads locally:', leads.length);
       
       // Store locally instead of cloud
-      const leadList = { id: Date.now().toString(), name: fileName };
+      const leadList: LeadList = { id: Date.now().toString(), name: fileName };
       setCurrentLeadList(leadList);
       setLeadsData(leads);
       

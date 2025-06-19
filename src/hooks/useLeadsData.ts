@@ -1,7 +1,44 @@
-
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Lead } from '../types/lead';
 import { getPhoneDigits } from '../utils/phoneUtils';
+
+// Throttle localStorage saves to prevent performance issues with large datasets
+const throttleLocalStorage = (() => {
+  let timeoutId: NodeJS.Timeout | null = null;
+  let pendingData: string | null = null;
+  
+  return (key: string, data: string) => {
+    pendingData = data;
+    
+    if (timeoutId) return;
+    
+    timeoutId = setTimeout(() => {
+      if (pendingData) {
+        try {
+          localStorage.setItem(key, pendingData);
+        } catch (error) {
+          console.error('localStorage save failed:', error);
+          // If storage is full, try to clear some space
+          if (error instanceof Error && error.name === 'QuotaExceededError') {
+            try {
+              // Remove old data to make space
+              const keys = Object.keys(localStorage);
+              const oldKeys = keys.filter(k => k.startsWith('coldcaller-') && k !== key);
+              if (oldKeys.length > 0) {
+                localStorage.removeItem(oldKeys[0]);
+                localStorage.setItem(key, pendingData);
+              }
+            } catch (clearError) {
+              console.error('Failed to clear localStorage space:', clearError);
+            }
+          }
+        }
+        pendingData = null;
+      }
+      timeoutId = null;
+    }, 1000); // Throttle to 1 second
+  };
+})();
 
 export const useLeadsData = (initialLeads: Lead[]) => {
   const [leadsData, setLeadsData] = useState<Lead[]>(
@@ -29,7 +66,7 @@ export const useLeadsData = (initialLeads: Lead[]) => {
     }
   };
 
-  const markLeadAsCalledWrapper = (lead: Lead) => {
+  const markLeadAsCalledWrapper = useCallback((lead: Lead) => {
     try {
       const now = new Date();
       
@@ -58,18 +95,14 @@ export const useLeadsData = (initialLeads: Lead[]) => {
       
       setLeadsData(updatedLeads);
       
-      // Save to localStorage with error handling
-      try {
-        localStorage.setItem('coldcaller-leads', JSON.stringify(updatedLeads));
-      } catch (error) {
-        console.error('Error saving to localStorage:', error);
-      }
+      // Use throttled localStorage save
+      throttleLocalStorage('coldcaller-leads', JSON.stringify(updatedLeads));
     } catch (error) {
       console.error('Error in markLeadAsCalledWrapper:', error);
     }
-  };
+  }, [leadsData]);
 
-  const resetCallCountWrapper = (lead: Lead) => {
+  const resetCallCountWrapper = useCallback((lead: Lead) => {
     try {
       const updatedLeads = leadsData.map(l => 
         l.name === lead.name && l.phone === lead.phone 
@@ -78,18 +111,14 @@ export const useLeadsData = (initialLeads: Lead[]) => {
       );
       setLeadsData(updatedLeads);
       
-      // Save to localStorage with error handling
-      try {
-        localStorage.setItem('coldcaller-leads', JSON.stringify(updatedLeads));
-      } catch (error) {
-        console.error('Error saving to localStorage:', error);
-      }
+      // Use throttled localStorage save
+      throttleLocalStorage('coldcaller-leads', JSON.stringify(updatedLeads));
     } catch (error) {
       console.error('Error in resetCallCountWrapper:', error);
     }
-  };
+  }, [leadsData]);
 
-  const resetAllCallCountsWrapper = () => {
+  const resetAllCallCountsWrapper = useCallback(() => {
     try {
       const updatedLeads = leadsData.map(l => ({
         ...l,
@@ -97,22 +126,18 @@ export const useLeadsData = (initialLeads: Lead[]) => {
       }));
       setLeadsData(updatedLeads);
       
-      // Save to localStorage with error handling
-      try {
-        localStorage.setItem('coldcaller-leads', JSON.stringify(updatedLeads));
-      } catch (error) {
-        console.error('Error saving to localStorage:', error);
-      }
+      // Use throttled localStorage save
+      throttleLocalStorage('coldcaller-leads', JSON.stringify(updatedLeads));
     } catch (error) {
       console.error('Error in resetAllCallCountsWrapper:', error);
     }
-  };
+  }, [leadsData]);
 
   // Function to mark a lead as called when navigating away
-  const markLeadAsCalledOnNavigation = (lead: Lead) => {
+  const markLeadAsCalledOnNavigation = useCallback((lead: Lead) => {
     console.log('Marking lead as called on navigation:', lead.name);
     markLeadAsCalledWrapper(lead);
-  };
+  }, [markLeadAsCalledWrapper]);
 
   return {
     leadsData,

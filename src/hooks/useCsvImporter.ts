@@ -16,22 +16,30 @@ export const useCsvImporter = ({ onLeadsImported }: UseCsvImporterProps) => {
       return;
     }
 
+    // Check file size for large files
+    const fileSizeMB = file.size / (1024 * 1024);
+    if (fileSizeMB > 50) {
+      toast.info('Large file detected. Processing may take a moment...');
+    }
+
     setLoading(true);
 
     try {
       const reader = new FileReader();
-      reader.onload = (e) => {
+      reader.onload = async (e) => {
         try {
           const text = e.target?.result as string;
           if (!text) {
             toast.error('File is empty or could not be read.');
             return;
           }
-          const leads = parseCSV(text);
+          
+          const leads = await parseCSV(text);
           if (leads.length === 0) {
             toast.error('No valid leads found in the CSV file. Please check the file format.');
             return;
           }
+          
           const fileName = file.name.replace('.csv', '');
           onLeadsImported(leads, fileName);
           toast.success(`${leads.length} leads imported successfully!`, {

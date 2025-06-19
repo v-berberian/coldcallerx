@@ -1,5 +1,4 @@
-
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import { Lead } from '../types/lead';
 
 interface UseSearchStateProps {
@@ -10,39 +9,89 @@ interface UseSearchStateProps {
   callFilter: string;
 }
 
+// Debounce hook for search optimization
+const useDebounce = (value: string, delay: number) => {
+  const [debouncedValue, setDebouncedValue] = useState(value);
+
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedValue(value);
+    }, delay);
+
+    return () => {
+      clearTimeout(handler);
+    };
+  }, [value, delay]);
+
+  return debouncedValue;
+};
+
 export const useSearchState = ({ leads, getBaseLeads, leadsData, timezoneFilter, callFilter }: UseSearchStateProps) => {
   const [searchQuery, setSearchQuery] = useState('');
-  const [searchResults, setSearchResults] = useState(leads);
+  const [searchResults, setSearchResults] = useState<Lead[]>([]);
   const [isSearching, setIsSearching] = useState(false);
   const [showAutocomplete, setShowAutocomplete] = useState(false);
 
-  useEffect(() => {
-    const baseLeads = getBaseLeads();
-    if (searchQuery.trim()) {
-      const filtered = baseLeads.filter(lead => 
-        lead.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
-        lead.phone.includes(searchQuery)
-      );
-      setSearchResults(filtered);
-      setIsSearching(true);
-    } else {
-      setSearchResults(baseLeads);
-      setIsSearching(false);
-    }
-  }, [searchQuery, leadsData, timezoneFilter, callFilter]);
+  // Debounce search query to avoid excessive filtering
+  const debouncedSearchQuery = useDebounce(searchQuery, 150);
 
-  const clearSearch = () => {
+  // Memoize base leads to avoid recalculation
+  const baseLeads = useMemo(() => {
+    return getBaseLeads();
+  }, [getBaseLeads]);
+
+  // Optimized search function with result limiting
+  const performSearch = useCallback((query: string, leads: Lead[]) => {
+    if (!query.trim()) {
+      return leads.slice(0, 100); // Limit initial results
+    }
+
+    const searchTerm = query.toLowerCase();
+    const results: Lead[] = [];
+    let count = 0;
+    const maxResults = 50; // Limit search results for performance
+
+    for (const lead of leads) {
+      if (count >= maxResults) break;
+      
+      if (
+        lead.name.toLowerCase().includes(searchTerm) || 
+        lead.phone.includes(searchTerm)
+      ) {
+        results.push(lead);
+        count++;
+      }
+    }
+
+    return results;
+  }, []);
+
+  // Memoized search results
+  const memoizedSearchResults = useMemo(() => {
+    if (!debouncedSearchQuery.trim()) {
+      return baseLeads.slice(0, 100); // Limit initial results
+    }
+    return performSearch(debouncedSearchQuery, baseLeads);
+  }, [debouncedSearchQuery, baseLeads, performSearch]);
+
+  // Update search results when memoized results change
+  useEffect(() => {
+    setSearchResults(memoizedSearchResults);
+    setIsSearching(debouncedSearchQuery.trim().length > 0);
+  }, [memoizedSearchResults, debouncedSearchQuery]);
+
+  const clearSearch = useCallback(() => {
     setSearchQuery('');
     setShowAutocomplete(false);
-  };
+  }, []);
 
-  const handleSearchFocus = () => {
+  const handleSearchFocus = useCallback(() => {
     setShowAutocomplete(true);
-  };
+  }, []);
 
-  const handleSearchBlur = () => {
+  const handleSearchBlur = useCallback(() => {
     setTimeout(() => setShowAutocomplete(false), 150);
-  };
+  }, []);
 
   return {
     searchQuery,

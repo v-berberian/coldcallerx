@@ -1,10 +1,14 @@
-
 import { Lead } from '../types/lead';
-import { leadService } from '../services/leadService';
-import { dailyStatsService } from '../services/dailyStatsService';
+
+interface LeadList {
+  id: string;
+  name: string;
+  file_name?: string;
+  total_leads?: number;
+}
 
 interface UseLeadCallOperationsProps {
-  currentLeadList: any;
+  currentLeadList: LeadList | null;
   leadsData: Lead[];
   setLeadsData: (leads: Lead[]) => void;
   loadDailyStats: () => Promise<void>;
@@ -40,17 +44,10 @@ export const useLeadCallOperations = ({
       );
       setLeadsData(updatedLeads);
 
-      // Update database - only pass the timestamp, not call count
-      await leadService.updateLeadCallCount(
-        currentLeadList.id,
-        lead.name,
-        lead.phone,
-        1, // This parameter might need to be removed from leadService
-        lastCalledString
-      );
+      // Save to localStorage
+      localStorage.setItem('coldcaller-leads', JSON.stringify(updatedLeads));
 
       // Increment daily call count
-      await dailyStatsService.incrementDailyCallCount();
       await loadDailyStats();
 
       return true;
@@ -73,8 +70,8 @@ export const useLeadCallOperations = ({
     );
     setLeadsData(updatedLeads);
 
-    // Update database
-    await leadService.resetLeadCallCount(currentLeadList.id, lead.name, lead.phone);
+    // Save to localStorage
+    localStorage.setItem('coldcaller-leads', JSON.stringify(updatedLeads));
   };
 
   const resetAllCallCounts = async () => {
@@ -89,8 +86,8 @@ export const useLeadCallOperations = ({
     }));
     setLeadsData(updatedLeads);
 
-    // Update database
-    await leadService.resetAllCallCounts(currentLeadList.id);
+    // Save to localStorage
+    localStorage.setItem('coldcaller-leads', JSON.stringify(updatedLeads));
   };
 
   return {

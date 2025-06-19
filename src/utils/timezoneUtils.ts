@@ -287,6 +287,9 @@ const AREA_CODE_MAP: {
   '989': { state: 'MI', timezone: 'America/New_York' }
 };
 
+// Cache for timezone groups to avoid recalculation
+const timezoneGroupCache = new Map<string, 'EST' | 'CST' | 'OTHER'>();
+
 export const getStateFromAreaCode = (phone: string): string => {
   const digits = phone.replace(/\D/g, '');
   if (digits.length >= 3) {
@@ -308,25 +311,52 @@ export const getStateFromAreaCode = (phone: string): string => {
   return '';
 };
 
-export const getTimezoneGroup = (phone: string): 'EST' | 'CST' | 'CDT' | 'OTHER' => {
+export const getTimezoneGroup = (phone: string): 'EST' | 'CST' | 'OTHER' => {
+  // Check cache first
+  if (timezoneGroupCache.has(phone)) {
+    return timezoneGroupCache.get(phone)!;
+  }
+
   const digits = phone.replace(/\D/g, '');
   if (digits.length >= 3) {
     const areaCode = digits.slice(0, 3);
     const info = AREA_CODE_MAP[areaCode];
     if (info) {
-      if (info.timezone === 'America/New_York') return 'EST';
-      if (info.timezone === 'America/Chicago') return 'CST';
+      if (info.timezone === 'America/New_York') {
+        timezoneGroupCache.set(phone, 'EST');
+        return 'EST';
+      }
+      if (info.timezone === 'America/Chicago') {
+        timezoneGroupCache.set(phone, 'CST');
+        return 'CST';
+      }
       // Note: CDT is effectively the same as CST (Chicago timezone), just different seasons
       // The Chicago timezone automatically handles daylight saving time
     }
   }
+  
+  timezoneGroupCache.set(phone, 'OTHER');
   return 'OTHER';
 };
 
 export const filterLeadsByTimezone = (leads: Lead[], timezoneFilter: 'ALL' | 'EST_CST'): Lead[] => {
   if (timezoneFilter === 'ALL') return leads;
+  
+  // For large lists, use a more efficient approach
+  if (leads.length > 1000) {
+    const results: Lead[] = [];
+    for (const lead of leads) {
+      const timezoneGroup = getTimezoneGroup(lead.phone);
+      if (timezoneGroup === 'EST' || timezoneGroup === 'CST') {
+        results.push(lead);
+      }
+    }
+    return results;
+  }
+  
+  // For smaller lists, use filter method
   return leads.filter(lead => {
     const timezoneGroup = getTimezoneGroup(lead.phone);
-    return timezoneGroup === 'EST' || timezoneGroup === 'CST' || timezoneGroup === 'CDT';
+    return timezoneGroup === 'EST' || timezoneGroup === 'CST';
   });
 };
