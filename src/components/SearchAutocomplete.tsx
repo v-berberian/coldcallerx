@@ -27,7 +27,7 @@ const SearchAutocomplete: React.FC<SearchAutocompleteProps> = ({
   loadMoreResults,
   loadedResultsCount = 0,
   totalResultsCount = 0,
-  itemHeight = 60,
+  itemHeight = 70,
   maxHeight = 400,
   maxItems = 50, // Only used as fallback when not using virtualized list
   searchResults = [],
@@ -54,14 +54,14 @@ const SearchAutocomplete: React.FC<SearchAutocompleteProps> = ({
           className="w-full px-4 py-3 text-left border-b border-border/10 last:border-b-0 transition-colors duration-75 cursor-default hover:bg-muted/50"
         >
           <div className="flex justify-between items-start">
-            <div className="flex-1 min-w-0">
+            <div className="flex-1 min-w-0 mr-3">
               <p className="font-medium text-foreground truncate">{lead.name}</p>
               {lead.company && (
                 <p className="text-xs text-muted-foreground truncate">{lead.company}</p>
               )}
-              <p className="text-sm text-muted-foreground">{lead.phone}</p>
+              <p className="text-sm text-muted-foreground break-all">{lead.phone}</p>
             </div>
-            <div className="ml-2 text-xs text-muted-foreground">
+            <div className="flex-shrink-0 text-xs text-muted-foreground">
               {leadsData.findIndex(l => l.name === lead.name && l.phone === lead.phone) + 1}/{leadsData.length}
             </div>
           </div>
@@ -103,7 +103,7 @@ const SearchAutocomplete: React.FC<SearchAutocompleteProps> = ({
 
   // If we have loadMoreResults function and searchResults, use infinite loader
   if (loadMoreResults && searchResults.length > 0) {
-    const listHeight = Math.min(maxHeight, Math.min(searchResults.length, 1000) * itemHeight);
+    const listHeight = Math.min(maxHeight, searchResults.length * itemHeight);
 
     return (
       <div className={`absolute top-full left-0 right-0 z-50 mt-1 rounded-xl shadow-lg overflow-hidden ${animationClass} bg-background/15 backdrop-blur-sm border border-border/15`}>

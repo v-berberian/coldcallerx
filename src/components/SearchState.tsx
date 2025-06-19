@@ -54,13 +54,18 @@ export const useSearchState = ({ leads, getBaseLeads, leadsData, timezoneFilter,
     const results: Lead[] = [];
     const length = leads.length;
 
-    // Use for loop for better performance - no limit here, we'll limit in the UI
+    // Match name, company, or phone (case-insensitive, partial match)
     for (let i = 0; i < length; i++) {
       const lead = leads[i];
       const name = lead.name.toLowerCase();
+      const company = (lead.company || '').toLowerCase();
       const phone = lead.phone;
       
-      if (name.includes(searchTerm) || phone.includes(searchTerm)) {
+      if (
+        name.includes(searchTerm) ||
+        company.includes(searchTerm) ||
+        phone.includes(searchTerm)
+      ) {
         results.push(lead);
       }
     }
