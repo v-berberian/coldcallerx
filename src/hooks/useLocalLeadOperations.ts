@@ -32,12 +32,9 @@ export const useLocalLeadOperations = () => {
   const importLeadsFromCSV = async (leads: Lead[], fileName: string): Promise<boolean> => {
     setLoading(true);
     try {
-      // Clear existing data first to prevent state conflicts
-      setCurrentLeadList(null);
-      setLeadsData([]);
-      localStorage.removeItem('currentLeadList');
-      localStorage.removeItem('leadsData');
+      console.log('Importing new leads:', leads.length);
       
+      // Create the new lead list first
       const leadList = { 
         id: Date.now().toString(), 
         name: fileName,
@@ -45,13 +42,15 @@ export const useLocalLeadOperations = () => {
         total_leads: leads.length
       };
 
-      // Save to localStorage
+      // Update state in the correct order
       setCurrentLeadList(leadList);
       setLeadsData(leads);
+      
+      // Save to localStorage after state updates
       localStorage.setItem('currentLeadList', JSON.stringify(leadList));
       localStorage.setItem('leadsData', JSON.stringify(leads));
 
-      console.log('Successfully saved leads locally');
+      console.log('Successfully imported and saved leads locally');
       return true;
     } catch (error) {
       console.error('Error importing leads:', error);

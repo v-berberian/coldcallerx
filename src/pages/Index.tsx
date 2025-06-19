@@ -5,6 +5,7 @@ import CallingScreen from '@/components/CallingScreen';
 import CSVImporter from '@/components/CSVImporter';
 import SettingsMenu from '@/components/SettingsMenu';
 import { useLocalLeadOperations } from '@/hooks/useLocalLeadOperations';
+import { Lead } from '@/types/lead';
 
 const Index = () => {
   const [appReady, setAppReady] = useState(false);
@@ -37,9 +38,16 @@ const Index = () => {
     initializeApp();
   }, [loadExistingData]);
 
-  const handleLeadsImported = async (importedLeads: any[], fileName: string) => {
+  const handleLeadsImported = async (importedLeads: Lead[], fileName: string) => {
     console.log('Index: Importing new leads locally:', importedLeads.length);
-    await importLeadsFromCSV(importedLeads, fileName);
+    try {
+      const success = await importLeadsFromCSV(importedLeads, fileName);
+      if (!success) {
+        console.error('Failed to import leads');
+      }
+    } catch (error) {
+      console.error('Error in handleLeadsImported:', error);
+    }
   };
 
   // Show loading until everything is ready
