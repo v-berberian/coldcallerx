@@ -1,0 +1,21 @@
+
+{
+  "name": "ColdCall X",
+  "short_name": "ColdCall X",
+  "description": "Professional mobile cold calling app",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#3b82f6",
+  "orientation": "portrait",
+  "scope": "/",
+  "icons": [
+    {
+      "src": "/favicon.ico",
+      "sizes": "48x48",
+      "type": "image/x-icon"
+    }
+  ],
+  "categories": ["business", "productivity"],
+  "lang": "en-US"
+}

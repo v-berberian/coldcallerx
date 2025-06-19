@@ -1,4 +1,3 @@
-
 import { useEffect } from 'react';
 import { Lead, TimezoneFilter, CallFilter } from '../types/lead';
 import { filterLeadsByTimezone } from '../utils/timezoneUtils';
@@ -32,59 +31,52 @@ export const useFilterChangeEffects = (
     console.log('Filter change effect triggered', { timezoneFilter, callFilter });
     setFilterChanging(true);
     
-    const baseLeadsBeforeFilter = filterLeadsByTimezone(leadsData, 'ALL');
-    const currentlyViewedLead = baseLeadsBeforeFilter[currentIndex];
-    
-    console.log('Currently viewed lead:', currentlyViewedLead?.name);
-    
-    let newFilteredLeads = filterLeadsByTimezone(leadsData, timezoneFilter);
-    if (callFilter === 'UNCALLED') {
-      newFilteredLeads = newFilteredLeads.filter(lead => !lead.called || lead.called === 0);
-    }
-    
-    console.log('New filtered leads count:', newFilteredLeads.length);
-    
-    if (currentlyViewedLead) {
-      const currentLeadMatchesNewFilter = newFilteredLeads.some(lead => 
-        lead.name === currentlyViewedLead.name && lead.phone === currentlyViewedLead.phone
-      );
+    try {
+      const baseLeadsBeforeFilter = filterLeadsByTimezone(leadsData, 'ALL');
+      const currentlyViewedLead = baseLeadsBeforeFilter[currentIndex];
       
-      if (currentLeadMatchesNewFilter) {
-        const newIndexOfCurrentLead = newFilteredLeads.findIndex(lead => 
-          lead.name === currentlyViewedLead.name && lead.phone === currentlyViewedLead.phone
-        );
-        console.log('Current lead matches new filter, keeping at index:', newIndexOfCurrentLead);
-        setCurrentIndex(newIndexOfCurrentLead);
+      console.log('Currently viewed lead:', currentlyViewedLead?.name);
+      
+      let newFilteredLeads = filterLeadsByTimezone(leadsData, timezoneFilter);
+      if (callFilter === 'UNCALLED') {
+        newFilteredLeads = newFilteredLeads.filter(lead => !lead.lastCalled);
+      }
+      
+      console.log('New filtered leads count:', newFilteredLeads.length);
+      
+      // Safety check: if no leads match the filter, reset to first available lead
+      if (newFilteredLeads.length === 0) {
+        console.log('No leads match the current filter, resetting to first lead');
+        setCurrentIndex(0);
         setTimeout(() => setFilterChanging(false), 100);
         return;
       }
       
-      const originalIndex = leadsData.findIndex(lead => 
-        lead.name === currentlyViewedLead.name && lead.phone === currentlyViewedLead.phone
-      );
-      
-      console.log('Original index of current lead:', originalIndex);
-      
-      let nextIndex = 0;
-      let foundNextLead = false;
-      
-      for (let i = originalIndex + 1; i < leadsData.length; i++) {
-        const leadAtIndex = leadsData[i];
-        const indexInFiltered = newFilteredLeads.findIndex(filteredLead => 
-          filteredLead.name === leadAtIndex.name && filteredLead.phone === leadAtIndex.phone
+      if (currentlyViewedLead) {
+        const currentLeadMatchesNewFilter = newFilteredLeads.some(lead => 
+          lead.name === currentlyViewedLead.name && lead.phone === currentlyViewedLead.phone
         );
         
-        if (indexInFiltered !== -1) {
-          nextIndex = indexInFiltered;
-          foundNextLead = true;
-          console.log('Found next lead after current position at filtered index:', nextIndex, 'lead:', leadAtIndex.name);
-          break;
+        if (currentLeadMatchesNewFilter) {
+          const newIndexOfCurrentLead = newFilteredLeads.findIndex(lead => 
+            lead.name === currentlyViewedLead.name && lead.phone === currentlyViewedLead.phone
+          );
+          console.log('Current lead matches new filter, keeping at index:', newIndexOfCurrentLead);
+          setCurrentIndex(newIndexOfCurrentLead);
+          setTimeout(() => setFilterChanging(false), 100);
+          return;
         }
-      }
-      
-      if (!foundNextLead) {
-        console.log('No lead found after current position, wrapping to beginning');
-        for (let i = 0; i <= originalIndex; i++) {
+        
+        const originalIndex = leadsData.findIndex(lead => 
+          lead.name === currentlyViewedLead.name && lead.phone === currentlyViewedLead.phone
+        );
+        
+        console.log('Original index of current lead:', originalIndex);
+        
+        let nextIndex = 0;
+        let foundNextLead = false;
+        
+        for (let i = originalIndex + 1; i < leadsData.length; i++) {
           const leadAtIndex = leadsData[i];
           const indexInFiltered = newFilteredLeads.findIndex(filteredLead => 
             filteredLead.name === leadAtIndex.name && filteredLead.phone === leadAtIndex.phone
@@ -92,15 +84,36 @@ export const useFilterChangeEffects = (
           
           if (indexInFiltered !== -1) {
             nextIndex = indexInFiltered;
-            console.log('Found wrapped lead at filtered index:', nextIndex, 'lead:', leadAtIndex.name);
+            foundNextLead = true;
+            console.log('Found next lead after current position at filtered index:', nextIndex, 'lead:', leadAtIndex.name);
             break;
           }
         }
+        
+        if (!foundNextLead) {
+          console.log('No lead found after current position, wrapping to beginning');
+          for (let i = 0; i <= originalIndex; i++) {
+            const leadAtIndex = leadsData[i];
+            const indexInFiltered = newFilteredLeads.findIndex(filteredLead => 
+              filteredLead.name === leadAtIndex.name && filteredLead.phone === leadAtIndex.phone
+            );
+            
+            if (indexInFiltered !== -1) {
+              nextIndex = indexInFiltered;
+              console.log('Found wrapped lead at filtered index:', nextIndex, 'lead:', leadAtIndex.name);
+              break;
+            }
+          }
+        }
+        
+        setCurrentIndex(nextIndex);
+      } else if (newFilteredLeads.length > 0) {
+        console.log('No current lead, setting to first');
+        setCurrentIndex(0);
       }
-      
-      setCurrentIndex(nextIndex);
-    } else if (newFilteredLeads.length > 0) {
-      console.log('No current lead, setting to first');
+    } catch (error) {
+      console.error('Error in filter change effect:', error);
+      // Fallback: reset to first lead if there's an error
       setCurrentIndex(0);
     }
     

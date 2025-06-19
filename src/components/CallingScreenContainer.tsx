@@ -144,6 +144,12 @@ const CallingScreenContainer: React.FC<CallingScreenContainerProps> = ({
   const currentLeads = getBaseLeads();
   const currentLead = currentLeads[currentIndex];
   
+  // Safety check: if currentLead is undefined, reset to first lead
+  if (!currentLead && currentLeads.length > 0) {
+    console.log('Current lead is undefined, resetting to first lead');
+    // This will be handled by the navigation reset effect
+  }
+  
   if (leadsData.length === 0) {
     return (
       <div className="h-[100dvh] bg-background overflow-hidden fixed inset-0">

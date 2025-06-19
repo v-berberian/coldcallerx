@@ -1,0 +1,6 @@
+{
+	"appId": "com.coldcallerx.app",
+	"appName": "ColdCall X",
+	"webDir": "dist",
+	"packageClassList": []
+}

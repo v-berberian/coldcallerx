@@ -1,9 +1,15 @@
-
 import { useState, useCallback } from 'react';
 import { Lead } from '../types/lead';
 
+interface LeadList {
+  id: string;
+  name: string;
+  file_name: string;
+  total_leads: number;
+}
+
 export const useLocalLeadOperations = () => {
-  const [currentLeadList, setCurrentLeadList] = useState<any>(null);
+  const [currentLeadList, setCurrentLeadList] = useState<LeadList | null>(null);
   const [leadsData, setLeadsData] = useState<Lead[]>([]);
   const [loading, setLoading] = useState(false);
 
@@ -26,6 +32,12 @@ export const useLocalLeadOperations = () => {
   const importLeadsFromCSV = async (leads: Lead[], fileName: string): Promise<boolean> => {
     setLoading(true);
     try {
+      // Clear existing data first to prevent state conflicts
+      setCurrentLeadList(null);
+      setLeadsData([]);
+      localStorage.removeItem('currentLeadList');
+      localStorage.removeItem('leadsData');
+      
       const leadList = { 
         id: Date.now().toString(), 
         name: fileName,
