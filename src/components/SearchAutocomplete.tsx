@@ -27,7 +27,7 @@ const SearchAutocomplete: React.FC<SearchAutocompleteProps> = ({
   loadMoreResults,
   loadedResultsCount = 0,
   totalResultsCount = 0,
-  itemHeight = 60,
+  itemHeight = 70,
   maxHeight = 400,
   maxItems = 50, // Only used as fallback when not using virtualized list
   searchResults = [],
@@ -54,14 +54,14 @@ const SearchAutocomplete: React.FC<SearchAutocompleteProps> = ({
           className="w-full px-4 py-3 text-left border-b border-border/10 last:border-b-0 transition-colors duration-75 cursor-default hover:bg-muted/50"
         >
           <div className="flex justify-between items-start">
-            <div className="flex-1 min-w-0">
+            <div className="flex-1 min-w-0 mr-3">
               <p className="font-medium text-foreground truncate">{lead.name}</p>
               {lead.company && (
                 <p className="text-xs text-muted-foreground truncate">{lead.company}</p>
               )}
-              <p className="text-sm text-muted-foreground">{lead.phone}</p>
+              <p className="text-sm text-muted-foreground break-all">{lead.phone}</p>
             </div>
-            <div className="ml-2 text-xs text-muted-foreground">
+            <div className="flex-shrink-0 text-xs text-muted-foreground">
               {leadsData.findIndex(l => l.name === lead.name && l.phone === lead.phone) + 1}/{leadsData.length}
             </div>
           </div>
@@ -103,10 +103,15 @@ const SearchAutocomplete: React.FC<SearchAutocompleteProps> = ({
 
   // If we have loadMoreResults function and searchResults, use infinite loader
   if (loadMoreResults && searchResults.length > 0) {
-    const listHeight = Math.min(maxHeight, Math.min(searchResults.length, 1000) * itemHeight);
+    // Calculate height to account for iOS system bar above keyboard
+    // Reduce the available height to leave space for the system bar (typically ~60px)
+    const systemBarHeight = 60; // Increased from 40px to 60px for more space
+    const availableHeight = window.innerHeight * 0.5 - systemBarHeight; // 50% of viewport minus system bar
+    const maxDropdownHeight = Math.min(400, availableHeight);
+    const listHeight = Math.min(maxDropdownHeight, searchResults.length * itemHeight);
 
     return (
-      <div className={`absolute top-full left-0 right-0 z-50 mt-1 rounded-xl shadow-lg overflow-hidden ${animationClass} bg-background/15 backdrop-blur-sm border border-border/15`}>
+      <div className={`absolute top-full left-0 right-0 z-50 mt-1 rounded-xl shadow-lg overflow-hidden ${animationClass} bg-background/15 backdrop-blur-sm border border-border/15`} style={{ maxHeight: `${availableHeight}px` }}>
         <InfiniteLoader
           isItemLoaded={isItemLoaded}
           itemCount={totalResultsCount}
@@ -127,19 +132,13 @@ const SearchAutocomplete: React.FC<SearchAutocompleteProps> = ({
             </List>
           )}
         </InfiniteLoader>
-        {loadedResultsCount < totalResultsCount && (
-          <div className="p-2 text-center text-sm text-muted-foreground border-t border-border/15">
-            Showing {loadedResultsCount} of {totalResultsCount} results
-            {loadedResultsCount < totalResultsCount && " - Scroll for more"}
-          </div>
-        )}
       </div>
     );
   }
 
   // Fallback to original rendering for non-virtualized content
   return (
-    <div className={`absolute top-full left-0 right-0 z-50 mt-1 rounded-xl shadow-lg overflow-hidden ${animationClass} bg-background/15 backdrop-blur-sm border border-border/15`}>
+    <div className={`absolute top-full left-0 right-0 z-50 mt-1 rounded-xl shadow-lg overflow-hidden ${animationClass} bg-background/15 backdrop-blur-sm border border-border/15`} style={{ maxHeight: `${Math.min(400, window.innerHeight * 0.5 - 60)}px` }}>
       {children}
     </div>
   );
