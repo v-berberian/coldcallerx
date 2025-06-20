@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Mail, HelpCircle, ChevronDown, Plus, Edit, Trash2, MessageSquare, Check, Upload, FileText } from 'lucide-react';
 import {
   Popover,
@@ -44,10 +44,58 @@ const SettingsMenu: React.FC<SettingsMenuProps> = ({ children }) => {
   const [textOpen, setTextOpen] = useState(false);
   const [helpOpen, setHelpOpen] = useState(false);
   const [csvGuideOpen, setCsvGuideOpen] = useState(false);
+  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+  
+  // Auto-collapse timer
+  const autoCollapseTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const lastActivityRef = useRef<number>(Date.now());
+
+  // Reset auto-collapse timer
+  const resetAutoCollapseTimer = () => {
+    lastActivityRef.current = Date.now();
+    
+    if (autoCollapseTimerRef.current) {
+      clearTimeout(autoCollapseTimerRef.current);
+    }
+    
+    if (isPopoverOpen) {
+      autoCollapseTimerRef.current = setTimeout(() => {
+        // Close all menus after 5 seconds of inactivity
+        setTemplatesOpen(false);
+        setEmailOpen(false);
+        setTextOpen(false);
+        setHelpOpen(false);
+        setCsvGuideOpen(false);
+      }, 5000); // 5 seconds
+    }
+  };
+
+  // Handle popover open/close
+  const handlePopoverOpenChange = (open: boolean) => {
+    setIsPopoverOpen(open);
+    
+    if (open) {
+      resetAutoCollapseTimer();
+    } else {
+      // Clear timer when popover closes
+      if (autoCollapseTimerRef.current) {
+        clearTimeout(autoCollapseTimerRef.current);
+        autoCollapseTimerRef.current = null;
+      }
+      // Close all menus when popover closes
+      setTemplatesOpen(false);
+      setEmailOpen(false);
+      setTextOpen(false);
+      setHelpOpen(false);
+      setCsvGuideOpen(false);
+    }
+  };
 
   // Handle template open/close
   const handleTemplatesOpen = (open: boolean) => {
     setTemplatesOpen(open);
+    resetAutoCollapseTimer(); // Reset timer on any interaction
+    
     if (!open) {
       // Close all submenus when templates menu is closed
       setEmailOpen(false);
@@ -57,16 +105,22 @@ const SettingsMenu: React.FC<SettingsMenuProps> = ({ children }) => {
 
   const handleEmailOpen = (open: boolean) => {
     setEmailOpen(open);
+    resetAutoCollapseTimer(); // Reset timer on any interaction
+    
     if (open) setTextOpen(false);
   };
 
   const handleTextOpen = (open: boolean) => {
     setTextOpen(open);
+    resetAutoCollapseTimer(); // Reset timer on any interaction
+    
     if (open) setEmailOpen(false);
   };
 
   const handleHelpOpen = (open: boolean) => {
     setHelpOpen(open);
+    resetAutoCollapseTimer(); // Reset timer on any interaction
+    
     if (!open) {
       // Close all submenus when help menu is closed
       setCsvGuideOpen(false);
@@ -75,7 +129,33 @@ const SettingsMenu: React.FC<SettingsMenuProps> = ({ children }) => {
 
   const handleCsvGuideOpen = (open: boolean) => {
     setCsvGuideOpen(open);
+    resetAutoCollapseTimer(); // Reset timer on any interaction
   };
+
+  // Handle input changes to reset timer
+  const handleEmailSubjectChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setEmailTemplateSubject(e.target.value);
+    resetAutoCollapseTimer();
+  };
+
+  const handleEmailBodyChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setEmailTemplateBody(e.target.value);
+    resetAutoCollapseTimer();
+  };
+
+  const handleTextMessageChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setTextTemplateMessage(e.target.value);
+    resetAutoCollapseTimer();
+  };
+
+  // Cleanup timer on unmount
+  useEffect(() => {
+    return () => {
+      if (autoCollapseTimerRef.current) {
+        clearTimeout(autoCollapseTimerRef.current);
+      }
+    };
+  }, []);
 
   // Load templates from localStorage on mount
   useEffect(() => {
@@ -99,7 +179,7 @@ const SettingsMenu: React.FC<SettingsMenuProps> = ({ children }) => {
   }, [textTemplateMessage]);
 
   return (
-    <Popover>
+    <Popover open={isPopoverOpen} onOpenChange={handlePopoverOpenChange}>
       <PopoverTrigger asChild>
         {children}
       </PopoverTrigger>
@@ -152,7 +232,7 @@ const SettingsMenu: React.FC<SettingsMenuProps> = ({ children }) => {
                       <Input
                         id="emailSubject"
                         value={emailTemplateSubject}
-                        onChange={(e) => setEmailTemplateSubject(e.target.value)}
+                        onChange={handleEmailSubjectChange}
                         placeholder="Enter email subject"
                         className="w-full"
                       />
@@ -162,7 +242,7 @@ const SettingsMenu: React.FC<SettingsMenuProps> = ({ children }) => {
                       <Textarea
                         id="emailBody"
                         value={emailTemplateBody}
-                        onChange={(e) => setEmailTemplateBody(e.target.value)}
+                        onChange={handleEmailBodyChange}
                         placeholder="Enter email body"
                         className="w-full h-32 resize-none"
                       />
@@ -193,7 +273,7 @@ const SettingsMenu: React.FC<SettingsMenuProps> = ({ children }) => {
                       <Textarea
                         id="textMessage"
                         value={textTemplateMessage}
-                        onChange={(e) => setTextTemplateMessage(e.target.value)}
+                        onChange={handleTextMessageChange}
                         placeholder="Enter text message"
                         className="w-full h-32 resize-none"
                       />

@@ -202,6 +202,45 @@ body {
   animation: slide-down 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
+/* Fast template animations to match autocomplete speed */
+@keyframes template-down {
+  0% {
+    opacity: 0;
+    height: 0;
+    margin-top: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    height: var(--radix-collapsible-content-height);
+    margin-top: 0.5rem;
+    transform: scale(1);
+  }
+}
+
+@keyframes template-up {
+  0% {
+    opacity: 1;
+    height: var(--radix-collapsible-content-height);
+    margin-top: 0.5rem;
+    transform: scale(1);
+  }
+  to {
+    opacity: 0;
+    height: 0;
+    margin-top: 0;
+    transform: scale(0.95);
+  }
+}
+
+.animate-template-down {
+  animation: template-down 0.05s ease-out;
+}
+
+.animate-template-up {
+  animation: template-up 0.05s ease-out;
+}
+
 /* Safe area support */
 .pt-safe {
   padding-top: env(safe-area-inset-top);
