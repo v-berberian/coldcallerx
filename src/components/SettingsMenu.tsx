@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Mail, HelpCircle, ChevronDown, Plus, Edit, Trash2, MessageSquare, Check, Upload, FileText } from 'lucide-react';
+import { Mail, HelpCircle, ChevronDown, Plus, Edit, Trash2, MessageSquare, Check, Upload, FileText, Sun, Moon, Smartphone } from 'lucide-react';
+import { useTheme } from 'next-themes';
 import {
   Popover,
   PopoverContent,
@@ -16,6 +17,7 @@ import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import * as Collapsible from '@radix-ui/react-collapsible';
 
 interface EmailTemplate {
@@ -44,6 +46,10 @@ const SettingsMenu: React.FC<SettingsMenuProps> = ({ children }) => {
   const [textOpen, setTextOpen] = useState(false);
   const [helpOpen, setHelpOpen] = useState(false);
   const [csvGuideOpen, setCsvGuideOpen] = useState(false);
+  const [modeOpen, setModeOpen] = useState(false);
+  
+  // Theme management
+  const { theme, setTheme } = useTheme();
 
   // Handle template open/close
   const handleTemplatesOpen = (open: boolean) => {
@@ -75,6 +81,10 @@ const SettingsMenu: React.FC<SettingsMenuProps> = ({ children }) => {
 
   const handleCsvGuideOpen = (open: boolean) => {
     setCsvGuideOpen(open);
+  };
+
+  const handleMode = (mode: string) => {
+    setTheme(mode);
   };
 
   // Load templates from localStorage on mount
@@ -123,7 +133,7 @@ const SettingsMenu: React.FC<SettingsMenuProps> = ({ children }) => {
                     <FileText className="h-4 w-4 text-muted-foreground" />
                     <span className="text-sm font-medium">Templates</span>
                   </div>
-                  <ChevronDown className={`h-4 w-4 text-muted-foreground transition-transform duration-200 ${templatesOpen ? 'rotate-180' : ''}`} />
+                  <ChevronDown className={`h-4 w-4 text-muted-foreground transition-transform duration-20 ${templatesOpen ? 'rotate-180' : ''}`} />
                 </button>
               </Collapsible.Trigger>
               <Collapsible.Content 
@@ -141,7 +151,7 @@ const SettingsMenu: React.FC<SettingsMenuProps> = ({ children }) => {
                         <Mail className="h-4 w-4 text-muted-foreground" />
                         <span className="text-sm font-medium">Email Template</span>
                       </div>
-                      <ChevronDown className={`h-4 w-4 text-muted-foreground transition-transform duration-200 ${emailOpen ? 'rotate-180' : ''}`} />
+                      <ChevronDown className={`h-4 w-4 text-muted-foreground transition-transform duration-20 ${emailOpen ? 'rotate-180' : ''}`} />
                     </button>
                   </Collapsible.Trigger>
                   <Collapsible.Content 
@@ -182,7 +192,7 @@ const SettingsMenu: React.FC<SettingsMenuProps> = ({ children }) => {
                         <MessageSquare className="h-4 w-4 text-muted-foreground" />
                         <span className="text-sm font-medium">Text Template</span>
                       </div>
-                      <ChevronDown className={`h-4 w-4 text-muted-foreground transition-transform duration-200 ${textOpen ? 'rotate-180' : ''}`} />
+                      <ChevronDown className={`h-4 w-4 text-muted-foreground transition-transform duration-20 ${textOpen ? 'rotate-180' : ''}`} />
                     </button>
                   </Collapsible.Trigger>
                   <Collapsible.Content 
@@ -203,6 +213,59 @@ const SettingsMenu: React.FC<SettingsMenuProps> = ({ children }) => {
               </Collapsible.Content>
             </Collapsible.Root>
 
+            {/* Mode Section */}
+            <Collapsible.Root 
+              open={modeOpen} 
+              onOpenChange={setModeOpen}
+              className="space-y-2"
+            >
+              <Collapsible.Trigger asChild>
+                <button className="w-full flex items-center justify-between p-3 rounded-lg border border-border/20 transition-colors">
+                  <div className="flex items-center gap-2">
+                    <Sun className="h-4 w-4 text-muted-foreground" />
+                    <span className="text-sm font-medium">Mode</span>
+                  </div>
+                  <ChevronDown className={`h-4 w-4 text-muted-foreground transition-transform duration-20 ${modeOpen ? 'rotate-180' : ''}`} />
+                </button>
+              </Collapsible.Trigger>
+              <Collapsible.Content 
+                className="space-y-3 data-[state=open]:animate-template-down data-[state=closed]:animate-template-up overflow-hidden"
+              >
+                <div className="space-y-3 p-3 pl-8">
+                  <RadioGroup 
+                    value={theme || 'light'} 
+                    onValueChange={handleMode}
+                    className="space-y-1"
+                  >
+                    <div className={`flex items-center justify-between p-3 rounded-lg border transition-colors hover:bg-muted/50 cursor-pointer ${theme === 'light' ? 'border-primary bg-primary/5' : 'border-border/20'}`} onClick={() => handleMode('light')}>
+                      <div className="flex items-center gap-3">
+                        <Sun className="h-4 w-4 text-muted-foreground" />
+                        <span className="text-sm font-medium">Light</span>
+                      </div>
+                      <RadioGroupItem value="light" id="light" className="sr-only" />
+                      {theme === 'light' && <Check className="h-4 w-4 text-primary" />}
+                    </div>
+                    <div className={`flex items-center justify-between p-3 rounded-lg border transition-colors hover:bg-muted/50 cursor-pointer ${theme === 'dark' ? 'border-primary bg-primary/5' : 'border-border/20'}`} onClick={() => handleMode('dark')}>
+                      <div className="flex items-center gap-3">
+                        <Moon className="h-4 w-4 text-muted-foreground" />
+                        <span className="text-sm font-medium">Dark</span>
+                      </div>
+                      <RadioGroupItem value="dark" id="dark" className="sr-only" />
+                      {theme === 'dark' && <Check className="h-4 w-4 text-primary" />}
+                    </div>
+                    <div className={`flex items-center justify-between p-3 rounded-lg border transition-colors hover:bg-muted/50 cursor-pointer ${theme === 'system' ? 'border-primary bg-primary/5' : 'border-border/20'}`} onClick={() => handleMode('system')}>
+                      <div className="flex items-center gap-3">
+                        <Smartphone className="h-4 w-4 text-muted-foreground" />
+                        <span className="text-sm font-medium">Device</span>
+                      </div>
+                      <RadioGroupItem value="system" id="system" className="sr-only" />
+                      {theme === 'system' && <Check className="h-4 w-4 text-primary" />}
+                    </div>
+                  </RadioGroup>
+                </div>
+              </Collapsible.Content>
+            </Collapsible.Root>
+
             {/* Help Section */}
             <Collapsible.Root 
               open={helpOpen} 
@@ -215,7 +278,7 @@ const SettingsMenu: React.FC<SettingsMenuProps> = ({ children }) => {
                     <HelpCircle className="h-4 w-4 text-muted-foreground" />
                     <span className="text-sm font-medium">Help</span>
                   </div>
-                  <ChevronDown className={`h-4 w-4 text-muted-foreground transition-transform duration-200 ${helpOpen ? 'rotate-180' : ''}`} />
+                  <ChevronDown className={`h-4 w-4 text-muted-foreground transition-transform duration-20 ${helpOpen ? 'rotate-180' : ''}`} />
                 </button>
               </Collapsible.Trigger>
               <Collapsible.Content 
@@ -233,7 +296,7 @@ const SettingsMenu: React.FC<SettingsMenuProps> = ({ children }) => {
                         <Upload className="h-4 w-4 text-muted-foreground" />
                         <span className="text-sm font-medium">CSV Upload Guide</span>
                       </div>
-                      <ChevronDown className={`h-4 w-4 text-muted-foreground transition-transform duration-200 ${csvGuideOpen ? 'rotate-180' : ''}`} />
+                      <ChevronDown className={`h-4 w-4 text-muted-foreground transition-transform duration-20 ${csvGuideOpen ? 'rotate-180' : ''}`} />
                     </button>
                   </Collapsible.Trigger>
                   <Collapsible.Content 
