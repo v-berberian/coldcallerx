@@ -5,10 +5,9 @@ import { useLeadNavigation } from './useLeadNavigation';
 
 interface UseLocalCallingScreenStateProps {
   leads: Lead[];
-  onCallMade?: () => void;
 }
 
-export const useLocalCallingScreenState = ({ leads, onCallMade }: UseLocalCallingScreenStateProps) => {
+export const useLocalCallingScreenState = ({ leads }: UseLocalCallingScreenStateProps) => {
   const [componentReady, setComponentReady] = useState(false);
   const [leadsInitialized, setLeadsInitialized] = useState(false);
   const localStorageRestoredRef = useRef(false);
@@ -45,7 +44,7 @@ export const useLocalCallingScreenState = ({ leads, onCallMade }: UseLocalCallin
     updateLeadsDataDirectly,
     restoreFromLocalStorage,
     getDelayDisplayType
-  } = useLeadNavigation({ initialLeads: leads, onCallMade });
+  } = useLeadNavigation(leads);
 
   const {
     searchQuery,
