@@ -8,6 +8,7 @@ interface CallProgressBarProps {
 
 const CallProgressBar: React.FC<CallProgressBarProps> = ({ dailyCallCount }) => {
   const [isVisible, setIsVisible] = useState(false);
+  const [isAnimating, setIsAnimating] = useState(false);
 
   // Load visibility setting from localStorage
   useEffect(() => {
@@ -41,12 +42,30 @@ const CallProgressBar: React.FC<CallProgressBarProps> = ({ dailyCallCount }) => 
     };
   }, []);
 
+  // Trigger bounce animation when dailyCallCount changes
+  useEffect(() => {
+    if (isVisible && dailyCallCount > 0) {
+      setIsAnimating(true);
+      const timer = setTimeout(() => setIsAnimating(false), 600);
+      return () => clearTimeout(timer);
+    }
+  }, [dailyCallCount, isVisible]);
+
   if (!isVisible) {
     return null;
   }
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 bg-background/95 backdrop-blur-sm border-t border-border p-4 z-50">
+    <div 
+      className={`fixed bottom-0 left-0 right-0 bg-background/95 backdrop-blur-sm border-t border-border p-3 z-[100] transition-transform duration-300 ${
+        isAnimating ? 'animate-bounce' : ''
+      }`}
+      style={{ 
+        transform: 'translateZ(0)',
+        willChange: 'transform',
+        paddingBottom: 'calc(0.75rem + env(safe-area-inset-bottom))'
+      }}
+    >
       <DailyProgress dailyCallCount={dailyCallCount} />
     </div>
   );
