@@ -57,7 +57,7 @@ export const useHybridCallingScreenState = ({ leads }: UseHybridCallingScreenSta
     resetLeadsData,
     restoreFromLocalStorage,
     getDelayDisplayType
-  } = useLeadNavigation(effectiveLeads);
+  } = useLeadNavigation({ initialLeads: effectiveLeads });
 
   const {
     searchQuery,
