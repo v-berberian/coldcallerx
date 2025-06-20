@@ -12,7 +12,7 @@ export const useCallingScreenState = ({ leads }: UseCallingScreenStateProps) => 
   const [componentReady, setComponentReady] = useState(false);
   const [leadsInitialized, setLeadsInitialized] = useState(false);
 
-  // Initialize hooks - only pass leads to useLeadNavigation
+  // Initialize hooks - pass leads with proper structure to useLeadNavigation
   const {
     leadsData,
     currentIndex,
@@ -41,7 +41,7 @@ export const useCallingScreenState = ({ leads }: UseCallingScreenStateProps) => 
     toggleCallDelay,
     resetCallDelay,
     resetLeadsData
-  } = useLeadNavigation(leads);
+  } = useLeadNavigation({ initialLeads: leads });
 
   const {
     searchQuery,
