@@ -39,22 +39,25 @@ const LeadCard: React.FC<LeadCardProps> = ({
   onResetCallCount,
   noLeadsMessage
 }) => {
+  // Debug logging
+  console.log('LeadCard render:', { lead, currentIndex, totalCount, fileName, noLeadsMessage });
+  
   const [emailTemplates, setEmailTemplates] = useState<EmailTemplate[]>([]);
   const [textTemplates, setTextTemplates] = useState<TextTemplate[]>([]);
   const [selectedEmailTemplateId, setSelectedEmailTemplateId] = useState<string>('');
   const [selectedTextTemplateId, setSelectedTextTemplateId] = useState<string>('');
-  const [selectedPhone, setSelectedPhone] = useState(formatPhoneNumber(lead.phone));
+  const [selectedPhone, setSelectedPhone] = useState(formatPhoneNumber(lead?.phone || ''));
   
   // Flip card state and touch handling
   const [isFlipped, setIsFlipped] = useState(false);
-  const [notes, setNotes] = useState(lead.notes || '');
+  const [notes, setNotes] = useState(lead?.notes || '');
   const [touchStart, setTouchStart] = useState<number | null>(null);
   const [touchEnd, setTouchEnd] = useState<number | null>(null);
   const cardRef = useRef<HTMLDivElement>(null);
   
   // Minimum swipe distance (in px)
   const minSwipeDistance = 50;
-
+  
   // Load templates and selections from localStorage
   useEffect(() => {
     const savedEmailTemplates = localStorage.getItem('emailTemplates');
@@ -80,74 +83,27 @@ const LeadCard: React.FC<LeadCardProps> = ({
 
   // Reset selectedPhone to primary phone when lead changes
   useEffect(() => {
-    const primaryPhone = formatPhoneNumber(lead.phone);
-    console.log('Lead changed, resetting selectedPhone to primary:', primaryPhone);
-    setSelectedPhone(primaryPhone);
-  }, [lead.phone, lead.name]); // Reset when lead changes (using phone and name as dependencies)
+    if (lead?.phone) {
+      const primaryPhone = formatPhoneNumber(lead.phone);
+      console.log('Lead changed, resetting selectedPhone to primary:', primaryPhone);
+      setSelectedPhone(primaryPhone);
+    }
+  }, [lead?.phone, lead?.name]); // Reset when lead changes (using phone and name as dependencies)
 
   // Update notes when lead changes
   useEffect(() => {
-    setNotes(lead.notes || '');
-  }, [lead.notes]);
-
-  // Touch handling functions
-  const onTouchStart = (e: React.TouchEvent) => {
-    setTouchEnd(null);
-    setTouchStart(e.targetTouches[0].clientX);
-  };
-
-  const onTouchMove = (e: React.TouchEvent) => {
-    setTouchEnd(e.targetTouches[0].clientX);
-  };
-
-  const onTouchEnd = () => {
-    if (!touchStart || !touchEnd) return;
-    
-    const distance = touchStart - touchEnd;
-    const isLeftSwipe = distance > minSwipeDistance;
-    const isRightSwipe = distance < -minSwipeDistance;
-    
-    if (isRightSwipe) {
-      // Swipe right to flip to notes
-      setIsFlipped(true);
-    } else if (isLeftSwipe) {
-      // Swipe left to flip back to main
-      setIsFlipped(false);
-    }
-  };
-
-  // Handle notes change
-  const handleNotesChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    const newNotes = e.target.value;
-    setNotes(newNotes);
-    // Update the lead object with new notes
-    lead.notes = newNotes;
-  };
-
-  // If we have a noLeadsMessage, show the empty state
-  if (noLeadsMessage) {
+    setNotes(lead?.notes || '');
+  }, [lead?.notes]);
+  
+  // Simple fallback - always render something
+  if (!lead) {
     return (
-      <Card className="shadow-2xl border-border/50 rounded-3xl bg-card min-h-[400px] max-h-[500px] sm:min-h-[420px] sm:max-h-[550px] flex flex-col mb-8">
-        <CardContent className="p-6 space-y-6 flex-1 flex flex-col justify-center">
-          <div className="text-center">
-            <h2 className="text-2xl font-bold text-foreground">{noLeadsMessage}</h2>
-          </div>
-        </CardContent>
-      </Card>
-    );
-  }
-
-  // Debug: Check if lead data exists
-  if (!lead || !lead.name) {
-    return (
-      <Card className="shadow-2xl border-border/50 rounded-3xl bg-card min-h-[400px] max-h-[500px] sm:min-h-[420px] sm:max-h-[550px] flex flex-col mb-4">
-        <CardContent className="p-6 space-y-6 flex-1 flex flex-col justify-center">
-          <div className="text-center">
-            <h2 className="text-2xl font-bold text-foreground">No lead data</h2>
-            <p className="text-muted-foreground">Lead information is missing</p>
-          </div>
-        </CardContent>
-      </Card>
+      <div className="shadow-2xl border-border/50 rounded-3xl bg-card min-h-[400px] max-h-[500px] sm:min-h-[420px] sm:max-h-[550px] flex flex-col mb-4 p-6">
+        <div className="text-center">
+          <h2 className="text-2xl font-bold text-foreground">Loading...</h2>
+          <p className="text-muted-foreground">Lead data is loading</p>
+        </div>
+      </div>
     );
   }
 
@@ -270,6 +226,67 @@ const LeadCard: React.FC<LeadCardProps> = ({
     console.log('Text clicked for:', selectedPhone, templateToUse ? `with template: ${templateToUse.name}` : 'without template');
     window.location.href = createSmsLink(template);
   };
+
+  // Touch handling functions
+  const onTouchStart = (e: React.TouchEvent) => {
+    setTouchEnd(null);
+    setTouchStart(e.targetTouches[0].clientX);
+  };
+
+  const onTouchMove = (e: React.TouchEvent) => {
+    setTouchEnd(e.targetTouches[0].clientX);
+  };
+
+  const onTouchEnd = () => {
+    if (!touchStart || !touchEnd) return;
+    
+    const distance = touchStart - touchEnd;
+    const isLeftSwipe = distance > minSwipeDistance;
+    const isRightSwipe = distance < -minSwipeDistance;
+    
+    if (isRightSwipe) {
+      // Swipe right to flip to notes
+      setIsFlipped(true);
+    } else if (isLeftSwipe) {
+      // Swipe left to flip back to main
+      setIsFlipped(false);
+    }
+  };
+
+  // Handle notes change
+  const handleNotesChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    const newNotes = e.target.value;
+    setNotes(newNotes);
+    // Update the lead object with new notes
+    lead.notes = newNotes;
+  };
+
+  // If we have a noLeadsMessage, show the empty state
+  if (noLeadsMessage) {
+    return (
+      <Card className="shadow-2xl border-border/50 rounded-3xl bg-card min-h-[400px] max-h-[500px] sm:min-h-[420px] sm:max-h-[550px] flex flex-col mb-8">
+        <CardContent className="p-6 space-y-6 flex-1 flex flex-col justify-center">
+          <div className="text-center">
+            <h2 className="text-2xl font-bold text-foreground">{noLeadsMessage}</h2>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  // Debug: Check if lead data exists
+  if (!lead || !lead.name) {
+    return (
+      <Card className="shadow-2xl border-border/50 rounded-3xl bg-card min-h-[400px] max-h-[500px] sm:min-h-[420px] sm:max-h-[550px] flex flex-col mb-4">
+        <CardContent className="p-6 space-y-6 flex-1 flex flex-col justify-center">
+          <div className="text-center">
+            <h2 className="text-2xl font-bold text-foreground">No lead data</h2>
+            <p className="text-muted-foreground">Lead information is missing</p>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
     <div 
