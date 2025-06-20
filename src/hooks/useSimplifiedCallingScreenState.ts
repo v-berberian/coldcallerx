@@ -6,15 +6,14 @@ import { useLeadNavigation } from './useLeadNavigation';
 
 interface UseSimplifiedCallingScreenStateProps {
   leads: Lead[];
-  onCallMade?: () => void;
 }
 
-export const useSimplifiedCallingScreenState = ({ leads, onCallMade }: UseSimplifiedCallingScreenStateProps) => {
+export const useSimplifiedCallingScreenState = ({ leads }: UseSimplifiedCallingScreenStateProps) => {
   const [componentReady, setComponentReady] = useState(false);
   const [leadsInitialized, setLeadsInitialized] = useState(false);
   const localStorageRestoredRef = useRef(false);
 
-  // Initialize hooks - pass leads with proper structure to useLeadNavigation
+  // Initialize hooks - only pass leads to useLeadNavigation
   const {
     leadsData,
     currentIndex,
@@ -44,17 +43,13 @@ export const useSimplifiedCallingScreenState = ({ leads, onCallMade }: UseSimpli
     resetCallDelay,
     resetLeadsData,
     restoreFromLocalStorage,
-    getDelayDisplayType,
-    updateLeadsDataDirectly
-  } = useLeadNavigation({ initialLeads: leads, onCallMade });
+    getDelayDisplayType
+  } = useLeadNavigation(leads);
 
   const {
     searchQuery,
     setSearchQuery,
     searchResults,
-    allSearchResults,
-    loadedResultsCount,
-    loadMoreResults,
     showAutocomplete,
     setShowAutocomplete,
     clearSearch,
@@ -118,13 +113,11 @@ export const useSimplifiedCallingScreenState = ({ leads, onCallMade }: UseSimpli
     toggleCallDelay,
     resetCallDelay,
     memoizedResetLeadsData,
-    updateLeadsDataDirectly,
+    resetCallCount: () => {}, // Local only now
+    resetAllCallCounts: () => {},
     searchQuery,
     setSearchQuery,
     searchResults,
-    allSearchResults,
-    loadedResultsCount,
-    loadMoreResults,
     showAutocomplete,
     setShowAutocomplete,
     clearSearch,

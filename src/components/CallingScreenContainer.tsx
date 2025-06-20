@@ -1,10 +1,8 @@
-
 import React, { memo, useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import CallingHeader from './CallingHeader';
 import MainContent from './MainContent';
-import CallProgressBar from './CallProgressBar';
 import { Lead } from '../types/lead';
 import { useLocalCallingScreenState } from '../hooks/useLocalCallingScreenState';
 import { useSimplifiedCallingScreenEffects } from '../hooks/useSimplifiedCallingScreenEffects';
@@ -241,8 +239,8 @@ const CallingScreenContainer: React.FC<CallingScreenContainerProps> = memo(({
         totalResultsCount={allSearchResults?.length || 0}
       />
 
-      {/* Main Content - takes remaining space, with bottom padding for progress bar */}
-      <div className="flex-1 overflow-hidden min-h-0" style={{ paddingBottom: dailyGoalEnabled ? '120px' : '0' }}>
+      {/* Main Content - takes remaining space */}
+      <div className="flex-1 overflow-hidden min-h-0">
         <MainContent
           currentLead={currentLead}
           currentIndex={currentIndex}
@@ -273,9 +271,6 @@ const CallingScreenContainer: React.FC<CallingScreenContainerProps> = memo(({
           noLeadsMessage={!currentLead ? "No Leads Found" : undefined}
         />
       </div>
-
-      {/* Call Progress Bar at bottom */}
-      <CallProgressBar dailyCallCount={dailyCallCount} />
     </div>
   );
 });
