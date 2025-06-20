@@ -137,6 +137,20 @@ const LeadCard: React.FC<LeadCardProps> = ({
     );
   }
 
+  // Debug: Check if lead data exists
+  if (!lead || !lead.name) {
+    return (
+      <Card className="shadow-2xl border-border/50 rounded-3xl bg-card min-h-[400px] max-h-[500px] sm:min-h-[420px] sm:max-h-[550px] flex flex-col mb-4">
+        <CardContent className="p-6 space-y-6 flex-1 flex flex-col justify-center">
+          <div className="text-center">
+            <h2 className="text-2xl font-bold text-foreground">No lead data</h2>
+            <p className="text-muted-foreground">Lead information is missing</p>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
   // Use stable key based on lead data instead of changing cardKey
   const leadKey = `${lead.name}-${lead.phone}`;
 
@@ -264,12 +278,13 @@ const LeadCard: React.FC<LeadCardProps> = ({
       onTouchStart={onTouchStart}
       onTouchMove={onTouchMove}
       onTouchEnd={onTouchEnd}
+      style={{ minHeight: '400px' }}
     >
       <div className="flip-card-inner">
         {/* Front of card - Main lead info */}
         <div className="flip-card-front">
-          <div className="h-full w-full bg-card rounded-3xl border border-border/50">
-            <div className="p-4 sm:p-6 space-y-5 sm:space-y-6 flex-1 flex flex-col h-full">
+          <div className="h-full w-full bg-card rounded-3xl border border-border/50 p-4 sm:p-6">
+            <div className="space-y-5 sm:space-y-6 flex-1 flex flex-col h-full">
               {/* Top row with lead count and file name */}
               <div className="flex items-center justify-between">
                 <p className="text-sm text-muted-foreground opacity-40">
@@ -280,14 +295,14 @@ const LeadCard: React.FC<LeadCardProps> = ({
                 </p>
               </div>
 
-              {/* Lead info - Main content area with animation */}
-              <div key={leadKey} className="text-center space-y-5 sm:space-y-6 flex-1 flex flex-col justify-center animate-fade-in">
-                {/* State and timezone - always show, with fallback */}
+              {/* Lead info - Main content area */}
+              <div key={leadKey} className="text-center space-y-5 sm:space-y-6 flex-1 flex flex-col justify-center">
+                {/* State and timezone */}
                 <p className="text-sm text-muted-foreground">
                   {leadState || 'Unknown State'}
                 </p>
                 
-                {/* Group 1: Name and Company */}
+                {/* Name and Company */}
                 <div className="space-y-2">
                   <div className="flex items-center justify-center px-2">
                     <h2 className="text-2xl sm:text-3xl font-bold text-foreground text-center break-words leading-tight">
@@ -304,9 +319,9 @@ const LeadCard: React.FC<LeadCardProps> = ({
                   )}
                 </div>
                 
-                {/* Group 2: Phone and Email */}
+                {/* Phone and Email */}
                 <div className="space-y-3">
-                  {/* Phone number with icon positioned to the left */}
+                  {/* Phone number */}
                   <div className="flex items-center justify-center">
                     <div className="relative">
                       <Phone className="absolute -left-6 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -348,7 +363,7 @@ const LeadCard: React.FC<LeadCardProps> = ({
                     </div>
                   </div>
                   
-                  {/* Email with icon positioned to the left */}
+                  {/* Email */}
                   {hasValidEmail && (
                     <div className="flex items-center justify-center">
                       <div className="relative">
@@ -366,9 +381,9 @@ const LeadCard: React.FC<LeadCardProps> = ({
                 </div>
               </div>
 
-              {/* Group 3: Last Called and Action Buttons */}
+              {/* Last Called and Action Buttons */}
               <div className="space-y-4">
-                {/* Last called section above buttons */}
+                {/* Last called section */}
                 {lead.lastCalled && (
                   <div className="flex items-center justify-center">
                     <div className="flex items-center">
@@ -386,7 +401,7 @@ const LeadCard: React.FC<LeadCardProps> = ({
                   </div>
                 )}
                 
-                {/* Action Buttons - Call and Text */}
+                {/* Action Buttons */}
                 <div className="flex gap-24 justify-center">
                   <Button 
                     onClick={() => handleTextClick()} 
@@ -407,7 +422,7 @@ const LeadCard: React.FC<LeadCardProps> = ({
             </div>
           </div>
           
-          {/* Swipe hint for mobile */}
+          {/* Swipe hint */}
           <div className="swipe-hint visible">
             <Edit3 className="h-6 w-6 text-muted-foreground" />
           </div>
@@ -415,8 +430,8 @@ const LeadCard: React.FC<LeadCardProps> = ({
 
         {/* Back of card - Notes */}
         <div className="flip-card-back">
-          <div className="h-full w-full bg-card rounded-3xl border border-border/50">
-            <div className="p-4 sm:p-6 space-y-4 h-full flex flex-col">
+          <div className="h-full w-full bg-card rounded-3xl border border-border/50 p-4 sm:p-6">
+            <div className="space-y-4 h-full flex flex-col">
               {/* Header */}
               <div className="flex items-center justify-between">
                 <h3 className="text-lg font-semibold text-foreground">Notes</h3>
@@ -436,7 +451,7 @@ const LeadCard: React.FC<LeadCardProps> = ({
                 />
               </div>
               
-              {/* Swipe hint for back */}
+              {/* Swipe hint */}
               <div className="text-center">
                 <p className="text-sm text-muted-foreground">Swipe left to return</p>
               </div>

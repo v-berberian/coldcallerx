@@ -266,8 +266,8 @@ body {
 
 .flip-card-back {
   transform: rotateY(180deg);
-  background: var(--card-background);
-  border: 1px solid var(--border);
+  background: hsl(var(--card));
+  border: 1px solid hsl(var(--border));
 }
 
 /* Mobile swipe hint */
