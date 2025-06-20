@@ -95,6 +95,17 @@ const SearchAutocomplete: React.FC<SearchAutocompleteProps> = ({
     }
   }, [isVisible, shouldRender, onAnimationComplete]);
 
+  useEffect(() => {
+    if (shouldRender) {
+      document.body.classList.add('overflow-hidden');
+    } else {
+      document.body.classList.remove('overflow-hidden');
+    }
+    return () => {
+      document.body.classList.remove('overflow-hidden');
+    };
+  }, [shouldRender]);
+
   if (!shouldRender) {
     return null;
   }
@@ -138,7 +149,7 @@ const SearchAutocomplete: React.FC<SearchAutocompleteProps> = ({
 
   // Fallback to original rendering for non-virtualized content
   return (
-    <div className={`absolute top-full left-0 right-0 z-50 mt-1 rounded-xl shadow-lg overflow-hidden ${animationClass} bg-background/15 backdrop-blur-sm border border-border/15`} style={{ maxHeight: `${Math.min(400, window.innerHeight * 0.5 - 60)}px` }}>
+    <div className={`absolute top-full left-0 right-0 z-50 mt-1 rounded-3xl shadow-lg overflow-hidden ${animationClass} bg-background/15 backdrop-blur-sm border border-white/10`} style={{ maxHeight: `${Math.min(400, window.innerHeight * 0.5 - 60)}px` }}>
       {children}
     </div>
   );

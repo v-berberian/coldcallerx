@@ -109,7 +109,16 @@ const SettingsMenu: React.FC<SettingsMenuProps> = ({ children }) => {
   }, [textTemplateMessage]);
 
   return (
-    <Popover>
+    <Popover onOpenChange={(open) => {
+      if (!open) {
+        setTemplatesOpen(false);
+        setEmailOpen(false);
+        setTextOpen(false);
+        setHelpOpen(false);
+        setCsvGuideOpen(false);
+        setModeOpen(false);
+      }
+    }}>
       <PopoverTrigger asChild>
         {children}
       </PopoverTrigger>
