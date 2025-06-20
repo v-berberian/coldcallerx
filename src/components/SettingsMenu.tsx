@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Mail, HelpCircle, ChevronDown, Plus, Edit, Trash2, MessageSquare, Check, Upload, FileText, Sun, Moon, Smartphone } from 'lucide-react';
+import { Mail, HelpCircle, ChevronDown, Plus, Edit, Trash2, MessageSquare, Check, Upload, FileText, Sun, Moon, Smartphone, Target } from 'lucide-react';
 import { useTheme } from 'next-themes';
 import {
   Popover,
@@ -18,6 +18,7 @@ import { Separator } from '@/components/ui/separator';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { Switch } from '@/components/ui/switch';
 import * as Collapsible from '@radix-ui/react-collapsible';
 
 interface EmailTemplate {
@@ -47,6 +48,11 @@ const SettingsMenu: React.FC<SettingsMenuProps> = ({ children }) => {
   const [helpOpen, setHelpOpen] = useState(false);
   const [csvGuideOpen, setCsvGuideOpen] = useState(false);
   const [modeOpen, setModeOpen] = useState(false);
+  const [dailyGoalsOpen, setDailyGoalsOpen] = useState(false);
+  const [dailyGoalEnabled, setDailyGoalEnabled] = useState(true);
+  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+  const [isAnimating, setIsAnimating] = useState(false);
+  const [shouldRender, setShouldRender] = useState(false);
   
   // Theme management
   const { theme, setTheme } = useTheme();
@@ -83,11 +89,15 @@ const SettingsMenu: React.FC<SettingsMenuProps> = ({ children }) => {
     setCsvGuideOpen(open);
   };
 
+  const handleDailyGoalsOpen = (open: boolean) => {
+    setDailyGoalsOpen(open);
+  };
+
   const handleMode = (mode: string) => {
     setTheme(mode);
   };
 
-  // Load templates from localStorage on mount
+  // Load settings from localStorage on mount
   useEffect(() => {
     const savedEmailSubject = localStorage.getItem('emailTemplateSubject');
     if (savedEmailSubject) setEmailTemplateSubject(savedEmailSubject);
@@ -95,6 +105,16 @@ const SettingsMenu: React.FC<SettingsMenuProps> = ({ children }) => {
     if (savedEmailBody) setEmailTemplateBody(savedEmailBody);
     const savedTextMessage = localStorage.getItem('textTemplateMessage');
     if (savedTextMessage) setTextTemplateMessage(savedTextMessage);
+    
+    // Load daily goal setting
+    const savedDailyGoal = localStorage.getItem('dailyGoalEnabled');
+    if (savedDailyGoal !== null) {
+      setDailyGoalEnabled(savedDailyGoal === 'true');
+    } else {
+      // Default to true if not set
+      setDailyGoalEnabled(true);
+      localStorage.setItem('dailyGoalEnabled', 'true');
+    }
   }, []);
 
   // Save email template changes
@@ -108,8 +128,33 @@ const SettingsMenu: React.FC<SettingsMenuProps> = ({ children }) => {
     localStorage.setItem('textTemplateMessage', textTemplateMessage);
   }, [textTemplateMessage]);
 
+  // Save daily goal setting
+  useEffect(() => {
+    localStorage.setItem('dailyGoalEnabled', dailyGoalEnabled.toString());
+    // Dispatch a custom event to notify other components
+    window.dispatchEvent(new CustomEvent('dailyGoalSettingChanged', { 
+      detail: { enabled: dailyGoalEnabled } 
+    }));
+  }, [dailyGoalEnabled]);
+
+  // Animation effect for disappearing
+  useEffect(() => {
+    if (isPopoverOpen) {
+      setShouldRender(true);
+      setIsAnimating(true);
+    } else if (shouldRender) {
+      setIsAnimating(false);
+      // Fade out animation duration - same as autocomplete
+      const timer = setTimeout(() => {
+        setShouldRender(false);
+      }, 20); // Same 20ms as autocomplete for fast disappearance
+      return () => clearTimeout(timer);
+    }
+  }, [isPopoverOpen, shouldRender]);
+
   return (
     <Popover onOpenChange={(open) => {
+      setIsPopoverOpen(open);
       if (!open) {
         setTemplatesOpen(false);
         setEmailOpen(false);
@@ -117,228 +162,257 @@ const SettingsMenu: React.FC<SettingsMenuProps> = ({ children }) => {
         setHelpOpen(false);
         setCsvGuideOpen(false);
         setModeOpen(false);
+        setDailyGoalsOpen(false);
       }
     }}>
       <PopoverTrigger asChild>
-        {children}
+        <div className={isPopoverOpen ? 'ring-2 ring-primary/50 ring-offset-2 ring-offset-background rounded-lg transition-all duration-200' : ''}>
+          {children}
+        </div>
       </PopoverTrigger>
-      <PopoverContent 
-        className="w-screen p-0 border-border/20 shadow-lg"
-        sideOffset={5}
-        align="center"
-        data-settings-menu="true"
-      >
-        <div className="p-4 space-y-4">
-          <div className="space-y-4">
-            {/* Templates Section */}
-            <Collapsible.Root 
-              open={templatesOpen} 
-              onOpenChange={handleTemplatesOpen}
-              className="space-y-2"
-            >
-              <Collapsible.Trigger asChild>
-                <button className="w-full flex items-center justify-between p-3 rounded-lg border border-border/20 transition-colors">
-                  <div className="flex items-center gap-2">
-                    <FileText className="h-4 w-4 text-muted-foreground" />
-                    <span className="text-sm font-medium">Templates</span>
-                  </div>
-                  <ChevronDown className={`h-4 w-4 text-muted-foreground transition-transform duration-20 ${templatesOpen ? 'rotate-180' : ''}`} />
-                </button>
-              </Collapsible.Trigger>
-              <Collapsible.Content 
-                className="space-y-2 data-[state=open]:animate-template-down data-[state=closed]:animate-template-up overflow-hidden"
+      {shouldRender && (
+        <PopoverContent 
+          className={`w-screen p-0 border-border/20 shadow-lg max-h-[80vh] overflow-y-auto ${isAnimating ? 'animate-slide-down' : 'animate-slide-up'}`}
+          sideOffset={5}
+          align="center"
+          data-settings-menu="true"
+        >
+          <div className="p-4 space-y-4">
+            <div className="space-y-4">
+              {/* Templates Section */}
+              <Collapsible.Root 
+                open={templatesOpen} 
+                onOpenChange={handleTemplatesOpen}
+                className="space-y-2"
               >
-                {/* Email Template */}
-                <Collapsible.Root 
-                  open={emailOpen} 
-                  onOpenChange={handleEmailOpen}
-                  className="space-y-2"
+                <Collapsible.Trigger asChild>
+                  <button className="w-full flex items-center justify-between p-3 rounded-lg border border-border/20 transition-colors">
+                    <div className="flex items-center gap-2">
+                      <FileText className="h-4 w-4 text-muted-foreground" />
+                      <span className="text-sm font-medium">Templates</span>
+                    </div>
+                    <ChevronDown className={`h-4 w-4 text-muted-foreground transition-transform duration-20 ${templatesOpen ? 'rotate-180' : ''}`} />
+                  </button>
+                </Collapsible.Trigger>
+                <Collapsible.Content 
+                  className="space-y-2 data-[state=open]:animate-template-down data-[state=closed]:animate-template-up overflow-hidden"
                 >
-                  <Collapsible.Trigger asChild>
-                    <button className="w-full flex items-center justify-between p-3 pl-8 rounded-lg border border-border/20 transition-colors">
-                      <div className="flex items-center gap-2">
-                        <Mail className="h-4 w-4 text-muted-foreground" />
-                        <span className="text-sm font-medium">Email Template</span>
-                      </div>
-                      <ChevronDown className={`h-4 w-4 text-muted-foreground transition-transform duration-20 ${emailOpen ? 'rotate-180' : ''}`} />
-                    </button>
-                  </Collapsible.Trigger>
-                  <Collapsible.Content 
-                    className="space-y-3 data-[state=open]:animate-template-down data-[state=closed]:animate-template-up overflow-hidden"
+                  {/* Email Template */}
+                  <Collapsible.Root 
+                    open={emailOpen} 
+                    onOpenChange={handleEmailOpen}
+                    className="space-y-2"
                   >
-                    <div className="space-y-2">
-                      <Label htmlFor="emailSubject">Subject</Label>
-                      <Input
-                        id="emailSubject"
-                        value={emailTemplateSubject}
-                        onChange={(e) => setEmailTemplateSubject(e.target.value)}
-                        placeholder="Enter email subject"
-                        className="w-full"
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="emailBody">Body</Label>
-                      <Textarea
-                        id="emailBody"
-                        value={emailTemplateBody}
-                        onChange={(e) => setEmailTemplateBody(e.target.value)}
-                        placeholder="Enter email body"
-                        className="w-full h-32 resize-none"
-                      />
-                    </div>
-                  </Collapsible.Content>
-                </Collapsible.Root>
-
-                {/* Text Template */}
-                <Collapsible.Root 
-                  open={textOpen} 
-                  onOpenChange={handleTextOpen}
-                  className="space-y-2"
-                >
-                  <Collapsible.Trigger asChild>
-                    <button className="w-full flex items-center justify-between p-3 pl-8 rounded-lg border border-border/20 transition-colors">
-                      <div className="flex items-center gap-2">
-                        <MessageSquare className="h-4 w-4 text-muted-foreground" />
-                        <span className="text-sm font-medium">Text Template</span>
+                    <Collapsible.Trigger asChild>
+                      <button className="w-full flex items-center justify-between p-3 pl-8 rounded-lg border border-border/20 transition-colors">
+                        <div className="flex items-center gap-2">
+                          <Mail className="h-4 w-4 text-muted-foreground" />
+                          <span className="text-sm font-medium">Email Template</span>
+                        </div>
+                        <ChevronDown className={`h-4 w-4 text-muted-foreground transition-transform duration-20 ${emailOpen ? 'rotate-180' : ''}`} />
+                      </button>
+                    </Collapsible.Trigger>
+                    <Collapsible.Content 
+                      className="space-y-3 data-[state=open]:animate-template-down data-[state=closed]:animate-template-up overflow-hidden"
+                    >
+                      <div className="space-y-2 p-3 pl-8">
+                        <Label htmlFor="emailSubject">Subject</Label>
+                        <Input
+                          id="emailSubject"
+                          value={emailTemplateSubject}
+                          onChange={(e) => setEmailTemplateSubject(e.target.value)}
+                          placeholder="Enter email subject"
+                          className="w-full"
+                        />
                       </div>
-                      <ChevronDown className={`h-4 w-4 text-muted-foreground transition-transform duration-20 ${textOpen ? 'rotate-180' : ''}`} />
-                    </button>
-                  </Collapsible.Trigger>
-                  <Collapsible.Content 
-                    className="space-y-3 data-[state=open]:animate-template-down data-[state=closed]:animate-template-up overflow-hidden"
-                  >
-                    <div className="space-y-2">
-                      <Label htmlFor="textMessage">Message</Label>
-                      <Textarea
-                        id="textMessage"
-                        value={textTemplateMessage}
-                        onChange={(e) => setTextTemplateMessage(e.target.value)}
-                        placeholder="Enter text message"
-                        className="w-full h-32 resize-none"
-                      />
-                    </div>
-                  </Collapsible.Content>
-                </Collapsible.Root>
-              </Collapsible.Content>
-            </Collapsible.Root>
+                      <div className="space-y-2 p-3 pl-8">
+                        <Label htmlFor="emailBody">Body</Label>
+                        <Textarea
+                          id="emailBody"
+                          value={emailTemplateBody}
+                          onChange={(e) => setEmailTemplateBody(e.target.value)}
+                          placeholder="Enter email body"
+                          className="w-full h-32 resize-none"
+                        />
+                      </div>
+                    </Collapsible.Content>
+                  </Collapsible.Root>
 
-            {/* Mode Section */}
-            <Collapsible.Root 
-              open={modeOpen} 
-              onOpenChange={setModeOpen}
-              className="space-y-2"
-            >
-              <Collapsible.Trigger asChild>
-                <button className="w-full flex items-center justify-between p-3 rounded-lg border border-border/20 transition-colors">
-                  <div className="flex items-center gap-2">
-                    <Sun className="h-4 w-4 text-muted-foreground" />
-                    <span className="text-sm font-medium">Mode</span>
-                  </div>
-                  <ChevronDown className={`h-4 w-4 text-muted-foreground transition-transform duration-20 ${modeOpen ? 'rotate-180' : ''}`} />
-                </button>
-              </Collapsible.Trigger>
-              <Collapsible.Content 
-                className="space-y-3 data-[state=open]:animate-template-down data-[state=closed]:animate-template-up overflow-hidden"
+                  {/* Text Template */}
+                  <Collapsible.Root 
+                    open={textOpen} 
+                    onOpenChange={handleTextOpen}
+                    className="space-y-2"
+                  >
+                    <Collapsible.Trigger asChild>
+                      <button className="w-full flex items-center justify-between p-3 pl-8 rounded-lg border border-border/20 transition-colors">
+                        <div className="flex items-center gap-2">
+                          <MessageSquare className="h-4 w-4 text-muted-foreground" />
+                          <span className="text-sm font-medium">Text Template</span>
+                        </div>
+                        <ChevronDown className={`h-4 w-4 text-muted-foreground transition-transform duration-20 ${textOpen ? 'rotate-180' : ''}`} />
+                      </button>
+                    </Collapsible.Trigger>
+                    <Collapsible.Content 
+                      className="space-y-3 data-[state=open]:animate-template-down data-[state=closed]:animate-template-up overflow-hidden"
+                    >
+                      <div className="space-y-2 p-3 pl-8">
+                        <Label htmlFor="textMessage">Message</Label>
+                        <Textarea
+                          id="textMessage"
+                          value={textTemplateMessage}
+                          onChange={(e) => setTextTemplateMessage(e.target.value)}
+                          placeholder="Enter text message"
+                          className="w-full h-32 resize-none"
+                        />
+                      </div>
+                    </Collapsible.Content>
+                  </Collapsible.Root>
+                </Collapsible.Content>
+              </Collapsible.Root>
+
+              {/* Mode Section */}
+              <Collapsible.Root 
+                open={modeOpen} 
+                onOpenChange={setModeOpen}
+                className="space-y-2"
               >
-                <div className="space-y-3 p-3 pl-8">
-                  <RadioGroup 
-                    value={theme || 'system'} 
-                    onValueChange={handleMode}
-                    className="space-y-1"
-                  >
-                    <div className={`flex items-center justify-between p-3 rounded-lg border transition-colors hover:bg-muted/50 cursor-pointer ${(theme || 'system') === 'light' ? 'border-primary bg-primary/5' : 'border-border/20'}`} onClick={() => handleMode('light')}>
+                <Collapsible.Trigger asChild>
+                  <button className="w-full flex items-center justify-between p-3 rounded-lg border border-border/20 transition-colors">
+                    <div className="flex items-center gap-2">
+                      <Sun className="h-4 w-4 text-muted-foreground" />
+                      <span className="text-sm font-medium">Mode</span>
+                    </div>
+                    <ChevronDown className={`h-4 w-4 text-muted-foreground transition-transform duration-20 ${modeOpen ? 'rotate-180' : ''}`} />
+                  </button>
+                </Collapsible.Trigger>
+                <Collapsible.Content 
+                  className="space-y-3 data-[state=open]:animate-template-down data-[state=closed]:animate-template-up overflow-hidden"
+                >
+                  <div className="space-y-2 p-3 pl-8">
+                    <div className={`flex items-center justify-between py-3 cursor-pointer ${(theme || 'system') === 'light' ? 'text-primary' : 'text-foreground'}`} onClick={() => handleMode('light')}>
                       <div className="flex items-center gap-3">
                         <Sun className="h-4 w-4 text-muted-foreground" />
                         <span className="text-sm font-medium">Light</span>
                       </div>
-                      <RadioGroupItem value="light" id="light" className="sr-only" />
                       {(theme || 'system') === 'light' && <Check className="h-4 w-4 text-primary" />}
                     </div>
-                    <div className={`flex items-center justify-between p-3 rounded-lg border transition-colors hover:bg-muted/50 cursor-pointer ${(theme || 'system') === 'dark' ? 'border-primary bg-primary/5' : 'border-border/20'}`} onClick={() => handleMode('dark')}>
+                    <div className={`flex items-center justify-between py-3 cursor-pointer ${(theme || 'system') === 'dark' ? 'text-primary' : 'text-foreground'}`} onClick={() => handleMode('dark')}>
                       <div className="flex items-center gap-3">
                         <Moon className="h-4 w-4 text-muted-foreground" />
                         <span className="text-sm font-medium">Dark</span>
                       </div>
-                      <RadioGroupItem value="dark" id="dark" className="sr-only" />
                       {(theme || 'system') === 'dark' && <Check className="h-4 w-4 text-primary" />}
                     </div>
-                    <div className={`flex items-center justify-between p-3 rounded-lg border transition-colors hover:bg-muted/50 cursor-pointer ${(theme || 'system') === 'system' ? 'border-primary bg-primary/5' : 'border-border/20'}`} onClick={() => handleMode('system')}>
+                    <div className={`flex items-center justify-between py-3 cursor-pointer ${(theme || 'system') === 'system' ? 'text-primary' : 'text-foreground'}`} onClick={() => handleMode('system')}>
                       <div className="flex items-center gap-3">
                         <Smartphone className="h-4 w-4 text-muted-foreground" />
                         <span className="text-sm font-medium">Device</span>
                       </div>
-                      <RadioGroupItem value="system" id="system" className="sr-only" />
                       {(theme || 'system') === 'system' && <Check className="h-4 w-4 text-primary" />}
                     </div>
-                  </RadioGroup>
-                </div>
-              </Collapsible.Content>
-            </Collapsible.Root>
-
-            {/* Help Section */}
-            <Collapsible.Root 
-              open={helpOpen} 
-              onOpenChange={handleHelpOpen}
-              className="space-y-2"
-            >
-              <Collapsible.Trigger asChild>
-                <button className="w-full flex items-center justify-between p-3 rounded-lg border border-border/20 transition-colors">
-                  <div className="flex items-center gap-2">
-                    <HelpCircle className="h-4 w-4 text-muted-foreground" />
-                    <span className="text-sm font-medium">Help</span>
                   </div>
-                  <ChevronDown className={`h-4 w-4 text-muted-foreground transition-transform duration-20 ${helpOpen ? 'rotate-180' : ''}`} />
-                </button>
-              </Collapsible.Trigger>
-              <Collapsible.Content 
-                className="space-y-2 data-[state=open]:animate-template-down data-[state=closed]:animate-template-up overflow-hidden"
+                </Collapsible.Content>
+              </Collapsible.Root>
+
+              {/* Daily Goals Section */}
+              <Collapsible.Root 
+                open={dailyGoalsOpen} 
+                onOpenChange={handleDailyGoalsOpen}
+                className="space-y-2"
               >
-                {/* CSV Upload Guide */}
-                <Collapsible.Root 
-                  open={csvGuideOpen} 
-                  onOpenChange={handleCsvGuideOpen}
-                  className="space-y-2"
-                >
-                  <Collapsible.Trigger asChild>
-                    <button className="w-full flex items-center justify-between p-3 pl-8 rounded-lg border border-border/20 transition-colors">
-                      <div className="flex items-center gap-2">
-                        <Upload className="h-4 w-4 text-muted-foreground" />
-                        <span className="text-sm font-medium">CSV Upload Guide</span>
-                      </div>
-                      <ChevronDown className={`h-4 w-4 text-muted-foreground transition-transform duration-20 ${csvGuideOpen ? 'rotate-180' : ''}`} />
-                    </button>
-                  </Collapsible.Trigger>
-                  <Collapsible.Content 
-                    className="space-y-3 data-[state=open]:animate-template-down data-[state=closed]:animate-template-up overflow-hidden"
-                  >
-                    <div className="space-y-3 p-3 bg-muted/30 rounded-lg">
-                      <div className="space-y-2">
-                        <p className="text-sm font-medium text-foreground">CSV Column Order:</p>
-                        <div className="text-xs text-muted-foreground space-y-1">
-                          <div><span className="font-medium">A:</span> Company (optional)</div>
-                          <div><span className="font-medium">B:</span> Name (required)</div>
-                          <div><span className="font-medium">C:</span> Phone (required)</div>
-                          <div><span className="font-medium">D:</span> Additional Phones (optional)</div>
-                          <div><span className="font-medium">E:</span> Email (optional)</div>
-                        </div>
-                      </div>
-                      <div className="space-y-2">
-                        <p className="text-sm font-medium text-foreground">Tips:</p>
-                        <div className="text-xs text-muted-foreground space-y-1">
-                          <div>• Phone numbers should include area code</div>
-                          <div>• Additional phones can be separated by spaces or commas</div>
-                          <div>• Email addresses should be valid format</div>
-                          <div>• First row can be headers (will be skipped)</div>
-                        </div>
-                      </div>
+                <Collapsible.Trigger asChild>
+                  <button className="w-full flex items-center justify-between p-3 rounded-lg border border-border/20 transition-colors">
+                    <div className="flex items-center gap-2">
+                      <Target className="h-4 w-4 text-muted-foreground" />
+                      <span className="text-sm font-medium">Daily Goals</span>
                     </div>
-                  </Collapsible.Content>
-                </Collapsible.Root>
-              </Collapsible.Content>
-            </Collapsible.Root>
+                    <ChevronDown className={`h-4 w-4 text-muted-foreground transition-transform duration-20 ${dailyGoalsOpen ? 'rotate-180' : ''}`} />
+                  </button>
+                </Collapsible.Trigger>
+                <Collapsible.Content 
+                  className="space-y-3 data-[state=open]:animate-template-down data-[state=closed]:animate-template-up overflow-hidden"
+                >
+                  <div className="space-y-3 p-3 pl-8">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <Target className="h-4 w-4 text-muted-foreground" />
+                        <span className="text-sm font-medium">Calls</span>
+                      </div>
+                      <Switch
+                        checked={dailyGoalEnabled}
+                        onCheckedChange={setDailyGoalEnabled}
+                      />
+                    </div>
+                  </div>
+                </Collapsible.Content>
+              </Collapsible.Root>
+
+              {/* Help Section */}
+              <Collapsible.Root 
+                open={helpOpen} 
+                onOpenChange={handleHelpOpen}
+                className="space-y-2"
+              >
+                <Collapsible.Trigger asChild>
+                  <button className="w-full flex items-center justify-between p-3 rounded-lg border border-border/20 transition-colors">
+                    <div className="flex items-center gap-2">
+                      <HelpCircle className="h-4 w-4 text-muted-foreground" />
+                      <span className="text-sm font-medium">Help</span>
+                    </div>
+                    <ChevronDown className={`h-4 w-4 text-muted-foreground transition-transform duration-20 ${helpOpen ? 'rotate-180' : ''}`} />
+                  </button>
+                </Collapsible.Trigger>
+                <Collapsible.Content 
+                  className="space-y-2 data-[state=open]:animate-template-down data-[state=closed]:animate-template-up overflow-hidden"
+                >
+                  {/* CSV Upload Guide */}
+                  <Collapsible.Root 
+                    open={csvGuideOpen} 
+                    onOpenChange={handleCsvGuideOpen}
+                    className="space-y-2"
+                  >
+                    <Collapsible.Trigger asChild>
+                      <button className="w-full flex items-center justify-between p-3 pl-8 rounded-lg border border-border/20 transition-colors">
+                        <div className="flex items-center gap-2">
+                          <Upload className="h-4 w-4 text-muted-foreground" />
+                          <span className="text-sm font-medium">CSV Upload Guide</span>
+                        </div>
+                        <ChevronDown className={`h-4 w-4 text-muted-foreground transition-transform duration-20 ${csvGuideOpen ? 'rotate-180' : ''}`} />
+                      </button>
+                    </Collapsible.Trigger>
+                    <Collapsible.Content 
+                      className="space-y-3 data-[state=open]:animate-template-down data-[state=closed]:animate-template-up overflow-hidden"
+                    >
+                      <div className="space-y-3 p-3 pl-8 bg-muted/30 rounded-lg">
+                        <div className="space-y-2">
+                          <p className="text-sm font-medium text-foreground">CSV Column Order:</p>
+                          <div className="text-xs text-muted-foreground space-y-1">
+                            <div><span className="font-medium">A:</span> Company (optional)</div>
+                            <div><span className="font-medium">B:</span> Name (required)</div>
+                            <div><span className="font-medium">C:</span> Phone (required)</div>
+                            <div><span className="font-medium">D:</span> Additional Phones (optional)</div>
+                            <div><span className="font-medium">E:</span> Email (optional)</div>
+                          </div>
+                        </div>
+                        <div className="space-y-2">
+                          <p className="text-sm font-medium text-foreground">Tips:</p>
+                          <div className="text-xs text-muted-foreground space-y-1">
+                            <div>• Phone numbers should include area code</div>
+                            <div>• Additional phones can be separated by spaces or commas</div>
+                            <div>• Email addresses should be valid format</div>
+                            <div>• First row can be headers (will be skipped)</div>
+                          </div>
+                        </div>
+                      </div>
+                    </Collapsible.Content>
+                  </Collapsible.Root>
+                </Collapsible.Content>
+              </Collapsible.Root>
+            </div>
           </div>
-        </div>
-      </PopoverContent>
+        </PopoverContent>
+      )}
     </Popover>
   );
 };

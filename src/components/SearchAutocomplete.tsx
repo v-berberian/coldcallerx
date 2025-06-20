@@ -110,19 +110,16 @@ const SearchAutocomplete: React.FC<SearchAutocompleteProps> = ({
     return null;
   }
 
-  const animationClass = isAnimating ? 'animate-slide-down' : 'animate-fade-out';
+  const animationClass = isAnimating ? 'animate-slide-down' : 'animate-slide-up';
 
   // If we have loadMoreResults function and searchResults, use infinite loader
   if (loadMoreResults && searchResults.length > 0) {
-    // Calculate height to account for iOS system bar above keyboard
-    // Reduce the available height to leave space for the system bar (typically ~60px)
-    const systemBarHeight = 60; // Increased from 40px to 60px for more space
-    const availableHeight = window.innerHeight * 0.5 - systemBarHeight; // 50% of viewport minus system bar
-    const maxDropdownHeight = Math.min(400, availableHeight);
-    const listHeight = Math.min(maxDropdownHeight, searchResults.length * itemHeight);
+    // Fixed height to show exactly 3 contacts
+    const contactsToShow = 3;
+    const listHeight = contactsToShow * itemHeight; // 3 * 70 = 210px
 
     return (
-      <div className={`absolute top-full left-0 right-0 z-50 mt-1 rounded-xl shadow-lg overflow-hidden ${animationClass} bg-background/15 backdrop-blur-sm border border-border/15`} style={{ maxHeight: `${availableHeight}px` }}>
+      <div className={`absolute top-full left-0 right-0 z-50 mt-1 mb-1 rounded-xl shadow-lg overflow-hidden ${animationClass} bg-background/15 backdrop-blur-sm border border-border/15`} style={{ height: `${listHeight}px` }}>
         <InfiniteLoader
           isItemLoaded={isItemLoaded}
           itemCount={totalResultsCount}
@@ -149,7 +146,7 @@ const SearchAutocomplete: React.FC<SearchAutocompleteProps> = ({
 
   // Fallback to original rendering for non-virtualized content
   return (
-    <div className={`absolute top-full left-0 right-0 z-50 mt-1 rounded-3xl shadow-lg overflow-hidden ${animationClass} bg-background/15 backdrop-blur-sm border border-white/10`} style={{ maxHeight: `${Math.min(400, window.innerHeight * 0.5 - 60)}px` }}>
+    <div className={`absolute top-full left-0 right-0 z-50 mt-1 mb-1 rounded-3xl shadow-lg overflow-hidden ${animationClass} bg-background/15 backdrop-blur-sm border border-white/10`} style={{ height: '210px' }}>
       {children}
     </div>
   );
