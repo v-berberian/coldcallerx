@@ -56,14 +56,9 @@ export const useLeadsData = (initialLeads: Lead[]) => {
     })));
   }, [initialLeads]);
 
-  const makeCall = (lead: Lead, markAsCalled: boolean = true, onCallMade?: () => void) => {
+  const makeCall = (lead: Lead, markAsCalled: boolean = true) => {
     const phoneNumber = getPhoneDigits(lead.phone);
     window.location.href = `tel:${phoneNumber}`;
-    
-    // Call the callback to increment daily call count
-    if (onCallMade) {
-      onCallMade();
-    }
     
     // Only update the lead data if we should mark it as called
     if (markAsCalled) {

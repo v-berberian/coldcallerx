@@ -95,81 +95,23 @@ const SearchAutocomplete: React.FC<SearchAutocompleteProps> = ({
     }
   }, [isVisible, shouldRender, onAnimationComplete]);
 
-  useEffect(() => {
-    if (shouldRender) {
-      document.body.classList.add('overflow-hidden');
-      // Add class to main container
-      const mainContainer = document.querySelector('.h-\\[100dvh\\].bg-background.flex.flex-col.overflow-hidden.fixed.inset-0');
-      if (mainContainer) {
-        mainContainer.classList.add('autocomplete-open');
-      }
-      
-      // Prevent touch scrolling on mobile
-      document.body.style.position = 'fixed';
-      document.body.style.width = '100%';
-      document.body.style.top = `-${window.scrollY}px`;
-      
-      // Add touch event prevention to main content
-      const preventScroll = (e: TouchEvent) => {
-        e.preventDefault();
-      };
-      
-      const mainContent = document.querySelector('.flex-1.overflow-hidden.min-h-0');
-      if (mainContent) {
-        mainContent.addEventListener('touchmove', preventScroll, { passive: false });
-        mainContent.addEventListener('touchstart', preventScroll, { passive: false });
-      }
-      
-      return () => {
-        if (mainContent) {
-          mainContent.removeEventListener('touchmove', preventScroll);
-          mainContent.removeEventListener('touchstart', preventScroll);
-        }
-        if (mainContainer) {
-          mainContainer.classList.remove('autocomplete-open');
-        }
-      };
-    } else {
-      document.body.classList.remove('overflow-hidden');
-      // Remove class from main container
-      const mainContainer = document.querySelector('.h-\\[100dvh\\].bg-background.flex.flex-col.overflow-hidden.fixed.inset-0');
-      if (mainContainer) {
-        mainContainer.classList.remove('autocomplete-open');
-      }
-      
-      // Restore scroll position
-      const scrollY = document.body.style.top;
-      document.body.style.position = '';
-      document.body.style.width = '';
-      document.body.style.top = '';
-      window.scrollTo(0, parseInt(scrollY || '0') * -1);
-    }
-    return () => {
-      document.body.classList.remove('overflow-hidden');
-      document.body.style.position = '';
-      document.body.style.width = '';
-      document.body.style.top = '';
-      const mainContainer = document.querySelector('.h-\\[100dvh\\].bg-background.flex.flex-col.overflow-hidden.fixed.inset-0');
-      if (mainContainer) {
-        mainContainer.classList.remove('autocomplete-open');
-      }
-    };
-  }, [shouldRender]);
-
   if (!shouldRender) {
     return null;
   }
 
-  const animationClass = isAnimating ? 'animate-slide-down' : 'animate-slide-up';
+  const animationClass = isAnimating ? 'animate-slide-down' : 'animate-fade-out';
 
   // If we have loadMoreResults function and searchResults, use infinite loader
   if (loadMoreResults && searchResults.length > 0) {
-    // Fixed height to show exactly 3 contacts
-    const contactsToShow = 3;
-    const listHeight = contactsToShow * itemHeight; // 3 * 70 = 210px
+    // Calculate height to account for iOS system bar above keyboard
+    // Reduce the available height to leave space for the system bar (typically ~60px)
+    const systemBarHeight = 60; // Increased from 40px to 60px for more space
+    const availableHeight = window.innerHeight * 0.5 - systemBarHeight; // 50% of viewport minus system bar
+    const maxDropdownHeight = Math.min(400, availableHeight);
+    const listHeight = Math.min(maxDropdownHeight, searchResults.length * itemHeight);
 
     return (
-      <div className={`absolute top-full left-0 right-0 z-50 mt-1 mb-1 rounded-xl shadow-lg overflow-hidden ${animationClass} bg-background/15 backdrop-blur-sm border border-border/15`} style={{ height: `${listHeight}px` }}>
+      <div className={`absolute top-full left-0 right-0 z-50 mt-1 rounded-xl shadow-lg overflow-hidden ${animationClass} bg-background/15 backdrop-blur-sm border border-border/15`} style={{ maxHeight: `${availableHeight}px` }}>
         <InfiniteLoader
           isItemLoaded={isItemLoaded}
           itemCount={totalResultsCount}
@@ -196,7 +138,7 @@ const SearchAutocomplete: React.FC<SearchAutocompleteProps> = ({
 
   // Fallback to original rendering for non-virtualized content
   return (
-    <div className={`absolute top-full left-0 right-0 z-50 mt-1 mb-1 rounded-3xl shadow-lg overflow-hidden ${animationClass} bg-background/15 backdrop-blur-sm border border-white/10`} style={{ height: '210px' }}>
+    <div className={`absolute top-full left-0 right-0 z-50 mt-1 rounded-xl shadow-lg overflow-hidden ${animationClass} bg-background/15 backdrop-blur-sm border border-border/15`} style={{ maxHeight: `${Math.min(400, window.innerHeight * 0.5 - 60)}px` }}>
       {children}
     </div>
   );
