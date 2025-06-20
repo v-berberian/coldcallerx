@@ -233,33 +233,33 @@ const SettingsMenu: React.FC<SettingsMenuProps> = ({ children }) => {
               >
                 <div className="space-y-3 p-3 pl-8">
                   <RadioGroup 
-                    value={theme || 'light'} 
+                    value={theme || 'system'} 
                     onValueChange={handleMode}
                     className="space-y-1"
                   >
-                    <div className={`flex items-center justify-between p-3 rounded-lg border transition-colors hover:bg-muted/50 cursor-pointer ${theme === 'light' ? 'border-primary bg-primary/5' : 'border-border/20'}`} onClick={() => handleMode('light')}>
+                    <div className={`flex items-center justify-between p-3 rounded-lg border transition-colors hover:bg-muted/50 cursor-pointer ${(theme || 'system') === 'light' ? 'border-primary bg-primary/5' : 'border-border/20'}`} onClick={() => handleMode('light')}>
                       <div className="flex items-center gap-3">
                         <Sun className="h-4 w-4 text-muted-foreground" />
                         <span className="text-sm font-medium">Light</span>
                       </div>
                       <RadioGroupItem value="light" id="light" className="sr-only" />
-                      {theme === 'light' && <Check className="h-4 w-4 text-primary" />}
+                      {(theme || 'system') === 'light' && <Check className="h-4 w-4 text-primary" />}
                     </div>
-                    <div className={`flex items-center justify-between p-3 rounded-lg border transition-colors hover:bg-muted/50 cursor-pointer ${theme === 'dark' ? 'border-primary bg-primary/5' : 'border-border/20'}`} onClick={() => handleMode('dark')}>
+                    <div className={`flex items-center justify-between p-3 rounded-lg border transition-colors hover:bg-muted/50 cursor-pointer ${(theme || 'system') === 'dark' ? 'border-primary bg-primary/5' : 'border-border/20'}`} onClick={() => handleMode('dark')}>
                       <div className="flex items-center gap-3">
                         <Moon className="h-4 w-4 text-muted-foreground" />
                         <span className="text-sm font-medium">Dark</span>
                       </div>
                       <RadioGroupItem value="dark" id="dark" className="sr-only" />
-                      {theme === 'dark' && <Check className="h-4 w-4 text-primary" />}
+                      {(theme || 'system') === 'dark' && <Check className="h-4 w-4 text-primary" />}
                     </div>
-                    <div className={`flex items-center justify-between p-3 rounded-lg border transition-colors hover:bg-muted/50 cursor-pointer ${theme === 'system' ? 'border-primary bg-primary/5' : 'border-border/20'}`} onClick={() => handleMode('system')}>
+                    <div className={`flex items-center justify-between p-3 rounded-lg border transition-colors hover:bg-muted/50 cursor-pointer ${(theme || 'system') === 'system' ? 'border-primary bg-primary/5' : 'border-border/20'}`} onClick={() => handleMode('system')}>
                       <div className="flex items-center gap-3">
                         <Smartphone className="h-4 w-4 text-muted-foreground" />
                         <span className="text-sm font-medium">Device</span>
                       </div>
                       <RadioGroupItem value="system" id="system" className="sr-only" />
-                      {theme === 'system' && <Check className="h-4 w-4 text-primary" />}
+                      {(theme || 'system') === 'system' && <Check className="h-4 w-4 text-primary" />}
                     </div>
                   </RadioGroup>
                 </div>
