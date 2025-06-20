@@ -1,4 +1,3 @@
-
 import { Lead } from '../types/lead';
 import { useNavigationState } from './useNavigationState';
 import { useFilters } from './useFilters';
@@ -14,7 +13,12 @@ import { useLeadNavigationEffects } from './useLeadNavigationEffects';
 import { useLeadNavigationWrappers } from './useLeadNavigationWrappers';
 import { useLeadNavigationReset } from './useLeadNavigationReset';
 
-export const useLeadNavigation = (initialLeads: Lead[]) => {
+interface UseLeadNavigationProps {
+  initialLeads: Lead[];
+  onCallMade?: () => void;
+}
+
+export const useLeadNavigation = ({ initialLeads, onCallMade }: UseLeadNavigationProps) => {
   const {
     shouldAutoCall,
     setShouldAutoCall,
@@ -57,12 +61,17 @@ export const useLeadNavigation = (initialLeads: Lead[]) => {
   const {
     leadsData,
     setLeadsData,
-    makeCall,
+    makeCall: originalMakeCall,
     markLeadAsCalled,
     markLeadAsCalledOnNavigation,
     resetCallCount,
     resetAllCallCounts
   } = useLeadsData(initialLeads);
+
+  // Wrap makeCall to include daily call tracking
+  const makeCall = (lead: Lead, markAsCalled: boolean = true) => {
+    originalMakeCall(lead, markAsCalled, onCallMade);
+  };
 
   const { getBaseLeads } = useLeadFiltering(leadsData, timezoneFilter, callFilter);
 

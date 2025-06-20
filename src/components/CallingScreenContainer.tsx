@@ -1,4 +1,4 @@
-import React, { memo } from 'react';
+import React, { memo, useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import CallingHeader from './CallingHeader';
@@ -8,6 +8,7 @@ import { useLocalCallingScreenState } from '../hooks/useLocalCallingScreenState'
 import { useSimplifiedCallingScreenEffects } from '../hooks/useSimplifiedCallingScreenEffects';
 import { useCallingScreenActions } from './CallingScreenActions';
 import { useLocalLeadOperations } from '../hooks/useLocalLeadOperations';
+import { useDailyCallState } from './DailyCallState';
 
 interface CallingScreenContainerProps {
   leads: Lead[];
@@ -23,6 +24,49 @@ const CallingScreenContainer: React.FC<CallingScreenContainerProps> = memo(({
   onLeadsImported
 }) => {
   const { importLeadsFromCSV, updateLeadCallCount, resetCallCount, resetAllCallCounts } = useLocalLeadOperations();
+  
+  // Daily call tracking
+  const {
+    dailyCallCount,
+    incrementDailyCallCount,
+    resetDailyCallCount
+  } = useDailyCallState();
+
+  // Daily goal setting
+  const [dailyGoalEnabled, setDailyGoalEnabled] = useState(true);
+
+  // Load daily goal setting from localStorage
+  useEffect(() => {
+    const savedDailyGoal = localStorage.getItem('dailyGoalEnabled');
+    if (savedDailyGoal !== null) {
+      const enabled = savedDailyGoal === 'true';
+      setDailyGoalEnabled(enabled);
+    }
+  }, []);
+
+  // Listen for changes to the daily goal setting
+  useEffect(() => {
+    const handleStorageChange = () => {
+      const savedDailyGoal = localStorage.getItem('dailyGoalEnabled');
+      if (savedDailyGoal !== null) {
+        const enabled = savedDailyGoal === 'true';
+        setDailyGoalEnabled(enabled);
+      }
+    };
+
+    const handleCustomEvent = (event: CustomEvent) => {
+      const enabled = event.detail.enabled;
+      setDailyGoalEnabled(enabled);
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+    window.addEventListener('dailyGoalSettingChanged', handleCustomEvent as EventListener);
+    
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+      window.removeEventListener('dailyGoalSettingChanged', handleCustomEvent as EventListener);
+    };
+  }, []);
 
   const {
     componentReady,
@@ -69,7 +113,7 @@ const CallingScreenContainer: React.FC<CallingScreenContainerProps> = memo(({
     handleSearchFocus,
     handleSearchBlur,
     getDelayDisplayType
-  } = useLocalCallingScreenState({ leads });
+  } = useLocalCallingScreenState({ leads, onCallMade: dailyGoalEnabled ? incrementDailyCallCount : undefined });
 
   useSimplifiedCallingScreenEffects({
     componentReady,
@@ -196,7 +240,7 @@ const CallingScreenContainer: React.FC<CallingScreenContainerProps> = memo(({
       />
 
       {/* Main Content - takes remaining space */}
-      <div className="flex-1 overflow-hidden">
+      <div className="flex-1 overflow-hidden min-h-0">
         <MainContent
           currentLead={currentLead}
           currentIndex={currentIndex}
