@@ -110,7 +110,7 @@ export const useSearchState = ({ leads, getBaseLeads, leadsData, timezoneFilter,
   }, []);
 
   const handleSearchBlur = useCallback(() => {
-    setTimeout(() => setShowAutocomplete(false), 150);
+    setTimeout(() => setShowAutocomplete(false), 20);
   }, []);
 
   return {
