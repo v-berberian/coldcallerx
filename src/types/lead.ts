@@ -1,4 +1,3 @@
-
 export interface Lead {
   name: string;
   phone: string;
@@ -6,6 +5,7 @@ export interface Lead {
   email?: string; // Explicitly ensure this is always a string, not an object
   lastCalled?: string;
   additionalPhones?: string;
+  notes?: string;
 }
 
 export type TimezoneFilter = 'ALL' | 'EST_CST';
