@@ -197,6 +197,37 @@ const SettingsMenu: React.FC<SettingsMenuProps> = ({ children }) => {
                 <Collapsible.Content 
                   className="space-y-2 data-[state=open]:animate-template-down data-[state=closed]:animate-template-up overflow-hidden"
                 >
+                  {/* Text Template */}
+                  <Collapsible.Root 
+                    open={textOpen} 
+                    onOpenChange={handleTextOpen}
+                    className="space-y-2"
+                  >
+                    <Collapsible.Trigger asChild>
+                      <button className="w-full flex items-center justify-between p-3 pl-8 rounded-lg border border-border/20 transition-colors">
+                        <div className="flex items-center gap-2">
+                          <MessageSquare className="h-4 w-4 text-muted-foreground" />
+                          <span className="text-sm font-medium">Text Template</span>
+                        </div>
+                        <ChevronDown className={`h-4 w-4 text-muted-foreground transition-transform duration-20 ${textOpen ? 'rotate-180' : ''}`} />
+                      </button>
+                    </Collapsible.Trigger>
+                    <Collapsible.Content 
+                      className="space-y-3 data-[state=open]:animate-template-down data-[state=closed]:animate-template-up overflow-hidden"
+                    >
+                      <div className="space-y-2 p-3 pl-8">
+                        <Label htmlFor="textMessage">Message</Label>
+                        <Textarea
+                          id="textMessage"
+                          value={textTemplateMessage}
+                          onChange={(e) => setTextTemplateMessage(e.target.value)}
+                          placeholder="Enter text message"
+                          className="w-full h-32 resize-none"
+                        />
+                      </div>
+                    </Collapsible.Content>
+                  </Collapsible.Root>
+
                   {/* Email Template */}
                   <Collapsible.Root 
                     open={emailOpen} 
@@ -232,37 +263,6 @@ const SettingsMenu: React.FC<SettingsMenuProps> = ({ children }) => {
                           value={emailTemplateBody}
                           onChange={(e) => setEmailTemplateBody(e.target.value)}
                           placeholder="Enter email body"
-                          className="w-full h-32 resize-none"
-                        />
-                      </div>
-                    </Collapsible.Content>
-                  </Collapsible.Root>
-
-                  {/* Text Template */}
-                  <Collapsible.Root 
-                    open={textOpen} 
-                    onOpenChange={handleTextOpen}
-                    className="space-y-2"
-                  >
-                    <Collapsible.Trigger asChild>
-                      <button className="w-full flex items-center justify-between p-3 pl-8 rounded-lg border border-border/20 transition-colors">
-                        <div className="flex items-center gap-2">
-                          <MessageSquare className="h-4 w-4 text-muted-foreground" />
-                          <span className="text-sm font-medium">Text Template</span>
-                        </div>
-                        <ChevronDown className={`h-4 w-4 text-muted-foreground transition-transform duration-20 ${textOpen ? 'rotate-180' : ''}`} />
-                      </button>
-                    </Collapsible.Trigger>
-                    <Collapsible.Content 
-                      className="space-y-3 data-[state=open]:animate-template-down data-[state=closed]:animate-template-up overflow-hidden"
-                    >
-                      <div className="space-y-2 p-3 pl-8">
-                        <Label htmlFor="textMessage">Message</Label>
-                        <Textarea
-                          id="textMessage"
-                          value={textTemplateMessage}
-                          onChange={(e) => setTextTemplateMessage(e.target.value)}
-                          placeholder="Enter text message"
                           className="w-full h-32 resize-none"
                         />
                       </div>

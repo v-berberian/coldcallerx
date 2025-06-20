@@ -98,11 +98,61 @@ const SearchAutocomplete: React.FC<SearchAutocompleteProps> = ({
   useEffect(() => {
     if (shouldRender) {
       document.body.classList.add('overflow-hidden');
+      // Add class to main container
+      const mainContainer = document.querySelector('.h-\\[100dvh\\].bg-background.flex.flex-col.overflow-hidden.fixed.inset-0');
+      if (mainContainer) {
+        mainContainer.classList.add('autocomplete-open');
+      }
+      
+      // Prevent touch scrolling on mobile
+      document.body.style.position = 'fixed';
+      document.body.style.width = '100%';
+      document.body.style.top = `-${window.scrollY}px`;
+      
+      // Add touch event prevention to main content
+      const preventScroll = (e: TouchEvent) => {
+        e.preventDefault();
+      };
+      
+      const mainContent = document.querySelector('.flex-1.overflow-hidden.min-h-0');
+      if (mainContent) {
+        mainContent.addEventListener('touchmove', preventScroll, { passive: false });
+        mainContent.addEventListener('touchstart', preventScroll, { passive: false });
+      }
+      
+      return () => {
+        if (mainContent) {
+          mainContent.removeEventListener('touchmove', preventScroll);
+          mainContent.removeEventListener('touchstart', preventScroll);
+        }
+        if (mainContainer) {
+          mainContainer.classList.remove('autocomplete-open');
+        }
+      };
     } else {
       document.body.classList.remove('overflow-hidden');
+      // Remove class from main container
+      const mainContainer = document.querySelector('.h-\\[100dvh\\].bg-background.flex.flex-col.overflow-hidden.fixed.inset-0');
+      if (mainContainer) {
+        mainContainer.classList.remove('autocomplete-open');
+      }
+      
+      // Restore scroll position
+      const scrollY = document.body.style.top;
+      document.body.style.position = '';
+      document.body.style.width = '';
+      document.body.style.top = '';
+      window.scrollTo(0, parseInt(scrollY || '0') * -1);
     }
     return () => {
       document.body.classList.remove('overflow-hidden');
+      document.body.style.position = '';
+      document.body.style.width = '';
+      document.body.style.top = '';
+      const mainContainer = document.querySelector('.h-\\[100dvh\\].bg-background.flex.flex-col.overflow-hidden.fixed.inset-0');
+      if (mainContainer) {
+        mainContainer.classList.remove('autocomplete-open');
+      }
     };
   }, [shouldRender]);
 
