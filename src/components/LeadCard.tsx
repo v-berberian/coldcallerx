@@ -268,8 +268,8 @@ const LeadCard: React.FC<LeadCardProps> = ({
       <div className="flip-card-inner">
         {/* Front of card - Main lead info */}
         <div className="flip-card-front">
-          <Card className="h-full border-0 shadow-none bg-transparent">
-            <CardContent className="p-4 sm:p-6 space-y-5 sm:space-y-6 flex-1 flex flex-col">
+          <div className="h-full w-full bg-card rounded-3xl border border-border/50">
+            <div className="p-4 sm:p-6 space-y-5 sm:space-y-6 flex-1 flex flex-col h-full">
               {/* Top row with lead count and file name */}
               <div className="flex items-center justify-between">
                 <p className="text-sm text-muted-foreground opacity-40">
@@ -404,8 +404,8 @@ const LeadCard: React.FC<LeadCardProps> = ({
                   </Button>
                 </div>
               </div>
-            </CardContent>
-          </Card>
+            </div>
+          </div>
           
           {/* Swipe hint for mobile */}
           <div className="swipe-hint visible">
@@ -415,29 +415,31 @@ const LeadCard: React.FC<LeadCardProps> = ({
 
         {/* Back of card - Notes */}
         <div className="flip-card-back">
-          <div className="p-4 sm:p-6 space-y-4 h-full flex flex-col">
-            {/* Header */}
-            <div className="flex items-center justify-between">
-              <h3 className="text-lg font-semibold text-foreground">Notes</h3>
-              <p className="text-sm text-muted-foreground">
-                {currentIndex + 1}/{totalCount}
-              </p>
-            </div>
-            
-            {/* Notes textarea */}
-            <div className="flex-1 flex flex-col">
-              <textarea
-                value={notes}
-                onChange={handleNotesChange}
-                placeholder="Add notes about this lead..."
-                className="flex-1 w-full p-4 border border-border/20 rounded-lg bg-background/50 resize-none text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all"
-                style={{ minHeight: '200px' }}
-              />
-            </div>
-            
-            {/* Swipe hint for back */}
-            <div className="text-center">
-              <p className="text-sm text-muted-foreground">Swipe left to return</p>
+          <div className="h-full w-full bg-card rounded-3xl border border-border/50">
+            <div className="p-4 sm:p-6 space-y-4 h-full flex flex-col">
+              {/* Header */}
+              <div className="flex items-center justify-between">
+                <h3 className="text-lg font-semibold text-foreground">Notes</h3>
+                <p className="text-sm text-muted-foreground">
+                  {currentIndex + 1}/{totalCount}
+                </p>
+              </div>
+              
+              {/* Notes textarea */}
+              <div className="flex-1 flex flex-col">
+                <textarea
+                  value={notes}
+                  onChange={handleNotesChange}
+                  placeholder="Add notes about this lead..."
+                  className="flex-1 w-full p-4 border border-border/20 rounded-lg bg-background/50 resize-none text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all"
+                  style={{ minHeight: '200px' }}
+                />
+              </div>
+              
+              {/* Swipe hint for back */}
+              <div className="text-center">
+                <p className="text-sm text-muted-foreground">Swipe left to return</p>
+              </div>
             </div>
           </div>
         </div>
