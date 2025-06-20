@@ -57,13 +57,14 @@ const CallProgressBar: React.FC<CallProgressBarProps> = ({ dailyCallCount }) => 
 
   return (
     <div 
-      className={`fixed bottom-0 left-0 right-0 bg-background/95 backdrop-blur-sm border-t border-border p-3 z-[100] transition-transform duration-300 ${
+      className={`fixed left-0 right-0 bg-background/95 backdrop-blur-sm border-t border-border p-3 z-[100] transition-transform duration-300 ${
         isAnimating ? 'animate-bounce' : ''
       }`}
       style={{ 
+        bottom: '-10px',
         transform: 'translateZ(0)',
         willChange: 'transform',
-        paddingBottom: 'calc(0.75rem + env(safe-area-inset-bottom))'
+        paddingBottom: 'calc(1.5rem + env(safe-area-inset-bottom))'
       }}
     >
       <DailyProgress dailyCallCount={dailyCallCount} />

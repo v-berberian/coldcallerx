@@ -1,3 +1,4 @@
+
 import React, { memo, useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -241,7 +242,7 @@ const CallingScreenContainer: React.FC<CallingScreenContainerProps> = memo(({
       />
 
       {/* Main Content - takes remaining space, with bottom padding for progress bar */}
-      <div className="flex-1 overflow-hidden min-h-0" style={{ paddingBottom: dailyGoalEnabled ? '100px' : '0' }}>
+      <div className="flex-1 overflow-hidden min-h-0" style={{ paddingBottom: dailyGoalEnabled ? '120px' : '0' }}>
         <MainContent
           currentLead={currentLead}
           currentIndex={currentIndex}
