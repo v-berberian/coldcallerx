@@ -234,11 +234,11 @@ body {
 }
 
 .animate-template-down {
-  animation: template-down 0.05s ease-out;
+  animation: template-down 0.02s ease-out;
 }
 
 .animate-template-up {
-  animation: template-up 0.05s ease-out;
+  animation: template-up 0.02s ease-out;
 }
 
 /* Safe area support */

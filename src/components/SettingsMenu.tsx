@@ -1,5 +1,6 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { Mail, HelpCircle, ChevronDown, Plus, Edit, Trash2, MessageSquare, Check, Upload, FileText } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Mail, HelpCircle, ChevronDown, Plus, Edit, Trash2, MessageSquare, Check, Upload, FileText, Sun, Moon, Smartphone } from 'lucide-react';
+import { useTheme } from 'next-themes';
 import {
   Popover,
   PopoverContent,
@@ -16,6 +17,7 @@ import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import * as Collapsible from '@radix-ui/react-collapsible';
 
 interface EmailTemplate {
@@ -45,56 +47,29 @@ const SettingsMenu: React.FC<SettingsMenuProps> = ({ children }) => {
   const [helpOpen, setHelpOpen] = useState(false);
   const [csvGuideOpen, setCsvGuideOpen] = useState(false);
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+  const [modeOpen, setModeOpen] = useState(false);
   
-  // Auto-collapse timer
-  const autoCollapseTimerRef = useRef<NodeJS.Timeout | null>(null);
-  const lastActivityRef = useRef<number>(Date.now());
-
-  // Reset auto-collapse timer
-  const resetAutoCollapseTimer = () => {
-    lastActivityRef.current = Date.now();
-    
-    if (autoCollapseTimerRef.current) {
-      clearTimeout(autoCollapseTimerRef.current);
-    }
-    
-    if (isPopoverOpen) {
-      autoCollapseTimerRef.current = setTimeout(() => {
-        // Close all menus after 5 seconds of inactivity
-        setTemplatesOpen(false);
-        setEmailOpen(false);
-        setTextOpen(false);
-        setHelpOpen(false);
-        setCsvGuideOpen(false);
-      }, 5000); // 5 seconds
-    }
-  };
+  // Theme management
+  const { theme, setTheme } = useTheme();
 
   // Handle popover open/close
   const handlePopoverOpenChange = (open: boolean) => {
     setIsPopoverOpen(open);
     
-    if (open) {
-      resetAutoCollapseTimer();
-    } else {
-      // Clear timer when popover closes
-      if (autoCollapseTimerRef.current) {
-        clearTimeout(autoCollapseTimerRef.current);
-        autoCollapseTimerRef.current = null;
-      }
+    if (!open) {
       // Close all menus when popover closes
       setTemplatesOpen(false);
       setEmailOpen(false);
       setTextOpen(false);
       setHelpOpen(false);
       setCsvGuideOpen(false);
+      setModeOpen(false);
     }
   };
 
   // Handle template open/close
   const handleTemplatesOpen = (open: boolean) => {
     setTemplatesOpen(open);
-    resetAutoCollapseTimer(); // Reset timer on any interaction
     
     if (!open) {
       // Close all submenus when templates menu is closed
@@ -105,21 +80,18 @@ const SettingsMenu: React.FC<SettingsMenuProps> = ({ children }) => {
 
   const handleEmailOpen = (open: boolean) => {
     setEmailOpen(open);
-    resetAutoCollapseTimer(); // Reset timer on any interaction
     
     if (open) setTextOpen(false);
   };
 
   const handleTextOpen = (open: boolean) => {
     setTextOpen(open);
-    resetAutoCollapseTimer(); // Reset timer on any interaction
     
     if (open) setEmailOpen(false);
   };
 
   const handleHelpOpen = (open: boolean) => {
     setHelpOpen(open);
-    resetAutoCollapseTimer(); // Reset timer on any interaction
     
     if (!open) {
       // Close all submenus when help menu is closed
@@ -129,33 +101,29 @@ const SettingsMenu: React.FC<SettingsMenuProps> = ({ children }) => {
 
   const handleCsvGuideOpen = (open: boolean) => {
     setCsvGuideOpen(open);
-    resetAutoCollapseTimer(); // Reset timer on any interaction
+  };
+
+  const handleModeOpen = (open: boolean) => {
+    setModeOpen(open);
   };
 
   // Handle input changes to reset timer
   const handleEmailSubjectChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setEmailTemplateSubject(e.target.value);
-    resetAutoCollapseTimer();
   };
 
   const handleEmailBodyChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setEmailTemplateBody(e.target.value);
-    resetAutoCollapseTimer();
   };
 
   const handleTextMessageChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setTextTemplateMessage(e.target.value);
-    resetAutoCollapseTimer();
   };
 
-  // Cleanup timer on unmount
-  useEffect(() => {
-    return () => {
-      if (autoCollapseTimerRef.current) {
-        clearTimeout(autoCollapseTimerRef.current);
-      }
-    };
-  }, []);
+  // Handle theme change
+  const handleThemeChange = (value: string) => {
+    setTheme(value);
+  };
 
   // Load templates from localStorage on mount
   useEffect(() => {
@@ -280,6 +248,59 @@ const SettingsMenu: React.FC<SettingsMenuProps> = ({ children }) => {
                     </div>
                   </Collapsible.Content>
                 </Collapsible.Root>
+              </Collapsible.Content>
+            </Collapsible.Root>
+
+            {/* Mode Section */}
+            <Collapsible.Root 
+              open={modeOpen} 
+              onOpenChange={handleModeOpen}
+              className="space-y-2"
+            >
+              <Collapsible.Trigger asChild>
+                <button className="w-full flex items-center justify-between p-3 rounded-lg border border-border/20 transition-colors">
+                  <div className="flex items-center gap-2">
+                    <Sun className="h-4 w-4 text-muted-foreground" />
+                    <span className="text-sm font-medium">Mode</span>
+                  </div>
+                  <ChevronDown className={`h-4 w-4 text-muted-foreground transition-transform duration-200 ${modeOpen ? 'rotate-180' : ''}`} />
+                </button>
+              </Collapsible.Trigger>
+              <Collapsible.Content 
+                className="space-y-3 data-[state=open]:animate-template-down data-[state=closed]:animate-template-up overflow-hidden"
+              >
+                <div className="space-y-3 p-3 pl-8">
+                  <RadioGroup 
+                    value={theme || 'light'} 
+                    onValueChange={handleThemeChange}
+                    className="space-y-1"
+                  >
+                    <div className={`flex items-center justify-between p-3 rounded-lg border transition-colors hover:bg-muted/50 cursor-pointer ${theme === 'light' ? 'border-primary bg-primary/5' : 'border-border/20'}`} onClick={() => handleThemeChange('light')}>
+                      <div className="flex items-center gap-3">
+                        <Sun className="h-4 w-4 text-muted-foreground" />
+                        <span className="text-sm font-medium">Light</span>
+                      </div>
+                      <RadioGroupItem value="light" id="light" className="sr-only" />
+                      {theme === 'light' && <Check className="h-4 w-4 text-primary" />}
+                    </div>
+                    <div className={`flex items-center justify-between p-3 rounded-lg border transition-colors hover:bg-muted/50 cursor-pointer ${theme === 'dark' ? 'border-primary bg-primary/5' : 'border-border/20'}`} onClick={() => handleThemeChange('dark')}>
+                      <div className="flex items-center gap-3">
+                        <Moon className="h-4 w-4 text-muted-foreground" />
+                        <span className="text-sm font-medium">Dark</span>
+                      </div>
+                      <RadioGroupItem value="dark" id="dark" className="sr-only" />
+                      {theme === 'dark' && <Check className="h-4 w-4 text-primary" />}
+                    </div>
+                    <div className={`flex items-center justify-between p-3 rounded-lg border transition-colors hover:bg-muted/50 cursor-pointer ${theme === 'system' ? 'border-primary bg-primary/5' : 'border-border/20'}`} onClick={() => handleThemeChange('system')}>
+                      <div className="flex items-center gap-3">
+                        <Smartphone className="h-4 w-4 text-muted-foreground" />
+                        <span className="text-sm font-medium">Device</span>
+                      </div>
+                      <RadioGroupItem value="system" id="system" className="sr-only" />
+                      {theme === 'system' && <Check className="h-4 w-4 text-primary" />}
+                    </div>
+                  </RadioGroup>
+                </div>
               </Collapsible.Content>
             </Collapsible.Root>
 
