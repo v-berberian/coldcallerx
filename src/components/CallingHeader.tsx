@@ -1,9 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { Settings } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Lead } from '../types/lead';
 import SearchAutocomplete from './SearchAutocomplete';
-import SearchBar from './SearchBar';
+import SearchBar, { SearchBarRef } from './SearchBar';
 import CSVImporter from './CSVImporter';
 import SettingsMenu from './SettingsMenu';
 
@@ -22,6 +22,7 @@ interface CallingHeaderProps {
   loadMoreResults?: () => void;
   loadedResultsCount?: number;
   totalResultsCount?: number;
+  onCloseAutocomplete?: () => void;
 }
 
 const CallingHeader: React.FC<CallingHeaderProps> = ({
@@ -38,14 +39,19 @@ const CallingHeader: React.FC<CallingHeaderProps> = ({
   onLeadsImported,
   loadMoreResults,
   loadedResultsCount,
-  totalResultsCount
+  totalResultsCount,
+  onCloseAutocomplete
 }) => {
   const [isAutocompleteVisible, setIsAutocompleteVisible] = useState(showAutocomplete);
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  const searchBarRef = useRef<SearchBarRef>(null);
 
   React.useEffect(() => {
     if (showAutocomplete) {
       setIsAutocompleteVisible(true);
     } else {
+      // Reset fullscreen state when autocomplete closes
+      setIsFullscreen(false);
       // Delay hiding to allow slide-up animation
       const timer = setTimeout(() => {
         setIsAutocompleteVisible(false);
@@ -53,6 +59,15 @@ const CallingHeader: React.FC<CallingHeaderProps> = ({
       return () => clearTimeout(timer);
     }
   }, [showAutocomplete]);
+
+  const handleToggleFullscreen = () => {
+    console.log('CallingHeader: handleToggleFullscreen called, current isFullscreen:', isFullscreen);
+    setIsFullscreen(!isFullscreen);
+    console.log('CallingHeader: isFullscreen will be set to:', !isFullscreen);
+    // Keep the autocomplete visible when toggling fullscreen
+    
+    // When transitioning from fullscreen to normal, keep it open
+  };
 
   return (
     <div className="bg-background border-b border-border p-3 sm:p-4 pt-safe flex-shrink-0 w-full" style={{ paddingTop: 'max(0.75rem, env(safe-area-inset-top))' }}>
@@ -85,48 +100,32 @@ const CallingHeader: React.FC<CallingHeaderProps> = ({
           onSearchFocus={onSearchFocus} 
           onSearchBlur={onSearchBlur} 
           onClearSearch={onClearSearch} 
+          onToggleFullscreen={handleToggleFullscreen}
+          isFullscreen={isFullscreen}
           fileName={fileName} 
+          ref={searchBarRef}
         />
         
         {/* Autocomplete Dropdown */}
-        <SearchAutocomplete 
-          isVisible={showAutocomplete}
-          loadMoreResults={loadMoreResults}
-          loadedResultsCount={loadedResultsCount}
-          totalResultsCount={totalResultsCount}
-          searchResults={searchResults}
-          onLeadSelect={onLeadSelect}
-          leadsData={leadsData}
-        >
-          <div className="max-h-60 overflow-y-auto">
-            {searchResults.length === 0 ? (
-              <div className="p-4 text-center text-muted-foreground">
-                No leads found
-              </div>
-            ) : (
-              searchResults.map((lead, index) => (
-                <button
-                  key={`${lead.name}-${lead.phone}-${index}`}
-                  onClick={() => onLeadSelect(lead)}
-                  className="w-full px-4 py-3 text-left border-b border-border/10 last:border-b-0 transition-colors duration-75 cursor-default hover:bg-muted/50"
-                >
-                  <div className="flex justify-between items-start">
-                    <div className="flex-1 min-w-0">
-                      <p className="font-medium text-foreground truncate">{lead.name}</p>
-                      {lead.company && (
-                        <p className="text-xs text-muted-foreground truncate">{lead.company}</p>
-                      )}
-                      <p className="text-sm text-muted-foreground">{lead.phone}</p>
-                    </div>
-                    <div className="ml-2 text-xs text-muted-foreground">
-                      {leadsData.findIndex(l => l.name === lead.name && l.phone === lead.phone) + 1}/{leadsData.length}
-                    </div>
-                  </div>
-                </button>
-              ))
-            )}
-          </div>
-        </SearchAutocomplete>
+        {(() => {
+          console.log('CallingHeader: Rendering SearchAutocomplete', { showAutocomplete, isFullscreen, searchResultsLength: searchResults.length });
+          return (
+            <SearchAutocomplete 
+              isVisible={showAutocomplete}
+              isFullscreen={isFullscreen}
+              loadMoreResults={loadMoreResults}
+              loadedResultsCount={loadedResultsCount}
+              totalResultsCount={totalResultsCount}
+              searchResults={searchResults}
+              onLeadSelect={onLeadSelect}
+              leadsData={leadsData}
+              onAnimationComplete={() => {
+                onCloseAutocomplete?.();
+              }}
+              onCloseAutocomplete={onCloseAutocomplete}
+            />
+          );
+        })()}
       </div>
     </div>
   );

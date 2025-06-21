@@ -191,7 +191,7 @@ const SettingsMenu: React.FC<SettingsMenuProps> = ({ children }) => {
                       <FileText className="h-4 w-4 text-muted-foreground" />
                       <span className="text-sm font-medium">Templates</span>
                     </div>
-                    <ChevronDown className={`h-4 w-4 text-muted-foreground transition-transform duration-20 ${templatesOpen ? 'rotate-180' : ''}`} />
+                    <ChevronDown className={`h-4 w-4 text-muted-foreground transition-transform duration-75 ${templatesOpen ? 'rotate-180' : ''}`} />
                   </button>
                 </Collapsible.Trigger>
                 <Collapsible.Content 
@@ -209,7 +209,7 @@ const SettingsMenu: React.FC<SettingsMenuProps> = ({ children }) => {
                           <MessageSquare className="h-4 w-4 text-muted-foreground" />
                           <span className="text-sm font-medium">Text Template</span>
                         </div>
-                        <ChevronDown className={`h-4 w-4 text-muted-foreground transition-transform duration-20 ${textOpen ? 'rotate-180' : ''}`} />
+                        <ChevronDown className={`h-4 w-4 text-muted-foreground transition-transform duration-75 ${textOpen ? 'rotate-180' : ''}`} />
                       </button>
                     </Collapsible.Trigger>
                     <Collapsible.Content 
@@ -240,7 +240,7 @@ const SettingsMenu: React.FC<SettingsMenuProps> = ({ children }) => {
                           <Mail className="h-4 w-4 text-muted-foreground" />
                           <span className="text-sm font-medium">Email Template</span>
                         </div>
-                        <ChevronDown className={`h-4 w-4 text-muted-foreground transition-transform duration-20 ${emailOpen ? 'rotate-180' : ''}`} />
+                        <ChevronDown className={`h-4 w-4 text-muted-foreground transition-transform duration-75 ${emailOpen ? 'rotate-180' : ''}`} />
                       </button>
                     </Collapsible.Trigger>
                     <Collapsible.Content 
@@ -283,7 +283,7 @@ const SettingsMenu: React.FC<SettingsMenuProps> = ({ children }) => {
                       <Sun className="h-4 w-4 text-muted-foreground" />
                       <span className="text-sm font-medium">Mode</span>
                     </div>
-                    <ChevronDown className={`h-4 w-4 text-muted-foreground transition-transform duration-20 ${modeOpen ? 'rotate-180' : ''}`} />
+                    <ChevronDown className={`h-4 w-4 text-muted-foreground transition-transform duration-75 ${modeOpen ? 'rotate-180' : ''}`} />
                   </button>
                 </Collapsible.Trigger>
                 <Collapsible.Content 
@@ -327,7 +327,7 @@ const SettingsMenu: React.FC<SettingsMenuProps> = ({ children }) => {
                       <Target className="h-4 w-4 text-muted-foreground" />
                       <span className="text-sm font-medium">Daily Goals</span>
                     </div>
-                    <ChevronDown className={`h-4 w-4 text-muted-foreground transition-transform duration-20 ${dailyGoalsOpen ? 'rotate-180' : ''}`} />
+                    <ChevronDown className={`h-4 w-4 text-muted-foreground transition-transform duration-75 ${dailyGoalsOpen ? 'rotate-180' : ''}`} />
                   </button>
                 </Collapsible.Trigger>
                 <Collapsible.Content 
@@ -360,7 +360,7 @@ const SettingsMenu: React.FC<SettingsMenuProps> = ({ children }) => {
                       <HelpCircle className="h-4 w-4 text-muted-foreground" />
                       <span className="text-sm font-medium">Help</span>
                     </div>
-                    <ChevronDown className={`h-4 w-4 text-muted-foreground transition-transform duration-20 ${helpOpen ? 'rotate-180' : ''}`} />
+                    <ChevronDown className={`h-4 w-4 text-muted-foreground transition-transform duration-75 ${helpOpen ? 'rotate-180' : ''}`} />
                   </button>
                 </Collapsible.Trigger>
                 <Collapsible.Content 
@@ -378,7 +378,7 @@ const SettingsMenu: React.FC<SettingsMenuProps> = ({ children }) => {
                           <Upload className="h-4 w-4 text-muted-foreground" />
                           <span className="text-sm font-medium">CSV Upload Guide</span>
                         </div>
-                        <ChevronDown className={`h-4 w-4 text-muted-foreground transition-transform duration-20 ${csvGuideOpen ? 'rotate-180' : ''}`} />
+                        <ChevronDown className={`h-4 w-4 text-muted-foreground transition-transform duration-75 ${csvGuideOpen ? 'rotate-180' : ''}`} />
                       </button>
                     </Collapsible.Trigger>
                     <Collapsible.Content 

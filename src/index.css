@@ -230,6 +230,37 @@ body {
   animation: slide-up 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
+/* Template animations for settings menu - faster and smoother */
+@keyframes template-down {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes template-up {
+  from {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+}
+
+.animate-template-down {
+  animation: template-down 0.03s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.animate-template-up {
+  animation: template-up 0.03s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
 /* Safe area support */
 .pt-safe {
   padding-top: env(safe-area-inset-top);

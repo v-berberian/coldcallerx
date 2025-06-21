@@ -112,6 +112,7 @@ const CallingScreenContainer: React.FC<CallingScreenContainerProps> = memo(({
     clearSearch,
     handleSearchFocus,
     handleSearchBlur,
+    closeAutocomplete,
     getDelayDisplayType
   } = useLocalCallingScreenState({ leads, onCallMade: dailyGoalEnabled ? incrementDailyCallCount : undefined });
 
@@ -237,6 +238,7 @@ const CallingScreenContainer: React.FC<CallingScreenContainerProps> = memo(({
         loadMoreResults={loadMoreResults}
         loadedResultsCount={loadedResultsCount}
         totalResultsCount={allSearchResults?.length || 0}
+        onCloseAutocomplete={closeAutocomplete}
       />
 
       {/* Main Content - takes remaining space */}

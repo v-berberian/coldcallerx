@@ -58,7 +58,8 @@ export const useLocalCallingScreenState = ({ leads, onCallMade }: UseLocalCallin
     setShowAutocomplete,
     clearSearch,
     handleSearchFocus,
-    handleSearchBlur
+    handleSearchBlur,
+    closeAutocomplete
   } = useSearchState({ 
     leads, 
     getBaseLeads, 
@@ -148,6 +149,7 @@ export const useLocalCallingScreenState = ({ leads, onCallMade }: UseLocalCallin
     clearSearch,
     handleSearchFocus,
     handleSearchBlur,
+    closeAutocomplete,
     getDelayDisplayType
   };
 };

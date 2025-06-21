@@ -33,6 +33,7 @@ export const useCallingScreenActions = ({
 }: CallingScreenActionsProps) => {
   
   const handleLeadSelect = (lead: Lead) => {
+    console.log('CallingScreenActions: handleLeadSelect called for:', lead.name);
     const baseLeads = getBaseLeads();
     const leadIndexInBaseLeads = baseLeads.findIndex(l => 
       l.name === lead.name && l.phone === lead.phone
@@ -44,6 +45,7 @@ export const useCallingScreenActions = ({
     }
     
     setSearchQuery('');
+    console.log('CallingScreenActions: Calling setShowAutocomplete(false)');
     setShowAutocomplete(false);
   };
 

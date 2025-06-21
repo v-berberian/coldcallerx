@@ -6,8 +6,9 @@ import { Lead } from '../types/lead';
 
 interface SearchAutocompleteProps {
   isVisible: boolean;
+  isFullscreen?: boolean;
   onAnimationComplete?: () => void;
-  children?: React.ReactNode;
+  onCloseAutocomplete?: () => void;
   loadMoreResults?: () => void;
   loadedResultsCount?: number;
   totalResultsCount?: number;
@@ -22,20 +23,25 @@ interface SearchAutocompleteProps {
 
 const SearchAutocomplete: React.FC<SearchAutocompleteProps> = ({ 
   isVisible,
+  isFullscreen = false,
   onAnimationComplete,
-  children,
+  onCloseAutocomplete,
   loadMoreResults,
   loadedResultsCount = 0,
   totalResultsCount = 0,
-  itemHeight = 70,
+  itemHeight = 85,
   maxHeight = 400,
   maxItems = 50, // Only used as fallback when not using virtualized list
   searchResults = [],
   onLeadSelect,
   leadsData = []
 }) => {
+  console.log('SearchAutocomplete: MOUNTED', { isVisible, isFullscreen, searchResultsLength: searchResults.length });
   const [isAnimating, setIsAnimating] = useState(false);
   const [shouldRender, setShouldRender] = useState(false);
+
+  // Check if we're on a mobile device
+  const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
 
   // Check if item is loaded
   const isItemLoaded = useCallback((index: number) => {
@@ -47,17 +53,29 @@ const SearchAutocomplete: React.FC<SearchAutocompleteProps> = ({
     const lead = searchResults[index];
     if (!lead) return null;
 
+    const handleLeadClick = () => {
+      console.log('SearchAutocomplete: Lead clicked in virtualized list:', lead.name);
+      onLeadSelect?.(lead);
+      // Explicitly close the autocomplete when a lead is selected
+      if (onCloseAutocomplete) {
+        console.log('SearchAutocomplete: Calling onCloseAutocomplete from virtualized list');
+        onCloseAutocomplete();
+      } else {
+        console.log('SearchAutocomplete: onCloseAutocomplete is not available in virtualized list');
+      }
+    };
+
     return (
       <div style={style} key={`${lead.name}-${lead.phone}-${index}`}>
         <button
-          onClick={() => onLeadSelect?.(lead)}
-          className="w-full px-4 py-3 text-left border-b border-border/10 last:border-b-0 transition-colors duration-75 cursor-default hover:bg-muted/50"
+          onClick={handleLeadClick}
+          className="w-full px-4 py-4 text-left border-b border-border/10 last:border-b-0 transition-colors duration-75 cursor-default hover:bg-muted/50"
         >
           <div className="flex justify-between items-start">
             <div className="flex-1 min-w-0 mr-3">
-              <p className="font-medium text-foreground truncate">{lead.name}</p>
+              <p className="font-medium text-foreground truncate mb-1">{lead.name}</p>
               {lead.company && (
-                <p className="text-xs text-muted-foreground truncate">{lead.company}</p>
+                <p className="text-xs text-muted-foreground truncate mb-1">{lead.company}</p>
               )}
               <p className="text-sm text-muted-foreground break-all">{lead.phone}</p>
             </div>
@@ -68,7 +86,7 @@ const SearchAutocomplete: React.FC<SearchAutocompleteProps> = ({
         </button>
       </div>
     );
-  }, [searchResults, onLeadSelect, leadsData]);
+  }, [searchResults, onLeadSelect, onCloseAutocomplete, leadsData]);
 
   // Handle loading more items
   const handleLoadMoreItems = useCallback((startIndex: number, stopIndex: number) => {
@@ -156,6 +174,103 @@ const SearchAutocomplete: React.FC<SearchAutocompleteProps> = ({
     };
   }, [shouldRender]);
 
+  // Separate useEffect for click outside detection
+  useEffect(() => {
+    if (shouldRender && (onAnimationComplete || onCloseAutocomplete)) {
+      const handleDocumentClick = (event: MouseEvent) => {
+        const target = event.target as Element;
+        
+        // Check if the click target is part of the search area
+        const searchArea = target.closest('.search-area');
+        const autocompleteArea = target.closest('.search-autocomplete-container');
+        
+        // If clicking outside both search area and autocomplete, close it
+        if (!searchArea && !autocompleteArea) {
+          if (onCloseAutocomplete) {
+            onCloseAutocomplete();
+          } else if (onAnimationComplete) {
+            onAnimationComplete();
+          }
+        }
+      };
+
+      const handleDocumentTouch = (event: TouchEvent) => {
+        const target = event.target as Element;
+        
+        // Check if the touch target is part of the search area
+        const searchArea = target.closest('.search-area');
+        const autocompleteArea = target.closest('.search-autocomplete-container');
+        
+        // If touching outside both search area and autocomplete, close it
+        if (!searchArea && !autocompleteArea) {
+          // On mobile, prevent default to avoid any mobile browser quirks
+          if (isMobile) {
+            event.preventDefault();
+            // Force close keyboard on mobile
+            const input = document.querySelector('input[type="text"]') as HTMLInputElement;
+            if (input) {
+              input.blur();
+              document.body.focus();
+            }
+          }
+          if (onCloseAutocomplete) {
+            onCloseAutocomplete();
+          } else if (onAnimationComplete) {
+            onAnimationComplete();
+          }
+        }
+      };
+
+      const handleDocumentTouchEnd = (event: TouchEvent) => {
+        const target = event.target as Element;
+        
+        // Check if the touch target is part of the search area
+        const searchArea = target.closest('.search-area');
+        const autocompleteArea = target.closest('.search-autocomplete-container');
+        
+        // If touching outside both search area and autocomplete, close it
+        if (!searchArea && !autocompleteArea) {
+          // On mobile, force close keyboard
+          if (isMobile) {
+            const input = document.querySelector('input[type="text"]') as HTMLInputElement;
+            if (input) {
+              input.blur();
+              document.body.focus();
+            }
+          }
+          if (onCloseAutocomplete) {
+            onCloseAutocomplete();
+          } else if (onAnimationComplete) {
+            onAnimationComplete();
+          }
+        }
+      };
+
+      const handleKeyDown = (event: KeyboardEvent) => {
+        if (event.key === 'Escape' || event.key === 'Enter') {
+          if (onCloseAutocomplete) {
+            onCloseAutocomplete();
+          } else if (onAnimationComplete) {
+            onAnimationComplete();
+          }
+        }
+      };
+
+      // Add event listeners for both click and touch
+      document.body.addEventListener('click', handleDocumentClick);
+      document.body.addEventListener('touchstart', handleDocumentTouch, { passive: false });
+      document.body.addEventListener('touchend', handleDocumentTouchEnd, { passive: true });
+      document.addEventListener('keydown', handleKeyDown);
+
+      return () => {
+        document.body.removeEventListener('click', handleDocumentClick);
+        document.body.removeEventListener('touchstart', handleDocumentTouch);
+        document.body.removeEventListener('touchend', handleDocumentTouchEnd);
+        document.removeEventListener('keydown', handleKeyDown);
+      };
+    }
+  }, [shouldRender, onAnimationComplete, onCloseAutocomplete]);
+
   if (!shouldRender) {
     return null;
   }
@@ -164,40 +279,162 @@ const SearchAutocomplete: React.FC<SearchAutocompleteProps> = ({
 
   // If we have loadMoreResults function and searchResults, use infinite loader
   if (loadMoreResults && searchResults.length > 0) {
-    // Fixed height to show exactly 3 contacts
-    const contactsToShow = 3;
-    const listHeight = contactsToShow * itemHeight; // 3 * 70 = 210px
+    // Calculate height based on fullscreen state and number of results
+    let listHeight: number;
+    let containerStyle: React.CSSProperties = {};
+    
+    if (isFullscreen) {
+      console.log('SearchAutocomplete: Rendering virtualized list in FULLSCREEN mode');
+      // Fullscreen mode - same width as normal mode, only extend downward
+      const fullscreenHeight = window.innerHeight - 160; // Full height minus header and search bar space
+      containerStyle = {
+        position: 'absolute' as const, // Same positioning as normal mode
+        top: '100%', // Same as normal mode - below search bar
+        left: '0',
+        right: '0',
+        height: `${fullscreenHeight}px`, // Only change the height
+        zIndex: 50,
+        transition: 'height 0.3s ease-in-out', // Smooth height transition
+      };
 
-    return (
-      <div className={`absolute top-full left-0 right-0 z-50 mt-1 mb-1 rounded-xl shadow-lg overflow-hidden ${animationClass} bg-background/15 backdrop-blur-sm border border-border/15`} style={{ height: `${listHeight}px` }}>
-        <InfiniteLoader
-          isItemLoaded={isItemLoaded}
-          itemCount={totalResultsCount}
-          loadMoreItems={handleLoadMoreItems}
-          threshold={5} // Load more when 5 items away from the end
+      return (
+        <div 
+          className={`z-50 mt-1 mb-1 rounded-xl shadow-lg overflow-hidden ${animationClass} bg-background/15 backdrop-blur-sm border border-border/15 search-autocomplete-container`} 
+          style={{ ...containerStyle, overflow: 'hidden' }}
+          onTouchStart={(e) => e.stopPropagation()}
+          onTouchEnd={(e) => e.stopPropagation()}
         >
-          {({ onItemsRendered, ref }) => (
-            <List
-              ref={ref}
-              height={listHeight}
-              itemCount={searchResults.length}
-              itemSize={itemHeight}
-              width="100%"
-              onItemsRendered={onItemsRendered}
-              overscanCount={10}
-            >
-              {renderLeadItem}
-            </List>
-          )}
-        </InfiniteLoader>
-      </div>
-    );
+          <InfiniteLoader
+            isItemLoaded={isItemLoaded}
+            itemCount={totalResultsCount}
+            loadMoreItems={handleLoadMoreItems}
+            threshold={5} // Load more when 5 items away from the end
+          >
+            {({ onItemsRendered, ref }) => (
+              <List
+                ref={ref}
+                height={fullscreenHeight}
+                itemCount={searchResults.length}
+                itemSize={itemHeight}
+                width="100%"
+                onItemsRendered={onItemsRendered}
+                overscanCount={10}
+              >
+                {renderLeadItem}
+              </List>
+            )}
+          </InfiniteLoader>
+        </div>
+      );
+    } else {
+      console.log('SearchAutocomplete: Rendering virtualized list in COLLAPSED mode');
+      // Normal mode - dynamic height based on number of results
+      const maxCollapsedHeight = 260; // Exactly accommodate 3 full cards (3 * 85 + 4 = 259px, rounded to 260)
+      const minCollapsedHeight = itemHeight; // Minimum height for one item
+      const heightBuffer = 4; // Small buffer to ensure last item is fully visible
+      const dynamicHeight = Math.min(Math.max(searchResults.length * itemHeight + heightBuffer, minCollapsedHeight), maxCollapsedHeight);
+      
+      containerStyle = {
+        position: 'absolute' as const, // Same positioning as normal mode
+        top: '100%', // Same as normal mode - below search bar
+        left: '0',
+        right: '0',
+        height: `${dynamicHeight}px`, // Dynamic height based on results
+        zIndex: 50,
+        transition: 'height 0.3s ease-in-out', // Smooth height transition
+        marginBottom: '0.25rem', // Account for mb-1 class
+      };
+
+      return (
+        <div 
+          className={`z-50 mt-1 rounded-xl shadow-lg overflow-hidden ${animationClass} bg-background/15 backdrop-blur-sm border border-border/15 search-autocomplete-container`} 
+          style={{ ...containerStyle, overflow: 'hidden' }}
+          onTouchStart={(e) => e.stopPropagation()}
+          onTouchEnd={(e) => e.stopPropagation()}
+        >
+          <InfiniteLoader
+            isItemLoaded={isItemLoaded}
+            itemCount={totalResultsCount}
+            loadMoreItems={handleLoadMoreItems}
+            threshold={5} // Load more when 5 items away from the end
+          >
+            {({ onItemsRendered, ref }) => (
+              <List
+                ref={ref}
+                height={dynamicHeight}
+                itemCount={searchResults.length}
+                itemSize={itemHeight}
+                width="100%"
+                onItemsRendered={onItemsRendered}
+                overscanCount={10}
+              >
+                {renderLeadItem}
+              </List>
+            )}
+          </InfiniteLoader>
+        </div>
+      );
+    }
   }
 
   // Fallback to original rendering for non-virtualized content
+  console.log('SearchAutocomplete: Rendering FALLBACK (non-virtualized) list');
+  const contactsToShow = Math.min(3, searchResults.length);
+  const heightBuffer = 4; // Small buffer to ensure last item is fully visible
+  const fallbackHeight = Math.max(searchResults.length * itemHeight + heightBuffer, itemHeight); // Dynamic height based on actual results
+  
   return (
-    <div className={`absolute top-full left-0 right-0 z-50 mt-1 mb-1 rounded-3xl shadow-lg overflow-hidden ${animationClass} bg-background/15 backdrop-blur-sm border border-white/10`} style={{ height: '210px' }}>
-      {children}
+    <div 
+      className={`absolute top-full left-0 right-0 z-50 mt-1 rounded-3xl shadow-lg overflow-hidden ${animationClass} bg-background/15 backdrop-blur-sm border border-white/10 search-autocomplete-container`}
+      style={{ 
+        height: `${fallbackHeight}px`,
+        transition: 'height 0.3s ease-in-out',
+        marginBottom: '0.25rem', // Account for the removed mb-1 class
+      }}
+      onTouchStart={(e) => e.stopPropagation()}
+      onTouchEnd={(e) => e.stopPropagation()}
+    >
+      {searchResults.length === 0 ? (
+        <div className="p-4 text-center text-muted-foreground">
+          No leads found
+        </div>
+      ) : (
+        searchResults.map((lead, index) => {
+          const handleLeadClick = () => {
+            console.log('SearchAutocomplete: Lead clicked in fallback list:', lead.name);
+            onLeadSelect?.(lead);
+            // Explicitly close the autocomplete when a lead is selected
+            if (onCloseAutocomplete) {
+              console.log('SearchAutocomplete: Calling onCloseAutocomplete from fallback list');
+              onCloseAutocomplete();
+            } else {
+              console.log('SearchAutocomplete: onCloseAutocomplete is not available in fallback list');
+            }
+          };
+
+          return (
+            <button
+              key={`${lead.name}-${lead.phone}-${index}`}
+              onClick={handleLeadClick}
+              className="w-full px-4 py-4 text-left border-b border-border/10 last:border-b-0 transition-colors duration-75 cursor-default hover:bg-muted/50"
+              style={{ height: `${itemHeight}px` }} // Ensure consistent height
+            >
+              <div className="flex justify-between items-start">
+                <div className="flex-1 min-w-0 mr-3">
+                  <p className="font-medium text-foreground truncate mb-1">{lead.name}</p>
+                  {lead.company && (
+                    <p className="text-xs text-muted-foreground truncate mb-1">{lead.company}</p>
+                  )}
+                  <p className="text-sm text-muted-foreground break-all">{lead.phone}</p>
+                </div>
+                <div className="flex-shrink-0 text-xs text-muted-foreground">
+                  {leadsData.findIndex(l => l.name === lead.name && l.phone === lead.phone) + 1}/{leadsData.length}
+                </div>
+              </div>
+            </button>
+          );
+        })
+      )}
     </div>
   );
 };

@@ -101,7 +101,8 @@ export const useSearchState = ({ leads, getBaseLeads, leadsData, timezoneFilter,
 
   const clearSearch = useCallback(() => {
     setSearchQuery('');
-    setShowAutocomplete(false);
+    // Don't close autocomplete - just clear the search query
+    // setShowAutocomplete(false); // Removed this line
     setLoadedResultsCount(INITIAL_RESULTS);
   }, []);
 
@@ -110,7 +111,34 @@ export const useSearchState = ({ leads, getBaseLeads, leadsData, timezoneFilter,
   }, []);
 
   const handleSearchBlur = useCallback(() => {
-    setTimeout(() => setShowAutocomplete(false), 20);
+    // Don't close autocomplete if there are results, even with no search query
+    // This allows the autocomplete to stay open when transitioning from fullscreen
+    if (searchResults.length === 0) {
+      setTimeout(() => setShowAutocomplete(false), 20);
+    }
+    // Don't reset search results when blurring - keep current results
+  }, [searchResults.length]);
+
+  const closeAutocomplete = useCallback(() => {
+    setShowAutocomplete(false);
+    
+    // On mobile, also blur the input to close the keyboard
+    if (/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
+      // Try multiple methods to ensure the keyboard closes
+      const input = document.querySelector('input[type="text"]') as HTMLInputElement;
+      if (input) {
+        input.blur();
+        // Force blur by focusing on body
+        document.body.focus();
+        // Additional mobile-specific keyboard closing
+        setTimeout(() => {
+          const activeElement = document.activeElement as HTMLElement;
+          if (activeElement && activeElement.tagName === 'INPUT') {
+            activeElement.blur();
+          }
+        }, 10);
+      }
+    }
   }, []);
 
   return {
@@ -125,6 +153,7 @@ export const useSearchState = ({ leads, getBaseLeads, leadsData, timezoneFilter,
     setShowAutocomplete,
     clearSearch,
     handleSearchFocus,
-    handleSearchBlur
+    handleSearchBlur,
+    closeAutocomplete
   };
 };
