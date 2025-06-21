@@ -397,4 +397,26 @@ body.overflow-hidden {
   overflow: hidden !important;
 }
 
+/* iOS Safari elastic scrolling prevention */
+html, body {
+  overscroll-behavior: none;
+  -webkit-overflow-scrolling: touch;
+  position: fixed;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+#root {
+  height: 100vh;
+  overflow-y: auto;
+  overscroll-behavior: none;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Prevent elastic scrolling on specific containers */
+.overflow-y-auto {
+  -webkit-overflow-scrolling: touch;
+}
+
 

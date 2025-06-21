@@ -172,12 +172,12 @@ const SettingsMenu: React.FC<SettingsMenuProps> = ({ children }) => {
       </PopoverTrigger>
       {shouldRender && (
         <PopoverContent 
-          className={`w-screen p-0 border-border/20 shadow-lg max-h-[80vh] overflow-y-auto ${isAnimating ? 'animate-slide-down' : 'animate-slide-up'}`}
+          className={`w-screen p-0 border-border/20 shadow-lg max-h-[95vh] overflow-y-auto ${isAnimating ? 'animate-slide-down' : 'animate-slide-up'}`}
           sideOffset={5}
           align="center"
           data-settings-menu="true"
         >
-          <div className="p-4 space-y-4">
+          <div className="p-4 space-y-4 pb-8">
             <div className="space-y-4">
               {/* Templates Section */}
               <Collapsible.Root 
