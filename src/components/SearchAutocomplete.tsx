@@ -17,6 +17,7 @@ interface SearchAutocompleteProps {
   maxItems?: number;
   // New props for direct search results
   searchResults?: Lead[];
+  allSearchResults?: Lead[]; // Add this prop for fullscreen mode
   onLeadSelect?: (lead: Lead) => void;
   leadsData?: Lead[];
 }
@@ -33,6 +34,7 @@ const SearchAutocomplete: React.FC<SearchAutocompleteProps> = ({
   maxHeight = 400,
   maxItems = 50, // Only used as fallback when not using virtualized list
   searchResults = [],
+  allSearchResults = [], // Add this prop for fullscreen mode
   onLeadSelect,
   leadsData = []
 }) => {
@@ -50,8 +52,29 @@ const SearchAutocomplete: React.FC<SearchAutocompleteProps> = ({
 
   // Render individual lead item for virtualized list
   const renderLeadItem = useCallback(({ index, style }: { index: number; style: React.CSSProperties }) => {
-    const lead = searchResults[index];
-    if (!lead) return null;
+    // Use allSearchResults in fullscreen mode, searchResults in normal mode
+    const dataSource = isFullscreen ? allSearchResults : searchResults;
+    const lead = dataSource[index];
+    
+    // If the item hasn't been loaded yet, show a loading placeholder
+    if (!lead) {
+      return (
+        <div style={style} key={`loading-${index}`}>
+          <div className="w-full px-4 py-4 text-left border-b border-border/10 last:border-b-0">
+            <div className="flex justify-between items-start">
+              <div className="flex-1 min-w-0 mr-3">
+                <div className="h-4 bg-muted/30 rounded animate-pulse mb-1"></div>
+                <div className="h-3 bg-muted/20 rounded animate-pulse mb-1"></div>
+                <div className="h-3 bg-muted/20 rounded animate-pulse"></div>
+              </div>
+              <div className="flex-shrink-0 text-xs text-muted-foreground">
+                {index + 1}/{totalResultsCount}
+              </div>
+            </div>
+          </div>
+        </div>
+      );
+    }
 
     const handleLeadClick = () => {
       console.log('SearchAutocomplete: Lead clicked in virtualized list:', lead.name);
@@ -86,7 +109,7 @@ const SearchAutocomplete: React.FC<SearchAutocompleteProps> = ({
         </button>
       </div>
     );
-  }, [searchResults, onLeadSelect, onCloseAutocomplete, leadsData]);
+  }, [isFullscreen, allSearchResults, searchResults, onLeadSelect, onCloseAutocomplete, leadsData, totalResultsCount]);
 
   // Handle loading more items
   const handleLoadMoreItems = useCallback((startIndex: number, stopIndex: number) => {
@@ -285,14 +308,16 @@ const SearchAutocomplete: React.FC<SearchAutocompleteProps> = ({
     
     if (isFullscreen) {
       console.log('SearchAutocomplete: Rendering virtualized list in FULLSCREEN mode');
-      // Fullscreen mode - same width as normal mode, only extend downward
-      const fullscreenHeight = window.innerHeight - 160; // Full height minus header and search bar space
+      // Fullscreen mode - use fixed positioning to cover the entire screen
+      const fullscreenHeight = window.innerHeight - 80; // Account for top spacing
+      
       containerStyle = {
-        position: 'absolute' as const, // Same positioning as normal mode
-        top: '100%', // Same as normal mode - below search bar
+        position: 'fixed' as const, // Use fixed positioning for true fullscreen
+        top: '80px', // Position below the header
         left: '0',
         right: '0',
-        height: `${fullscreenHeight}px`, // Only change the height
+        bottom: '0', // Extend to bottom of screen
+        height: `${fullscreenHeight}px`,
         zIndex: 50,
         transition: 'height 0.3s ease-in-out', // Smooth height transition
       };
@@ -314,7 +339,7 @@ const SearchAutocomplete: React.FC<SearchAutocompleteProps> = ({
               <List
                 ref={ref}
                 height={fullscreenHeight}
-                itemCount={searchResults.length}
+                itemCount={totalResultsCount} // Use totalResultsCount instead of searchResults.length
                 itemSize={itemHeight}
                 width="100%"
                 onItemsRendered={onItemsRendered}

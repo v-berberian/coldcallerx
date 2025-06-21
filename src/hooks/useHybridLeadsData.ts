@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Lead } from '../types/lead';
 import { getPhoneDigits } from '../utils/phoneUtils';
@@ -22,7 +21,7 @@ export const useHybridLeadsData = (initialLeads: Lead[]) => {
     })));
   }, [initialLeads]);
 
-  const makeCall = (lead: Lead, markAsCalled: boolean = true) => {
+  const makeCall = (lead: Lead, markAsCalled: boolean = true, onCallMade?: () => void, onTransitionDetected?: () => void) => {
     const phoneNumber = getPhoneDigits(lead.phone);
     window.location.href = `tel:${phoneNumber}`;
     

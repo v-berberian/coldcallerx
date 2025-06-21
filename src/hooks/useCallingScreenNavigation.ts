@@ -1,4 +1,3 @@
-
 import { Lead, CallFilter } from '../types/lead';
 import { useNavigationState } from './useNavigationState';
 import { useLeadNavigationState } from './useLeadNavigationState';
@@ -7,12 +6,27 @@ import { useAutoCall } from './useAutoCall';
 
 interface UseCallingScreenNavigationProps {
   leadsData: Lead[];
-  makeCall: (lead: Lead, markAsCalled?: boolean) => void;
-  markLeadAsCalledOnNavigation: (lead: Lead) => void;
-  callDelay: number;
+  currentIndex: number;
+  updateNavigation: (index: number) => void;
+  resetNavigation: (index: number) => void;
   shuffleMode: boolean;
   callFilter: CallFilter;
   isFilterChanging: boolean;
+  isAutoCallInProgress: boolean;
+  shouldBlockNavigation: boolean;
+  makeCall: (lead: Lead, markAsCalled?: boolean, onCallMade?: () => void, onTransitionDetected?: () => void) => void;
+  markLeadAsCalledOnNavigation: (lead: Lead) => void;
+  shownLeadsInShuffle: Set<string>;
+  setShownLeadsInShuffle: (shown: Set<string>) => void;
+  handleNext: (baseLeads: Lead[]) => void;
+  handlePrevious: () => void;
+  selectLead: (lead: Lead, baseLeads: Lead[], allLeads: Lead[]) => void;
+  setCallMadeToCurrentLead: (called: boolean) => void;
+  autoCall: boolean;
+  setShouldAutoCall: (should: boolean) => void;
+  goToPrevious: () => boolean;
+  callMadeToCurrentLead: boolean;
+  callDelay: number;
 }
 
 export const useCallingScreenNavigation = ({

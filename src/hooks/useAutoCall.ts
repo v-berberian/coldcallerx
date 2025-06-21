@@ -1,9 +1,13 @@
-
 import { useState, useEffect, useRef } from 'react';
 import { Lead } from '../types/lead';
 
+interface UseAutoCallProps {
+  makeCall: (lead: Lead, markAsCalled?: boolean, onCallMade?: () => void, onTransitionDetected?: () => void) => void;
+  callDelay: number;
+}
+
 export const useAutoCall = (
-  makeCall: (lead: Lead, markAsCalled?: boolean) => void,
+  makeCall: (lead: Lead, markAsCalled?: boolean, onCallMade?: () => void, onTransitionDetected?: () => void) => void,
   callDelay: number = 15
 ) => {
   const [isAutoCallInProgress, setIsAutoCallInProgress] = useState(false);

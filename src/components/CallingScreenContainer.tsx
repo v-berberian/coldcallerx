@@ -227,6 +227,7 @@ const CallingScreenContainer: React.FC<CallingScreenContainerProps> = memo(({
         searchQuery={searchQuery}
         showAutocomplete={showAutocomplete}
         searchResults={searchResults}
+        allSearchResults={allSearchResults}
         leadsData={leadsData}
         fileName={fileName}
         onSearchChange={setSearchQuery}

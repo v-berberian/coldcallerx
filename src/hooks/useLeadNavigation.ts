@@ -69,8 +69,8 @@ export const useLeadNavigation = ({ initialLeads, onCallMade }: UseLeadNavigatio
   } = useLeadsData(initialLeads);
 
   // Wrap makeCall to include daily call tracking
-  const makeCall = (lead: Lead, markAsCalled: boolean = true) => {
-    originalMakeCall(lead, markAsCalled, onCallMade);
+  const makeCall = (lead: Lead, markAsCalled: boolean = true, onCallMade?: () => void, onTransitionDetected?: () => void) => {
+    originalMakeCall(lead, markAsCalled, onCallMade, onTransitionDetected);
   };
 
   const { getBaseLeads } = useLeadFiltering(leadsData, timezoneFilter, callFilter);

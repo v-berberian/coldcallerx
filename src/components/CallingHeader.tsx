@@ -11,6 +11,7 @@ interface CallingHeaderProps {
   searchQuery: string;
   showAutocomplete: boolean;
   searchResults: Lead[];
+  allSearchResults?: Lead[];
   leadsData: Lead[];
   fileName: string;
   onSearchChange: (query: string) => void;
@@ -29,6 +30,7 @@ const CallingHeader: React.FC<CallingHeaderProps> = ({
   searchQuery,
   showAutocomplete,
   searchResults,
+  allSearchResults,
   leadsData,
   fileName,
   onSearchChange,
@@ -117,6 +119,7 @@ const CallingHeader: React.FC<CallingHeaderProps> = ({
               loadedResultsCount={loadedResultsCount}
               totalResultsCount={totalResultsCount}
               searchResults={searchResults}
+              allSearchResults={allSearchResults}
               onLeadSelect={onLeadSelect}
               leadsData={leadsData}
               onAnimationComplete={() => {
