@@ -10,9 +10,9 @@ interface CallingScreenActionsProps {
   leadsData: Lead[];
   setSearchQuery: (query: string) => void;
   setShowAutocomplete: (show: boolean) => void;
-  updateLeadCallCount: (currentLeadsData: Lead[], lead: Lead) => Lead[];
-  resetCallCount: (currentLeadsData: Lead[], lead: Lead) => Lead[];
-  resetAllCallCounts: (currentLeadsData: Lead[]) => Lead[];
+  updateLeadCallCount: (currentLeadsData: Lead[], lead: Lead) => Promise<Lead[]>;
+  resetCallCount: (currentLeadsData: Lead[], lead: Lead) => Promise<Lead[]>;
+  resetAllCallCounts: (currentLeadsData: Lead[]) => Promise<Lead[]>;
   onLeadsDataUpdate: (updatedLeads: Lead[]) => void;
 }
 
@@ -93,7 +93,7 @@ export const useCallingScreenActions = ({
   const handleResetCallCount = async (lead: Lead) => {
     try {
       console.log('CallingScreenActions: Reset call count for:', lead.name);
-      const updatedLeads = resetCallCount(leadsData, lead);
+      const updatedLeads = await resetCallCount(leadsData, lead);
       onLeadsDataUpdate(updatedLeads);
     } catch (error) {
       console.error('CallingScreenActions: Error in handleResetCallCount:', error);
@@ -104,7 +104,7 @@ export const useCallingScreenActions = ({
   const handleResetAllCallCounts = async () => {
     try {
       console.log('CallingScreenActions: Reset all call counts');
-      const updatedLeads = resetAllCallCounts(leadsData);
+      const updatedLeads = await resetAllCallCounts(leadsData);
       onLeadsDataUpdate(updatedLeads);
     } catch (error) {
       console.error('CallingScreenActions: Error in handleResetAllCallCounts:', error);

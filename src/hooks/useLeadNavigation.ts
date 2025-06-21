@@ -1,5 +1,4 @@
 import { Lead } from '../types/lead';
-import { useNavigationState } from './useNavigationState';
 import { useFilters } from './useFilters';
 import { useLeadsData } from './useLeadsData';
 import { useLeadFiltering } from './useLeadFiltering';
@@ -16,9 +15,29 @@ import { useLeadNavigationReset } from './useLeadNavigationReset';
 interface UseLeadNavigationProps {
   initialLeads: Lead[];
   onCallMade?: () => void;
+  // Navigation state from parent
+  currentIndex: number;
+  historyIndex: number;
+  updateNavigation: (index: number) => void;
+  goToPrevious: () => boolean;
+  resetNavigation: (index: number) => void;
+  setCurrentIndex: (index: number) => void;
+  restoreFromLocalStorage: (totalLeads: number) => Promise<void>;
+  syncFromCloudSession: (index: number) => void;
 }
 
-export const useLeadNavigation = ({ initialLeads, onCallMade }: UseLeadNavigationProps) => {
+export const useLeadNavigation = ({ 
+  initialLeads, 
+  onCallMade,
+  currentIndex,
+  historyIndex,
+  updateNavigation,
+  goToPrevious,
+  resetNavigation,
+  setCurrentIndex,
+  restoreFromLocalStorage,
+  syncFromCloudSession
+}: UseLeadNavigationProps) => {
   const {
     shouldAutoCall,
     setShouldAutoCall,
@@ -31,17 +50,6 @@ export const useLeadNavigation = ({ initialLeads, onCallMade }: UseLeadNavigatio
     resetShownLeads,
     resetCallState
   } = useLeadNavigationState();
-
-  const {
-    currentIndex,
-    historyIndex,
-    updateNavigation,
-    goToPrevious,
-    resetNavigation,
-    setCurrentIndex,
-    restoreFromLocalStorage,
-    syncFromCloudSession
-  } = useNavigationState();
 
   const {
     timezoneFilter,

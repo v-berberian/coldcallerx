@@ -1,4 +1,3 @@
-
 import { Lead, CallFilter } from '../types/lead';
 import { useLeadSelection } from './useLeadSelection';
 
@@ -18,6 +17,13 @@ export const useNavigation = (
   const { getNextLeadInSequential, getNextLeadInShuffle } = useLeadSelection();
 
   const handleNext = (baseLeads: Lead[]) => {
+    console.log('useNavigation: handleNext called', { 
+      isFilterChanging, 
+      shouldBlockNavigation, 
+      baseLeadsLength: baseLeads.length,
+      currentIndex 
+    });
+    
     // Block navigation during filter changes or when countdown is 1 second or less
     if (isFilterChanging) {
       console.log('Skipping navigation because filters are changing');

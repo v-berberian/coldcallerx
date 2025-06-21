@@ -190,7 +190,18 @@ const CallingScreenContainer: React.FC<CallingScreenContainerProps> = memo(({
   }
 
   const currentLeads = getBaseLeads();
-  const currentLead = currentLeads[currentIndex];
+  // Clamp currentIndex to valid range for filtered leads
+  const safeCurrentIndex = Math.max(0, Math.min(currentIndex, currentLeads.length - 1));
+  const currentLead = currentLeads[safeCurrentIndex];
+  
+  console.log('CallingScreenContainer: Navigation debug', {
+    currentIndex,
+    safeCurrentIndex,
+    totalLeads: leadsData.length,
+    filteredLeads: currentLeads.length,
+    currentLeadName: currentLead?.name,
+    currentLeadPhone: currentLead?.phone
+  });
   
   // Safety check: if currentLead is undefined, reset to first lead
   if (!currentLead && currentLeads.length > 0) {
@@ -246,7 +257,7 @@ const CallingScreenContainer: React.FC<CallingScreenContainerProps> = memo(({
       <div className="flex-1 overflow-hidden min-h-0">
         <MainContent
           currentLead={currentLead}
-          currentIndex={currentIndex}
+          currentIndex={safeCurrentIndex}
           totalCount={totalLeadCount}
           fileName={fileName}
           timezoneFilter={timezoneFilter}

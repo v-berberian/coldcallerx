@@ -1,4 +1,5 @@
 import { Lead } from '../types/lead';
+import { Preferences } from '@capacitor/preferences';
 
 // Storage keys
 const STORAGE_KEYS = {
@@ -26,8 +27,13 @@ export interface AppSettings {
 // Storage utility class
 export class AppStorage {
   private static instance: AppStorage;
+  private useCapacitorStorage: boolean = true;
   
-  private constructor() {}
+  private constructor() {
+    // Check if we're in a Capacitor environment
+    this.useCapacitorStorage = typeof window !== 'undefined' && 'Capacitor' in window;
+    console.log('AppStorage: Using', this.useCapacitorStorage ? 'Capacitor Preferences' : 'localStorage');
+  }
   
   static getInstance(): AppStorage {
     if (!AppStorage.instance) {
@@ -36,135 +42,178 @@ export class AppStorage {
     return AppStorage.instance;
   }
 
-  // Generic storage methods
-  private setItem(key: string, value: unknown): void {
+  // Generic storage methods with Capacitor fallback
+  private async setItem(key: string, value: unknown): Promise<void> {
     try {
-      localStorage.setItem(key, JSON.stringify(value));
+      const stringValue = JSON.stringify(value);
+      
+      if (this.useCapacitorStorage) {
+        await Preferences.set({ key, value: stringValue });
+        console.log('AppStorage: Saved to Capacitor Preferences:', key, value);
+      } else {
+        localStorage.setItem(key, stringValue);
+        console.log('AppStorage: Saved to localStorage:', key, value);
+      }
     } catch (error) {
-      console.error('Failed to save to localStorage:', error);
+      console.error('Failed to save to storage:', error);
+      // Fallback to localStorage if Capacitor fails
+      if (this.useCapacitorStorage) {
+        try {
+          localStorage.setItem(key, JSON.stringify(value));
+          console.log('AppStorage: Fallback to localStorage:', key);
+        } catch (fallbackError) {
+          console.error('Fallback localStorage also failed:', fallbackError);
+        }
+      }
     }
   }
 
-  private getItem<T>(key: string, defaultValue: T): T {
+  private async getItem<T>(key: string, defaultValue: T): Promise<T> {
     try {
-      const item = localStorage.getItem(key);
+      let item: string | null = null;
+      
+      if (this.useCapacitorStorage) {
+        const result = await Preferences.get({ key });
+        item = result.value;
+        console.log('AppStorage: Retrieved from Capacitor Preferences:', key, item);
+      } else {
+        item = localStorage.getItem(key);
+        console.log('AppStorage: Retrieved from localStorage:', key, item);
+      }
+      
       return item ? JSON.parse(item) : defaultValue;
     } catch (error) {
-      console.error('Failed to read from localStorage:', error);
+      console.error('Failed to read from storage:', error);
+      // Fallback to localStorage if Capacitor fails
+      if (this.useCapacitorStorage) {
+        try {
+          const fallbackItem = localStorage.getItem(key);
+          console.log('AppStorage: Fallback to localStorage:', key);
+          return fallbackItem ? JSON.parse(fallbackItem) : defaultValue;
+        } catch (fallbackError) {
+          console.error('Fallback localStorage also failed:', fallbackError);
+        }
+      }
       return defaultValue;
     }
   }
 
-  private removeItem(key: string): void {
+  private async removeItem(key: string): Promise<void> {
     try {
-      localStorage.removeItem(key);
+      if (this.useCapacitorStorage) {
+        await Preferences.remove({ key });
+        console.log('AppStorage: Removed from Capacitor Preferences:', key);
+      } else {
+        localStorage.removeItem(key);
+        console.log('AppStorage: Removed from localStorage:', key);
+      }
     } catch (error) {
-      console.error('Failed to remove from localStorage:', error);
+      console.error('Failed to remove from storage:', error);
     }
   }
 
   // Current lead index
-  saveCurrentLeadIndex(index: number): void {
-    this.setItem(STORAGE_KEYS.CURRENT_LEAD_INDEX, index);
+  async saveCurrentLeadIndex(index: number): Promise<void> {
+    await this.setItem(STORAGE_KEYS.CURRENT_LEAD_INDEX, index);
   }
 
-  getCurrentLeadIndex(): number {
-    return this.getItem(STORAGE_KEYS.CURRENT_LEAD_INDEX, 0);
+  async getCurrentLeadIndex(): Promise<number> {
+    return await this.getItem(STORAGE_KEYS.CURRENT_LEAD_INDEX, 0);
   }
 
   // Leads data with call status
-  saveLeadsData(leads: Lead[]): void {
-    this.setItem(STORAGE_KEYS.LEADS_DATA, leads);
+  async saveLeadsData(leads: Lead[]): Promise<void> {
+    await this.setItem(STORAGE_KEYS.LEADS_DATA, leads);
   }
 
-  getLeadsData(): Lead[] {
-    return this.getItem(STORAGE_KEYS.LEADS_DATA, []);
+  async getLeadsData(): Promise<Lead[]> {
+    return await this.getItem(STORAGE_KEYS.LEADS_DATA, []);
   }
 
   // Search state
-  saveSearchQuery(query: string): void {
-    this.setItem(STORAGE_KEYS.SEARCH_QUERY, query);
+  async saveSearchQuery(query: string): Promise<void> {
+    await this.setItem(STORAGE_KEYS.SEARCH_QUERY, query);
   }
 
-  getSearchQuery(): string {
-    return this.getItem(STORAGE_KEYS.SEARCH_QUERY, '');
+  async getSearchQuery(): Promise<string> {
+    return await this.getItem(STORAGE_KEYS.SEARCH_QUERY, '');
   }
 
   // Filter states
-  saveTimezoneFilter(filter: string): void {
-    this.setItem(STORAGE_KEYS.TIMEZONE_FILTER, filter);
+  async saveTimezoneFilter(filter: string): Promise<void> {
+    await this.setItem(STORAGE_KEYS.TIMEZONE_FILTER, filter);
   }
 
-  getTimezoneFilter(): string {
-    return this.getItem(STORAGE_KEYS.TIMEZONE_FILTER, 'all');
+  async getTimezoneFilter(): Promise<string> {
+    return await this.getItem(STORAGE_KEYS.TIMEZONE_FILTER, 'all');
   }
 
-  saveCallFilter(filter: string): void {
-    this.setItem(STORAGE_KEYS.CALL_FILTER, filter);
+  async saveCallFilter(filter: string): Promise<void> {
+    await this.setItem(STORAGE_KEYS.CALL_FILTER, filter);
   }
 
-  getCallFilter(): string {
-    return this.getItem(STORAGE_KEYS.CALL_FILTER, 'all');
+  async getCallFilter(): Promise<string> {
+    return await this.getItem(STORAGE_KEYS.CALL_FILTER, 'all');
   }
 
   // App modes
-  saveShuffleMode(enabled: boolean): void {
-    this.setItem(STORAGE_KEYS.SHUFFLE_MODE, enabled);
+  async saveShuffleMode(enabled: boolean): Promise<void> {
+    await this.setItem(STORAGE_KEYS.SHUFFLE_MODE, enabled);
   }
 
-  getShuffleMode(): boolean {
-    return this.getItem(STORAGE_KEYS.SHUFFLE_MODE, false);
+  async getShuffleMode(): Promise<boolean> {
+    return await this.getItem(STORAGE_KEYS.SHUFFLE_MODE, false);
   }
 
-  saveAutoCall(enabled: boolean): void {
-    this.setItem(STORAGE_KEYS.AUTO_CALL, enabled);
+  async saveAutoCall(enabled: boolean): Promise<void> {
+    await this.setItem(STORAGE_KEYS.AUTO_CALL, enabled);
   }
 
-  getAutoCall(): boolean {
-    return this.getItem(STORAGE_KEYS.AUTO_CALL, false);
+  async getAutoCall(): Promise<boolean> {
+    return await this.getItem(STORAGE_KEYS.AUTO_CALL, false);
   }
 
-  saveCallDelay(delay: number): void {
-    this.setItem(STORAGE_KEYS.CALL_DELAY, delay);
+  async saveCallDelay(delay: number): Promise<void> {
+    await this.setItem(STORAGE_KEYS.CALL_DELAY, delay);
   }
 
-  getCallDelay(): number {
-    return this.getItem(STORAGE_KEYS.CALL_DELAY, 0);
+  async getCallDelay(): Promise<number> {
+    return await this.getItem(STORAGE_KEYS.CALL_DELAY, 0);
   }
 
   // Daily call tracking
-  saveDailyCallCount(count: number): void {
-    this.setItem(STORAGE_KEYS.DAILY_CALL_COUNT, count);
+  async saveDailyCallCount(count: number): Promise<void> {
+    await this.setItem(STORAGE_KEYS.DAILY_CALL_COUNT, count);
   }
 
-  getDailyCallCount(): number {
-    return this.getItem(STORAGE_KEYS.DAILY_CALL_COUNT, 0);
+  async getDailyCallCount(): Promise<number> {
+    return await this.getItem(STORAGE_KEYS.DAILY_CALL_COUNT, 0);
   }
 
-  saveLastOpenedDate(date: string): void {
-    this.setItem(STORAGE_KEYS.LAST_OPENED_DATE, date);
+  async saveLastOpenedDate(date: string): Promise<void> {
+    await this.setItem(STORAGE_KEYS.LAST_OPENED_DATE, date);
   }
 
-  getLastOpenedDate(): string {
-    return this.getItem(STORAGE_KEYS.LAST_OPENED_DATE, '');
+  async getLastOpenedDate(): Promise<string> {
+    return await this.getItem(STORAGE_KEYS.LAST_OPENED_DATE, '');
   }
 
   // App settings
-  saveAppSettings(settings: AppSettings): void {
-    this.setItem(STORAGE_KEYS.APP_SETTINGS, settings);
+  async saveAppSettings(settings: AppSettings): Promise<void> {
+    await this.setItem(STORAGE_KEYS.APP_SETTINGS, settings);
   }
 
-  getAppSettings(): AppSettings {
-    return this.getItem(STORAGE_KEYS.APP_SETTINGS, {});
+  async getAppSettings(): Promise<AppSettings> {
+    return await this.getItem(STORAGE_KEYS.APP_SETTINGS, {});
   }
 
   // Check if we need to reset daily count (new day)
-  shouldResetDailyCount(): boolean {
-    const lastOpened = this.getLastOpenedDate();
+  async shouldResetDailyCount(): Promise<boolean> {
+    const lastOpened = await this.getLastOpenedDate();
     const today = new Date().toDateString();
     
     if (lastOpened !== today) {
-      this.saveLastOpenedDate(today);
+      await this.saveLastOpenedDate(today);
       return true;
     }
     
@@ -172,26 +221,26 @@ export class AppStorage {
   }
 
   // Clear all app data
-  clearAllData(): void {
-    Object.values(STORAGE_KEYS).forEach(key => {
-      this.removeItem(key);
-    });
+  async clearAllData(): Promise<void> {
+    for (const key of Object.values(STORAGE_KEYS)) {
+      await this.removeItem(key);
+    }
   }
 
   // Export data for backup
-  exportData(): string {
+  async exportData(): Promise<string> {
     const data = {
-      currentLeadIndex: this.getCurrentLeadIndex(),
-      leadsData: this.getLeadsData(),
-      searchQuery: this.getSearchQuery(),
-      timezoneFilter: this.getTimezoneFilter(),
-      callFilter: this.getCallFilter(),
-      shuffleMode: this.getShuffleMode(),
-      autoCall: this.getAutoCall(),
-      callDelay: this.getCallDelay(),
-      dailyCallCount: this.getDailyCallCount(),
-      lastOpenedDate: this.getLastOpenedDate(),
-      appSettings: this.getAppSettings(),
+      currentLeadIndex: await this.getCurrentLeadIndex(),
+      leadsData: await this.getLeadsData(),
+      searchQuery: await this.getSearchQuery(),
+      timezoneFilter: await this.getTimezoneFilter(),
+      callFilter: await this.getCallFilter(),
+      shuffleMode: await this.getShuffleMode(),
+      autoCall: await this.getAutoCall(),
+      callDelay: await this.getCallDelay(),
+      dailyCallCount: await this.getDailyCallCount(),
+      lastOpenedDate: await this.getLastOpenedDate(),
+      appSettings: await this.getAppSettings(),
       exportDate: new Date().toISOString(),
     };
     
@@ -199,21 +248,21 @@ export class AppStorage {
   }
 
   // Import data from backup
-  importData(jsonData: string): boolean {
+  async importData(jsonData: string): Promise<boolean> {
     try {
       const data = JSON.parse(jsonData);
       
-      if (data.currentLeadIndex !== undefined) this.saveCurrentLeadIndex(data.currentLeadIndex);
-      if (data.leadsData) this.saveLeadsData(data.leadsData);
-      if (data.searchQuery !== undefined) this.saveSearchQuery(data.searchQuery);
-      if (data.timezoneFilter !== undefined) this.saveTimezoneFilter(data.timezoneFilter);
-      if (data.callFilter !== undefined) this.saveCallFilter(data.callFilter);
-      if (data.shuffleMode !== undefined) this.saveShuffleMode(data.shuffleMode);
-      if (data.autoCall !== undefined) this.saveAutoCall(data.autoCall);
-      if (data.callDelay !== undefined) this.saveCallDelay(data.callDelay);
-      if (data.dailyCallCount !== undefined) this.saveDailyCallCount(data.dailyCallCount);
-      if (data.lastOpenedDate) this.saveLastOpenedDate(data.lastOpenedDate);
-      if (data.appSettings) this.saveAppSettings(data.appSettings);
+      if (data.currentLeadIndex !== undefined) await this.saveCurrentLeadIndex(data.currentLeadIndex);
+      if (data.leadsData) await this.saveLeadsData(data.leadsData);
+      if (data.searchQuery !== undefined) await this.saveSearchQuery(data.searchQuery);
+      if (data.timezoneFilter !== undefined) await this.saveTimezoneFilter(data.timezoneFilter);
+      if (data.callFilter !== undefined) await this.saveCallFilter(data.callFilter);
+      if (data.shuffleMode !== undefined) await this.saveShuffleMode(data.shuffleMode);
+      if (data.autoCall !== undefined) await this.saveAutoCall(data.autoCall);
+      if (data.callDelay !== undefined) await this.saveCallDelay(data.callDelay);
+      if (data.dailyCallCount !== undefined) await this.saveDailyCallCount(data.dailyCallCount);
+      if (data.lastOpenedDate) await this.saveLastOpenedDate(data.lastOpenedDate);
+      if (data.appSettings) await this.saveAppSettings(data.appSettings);
       
       return true;
     } catch (error) {

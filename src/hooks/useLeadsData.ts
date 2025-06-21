@@ -42,34 +42,20 @@ const throttleLocalStorage = (() => {
 })();
 
 export const useLeadsData = (initialLeads: Lead[]) => {
-  const [leadsData, setLeadsData] = useState<Lead[]>(() => {
-    // Try to load from storage first, fallback to initial leads
-    const savedLeads = appStorage.getLeadsData();
-    if (savedLeads.length > 0) {
-      console.log('Loading leads from storage:', savedLeads.length, 'leads');
-      return savedLeads;
-    }
-    console.log('No saved leads found, using initial leads:', initialLeads.length, 'leads');
-    return initialLeads.map(lead => ({
-      ...lead,
-      lastCalled: lead.lastCalled || undefined
-    }));
-  });
+  const [leadsData, setLeadsData] = useState<Lead[]>([]);
+  const [isLoaded, setIsLoaded] = useState(false);
 
-  // Update local state when initialLeads change
   useEffect(() => {
-    setLeadsData(initialLeads.map(lead => ({
-      ...lead,
-      lastCalled: lead.lastCalled || undefined
-    })));
+    (async () => {
+      const saved = await appStorage.getLeadsData();
+      setLeadsData(saved.length > 0 ? saved : initialLeads);
+      setIsLoaded(true);
+    })();
   }, [initialLeads]);
 
-  // Save leads data to storage whenever it changes
   useEffect(() => {
-    if (leadsData.length > 0) {
-      appStorage.saveLeadsData(leadsData);
-    }
-  }, [leadsData]);
+    if (isLoaded) appStorage.saveLeadsData(leadsData);
+  }, [leadsData, isLoaded]);
 
   // Log call tracking capabilities on mount
   useEffect(() => {
@@ -262,6 +248,7 @@ export const useLeadsData = (initialLeads: Lead[]) => {
   return {
     leadsData,
     setLeadsData,
+    isLoaded,
     makeCall,
     markLeadAsCalled: markLeadAsCalledWrapper,
     markLeadAsCalledOnNavigation,

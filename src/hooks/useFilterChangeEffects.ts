@@ -30,6 +30,7 @@ export const useFilterChangeEffects = (
 
     console.log('Filter change effect triggered', { timezoneFilter, callFilter });
     setFilterChanging(true);
+    console.log('useFilterChangeEffects: Setting isFilterChanging to true');
     
     try {
       const baseLeadsBeforeFilter = filterLeadsByTimezone(leadsData, 'ALL');
@@ -48,7 +49,10 @@ export const useFilterChangeEffects = (
       if (newFilteredLeads.length === 0) {
         console.log('No leads match the current filter, resetting to first lead');
         setCurrentIndex(0);
-        setTimeout(() => setFilterChanging(false), 100);
+        setTimeout(() => {
+          setFilterChanging(false);
+          console.log('useFilterChangeEffects: Setting isFilterChanging to false (no leads match)');
+        }, 100);
         return;
       }
       
@@ -63,7 +67,10 @@ export const useFilterChangeEffects = (
           );
           console.log('Current lead matches new filter, keeping at index:', newIndexOfCurrentLead);
           setCurrentIndex(newIndexOfCurrentLead);
-          setTimeout(() => setFilterChanging(false), 100);
+          setTimeout(() => {
+            setFilterChanging(false);
+            console.log('useFilterChangeEffects: Setting isFilterChanging to false (current lead matches)');
+          }, 100);
           return;
         }
         
@@ -117,7 +124,10 @@ export const useFilterChangeEffects = (
       setCurrentIndex(0);
     }
     
-    setTimeout(() => setFilterChanging(false), 100);
+    setTimeout(() => {
+      setFilterChanging(false);
+      console.log('useFilterChangeEffects: Setting isFilterChanging to false (default timeout)');
+    }, 100);
   }, [timezoneFilter, callFilter]); // Remove leadsData dependency to prevent navigation when leads are called
 
   useEffect(() => {

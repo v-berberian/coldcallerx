@@ -3,6 +3,8 @@ import { Lead } from '../types/lead';
 import { useSearchState } from '../components/SearchState';
 import { useLeadNavigation } from './useLeadNavigation';
 import { appStorage } from '../utils/storage';
+import { useNavigationState } from './useNavigationState';
+import { useLeadsData } from './useLeadsData';
 
 interface UseLocalCallingScreenStateProps {
   leads: Lead[];
@@ -14,10 +16,20 @@ export const useLocalCallingScreenState = ({ leads, onCallMade }: UseLocalCallin
   const [leadsInitialized, setLeadsInitialized] = useState(false);
   const localStorageRestoredRef = useRef(false);
 
+  // Use the new async hooks
+  const { currentIndex, updateNavigation, isLoaded: navLoaded, historyIndex, goToPrevious, resetNavigation, setCurrentIndex, restoreFromLocalStorage, syncFromCloudSession } = useNavigationState();
+  const { leadsData, setLeadsData, isLoaded: leadsLoaded } = useLeadsData(leads);
+
+  // Debug effect to track currentIndex changes
+  useEffect(() => {
+    console.log('useLocalCallingScreenState: currentIndex changed to:', currentIndex);
+  }, [currentIndex]);
+
+  // Wait for both to load
+  const isLoaded = navLoaded && leadsLoaded;
+
   // Initialize hooks - only pass leads to useLeadNavigation
   const {
-    leadsData,
-    currentIndex,
     timezoneFilter,
     callFilter,
     shuffleMode,
@@ -44,9 +56,19 @@ export const useLocalCallingScreenState = ({ leads, onCallMade }: UseLocalCallin
     resetCallDelay,
     resetLeadsData,
     updateLeadsDataDirectly,
-    restoreFromLocalStorage,
     getDelayDisplayType
-  } = useLeadNavigation({ initialLeads: leads, onCallMade });
+  } = useLeadNavigation({ 
+    initialLeads: leads, 
+    onCallMade,
+    currentIndex,
+    historyIndex,
+    updateNavigation,
+    goToPrevious,
+    resetNavigation,
+    setCurrentIndex,
+    restoreFromLocalStorage,
+    syncFromCloudSession
+  });
 
   const {
     searchQuery,
@@ -71,88 +93,161 @@ export const useLocalCallingScreenState = ({ leads, onCallMade }: UseLocalCallin
 
   // Save state to localStorage whenever it changes
   useEffect(() => {
-    if (leadsData.length > 0) {
-      appStorage.saveLeadsData(leadsData);
-    }
+    const saveLeadsData = async () => {
+      if (leadsData.length > 0) {
+        try {
+          await appStorage.saveLeadsData(leadsData);
+        } catch (error) {
+          console.error('Error saving leads data:', error);
+        }
+      }
+    };
+    saveLeadsData();
   }, [leadsData]);
 
   useEffect(() => {
-    appStorage.saveCurrentLeadIndex(currentIndex);
+    const saveCurrentIndex = async () => {
+      try {
+        await appStorage.saveCurrentLeadIndex(currentIndex);
+      } catch (error) {
+        console.error('Error saving current index:', error);
+      }
+    };
+    saveCurrentIndex();
   }, [currentIndex]);
 
   useEffect(() => {
-    appStorage.saveSearchQuery(searchQuery);
+    const saveSearchQuery = async () => {
+      try {
+        await appStorage.saveSearchQuery(searchQuery);
+      } catch (error) {
+        console.error('Error saving search query:', error);
+      }
+    };
+    saveSearchQuery();
   }, [searchQuery]);
 
   useEffect(() => {
-    appStorage.saveTimezoneFilter(timezoneFilter);
+    const saveTimezoneFilter = async () => {
+      try {
+        await appStorage.saveTimezoneFilter(timezoneFilter);
+      } catch (error) {
+        console.error('Error saving timezone filter:', error);
+      }
+    };
+    saveTimezoneFilter();
   }, [timezoneFilter]);
 
   useEffect(() => {
-    appStorage.saveCallFilter(callFilter);
+    const saveCallFilter = async () => {
+      try {
+        await appStorage.saveCallFilter(callFilter);
+      } catch (error) {
+        console.error('Error saving call filter:', error);
+      }
+    };
+    saveCallFilter();
   }, [callFilter]);
 
   useEffect(() => {
-    appStorage.saveShuffleMode(shuffleMode);
+    const saveShuffleMode = async () => {
+      try {
+        await appStorage.saveShuffleMode(shuffleMode);
+      } catch (error) {
+        console.error('Error saving shuffle mode:', error);
+      }
+    };
+    saveShuffleMode();
   }, [shuffleMode]);
 
   useEffect(() => {
-    appStorage.saveAutoCall(autoCall);
+    const saveAutoCall = async () => {
+      try {
+        await appStorage.saveAutoCall(autoCall);
+      } catch (error) {
+        console.error('Error saving auto call:', error);
+      }
+    };
+    saveAutoCall();
   }, [autoCall]);
 
   useEffect(() => {
-    appStorage.saveCallDelay(callDelay);
+    const saveCallDelay = async () => {
+      try {
+        await appStorage.saveCallDelay(callDelay);
+      } catch (error) {
+        console.error('Error saving call delay:', error);
+      }
+    };
+    saveCallDelay();
   }, [callDelay]);
 
   // Restore state from localStorage on app startup
   useEffect(() => {
-    if (leadsData.length > 0 && !localStorageRestoredRef.current) {
-      console.log('Restoring app state from localStorage');
-      
-      // Restore search query
-      const savedSearchQuery = appStorage.getSearchQuery();
-      if (savedSearchQuery) {
-        setSearchQuery(savedSearchQuery);
-      }
+    const restoreState = async () => {
+      if (leadsData.length > 0 && !localStorageRestoredRef.current) {
+        console.log('Restoring app state from localStorage');
+        
+        try {
+          // Restore search query
+          const savedSearchQuery = await appStorage.getSearchQuery();
+          if (savedSearchQuery) {
+            setSearchQuery(savedSearchQuery);
+          }
 
-      // Restore filters
-      const savedTimezoneFilter = appStorage.getTimezoneFilter();
-      if (savedTimezoneFilter !== 'all') {
-        // Note: We'll need to trigger the filter change
-        console.log('Restoring timezone filter:', savedTimezoneFilter);
-      }
+          // Restore filters
+          const savedTimezoneFilter = await appStorage.getTimezoneFilter();
+          if (savedTimezoneFilter !== 'all') {
+            // Note: We'll need to trigger the filter change
+            console.log('Restoring timezone filter:', savedTimezoneFilter);
+          }
 
-      const savedCallFilter = appStorage.getCallFilter();
-      if (savedCallFilter !== 'all') {
-        console.log('Restoring call filter:', savedCallFilter);
-      }
+          const savedCallFilter = await appStorage.getCallFilter();
+          if (savedCallFilter !== 'all') {
+            console.log('Restoring call filter:', savedCallFilter);
+          }
 
-      // Restore app modes
-      const savedShuffleMode = appStorage.getShuffleMode();
-      if (savedShuffleMode) {
-        console.log('Restoring shuffle mode:', savedShuffleMode);
-      }
+          // Restore app modes
+          const savedShuffleMode = await appStorage.getShuffleMode();
+          if (savedShuffleMode) {
+            console.log('Restoring shuffle mode:', savedShuffleMode);
+          }
 
-      const savedAutoCall = appStorage.getAutoCall();
-      if (savedAutoCall) {
-        console.log('Restoring auto call mode:', savedAutoCall);
-      }
+          const savedAutoCall = await appStorage.getAutoCall();
+          if (savedAutoCall) {
+            console.log('Restoring auto call mode:', savedAutoCall);
+          }
 
-      const savedCallDelay = appStorage.getCallDelay();
-      if (savedCallDelay > 0) {
-        console.log('Restoring call delay:', savedCallDelay);
-      }
+          const savedCallDelay = await appStorage.getCallDelay();
+          if (savedCallDelay > 0) {
+            console.log('Restoring call delay:', savedCallDelay);
+          }
 
-      localStorageRestoredRef.current = true;
-    }
+          localStorageRestoredRef.current = true;
+        } catch (error) {
+          console.error('Error restoring state:', error);
+        }
+      }
+    };
+
+    restoreState();
   }, [leadsData.length, setSearchQuery]);
 
   // Check if we need to reset daily count (new day)
   useEffect(() => {
-    if (appStorage.shouldResetDailyCount()) {
-      console.log('New day detected, resetting daily call count');
-      // Reset daily call count logic can be added here
-    }
+    const checkDailyReset = async () => {
+      try {
+        const shouldReset = await appStorage.shouldResetDailyCount();
+        if (shouldReset) {
+          console.log('New day detected, resetting daily call count');
+          // Reset daily call count logic can be added here
+        }
+      } catch (error) {
+        console.error('Error checking daily reset:', error);
+      }
+    };
+
+    checkDailyReset();
   }, []);
 
   // Memoize resetLeadsData to prevent infinite loops
@@ -237,6 +332,8 @@ export const useLocalCallingScreenState = ({ leads, onCallMade }: UseLocalCallin
     handleSearchFocus,
     handleSearchBlur,
     closeAutocomplete,
-    getDelayDisplayType
+    getDelayDisplayType,
+    updateNavigation,
+    isLoaded
   };
 };

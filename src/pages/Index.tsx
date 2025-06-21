@@ -18,21 +18,27 @@ const Index = () => {
     loadExistingData
   } = useLocalLeadOperations();
 
+  console.log('Index: Rendering with appReady:', appReady, 'leadsData.length:', leadsData.length);
+
   // Load saved data when component mounts
   useEffect(() => {
     console.log('Index: Loading saved data');
-    loadExistingData();
     
-    // Initialize app
     const initializeApp = async () => {
-      await new Promise(resolve => setTimeout(resolve, 200));
-      console.log('Index: App initialization complete');
-      setAppReady(true);
-      
-      // Add fade-in effect
-      setTimeout(() => {
-        setShowContent(true);
-      }, 50);
+      try {
+        await loadExistingData();
+        await new Promise(resolve => setTimeout(resolve, 200));
+        console.log('Index: App initialization complete');
+        setAppReady(true);
+        
+        // Add fade-in effect
+        setTimeout(() => {
+          setShowContent(true);
+        }, 50);
+      } catch (error) {
+        console.error('Error initializing app:', error);
+        setAppReady(true); // Still set ready to show UI
+      }
     };
 
     initializeApp();
@@ -52,6 +58,7 @@ const Index = () => {
 
   // Show loading until everything is ready
   if (!appReady) {
+    console.log('Index: Showing loading screen');
     return (
       <div className="h-[100vh] h-[100dvh] h-[100svh] bg-background flex items-center justify-center fixed inset-0 overflow-hidden">
         <div className="text-center space-y-4">
@@ -64,6 +71,7 @@ const Index = () => {
 
   // If no leads, show empty state with proper header
   if (leadsData.length === 0) {
+    console.log('Index: Showing empty state');
     return (
       <div className={`h-[100vh] h-[100dvh] h-[100svh] bg-background overflow-hidden fixed inset-0 transition-opacity duration-300 ${showContent ? 'opacity-100' : 'opacity-0'} flex flex-col`}>
         
@@ -112,6 +120,7 @@ const Index = () => {
     );
   }
 
+  console.log('Index: Rendering CallingScreen with', leadsData.length, 'leads');
   return (
     <div className={`transition-opacity duration-300 ${showContent ? 'opacity-100' : 'opacity-0'}`}>
       <CallingScreen 

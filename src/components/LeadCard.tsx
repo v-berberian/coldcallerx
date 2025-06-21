@@ -39,6 +39,8 @@ const LeadCard: React.FC<LeadCardProps> = ({
   onResetCallCount,
   noLeadsMessage
 }) => {
+  console.log('LeadCard: Rendering with lead:', lead?.name, 'at index:', currentIndex);
+
   const [emailTemplates, setEmailTemplates] = useState<EmailTemplate[]>([]);
   const [textTemplates, setTextTemplates] = useState<TextTemplate[]>([]);
   const [selectedEmailTemplateId, setSelectedEmailTemplateId] = useState<string>('');

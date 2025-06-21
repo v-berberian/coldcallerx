@@ -1,4 +1,3 @@
-
 import React from 'react';
 import CallingScreenContainer from './CallingScreenContainer';
 
@@ -17,6 +16,7 @@ interface CallingScreenProps {
 }
 
 const CallingScreen: React.FC<CallingScreenProps> = (props) => {
+  console.log('CallingScreen: Rendering with', props.leads.length, 'leads');
   return <CallingScreenContainer {...props} />;
 };
 

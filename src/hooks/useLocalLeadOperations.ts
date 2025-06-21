@@ -1,5 +1,6 @@
 import { useState, useCallback } from 'react';
 import { Lead } from '../types/lead';
+import { appStorage } from '../utils/storage';
 
 interface LeadList {
   id: string;
@@ -13,19 +14,22 @@ export const useLocalLeadOperations = () => {
   const [leadsData, setLeadsData] = useState<Lead[]>([]);
   const [loading, setLoading] = useState(false);
 
-  const loadExistingData = useCallback(() => {
+  const loadExistingData = useCallback(async () => {
     try {
-      // Load from localStorage
-      const savedLeads = localStorage.getItem('leadsData');
-      const savedLeadList = localStorage.getItem('currentLeadList');
+      // Load from Capacitor Preferences using appStorage
+      const savedLeads = await appStorage.getLeadsData();
+      const savedLeadList = localStorage.getItem('currentLeadList'); // Keep this as localStorage for now
       
-      if (savedLeads && savedLeadList) {
-        setLeadsData(JSON.parse(savedLeads));
+      if (savedLeads.length > 0) {
+        setLeadsData(savedLeads);
+        console.log('Loaded data from Capacitor Preferences');
+      }
+      
+      if (savedLeadList) {
         setCurrentLeadList(JSON.parse(savedLeadList));
-        console.log('Loaded data from localStorage');
       }
     } catch (error) {
-      console.error('Error loading data from localStorage:', error);
+      console.error('Error loading data from storage:', error);
     }
   }, []);
 
@@ -46,9 +50,9 @@ export const useLocalLeadOperations = () => {
       setCurrentLeadList(leadList);
       setLeadsData(leads);
       
-      // Save to localStorage after state updates
+      // Save to Capacitor Preferences and localStorage
+      await appStorage.saveLeadsData(leads);
       localStorage.setItem('currentLeadList', JSON.stringify(leadList));
-      localStorage.setItem('leadsData', JSON.stringify(leads));
 
       console.log('Successfully imported and saved leads locally');
       return true;
@@ -61,7 +65,7 @@ export const useLocalLeadOperations = () => {
   };
 
   // Updated to only set last called timestamp
-  const updateLeadCallCount = useCallback((currentLeadsData: Lead[], lead: Lead): Lead[] => {
+  const updateLeadCallCount = useCallback(async (currentLeadsData: Lead[], lead: Lead): Promise<Lead[]> => {
     try {
       const now = new Date();
       const dateString = now.toLocaleDateString();
@@ -82,8 +86,8 @@ export const useLocalLeadOperations = () => {
         } : l
       );
       
-      // Save to localStorage
-      localStorage.setItem('leadsData', JSON.stringify(updatedLeads));
+      // Save to Capacitor Preferences
+      await appStorage.saveLeadsData(updatedLeads);
       
       return updatedLeads;
     } catch (error) {
@@ -92,7 +96,7 @@ export const useLocalLeadOperations = () => {
     }
   }, []);
 
-  const resetCallCount = useCallback((currentLeadsData: Lead[], lead: Lead): Lead[] => {
+  const resetCallCount = useCallback(async (currentLeadsData: Lead[], lead: Lead): Promise<Lead[]> => {
     try {
       // Update the leads data - only clear lastCalled
       const updatedLeads = currentLeadsData.map(l => 
@@ -101,7 +105,7 @@ export const useLocalLeadOperations = () => {
           : l
       );
       
-      localStorage.setItem('leadsData', JSON.stringify(updatedLeads));
+      await appStorage.saveLeadsData(updatedLeads);
       return updatedLeads;
     } catch (error) {
       console.error('Error resetting last called:', error);
@@ -109,7 +113,7 @@ export const useLocalLeadOperations = () => {
     }
   }, []);
 
-  const resetAllCallCounts = useCallback((currentLeadsData: Lead[]): Lead[] => {
+  const resetAllCallCounts = useCallback(async (currentLeadsData: Lead[]): Promise<Lead[]> => {
     try {
       // Update the leads data - only clear lastCalled for all
       const updatedLeads = currentLeadsData.map(l => ({
@@ -117,7 +121,7 @@ export const useLocalLeadOperations = () => {
         lastCalled: undefined
       }));
       
-      localStorage.setItem('leadsData', JSON.stringify(updatedLeads));
+      await appStorage.saveLeadsData(updatedLeads);
       return updatedLeads;
     } catch (error) {
       console.error('Error resetting all last called timestamps:', error);

@@ -1,97 +1,83 @@
-import { useState } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { appStorage } from '../utils/storage';
 
 export const useNavigationState = () => {
-  // Initialize from localStorage immediately
-  const getInitialIndex = () => {
-    return appStorage.getCurrentLeadIndex();
-  };
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [historyIndex, setHistoryIndex] = useState(-1);
+  const [isLoaded, setIsLoaded] = useState(false);
 
-  const [currentIndex, setCurrentIndex] = useState(getInitialIndex());
-  const [navigationHistory, setNavigationHistory] = useState<number[]>([getInitialIndex()]);
-  const [historyIndex, setHistoryIndex] = useState(0);
-
-  const updateNavigation = (newIndex: number, addToHistory = true, silent = false) => {
-    setCurrentIndex(newIndex);
+  // Load initial state from localStorage
+  useEffect(() => {
+    const loadInitialState = async () => {
+      const savedIndex = await appStorage.getCurrentLeadIndex();
+      if (savedIndex !== null && savedIndex >= 0) {
+        console.log('useNavigationState: Loading saved index:', savedIndex);
+        setCurrentIndex(savedIndex);
+      }
+      setIsLoaded(true);
+    };
     
-    // Always save to localStorage immediately for instant restoration
-    appStorage.saveCurrentLeadIndex(newIndex);
-    console.log('Saved to localStorage:', newIndex);
-    
-    if (addToHistory) {
-      const newHistory = navigationHistory.slice(0, historyIndex + 1);
-      newHistory.push(newIndex);
-      setNavigationHistory(newHistory);
-      setHistoryIndex(newHistory.length - 1);
-    }
-  };
+    loadInitialState();
+  }, []);
 
-  const goToPrevious = () => {
-    if (historyIndex > 0) {
-      const newHistoryIndex = historyIndex - 1;
-      const prevIndex = navigationHistory[newHistoryIndex];
-      setCurrentIndex(prevIndex);
-      setHistoryIndex(newHistoryIndex);
-      
-      // Save to localStorage immediately
-      appStorage.saveCurrentLeadIndex(prevIndex);
-      console.log('Saved to localStorage (previous):', prevIndex);
+  const updateNavigation = useCallback((index: number) => {
+    console.log('useNavigationState: updateNavigation called with index:', index);
+    setHistoryIndex(prevHistory => {
+      console.log('useNavigationState: Setting history index to current index');
+      return currentIndex;
+    });
+    setCurrentIndex(index);
+    console.log('useNavigationState: State will be updated to index:', index);
+  }, []);
+
+  // Debug effect to track currentIndex changes
+  useEffect(() => {
+    console.log('useNavigationState: currentIndex changed to:', currentIndex);
+  }, [currentIndex]);
+
+  const resetNavigation = useCallback((index: number) => {
+    console.log('useNavigationState: resetNavigation called with index:', index);
+    setHistoryIndex(-1);
+    setCurrentIndex(index);
+  }, []);
+
+  const goToPrevious = useCallback(() => {
+    if (historyIndex >= 0) {
+      console.log('useNavigationState: goToPrevious from', currentIndex, 'to', historyIndex);
+      setCurrentIndex(historyIndex);
+      setHistoryIndex(-1);
       return true;
     }
     return false;
-  };
+  }, [historyIndex, currentIndex]);
 
-  const resetNavigation = (index = 0, silent = false) => {
+  const setCurrentIndexDirectly = useCallback((index: number) => {
+    console.log('useNavigationState: setCurrentIndexDirectly called with index:', index);
     setCurrentIndex(index);
-    setNavigationHistory([index]);
-    setHistoryIndex(0);
-    
-    // Save to localStorage immediately
-    appStorage.saveCurrentLeadIndex(index);
-    console.log('Saved to localStorage (reset):', index);
-  };
+  }, []);
 
-  // Function to restore from localStorage when leads are ready
-  const restoreFromLocalStorage = (leadsLength: number) => {
-    const savedIndex = appStorage.getCurrentLeadIndex();
-    if (leadsLength > 0) {
-      const index = Math.max(0, Math.min(savedIndex, leadsLength - 1));
-      if (index !== currentIndex) {
-        console.log('Restoring from localStorage:', index);
-        setCurrentIndex(index);
-        setNavigationHistory([index]);
-        setHistoryIndex(0);
-      }
+  const restoreFromLocalStorage = useCallback(async (totalLeads: number) => {
+    const savedIndex = await appStorage.getCurrentLeadIndex();
+    if (savedIndex !== null && savedIndex >= 0 && savedIndex < totalLeads) {
+      console.log('useNavigationState: restoreFromLocalStorage setting index to:', savedIndex);
+      setCurrentIndex(savedIndex);
     }
-  };
+  }, []);
 
-  // Function to sync from cloud session (secondary, silent)
-  const syncFromCloudSession = (sessionIndex: number, leadsLength: number) => {
-    if (leadsLength > 0) {
-      const validIndex = Math.max(0, Math.min(sessionIndex, leadsLength - 1));
-      
-      // Only update if different from current localStorage value
-      const currentLocalIndex = appStorage.getCurrentLeadIndex();
-      
-      if (validIndex !== currentLocalIndex) {
-        console.log('Syncing from cloud session (silent):', validIndex);
-        setCurrentIndex(validIndex);
-        setNavigationHistory([validIndex]);
-        setHistoryIndex(0);
-        appStorage.saveCurrentLeadIndex(validIndex);
-      }
-    }
-  };
+  const syncFromCloudSession = useCallback((index: number) => {
+    console.log('useNavigationState: syncFromCloudSession setting index to:', index);
+    setCurrentIndex(index);
+  }, []);
 
   return {
     currentIndex,
     historyIndex,
-    navigationHistory,
     updateNavigation,
     goToPrevious,
     resetNavigation,
-    setCurrentIndex,
+    setCurrentIndex: setCurrentIndexDirectly,
     restoreFromLocalStorage,
-    syncFromCloudSession
+    syncFromCloudSession,
+    isLoaded
   };
-};
+}; 
