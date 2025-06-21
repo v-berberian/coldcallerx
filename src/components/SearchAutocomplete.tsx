@@ -308,15 +308,15 @@ const SearchAutocomplete: React.FC<SearchAutocompleteProps> = ({
     
     if (isFullscreen) {
       console.log('SearchAutocomplete: Rendering virtualized list in FULLSCREEN mode');
-      // Fullscreen mode - use full screen height and show all results
-      const fullscreenHeight = window.innerHeight - 160; // Full height minus header and search bar space
+      // Fullscreen mode - use CSS calc() for better iOS compatibility
+      const fullscreenHeight = window.innerHeight - 80; // Calculate for List component
       
       containerStyle = {
         position: 'absolute' as const, // Same positioning as normal mode
         top: '100%', // Same as normal mode - below search bar
         left: '0',
         right: '0',
-        height: `${fullscreenHeight}px`, // Only change the height
+        height: 'calc(100vh - 80px)', // Use CSS calc with viewport units
         zIndex: 50,
         transition: 'height 0.3s ease-in-out', // Smooth height transition
       };
