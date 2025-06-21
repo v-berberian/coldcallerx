@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Lead } from '../types/lead';
 import { getPhoneDigits } from '../utils/phoneUtils';
+import { appStorage } from '../utils/storage';
 
 // Throttle localStorage saves to prevent performance issues with large datasets
 const throttleLocalStorage = (() => {
@@ -41,12 +42,19 @@ const throttleLocalStorage = (() => {
 })();
 
 export const useLeadsData = (initialLeads: Lead[]) => {
-  const [leadsData, setLeadsData] = useState<Lead[]>(
-    initialLeads.map(lead => ({
+  const [leadsData, setLeadsData] = useState<Lead[]>(() => {
+    // Try to load from storage first, fallback to initial leads
+    const savedLeads = appStorage.getLeadsData();
+    if (savedLeads.length > 0) {
+      console.log('Loading leads from storage:', savedLeads.length, 'leads');
+      return savedLeads;
+    }
+    console.log('No saved leads found, using initial leads:', initialLeads.length, 'leads');
+    return initialLeads.map(lead => ({
       ...lead,
       lastCalled: lead.lastCalled || undefined
-    }))
-  );
+    }));
+  });
 
   // Update local state when initialLeads change
   useEffect(() => {
@@ -55,6 +63,13 @@ export const useLeadsData = (initialLeads: Lead[]) => {
       lastCalled: lead.lastCalled || undefined
     })));
   }, [initialLeads]);
+
+  // Save leads data to storage whenever it changes
+  useEffect(() => {
+    if (leadsData.length > 0) {
+      appStorage.saveLeadsData(leadsData);
+    }
+  }, [leadsData]);
 
   // Log call tracking capabilities on mount
   useEffect(() => {
@@ -200,8 +215,8 @@ export const useLeadsData = (initialLeads: Lead[]) => {
       
       setLeadsData(updatedLeads);
       
-      // Use throttled localStorage save
-      throttleLocalStorage('coldcaller-leads', JSON.stringify(updatedLeads));
+      // Save to appStorage
+      appStorage.saveLeadsData(updatedLeads);
     } catch (error) {
       console.error('Error in markLeadAsCalledWrapper:', error);
     }
@@ -216,8 +231,8 @@ export const useLeadsData = (initialLeads: Lead[]) => {
       );
       setLeadsData(updatedLeads);
       
-      // Use throttled localStorage save
-      throttleLocalStorage('coldcaller-leads', JSON.stringify(updatedLeads));
+      // Save to appStorage
+      appStorage.saveLeadsData(updatedLeads);
     } catch (error) {
       console.error('Error in resetCallCountWrapper:', error);
     }
@@ -231,8 +246,8 @@ export const useLeadsData = (initialLeads: Lead[]) => {
       }));
       setLeadsData(updatedLeads);
       
-      // Use throttled localStorage save
-      throttleLocalStorage('coldcaller-leads', JSON.stringify(updatedLeads));
+      // Save to appStorage
+      appStorage.saveLeadsData(updatedLeads);
     } catch (error) {
       console.error('Error in resetAllCallCountsWrapper:', error);
     }

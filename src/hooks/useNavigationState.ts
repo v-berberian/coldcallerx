@@ -1,11 +1,10 @@
-
 import { useState } from 'react';
+import { appStorage } from '../utils/storage';
 
 export const useNavigationState = () => {
   // Initialize from localStorage immediately
   const getInitialIndex = () => {
-    const saved = localStorage.getItem('coldcaller-current-index');
-    return saved ? parseInt(saved, 10) : 0;
+    return appStorage.getCurrentLeadIndex();
   };
 
   const [currentIndex, setCurrentIndex] = useState(getInitialIndex());
@@ -16,7 +15,7 @@ export const useNavigationState = () => {
     setCurrentIndex(newIndex);
     
     // Always save to localStorage immediately for instant restoration
-    localStorage.setItem('coldcaller-current-index', newIndex.toString());
+    appStorage.saveCurrentLeadIndex(newIndex);
     console.log('Saved to localStorage:', newIndex);
     
     if (addToHistory) {
@@ -35,7 +34,7 @@ export const useNavigationState = () => {
       setHistoryIndex(newHistoryIndex);
       
       // Save to localStorage immediately
-      localStorage.setItem('coldcaller-current-index', prevIndex.toString());
+      appStorage.saveCurrentLeadIndex(prevIndex);
       console.log('Saved to localStorage (previous):', prevIndex);
       return true;
     }
@@ -48,15 +47,15 @@ export const useNavigationState = () => {
     setHistoryIndex(0);
     
     // Save to localStorage immediately
-    localStorage.setItem('coldcaller-current-index', index.toString());
+    appStorage.saveCurrentLeadIndex(index);
     console.log('Saved to localStorage (reset):', index);
   };
 
   // Function to restore from localStorage when leads are ready
   const restoreFromLocalStorage = (leadsLength: number) => {
-    const savedIndex = localStorage.getItem('coldcaller-current-index');
-    if (savedIndex && leadsLength > 0) {
-      const index = Math.max(0, Math.min(parseInt(savedIndex, 10), leadsLength - 1));
+    const savedIndex = appStorage.getCurrentLeadIndex();
+    if (leadsLength > 0) {
+      const index = Math.max(0, Math.min(savedIndex, leadsLength - 1));
       if (index !== currentIndex) {
         console.log('Restoring from localStorage:', index);
         setCurrentIndex(index);
@@ -72,15 +71,14 @@ export const useNavigationState = () => {
       const validIndex = Math.max(0, Math.min(sessionIndex, leadsLength - 1));
       
       // Only update if different from current localStorage value
-      const localStorageIndex = localStorage.getItem('coldcaller-current-index');
-      const currentLocalIndex = localStorageIndex ? parseInt(localStorageIndex, 10) : 0;
+      const currentLocalIndex = appStorage.getCurrentLeadIndex();
       
       if (validIndex !== currentLocalIndex) {
         console.log('Syncing from cloud session (silent):', validIndex);
         setCurrentIndex(validIndex);
         setNavigationHistory([validIndex]);
         setHistoryIndex(0);
-        localStorage.setItem('coldcaller-current-index', validIndex.toString());
+        appStorage.saveCurrentLeadIndex(validIndex);
       }
     }
   };
