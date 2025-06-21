@@ -308,16 +308,15 @@ const SearchAutocomplete: React.FC<SearchAutocompleteProps> = ({
     
     if (isFullscreen) {
       console.log('SearchAutocomplete: Rendering virtualized list in FULLSCREEN mode');
-      // Fullscreen mode - use fixed positioning to cover the entire screen
-      const fullscreenHeight = window.innerHeight - 80; // Account for top spacing
+      // Fullscreen mode - use full screen height and show all results
+      const fullscreenHeight = window.innerHeight - 160; // Full height minus header and search bar space
       
       containerStyle = {
-        position: 'fixed' as const, // Use fixed positioning for true fullscreen
-        top: '80px', // Position below the header
+        position: 'absolute' as const, // Same positioning as normal mode
+        top: '100%', // Same as normal mode - below search bar
         left: '0',
         right: '0',
-        bottom: '0', // Extend to bottom of screen
-        height: `${fullscreenHeight}px`,
+        height: `${fullscreenHeight}px`, // Only change the height
         zIndex: 50,
         transition: 'height 0.3s ease-in-out', // Smooth height transition
       };
