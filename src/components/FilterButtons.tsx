@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect } from 'react';
 import { RotateCcw, Timer, Rocket } from 'lucide-react';
 
@@ -86,8 +85,8 @@ const FilterButtons: React.FC<FilterButtonsProps> = ({
         <div className="flex-1 min-w-0">
           <button 
             onClick={onToggleTimezone} 
-            className={`w-full text-sm font-medium py-3 px-2 sm:px-3 rounded transition-all duration-200 touch-manipulation select-none ${
-              timezoneFilter === 'EST_CST' ? 'text-blue-600 animate-button-switch' : 'text-muted-foreground'
+            className={`text-sm font-medium transition-all duration-200 touch-manipulation px-3 py-2 rounded-lg border border-border/20 hover:bg-muted/30 active:bg-muted/50 ${
+              timezoneFilter === 'EST_CST' ? 'bg-gradient-to-r from-blue-600 to-blue-600/90 bg-clip-text text-transparent dark:bg-none dark:text-blue-600 animate-button-switch' : 'text-muted-foreground'
             }`} 
             style={{ WebkitTapHighlightColor: 'transparent' }}
           >
@@ -100,7 +99,7 @@ const FilterButtons: React.FC<FilterButtonsProps> = ({
           <button 
             onClick={onToggleCallFilter} 
             className={`flex-1 min-w-0 text-sm font-medium py-3 px-2 sm:px-3 rounded transition-all duration-200 touch-manipulation select-none ${
-              callFilter === 'UNCALLED' ? 'text-purple-600 animate-button-switch' : 'text-muted-foreground'
+              callFilter === 'UNCALLED' ? 'bg-gradient-to-r from-purple-600 to-purple-600/90 bg-clip-text text-transparent dark:bg-none dark:text-purple-600 animate-button-switch' : 'text-muted-foreground'
             }`} 
             style={{ WebkitTapHighlightColor: 'transparent' }}
           >
@@ -126,8 +125,8 @@ const FilterButtons: React.FC<FilterButtonsProps> = ({
         <div className="flex-1 min-w-0">
           <button 
             onClick={onToggleShuffle} 
-            className={`w-full text-sm font-medium py-3 px-2 sm:px-3 rounded transition-all duration-200 touch-manipulation select-none ${
-              shuffleMode ? 'text-orange-600 animate-button-switch' : 'text-muted-foreground'
+            className={`text-sm font-medium transition-all duration-200 touch-manipulation px-3 py-2 rounded-lg border border-border/20 hover:bg-muted/30 active:bg-muted/50 ${
+              shuffleMode ? 'bg-gradient-to-r from-orange-600 to-orange-600/90 bg-clip-text text-transparent dark:bg-none dark:text-orange-600 animate-button-switch' : 'text-muted-foreground'
             }`} 
             style={{ WebkitTapHighlightColor: 'transparent' }}
           >
@@ -137,8 +136,8 @@ const FilterButtons: React.FC<FilterButtonsProps> = ({
         <div className="flex-1 min-w-0 relative flex items-center justify-center">
           <button 
             onClick={handleAutoCallToggle} 
-            className={`w-full text-sm font-medium py-3 px-2 sm:px-3 rounded transition-all duration-200 touch-manipulation select-none ${
-              autoCall ? 'text-green-600 animate-button-switch' : 'text-muted-foreground'
+            className={`text-sm font-medium transition-all duration-200 touch-manipulation px-3 py-2 rounded-lg border border-border/20 hover:bg-muted/30 active:bg-muted/50 ${
+              autoCall ? 'bg-gradient-to-r from-green-600 to-green-600/90 bg-clip-text text-transparent dark:bg-none dark:text-green-600 animate-button-switch' : 'text-muted-foreground'
             }`} 
             style={{ WebkitTapHighlightColor: 'transparent' }}
           >
@@ -147,7 +146,7 @@ const FilterButtons: React.FC<FilterButtonsProps> = ({
           {autoCall && showTimerIcon && (
             <button 
               onClick={onToggleCallDelay}
-              className="absolute right-1 sm:right-2 text-green-600 text-xs font-medium px-2 sm:px-3 py-2 rounded min-w-[32px] sm:min-w-[40px] flex items-center justify-center select-none touch-manipulation"
+              className="absolute right-1 sm:right-2 bg-gradient-to-r from-green-600 to-green-600/90 bg-clip-text text-transparent dark:bg-none dark:text-green-600 text-xs font-medium px-2 sm:px-3 py-2 rounded min-w-[32px] sm:min-w-[40px] flex items-center justify-center select-none touch-manipulation"
               style={{ WebkitTapHighlightColor: 'transparent' }}
               title="Click to change delay mode"
             >

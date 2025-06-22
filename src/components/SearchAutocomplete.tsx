@@ -38,7 +38,6 @@ const SearchAutocomplete: React.FC<SearchAutocompleteProps> = ({
   onLeadSelect,
   leadsData = []
 }) => {
-  console.log('SearchAutocomplete: MOUNTED', { isVisible, isFullscreen, searchResultsLength: searchResults.length });
   const [isAnimating, setIsAnimating] = useState(false);
   const [shouldRender, setShouldRender] = useState(false);
 
@@ -77,14 +76,10 @@ const SearchAutocomplete: React.FC<SearchAutocompleteProps> = ({
     }
 
     const handleLeadClick = () => {
-      console.log('SearchAutocomplete: Lead clicked in virtualized list:', lead.name);
       onLeadSelect?.(lead);
       // Explicitly close the autocomplete when a lead is selected
       if (onCloseAutocomplete) {
-        console.log('SearchAutocomplete: Calling onCloseAutocomplete from virtualized list');
         onCloseAutocomplete();
-      } else {
-        console.log('SearchAutocomplete: onCloseAutocomplete is not available in virtualized list');
       }
     };
 
@@ -307,7 +302,6 @@ const SearchAutocomplete: React.FC<SearchAutocompleteProps> = ({
     let containerStyle: React.CSSProperties = {};
     
     if (isFullscreen) {
-      console.log('SearchAutocomplete: Rendering virtualized list in FULLSCREEN mode');
       // Fullscreen mode - use CSS calc() for better iOS compatibility
       const fullscreenHeight = window.innerHeight - 80; // Calculate for List component
       
@@ -351,7 +345,6 @@ const SearchAutocomplete: React.FC<SearchAutocompleteProps> = ({
         </div>
       );
     } else {
-      console.log('SearchAutocomplete: Rendering virtualized list in COLLAPSED mode');
       // Normal mode - dynamic height based on number of results
       const maxCollapsedHeight = 260; // Exactly accommodate 3 full cards (3 * 85 + 4 = 259px, rounded to 260)
       const minCollapsedHeight = itemHeight; // Minimum height for one item
@@ -402,7 +395,6 @@ const SearchAutocomplete: React.FC<SearchAutocompleteProps> = ({
   }
 
   // Fallback to original rendering for non-virtualized content
-  console.log('SearchAutocomplete: Rendering FALLBACK (non-virtualized) list');
   const contactsToShow = Math.min(3, searchResults.length);
   const heightBuffer = 4; // Small buffer to ensure last item is fully visible
   const fallbackHeight = Math.max(searchResults.length * itemHeight + heightBuffer, itemHeight); // Dynamic height based on actual results
@@ -425,14 +417,10 @@ const SearchAutocomplete: React.FC<SearchAutocompleteProps> = ({
       ) : (
         searchResults.map((lead, index) => {
           const handleLeadClick = () => {
-            console.log('SearchAutocomplete: Lead clicked in fallback list:', lead.name);
             onLeadSelect?.(lead);
             // Explicitly close the autocomplete when a lead is selected
             if (onCloseAutocomplete) {
-              console.log('SearchAutocomplete: Calling onCloseAutocomplete from fallback list');
               onCloseAutocomplete();
-            } else {
-              console.log('SearchAutocomplete: onCloseAutocomplete is not available in fallback list');
             }
           };
 

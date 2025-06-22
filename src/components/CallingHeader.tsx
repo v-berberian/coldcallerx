@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Lead } from '../types/lead';
 import SearchAutocomplete from './SearchAutocomplete';
 import SearchBar, { SearchBarRef } from './SearchBar';
-import CSVImporter from './CSVImporter';
+import CSVFileSelector from './CSVFileSelector';
 import SettingsMenu from './SettingsMenu';
 
 interface CallingHeaderProps {
@@ -19,11 +19,15 @@ interface CallingHeaderProps {
   onSearchBlur: () => void;
   onClearSearch: () => void;
   onLeadSelect: (lead: Lead) => void;
-  onLeadsImported: (leads: Lead[], fileName: string) => void;
+  onLeadsImported: (leads: Lead[], fileName: string, csvId: string) => void;
+  onCSVSelect?: (csvId: string, leads: Lead[], fileName: string) => void;
+  currentCSVId?: string | null;
+  refreshTrigger?: number;
   loadMoreResults?: () => void;
   loadedResultsCount?: number;
   totalResultsCount?: number;
   onCloseAutocomplete?: () => void;
+  onAllListsDeleted?: () => void;
 }
 
 const CallingHeader: React.FC<CallingHeaderProps> = ({
@@ -39,10 +43,14 @@ const CallingHeader: React.FC<CallingHeaderProps> = ({
   onClearSearch,
   onLeadSelect,
   onLeadsImported,
+  onCSVSelect,
+  currentCSVId,
+  refreshTrigger = 0,
   loadMoreResults,
   loadedResultsCount,
   totalResultsCount,
-  onCloseAutocomplete
+  onCloseAutocomplete,
+  onAllListsDeleted
 }) => {
   const [isAutocompleteVisible, setIsAutocompleteVisible] = useState(showAutocomplete);
   const [isFullscreen, setIsFullscreen] = useState(false);
@@ -63,25 +71,31 @@ const CallingHeader: React.FC<CallingHeaderProps> = ({
   }, [showAutocomplete]);
 
   const handleToggleFullscreen = () => {
-    console.log('CallingHeader: handleToggleFullscreen called, current isFullscreen:', isFullscreen);
     setIsFullscreen(!isFullscreen);
-    console.log('CallingHeader: isFullscreen will be set to:', !isFullscreen);
     // Keep the autocomplete visible when toggling fullscreen
     
     // When transitioning from fullscreen to normal, keep it open
   };
 
   return (
-    <div className="bg-background border-b border-border p-3 sm:p-4 pt-safe flex-shrink-0 w-full" style={{ paddingTop: 'max(0.75rem, env(safe-area-inset-top))' }}>
+    <div className="relative bg-background border-b border-border p-3 sm:p-4 pt-safe flex-shrink-0 w-full" style={{ paddingTop: 'max(0.75rem, env(safe-area-inset-top))' }}>
       <div className="flex items-center justify-between mb-3 sm:mb-4 w-full">
         <div className="min-w-0 flex-shrink-0">
-          <CSVImporter onLeadsImported={onLeadsImported} />
+          <CSVFileSelector 
+            onCSVSelect={onCSVSelect || ((csvId: string, leads: Lead[], fileName: string) => {
+              // Fallback: treat as import if onCSVSelect is not provided
+              onLeadsImported(leads, fileName, csvId);
+            })}
+            refreshTrigger={refreshTrigger}
+            currentCSVId={currentCSVId}
+            onLeadsImported={onLeadsImported}
+            onAllListsDeleted={onAllListsDeleted}
+          />
         </div>
         
-        <div className="flex items-center space-x-2 sm:space-x-3 flex-1 justify-center min-w-0">
-          <h1 className="text-xl sm:text-2xl font-bold truncate">
-            <span style={{ color: '#6EC6F1' }}>ColdCall </span>
-            <span style={{ color: '#6EC6F1' }}>X</span>
+        <div className="absolute left-1/2 transform -translate-x-1/2 flex items-center space-x-2 sm:space-x-3 min-w-0">
+          <h1 className="text-xl sm:text-2xl font-bold truncate dark:text-white text-black bg-gradient-to-r from-[#6EC6F1] to-[#6EC6F1]/90 bg-clip-text text-transparent dark:bg-none dark:text-white">
+            ColdCall X
           </h1>
         </div>
         
@@ -109,26 +123,21 @@ const CallingHeader: React.FC<CallingHeaderProps> = ({
         />
         
         {/* Autocomplete Dropdown */}
-        {(() => {
-          console.log('CallingHeader: Rendering SearchAutocomplete', { showAutocomplete, isFullscreen, searchResultsLength: searchResults.length });
-          return (
-            <SearchAutocomplete 
-              isVisible={showAutocomplete}
-              isFullscreen={isFullscreen}
-              loadMoreResults={loadMoreResults}
-              loadedResultsCount={loadedResultsCount}
-              totalResultsCount={totalResultsCount}
-              searchResults={searchResults}
-              allSearchResults={allSearchResults}
-              onLeadSelect={onLeadSelect}
-              leadsData={leadsData}
-              onAnimationComplete={() => {
-                onCloseAutocomplete?.();
-              }}
-              onCloseAutocomplete={onCloseAutocomplete}
-            />
-          );
-        })()}
+        <SearchAutocomplete 
+          isVisible={showAutocomplete}
+          isFullscreen={isFullscreen}
+          loadMoreResults={loadMoreResults}
+          loadedResultsCount={loadedResultsCount}
+          totalResultsCount={totalResultsCount}
+          searchResults={searchResults}
+          allSearchResults={allSearchResults}
+          onLeadSelect={onLeadSelect}
+          leadsData={leadsData}
+          onAnimationComplete={() => {
+            onCloseAutocomplete?.();
+          }}
+          onCloseAutocomplete={onCloseAutocomplete}
+        />
       </div>
     </div>
   );

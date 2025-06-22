@@ -3,18 +3,23 @@ import { Preferences } from '@capacitor/preferences';
 
 // Storage keys
 const STORAGE_KEYS = {
-  CURRENT_LEAD_INDEX: 'coldcallerx_current_lead_index',
-  LEADS_DATA: 'coldcallerx_leads_data',
-  SEARCH_QUERY: 'coldcallerx_search_query',
-  TIMEZONE_FILTER: 'coldcallerx_timezone_filter',
-  CALL_FILTER: 'coldcallerx_call_filter',
-  SHUFFLE_MODE: 'coldcallerx_shuffle_mode',
-  AUTO_CALL: 'coldcallerx_auto_call',
-  CALL_DELAY: 'coldcallerx_call_delay',
-  DAILY_CALL_COUNT: 'coldcallerx_daily_call_count',
-  LAST_OPENED_DATE: 'coldcallerx_last_opened_date',
-  APP_SETTINGS: 'coldcallerx_app_settings',
+  CURRENT_LEAD_INDEX: 'coldcaller-current-lead-index',
+  LEADS_DATA: 'coldcaller-leads-data',
+  SEARCH_QUERY: 'coldcaller-search-query',
+  TIMEZONE_FILTER: 'coldcaller-timezone-filter',
+  CALL_FILTER: 'coldcaller-call-filter',
+  SHUFFLE_MODE: 'coldcaller-shuffle-mode',
+  AUTO_CALL: 'coldcaller-auto-call',
+  CALL_DELAY: 'coldcaller-call-delay',
+  DAILY_CALL_COUNT: 'coldcaller-daily-call-count',
+  LAST_OPENED_DATE: 'coldcaller-last-opened-date',
+  APP_SETTINGS: 'coldcaller-app-settings',
+  CSV_FILES: 'coldcaller-csv-files',
+  CURRENT_CSV_ID: 'coldcaller-current-csv-id'
 } as const;
+
+// Helper function to create CSV-specific storage keys
+const getCSVStorageKey = (csvId: string, key: string) => `coldcaller-csv-${csvId}-${key}`;
 
 // App settings interface
 export interface AppSettings {
@@ -32,7 +37,6 @@ export class AppStorage {
   private constructor() {
     // Check if we're in a Capacitor environment
     this.useCapacitorStorage = typeof window !== 'undefined' && 'Capacitor' in window;
-    console.log('AppStorage: Using', this.useCapacitorStorage ? 'Capacitor Preferences' : 'localStorage');
   }
   
   static getInstance(): AppStorage {
@@ -49,20 +53,16 @@ export class AppStorage {
       
       if (this.useCapacitorStorage) {
         await Preferences.set({ key, value: stringValue });
-        console.log('AppStorage: Saved to Capacitor Preferences:', key, value);
       } else {
         localStorage.setItem(key, stringValue);
-        console.log('AppStorage: Saved to localStorage:', key, value);
       }
     } catch (error) {
-      console.error('Failed to save to storage:', error);
       // Fallback to localStorage if Capacitor fails
       if (this.useCapacitorStorage) {
         try {
           localStorage.setItem(key, JSON.stringify(value));
-          console.log('AppStorage: Fallback to localStorage:', key);
         } catch (fallbackError) {
-          console.error('Fallback localStorage also failed:', fallbackError);
+          console.error('Failed to save to localStorage:', fallbackError);
         }
       }
     }
@@ -75,23 +75,19 @@ export class AppStorage {
       if (this.useCapacitorStorage) {
         const result = await Preferences.get({ key });
         item = result.value;
-        console.log('AppStorage: Retrieved from Capacitor Preferences:', key, item);
       } else {
         item = localStorage.getItem(key);
-        console.log('AppStorage: Retrieved from localStorage:', key, item);
       }
       
       return item ? JSON.parse(item) : defaultValue;
     } catch (error) {
-      console.error('Failed to read from storage:', error);
       // Fallback to localStorage if Capacitor fails
       if (this.useCapacitorStorage) {
         try {
           const fallbackItem = localStorage.getItem(key);
-          console.log('AppStorage: Fallback to localStorage:', key);
           return fallbackItem ? JSON.parse(fallbackItem) : defaultValue;
         } catch (fallbackError) {
-          console.error('Fallback localStorage also failed:', fallbackError);
+          console.error('Failed to read from localStorage:', fallbackError);
         }
       }
       return defaultValue;
@@ -102,13 +98,11 @@ export class AppStorage {
     try {
       if (this.useCapacitorStorage) {
         await Preferences.remove({ key });
-        console.log('AppStorage: Removed from Capacitor Preferences:', key);
       } else {
         localStorage.removeItem(key);
-        console.log('AppStorage: Removed from localStorage:', key);
       }
     } catch (error) {
-      console.error('Failed to remove from storage:', error);
+      console.error('Failed to remove item:', error);
     }
   }
 
@@ -266,8 +260,63 @@ export class AppStorage {
       
       return true;
     } catch (error) {
-      console.error('Failed to import data:', error);
       return false;
+    }
+  }
+
+  // CSV-specific storage methods
+  async saveCSVLeadsData(csvId: string, leads: Lead[]): Promise<void> {
+    await this.setItem(getCSVStorageKey(csvId, 'leads'), leads);
+  }
+
+  async getCSVLeadsData(csvId: string): Promise<Lead[]> {
+    return await this.getItem(getCSVStorageKey(csvId, 'leads'), []);
+  }
+
+  async saveCSVCurrentIndex(csvId: string, index: number): Promise<void> {
+    await this.setItem(getCSVStorageKey(csvId, 'current-index'), index);
+  }
+
+  async getCSVCurrentIndex(csvId: string): Promise<number> {
+    return await this.getItem(getCSVStorageKey(csvId, 'current-index'), 0);
+  }
+
+  // CSV file management
+  async saveCSVFiles(csvFiles: Array<{id: string, name: string, fileName: string, totalLeads: number}>): Promise<void> {
+    await this.setItem(STORAGE_KEYS.CSV_FILES, csvFiles);
+  }
+
+  async getCSVFiles(): Promise<Array<{id: string, name: string, fileName: string, totalLeads: number}>> {
+    return await this.getItem(STORAGE_KEYS.CSV_FILES, []);
+  }
+
+  async saveCurrentCSVId(csvId: string): Promise<void> {
+    await this.setItem(STORAGE_KEYS.CURRENT_CSV_ID, csvId);
+  }
+
+  async getCurrentCSVId(): Promise<string | null> {
+    return await this.getItem(STORAGE_KEYS.CURRENT_CSV_ID, null);
+  }
+
+  // Remove CSV file and its data
+  async removeCSVFile(csvId: string): Promise<void> {
+    try {
+      // Get current CSV files
+      const csvFiles = await this.getCSVFiles();
+      const updatedFiles = csvFiles.filter(file => file.id !== csvId);
+      await this.saveCSVFiles(updatedFiles);
+    } catch (error) {
+      console.error('Error removing CSV file:', error);
+    }
+  }
+
+  async removeCSVLeadsData(csvId: string): Promise<void> {
+    try {
+      // Remove CSV-specific storage keys
+      await this.removeItem(getCSVStorageKey(csvId, 'leads'));
+      await this.removeItem(getCSVStorageKey(csvId, 'current-index'));
+    } catch (error) {
+      console.error('Error removing CSV leads data:', error);
     }
   }
 }

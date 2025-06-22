@@ -1,4 +1,3 @@
-
 import { useState, useCallback, useRef, useEffect } from 'react';
 import { Lead } from '../types/lead';
 import { useSearchState } from '../components/SearchState';
@@ -88,7 +87,6 @@ export const useHybridCallingScreenState = ({ leads }: UseHybridCallingScreenSta
       leadsInitialized && 
       !localStorageRestoredRef.current
     ) {
-      console.log('Restoring session from localStorage only');
       restoreFromLocalStorage(leadsData.length);
       localStorageRestoredRef.current = true;
     }

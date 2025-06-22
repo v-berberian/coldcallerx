@@ -9,9 +9,10 @@ import { useLeadsData } from './useLeadsData';
 interface UseLocalCallingScreenStateProps {
   leads: Lead[];
   onCallMade?: () => void;
+  refreshTrigger?: number;
 }
 
-export const useLocalCallingScreenState = ({ leads, onCallMade }: UseLocalCallingScreenStateProps) => {
+export const useLocalCallingScreenState = ({ leads, onCallMade, refreshTrigger = 0 }: UseLocalCallingScreenStateProps) => {
   const [componentReady, setComponentReady] = useState(false);
   const [leadsInitialized, setLeadsInitialized] = useState(false);
   const localStorageRestoredRef = useRef(false);
@@ -19,11 +20,6 @@ export const useLocalCallingScreenState = ({ leads, onCallMade }: UseLocalCallin
   // Use the new async hooks
   const { currentIndex, updateNavigation, isLoaded: navLoaded, historyIndex, goToPrevious, resetNavigation, setCurrentIndex, restoreFromLocalStorage, syncFromCloudSession } = useNavigationState();
   const { leadsData, setLeadsData, isLoaded: leadsLoaded } = useLeadsData(leads);
-
-  // Debug effect to track currentIndex changes
-  useEffect(() => {
-    console.log('useLocalCallingScreenState: currentIndex changed to:', currentIndex);
-  }, [currentIndex]);
 
   // Wait for both to load
   const isLoaded = navLoaded && leadsLoaded;
@@ -56,7 +52,9 @@ export const useLocalCallingScreenState = ({ leads, onCallMade }: UseLocalCallin
     resetCallDelay,
     resetLeadsData,
     updateLeadsDataDirectly,
-    getDelayDisplayType
+    getDelayDisplayType,
+    resetCallCount: leadNavigationResetCallCount,
+    resetAllCallCounts: leadNavigationResetAllCallCounts
   } = useLeadNavigation({ 
     initialLeads: leads, 
     onCallMade,
@@ -67,7 +65,8 @@ export const useLocalCallingScreenState = ({ leads, onCallMade }: UseLocalCallin
     resetNavigation,
     setCurrentIndex,
     restoreFromLocalStorage,
-    syncFromCloudSession
+    syncFromCloudSession,
+    refreshTrigger
   });
 
   const {
@@ -93,16 +92,20 @@ export const useLocalCallingScreenState = ({ leads, onCallMade }: UseLocalCallin
 
   // Save state to localStorage whenever it changes
   useEffect(() => {
-    const saveLeadsData = async () => {
-      if (leadsData.length > 0) {
-        try {
-          await appStorage.saveLeadsData(leadsData);
-        } catch (error) {
-          console.error('Error saving leads data:', error);
+    if (leadsData.length > 0) {
+      try {
+        const currentCSVId = localStorage.getItem('coldcaller-current-csv-id');
+        if (currentCSVId) {
+          const key = `coldcaller-csv-${currentCSVId}-leads`;
+          localStorage.setItem(key, JSON.stringify(leadsData));
+        } else {
+          // Fall back to old storage
+          localStorage.setItem('coldcaller-leads-data', JSON.stringify(leadsData));
         }
+      } catch (error) {
+        console.error('Error saving leads data:', error);
       }
-    };
-    saveLeadsData();
+    }
   }, [leadsData]);
 
   useEffect(() => {
@@ -186,8 +189,6 @@ export const useLocalCallingScreenState = ({ leads, onCallMade }: UseLocalCallin
   useEffect(() => {
     const restoreState = async () => {
       if (leadsData.length > 0 && !localStorageRestoredRef.current) {
-        console.log('Restoring app state from localStorage');
-        
         try {
           // Restore search query
           const savedSearchQuery = await appStorage.getSearchQuery();
@@ -199,28 +200,28 @@ export const useLocalCallingScreenState = ({ leads, onCallMade }: UseLocalCallin
           const savedTimezoneFilter = await appStorage.getTimezoneFilter();
           if (savedTimezoneFilter !== 'all') {
             // Note: We'll need to trigger the filter change
-            console.log('Restoring timezone filter:', savedTimezoneFilter);
+            // This will be handled by the filter hooks
           }
 
           const savedCallFilter = await appStorage.getCallFilter();
           if (savedCallFilter !== 'all') {
-            console.log('Restoring call filter:', savedCallFilter);
+            // This will be handled by the filter hooks
           }
 
           // Restore app modes
           const savedShuffleMode = await appStorage.getShuffleMode();
           if (savedShuffleMode) {
-            console.log('Restoring shuffle mode:', savedShuffleMode);
+            // This will be handled by the mode hooks
           }
 
           const savedAutoCall = await appStorage.getAutoCall();
           if (savedAutoCall) {
-            console.log('Restoring auto call mode:', savedAutoCall);
+            // This will be handled by the auto call hooks
           }
 
           const savedCallDelay = await appStorage.getCallDelay();
           if (savedCallDelay > 0) {
-            console.log('Restoring call delay:', savedCallDelay);
+            // This will be handled by the call delay hooks
           }
 
           localStorageRestoredRef.current = true;
@@ -239,7 +240,6 @@ export const useLocalCallingScreenState = ({ leads, onCallMade }: UseLocalCallin
       try {
         const shouldReset = await appStorage.shouldResetDailyCount();
         if (shouldReset) {
-          console.log('New day detected, resetting daily call count');
           // Reset daily call count logic can be added here
         }
       } catch (error) {
@@ -257,7 +257,6 @@ export const useLocalCallingScreenState = ({ leads, onCallMade }: UseLocalCallin
 
   // Direct leads data update without navigation reset - now properly implemented
   const updateLeadsDataDirectlyMemoized = useCallback((updatedLeads: Lead[]) => {
-    console.log('Updating leads data directly without navigation reset');
     updateLeadsDataDirectly(updatedLeads);
   }, [updateLeadsDataDirectly]);
 
@@ -268,22 +267,27 @@ export const useLocalCallingScreenState = ({ leads, onCallMade }: UseLocalCallin
       leadsInitialized && 
       !localStorageRestoredRef.current
     ) {
-      console.log('Restoring session from localStorage only');
       restoreFromLocalStorage(leadsData.length);
       localStorageRestoredRef.current = true;
     }
   }, [leadsData.length, leadsInitialized, restoreFromLocalStorage]);
 
-  // Local reset functions
+  // Local reset functions - use the actual ones from useLeadNavigation
   const resetCallCount = useCallback(async (lead: Lead) => {
-    console.log('Local reset call count for:', lead.name);
-    // This is just a placeholder - the actual reset logic is handled elsewhere
-  }, []);
+    try {
+      await leadNavigationResetCallCount(lead);
+    } catch (error) {
+      console.error('Error in resetCallCount:', error);
+    }
+  }, [leadNavigationResetCallCount]);
 
   const resetAllCallCounts = useCallback(async () => {
-    console.log('Local reset all call counts');
-    // This is just a placeholder - the actual reset logic is handled elsewhere
-  }, []);
+    try {
+      await leadNavigationResetAllCallCounts();
+    } catch (error) {
+      console.error('Error in resetAllCallCounts:', error);
+    }
+  }, [leadNavigationResetAllCallCounts]);
 
   return {
     componentReady,

@@ -67,7 +67,6 @@ export const parseCSV = async (text: string): Promise<Lead[]> => {
   }
   
   const header = rows[0].map(h => h.trim());
-  console.log('Header line:', JSON.stringify(header));
   
   const leads: Lead[] = [];
   

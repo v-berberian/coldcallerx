@@ -27,7 +27,9 @@ interface LeadCardProps {
   fileName: string;
   onCall: (phone: string) => void;
   onResetCallCount: () => void;
+  onDeleteLead?: (lead: Lead) => void;
   noLeadsMessage?: string;
+  onImportNew?: () => void;
 }
 
 const LeadCard: React.FC<LeadCardProps> = ({
@@ -37,10 +39,10 @@ const LeadCard: React.FC<LeadCardProps> = ({
   fileName,
   onCall,
   onResetCallCount,
-  noLeadsMessage
+  onDeleteLead,
+  noLeadsMessage,
+  onImportNew
 }) => {
-  console.log('LeadCard: Rendering with lead:', lead?.name, 'at index:', currentIndex);
-
   const [emailTemplates, setEmailTemplates] = useState<EmailTemplate[]>([]);
   const [textTemplates, setTextTemplates] = useState<TextTemplate[]>([]);
   const [selectedEmailTemplateId, setSelectedEmailTemplateId] = useState<string>('');
@@ -103,7 +105,6 @@ const LeadCard: React.FC<LeadCardProps> = ({
   // Reset selectedPhone to primary phone when lead changes
   useEffect(() => {
     const primaryPhone = formatPhoneNumber(lead.phone);
-    console.log('Lead changed, resetting selectedPhone to primary:', primaryPhone);
     setSelectedPhone(primaryPhone);
   }, [lead.phone, lead.name]);
 
@@ -179,7 +180,6 @@ const LeadCard: React.FC<LeadCardProps> = ({
   // Completely rewrite phone parsing - handle format: "773) 643-4644 (773) 643-9346"
   const additionalPhones = lead.additionalPhones ? (() => {
     const rawString = lead.additionalPhones.trim();
-    console.log('Raw additional phones string:', rawString);
 
     // Use regex to find all phone patterns like "(123) 456-7890" or "123) 456-7890"
     const phonePattern = /\(?(\d{3})\)?\s*(\d{3})-?(\d{4})/g;
@@ -189,7 +189,6 @@ const LeadCard: React.FC<LeadCardProps> = ({
       const formattedPhone = `(${match[1]}) ${match[2]}-${match[3]}`;
       foundPhones.push(formattedPhone);
     }
-    console.log('Found phones:', foundPhones);
 
     // Remove the primary phone if it appears in the additional phones
     const primaryPhoneFormatted = formatPhoneNumber(lead.phone);
@@ -213,22 +212,13 @@ const LeadCard: React.FC<LeadCardProps> = ({
   const cleanSelectedPhone = selectedPhone.replace(/\D/g, '');
   const leadState = getStateFromAreaCode(cleanSelectedPhone);
 
-  // Debug logging
-  console.log('Primary phone:', formatPhoneNumber(lead.phone));
-  console.log('Selected phone:', selectedPhone);
-  console.log('Clean selected phone for state:', cleanSelectedPhone);
-  console.log('Lead state from selected phone:', leadState);
-  console.log('Additional phones after parsing (limited to 3):', additionalPhones);
-
   // Handle phone selection
   const handlePhoneSelect = (phone: string) => {
-    console.log('Phone selected:', phone);
     setSelectedPhone(phone);
   };
 
   // Modified onCall to use selected phone
   const handleCall = () => {
-    console.log('Making call to selected phone:', selectedPhone);
     onCall(selectedPhone);
   };
 
@@ -295,13 +285,11 @@ const LeadCard: React.FC<LeadCardProps> = ({
 
   const handleEmailClick = (template?: EmailTemplate) => {
     const templateToUse = template || selectedEmailTemplate;
-    console.log('Email clicked for:', emailValue, templateToUse ? `with template: ${templateToUse.name}` : 'without template');
     window.location.href = createMailtoLink(template);
   };
 
   const handleTextClick = (template?: TextTemplate) => {
     const templateToUse = template || selectedTextTemplate;
-    console.log('Text clicked for:', selectedPhone, templateToUse ? `with template: ${templateToUse.name}` : 'without template');
     window.location.href = createSmsLink(template);
   };
 
@@ -309,12 +297,9 @@ const LeadCard: React.FC<LeadCardProps> = ({
     <Card className="shadow-2xl border-border/50 rounded-3xl bg-card min-h-[400px] max-h-[500px] sm:min-h-[420px] sm:max-h-[550px] flex flex-col mb-4">
       <CardContent className="p-4 sm:p-6 space-y-5 sm:space-y-6 flex-1 flex flex-col">
         {/* Top row with lead count and file name */}
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-center">
           <p className="text-sm text-muted-foreground opacity-40">
             {currentIndex + 1}/{totalCount}
-          </p>
-          <p className="text-sm text-muted-foreground opacity-40 truncate">
-            {fileName}
           </p>
         </div>
 
@@ -328,14 +313,14 @@ const LeadCard: React.FC<LeadCardProps> = ({
           {/* Group 1: Name and Company */}
           <div className="space-y-2">
             <div className="flex items-center justify-center px-2">
-              <h2 className="text-2xl sm:text-3xl font-bold text-foreground text-center break-words leading-tight">
+              <h2 className="text-2xl sm:text-3xl font-bold text-center break-words leading-tight bg-gradient-to-r from-foreground to-foreground/95 bg-clip-text text-transparent dark:bg-none dark:text-foreground">
                 {lead.name}
               </h2>
             </div>
             
             {lead.company && (
               <div className="flex items-center justify-center px-2">
-                <p className="text-base sm:text-lg text-muted-foreground font-medium text-center break-words leading-relaxed">
+                <p className="text-base sm:text-lg font-medium text-center break-words leading-relaxed bg-gradient-to-r from-muted-foreground to-muted-foreground/90 bg-clip-text text-transparent dark:bg-none dark:text-muted-foreground">
                   {lead.company}
                 </p>
               </div>
@@ -351,7 +336,7 @@ const LeadCard: React.FC<LeadCardProps> = ({
                 {hasAdditionalPhones ? (
                   <DropdownMenu>
                     <DropdownMenuTrigger className="flex items-center gap-1 cursor-pointer hover:text-foreground transition-colors">
-                      <p className="text-base sm:text-lg text-muted-foreground">{selectedPhone}</p>
+                      <p className="text-base sm:text-lg bg-gradient-to-r from-muted-foreground to-muted-foreground/95 bg-clip-text text-transparent dark:bg-none dark:text-muted-foreground">{selectedPhone}</p>
                       <ChevronDown className="h-4 w-4 text-muted-foreground" />
                     </DropdownMenuTrigger>
                     <DropdownMenuContent 
@@ -381,7 +366,7 @@ const LeadCard: React.FC<LeadCardProps> = ({
                     </DropdownMenuContent>
                   </DropdownMenu>
                 ) : (
-                  <p className="text-base sm:text-lg text-muted-foreground">{selectedPhone}</p>
+                  <p className="text-base sm:text-lg bg-gradient-to-r from-muted-foreground to-muted-foreground/95 bg-clip-text text-transparent dark:bg-none dark:text-muted-foreground">{selectedPhone}</p>
                 )}
               </div>
             </div>
@@ -429,14 +414,14 @@ const LeadCard: React.FC<LeadCardProps> = ({
             <Button 
               onClick={() => handleTextClick()} 
               size="lg" 
-              className="w-24 h-24 sm:w-32 sm:h-32 rounded-full shadow-lg bg-[#007AFF] hover:bg-[#007AFF] active:bg-[#005BB5] text-white transition-colors duration-200 flex items-center justify-center p-0"
+              className="w-24 h-24 sm:w-32 sm:h-32 rounded-full shadow-lg bg-gradient-to-b from-[#007AFF] via-[#007AFF] to-[#0056CC] hover:from-[#007AFF]/95 hover:via-[#007AFF]/95 hover:to-[#0056CC]/95 active:from-[#0056CC] active:via-[#0056CC] active:to-[#004499] dark:bg-[#007AFF] dark:hover:bg-[#007AFF]/95 dark:active:bg-[#0056CC] text-white transition-all duration-200 flex items-center justify-center p-0"
             >
               <MessageSquare className="h-[32px] w-[32px] sm:h-[40px] sm:w-[40px]" />
             </Button>
             <Button 
               onClick={handleCall} 
               size="lg" 
-              className="w-24 h-24 sm:w-32 sm:h-32 rounded-full shadow-lg bg-green-500 hover:bg-green-500 active:bg-green-700 text-white transition-colors duration-200 flex items-center justify-center p-0"
+              className="w-24 h-24 sm:w-32 sm:h-32 rounded-full shadow-lg bg-gradient-to-b from-green-500 via-green-500 to-green-600 hover:from-green-500/95 hover:via-green-500/95 hover:to-green-600/95 active:from-green-600 active:via-green-600 active:to-green-700 dark:bg-green-500 dark:hover:bg-green-500/95 dark:active:bg-green-600 text-white transition-all duration-200 flex items-center justify-center p-0"
             >
               <Phone className="h-[32px] w-[32px] sm:h-[40px] sm:w-[40px]" />
             </Button>

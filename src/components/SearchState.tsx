@@ -36,13 +36,18 @@ export const useSearchState = ({ leads, getBaseLeads, leadsData, timezoneFilter,
   const [isSearching, setIsSearching] = useState(false);
   const [showAutocomplete, setShowAutocomplete] = useState(false);
 
-  // Debounce search query to avoid excessive filtering
-  const debouncedSearchQuery = useDebounce(searchQuery, 150);
+  // Reduced debounce time for faster response
+  const debouncedSearchQuery = useDebounce(searchQuery, 50);
 
   // Memoize base leads to avoid recalculation
   const baseLeads = useMemo(() => {
     return getBaseLeads();
   }, [getBaseLeads]);
+
+  // Pre-initialize search results with all leads for instant display
+  const initialSearchResults = useMemo(() => {
+    return baseLeads.slice(0, INITIAL_RESULTS);
+  }, [baseLeads]);
 
   // Ultra-optimized search function with incremental loading
   const performSearch = useCallback((query: string, leads: Lead[]) => {
@@ -99,6 +104,13 @@ export const useSearchState = ({ leads, getBaseLeads, leadsData, timezoneFilter,
     setIsSearching(debouncedSearchQuery.trim().length > 0);
   }, [visibleSearchResults, debouncedSearchQuery]);
 
+  // Pre-populate search results on mount for instant display
+  useEffect(() => {
+    if (searchResults.length === 0 && initialSearchResults.length > 0) {
+      setSearchResults(initialSearchResults);
+    }
+  }, [initialSearchResults, searchResults.length]);
+
   const clearSearch = useCallback(() => {
     setSearchQuery('');
     // Don't close autocomplete - just clear the search query
@@ -107,8 +119,13 @@ export const useSearchState = ({ leads, getBaseLeads, leadsData, timezoneFilter,
   }, []);
 
   const handleSearchFocus = useCallback(() => {
+    // Immediately show autocomplete with pre-loaded results
     setShowAutocomplete(true);
-  }, []);
+    // Ensure we have results to show immediately
+    if (searchResults.length === 0 && initialSearchResults.length > 0) {
+      setSearchResults(initialSearchResults);
+    }
+  }, [searchResults.length, initialSearchResults]);
 
   const handleSearchBlur = useCallback(() => {
     // Don't close autocomplete if there are results, even with no search query

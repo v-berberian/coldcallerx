@@ -63,12 +63,23 @@
   * {
     @apply border-border;
   }
+  html {
+    /* Apply gradient to html element - subtle blue aesthetic */
+    background: linear-gradient(135deg, hsl(var(--background)) 0%, hsl(var(--background) / 0.85) 30%, hsl(210 40% 98% / 0.15) 60%, hsl(var(--background) / 0.9) 100%) !important;
+  }
+  
+  .dark html {
+    /* Remove gradient in dark mode - use solid background */
+    background: hsl(var(--background)) !important;
+  }
   body {
     @apply bg-background text-foreground;
     font-family: 'Poppins', sans-serif;
     user-select: none;
     -webkit-user-select: none;
     -webkit-touch-callout: none;
+    /* Remove background from body since we're applying to html */
+    background: transparent !important;
   }
 }
 
@@ -135,6 +146,17 @@ select:focus-visible:ring-offset-0 {
 body {
   overscroll-behavior: none;
   -webkit-overflow-scrolling: touch;
+  position: fixed;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  /* Keep the gradient background */
+  background: linear-gradient(135deg, hsl(var(--background)) 0%, hsl(var(--background) / 0.3) 15%, hsl(210 40% 98% / 0.7) 35%, hsl(220 30% 96% / 0.6) 55%, hsl(230 20% 94% / 0.5) 75%, hsl(var(--background) / 0.2) 100%) !important;
+}
+
+.dark body {
+  /* Remove gradient in dark mode - use solid background */
+  background: hsl(var(--background)) !important;
 }
 
 /* Hide scrollbars in standalone mode */
@@ -398,7 +420,7 @@ body.overflow-hidden {
 }
 
 /* iOS Safari elastic scrolling prevention */
-html, body {
+html {
   overscroll-behavior: none;
   -webkit-overflow-scrolling: touch;
   position: fixed;
@@ -417,6 +439,32 @@ html, body {
 /* Prevent elastic scrolling on specific containers */
 .overflow-y-auto {
   -webkit-overflow-scrolling: touch;
+}
+
+/* CSV File Selector Button - No borders or outlines ever */
+[data-radix-dropdown-trigger] button,
+[data-radix-dropdown-trigger] button:focus,
+[data-radix-dropdown-trigger] button:focus-visible,
+[data-radix-dropdown-trigger] button:active,
+[data-radix-dropdown-trigger] button:visited,
+[data-radix-dropdown-trigger] button:hover,
+button[data-state="closed"],
+button[data-state="open"],
+button[data-state="closed"]:focus,
+button[data-state="open"]:focus,
+button[data-state="closed"]:focus-visible,
+button[data-state="open"]:focus-visible,
+button[data-no-outline="true"],
+button[data-no-outline="true"]:focus,
+button[data-no-outline="true"]:focus-visible,
+button[data-no-outline="true"]:active,
+button[data-no-outline="true"]:visited,
+button[data-no-outline="true"]:hover {
+  outline: none !important;
+  border: none !important;
+  box-shadow: none !important;
+  ring: none !important;
+  ring-offset: none !important;
 }
 
 

@@ -75,6 +75,17 @@ const SearchBar = forwardRef<SearchBarRef, SearchBarProps>(({
     onToggleFullscreen?.();
   };
 
+  const handleInputClick = () => {
+    // If in fullscreen mode, collapse when input is clicked
+    if (isFullscreen) {
+      onToggleFullscreen?.();
+      // Focus the input after collapsing
+      setTimeout(() => {
+        inputRef.current?.focus();
+      }, 10);
+    }
+  };
+
   return (
     <div className="relative search-area" onTouchStart={(e) => e.stopPropagation()} onTouchEnd={(e) => e.stopPropagation()}>
       <input 
@@ -84,6 +95,7 @@ const SearchBar = forwardRef<SearchBarRef, SearchBarProps>(({
         onChange={e => onSearchChange(e.target.value)} 
         onFocus={handleFocus} 
         onBlur={handleBlur} 
+        onClick={handleInputClick}
         className="w-full px-4 py-2 bg-card text-card-foreground rounded-xl border border-border placeholder:text-center placeholder:text-muted-foreground text-center focus:border-primary/50 focus:bg-card shadow-sm"
         ref={inputRef}
       />

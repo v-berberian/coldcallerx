@@ -18,40 +18,30 @@ export const useFilterChangeEffects = (
     // Don't auto-navigate during auto-call operations or when filters are changing
     // IMPORTANT: Don't navigate during auto-call to prevent jumping away from called leads
     if (isAutoCallInProgress || isFilterChanging) {
-      console.log('Skipping filter navigation because auto-call is in progress or filters are changing');
       return;
     }
 
     // Early return if leadsData is not ready
     if (!leadsData || leadsData.length === 0) {
-      console.log('Skipping filter navigation because leads data is not ready');
       return;
     }
 
-    console.log('Filter change effect triggered', { timezoneFilter, callFilter });
     setFilterChanging(true);
-    console.log('useFilterChangeEffects: Setting isFilterChanging to true');
     
     try {
       const baseLeadsBeforeFilter = filterLeadsByTimezone(leadsData, 'ALL');
       const currentlyViewedLead = baseLeadsBeforeFilter[currentIndex];
-      
-      console.log('Currently viewed lead:', currentlyViewedLead?.name);
       
       let newFilteredLeads = filterLeadsByTimezone(leadsData, timezoneFilter);
       if (callFilter === 'UNCALLED') {
         newFilteredLeads = newFilteredLeads.filter(lead => !lead.lastCalled);
       }
       
-      console.log('New filtered leads count:', newFilteredLeads.length);
-      
       // Safety check: if no leads match the filter, reset to first available lead
       if (newFilteredLeads.length === 0) {
-        console.log('No leads match the current filter, resetting to first lead');
         setCurrentIndex(0);
         setTimeout(() => {
           setFilterChanging(false);
-          console.log('useFilterChangeEffects: Setting isFilterChanging to false (no leads match)');
         }, 100);
         return;
       }
@@ -65,11 +55,9 @@ export const useFilterChangeEffects = (
           const newIndexOfCurrentLead = newFilteredLeads.findIndex(lead => 
             lead.name === currentlyViewedLead.name && lead.phone === currentlyViewedLead.phone
           );
-          console.log('Current lead matches new filter, keeping at index:', newIndexOfCurrentLead);
           setCurrentIndex(newIndexOfCurrentLead);
           setTimeout(() => {
             setFilterChanging(false);
-            console.log('useFilterChangeEffects: Setting isFilterChanging to false (current lead matches)');
           }, 100);
           return;
         }
@@ -77,8 +65,6 @@ export const useFilterChangeEffects = (
         const originalIndex = leadsData.findIndex(lead => 
           lead.name === currentlyViewedLead.name && lead.phone === currentlyViewedLead.phone
         );
-        
-        console.log('Original index of current lead:', originalIndex);
         
         let nextIndex = 0;
         let foundNextLead = false;
@@ -92,13 +78,11 @@ export const useFilterChangeEffects = (
           if (indexInFiltered !== -1) {
             nextIndex = indexInFiltered;
             foundNextLead = true;
-            console.log('Found next lead after current position at filtered index:', nextIndex, 'lead:', leadAtIndex.name);
             break;
           }
         }
         
         if (!foundNextLead) {
-          console.log('No lead found after current position, wrapping to beginning');
           for (let i = 0; i <= originalIndex; i++) {
             const leadAtIndex = leadsData[i];
             const indexInFiltered = newFilteredLeads.findIndex(filteredLead => 
@@ -107,7 +91,6 @@ export const useFilterChangeEffects = (
             
             if (indexInFiltered !== -1) {
               nextIndex = indexInFiltered;
-              console.log('Found wrapped lead at filtered index:', nextIndex, 'lead:', leadAtIndex.name);
               break;
             }
           }
@@ -115,18 +98,15 @@ export const useFilterChangeEffects = (
         
         setCurrentIndex(nextIndex);
       } else if (newFilteredLeads.length > 0) {
-        console.log('No current lead, setting to first');
         setCurrentIndex(0);
       }
     } catch (error) {
-      console.error('Error in filter change effect:', error);
       // Fallback: reset to first lead if there's an error
       setCurrentIndex(0);
     }
     
     setTimeout(() => {
       setFilterChanging(false);
-      console.log('useFilterChangeEffects: Setting isFilterChanging to false (default timeout)');
     }, 100);
   }, [timezoneFilter, callFilter]); // Remove leadsData dependency to prevent navigation when leads are called
 

@@ -66,11 +66,11 @@ const DailyProgress: React.FC<DailyProgressProps> = ({
       <div className="flex items-center justify-between text-sm">
         <div className="flex items-center space-x-2 text-muted-foreground">
           <Target className="h-4 w-4" style={{ color: '#6EC6F1' }} />
-          <span className="font-medium">Calls</span>
+          <span className="font-medium bg-gradient-to-r from-muted-foreground to-muted-foreground/95 bg-clip-text text-transparent dark:bg-none dark:text-muted-foreground">Calls</span>
         </div>
         <div className="flex items-center">
-          <span className="text-sm font-medium text-foreground">{dailyCallCount} </span>
-          <span className="text-sm font-medium text-foreground">/</span>
+          <span className="text-sm font-medium bg-gradient-to-r from-foreground to-foreground/95 bg-clip-text text-transparent dark:bg-none dark:text-foreground">{dailyCallCount} </span>
+          <span className="text-sm font-medium bg-gradient-to-r from-foreground to-foreground/95 bg-clip-text text-transparent dark:bg-none dark:text-foreground">/</span>
           {isEditingGoal ? (
             <div className="flex items-center space-x-1">
               <Input
@@ -92,7 +92,7 @@ const DailyProgress: React.FC<DailyProgressProps> = ({
           ) : (
             <button
               onClick={handleGoalClick}
-              className="text-sm font-medium text-foreground hover:text-primary transition-colors duration-200 touch-manipulation ml-1"
+              className="text-sm font-medium hover:text-primary transition-colors duration-200 touch-manipulation ml-1 bg-gradient-to-r from-foreground to-foreground/95 bg-clip-text text-transparent dark:bg-none dark:text-foreground"
               style={{ WebkitTapHighlightColor: 'transparent' }}
             >
               {dailyCallGoal}

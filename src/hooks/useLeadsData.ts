@@ -41,40 +41,55 @@ const throttleLocalStorage = (() => {
   };
 })();
 
-export const useLeadsData = (initialLeads: Lead[]) => {
+export const useLeadsData = (initialLeads: Lead[], refreshTrigger: number = 0) => {
   const [leadsData, setLeadsData] = useState<Lead[]>([]);
   const [isLoaded, setIsLoaded] = useState(false);
 
   useEffect(() => {
     (async () => {
-      const saved = await appStorage.getLeadsData();
-      setLeadsData(saved.length > 0 ? saved : initialLeads);
-      setIsLoaded(true);
+      try {
+        // Try to load from CSV-specific storage first
+        const currentCSVId = await appStorage.getCurrentCSVId();
+        let saved: Lead[] = [];
+        
+        if (currentCSVId) {
+          saved = await appStorage.getCSVLeadsData(currentCSVId);
+        }
+        
+        // If no CSV-specific data, fall back to old storage
+        if (saved.length === 0) {
+          saved = await appStorage.getLeadsData();
+        }
+        
+        setLeadsData(saved.length > 0 ? saved : initialLeads);
+        setIsLoaded(true);
+      } catch (error) {
+        console.error('Error loading leads data:', error);
+        setLeadsData(initialLeads);
+        setIsLoaded(true);
+      }
     })();
-  }, [initialLeads]);
+  }, [initialLeads, refreshTrigger]);
 
   useEffect(() => {
-    if (isLoaded) appStorage.saveLeadsData(leadsData);
+    if (isLoaded && leadsData.length > 0) {
+      try {
+        const currentCSVId = localStorage.getItem('coldcaller-current-csv-id');
+        if (currentCSVId) {
+          const key = `coldcaller-csv-${currentCSVId}-leads`;
+          localStorage.setItem(key, JSON.stringify(leadsData));
+        } else {
+          // Fall back to old storage
+          localStorage.setItem('coldcaller-leads-data', JSON.stringify(leadsData));
+        }
+      } catch (error) {
+        console.error('Error saving leads data:', error);
+      }
+    }
   }, [leadsData, isLoaded]);
-
-  // Log call tracking capabilities on mount
-  useEffect(() => {
-    console.log('📱 CALL TRACKING CAPABILITIES ON iOS:');
-    console.log('✅ CAN TRACK: iOS transition from app to Phone app');
-    console.log('✅ CAN TRACK: When Phone app actually opens');
-    console.log('✅ CAN TRACK: App focus loss (indicates call initiation)');
-    console.log('❌ CANNOT TRACK: Actual call completion (answered/hung up)');
-    console.log('❌ CANNOT TRACK: Call duration or length');
-    console.log('❌ CANNOT TRACK: Call outcome (voicemail, busy, etc.)');
-    console.log('🔒 REASON: iOS privacy restrictions prevent call state access');
-    console.log('📞 SOLUTION: App tracks iOS transitions to Phone app');
-  }, []);
 
   const makeCall = (lead: Lead, markAsCalled: boolean = true, onCallMade?: () => void, onTransitionDetected?: () => void) => {
     const phoneNumber = getPhoneDigits(lead.phone);
-    
-    console.log('📞 CALL ATTEMPT: Initiating call to', lead.name, 'at', phoneNumber);
-    console.log('📱 Waiting for iOS transition to Phone app...');
     
     // Set up a flag to track if we've already marked this call
     let callMarked = false;
@@ -84,12 +99,9 @@ export const useLeadsData = (initialLeads: Lead[]) => {
     const markCallOnTransition = () => {
       if (!callMarked && transitionDetected) {
         callMarked = true;
-        console.log('✅ iOS TRANSITION DETECTED: App lost focus - Phone app opened');
-        console.log('📞 CALL INITIATED: Lead will be marked as called');
         
         // Call the transition callback to set callMadeToCurrentLead flag
         if (onTransitionDetected) {
-          console.log('🎯 SETTING CALL FLAG: Marking that call was actually made');
           onTransitionDetected();
         }
         
@@ -100,10 +112,12 @@ export const useLeadsData = (initialLeads: Lead[]) => {
         
         // Mark the lead as called
         if (markAsCalled) {
-          console.log('✅ MARKING AS CALLED: Lead marked immediately after iOS transition');
           markLeadAsCalledWrapper(lead);
         } else {
-          console.log('⏳ DEFERRED MARKING: Lead will be marked on navigation');
+          // Call the callback to increment daily call count
+          if (onCallMade) {
+            onCallMade();
+          }
         }
       }
     };
@@ -111,11 +125,9 @@ export const useLeadsData = (initialLeads: Lead[]) => {
     // Listen for app visibility change (when iOS transitions to Phone app)
     const handleVisibilityChange = () => {
       if (document.hidden) {
-        console.log('📱 APP LOST FOCUS: iOS transitioning to Phone app');
         transitionDetected = true;
         markCallOnTransition();
       } else {
-        console.log('📱 APP REGAINED FOCUS: User returned from Phone app');
         // Clean up listeners when app regains focus
         cleanupListeners();
       }
@@ -123,7 +135,6 @@ export const useLeadsData = (initialLeads: Lead[]) => {
     
     // Listen for page blur (alternative method)
     const handlePageBlur = () => {
-      console.log('📱 PAGE BLUR: iOS transitioning to Phone app');
       transitionDetected = true;
       markCallOnTransition();
     };
@@ -145,11 +156,21 @@ export const useLeadsData = (initialLeads: Lead[]) => {
       
       // If no transition was detected, don't mark the call
       if (!transitionDetected) {
-        console.log('❌ NO iOS TRANSITION: User likely cancelled the call menu');
-        console.log('📞 CALL NOT MARKED: Lead will not be marked as called');
-        console.log('🎯 CALL FLAG NOT SET: callMadeToCurrentLead remains false');
+        // If no transition was detected, don't mark the call
+        callMarked = true;
+        
+        if (onTransitionDetected) {
+          onTransitionDetected();
+        }
+        
+        if (onCallMade) {
+          onCallMade();
+        }
+        
+        if (markAsCalled) {
+          markLeadAsCalledWrapper(lead);
+        }
       } else if (!callMarked) {
-        console.log('⏰ TIMEOUT: iOS transition detected but call not marked yet');
         callMarked = true;
         
         if (onTransitionDetected) {
@@ -176,7 +197,6 @@ export const useLeadsData = (initialLeads: Lead[]) => {
       
       // Ensure we have a valid date
       if (isNaN(now.getTime())) {
-        console.error('Invalid date created');
         return;
       }
 
@@ -188,60 +208,99 @@ export const useLeadsData = (initialLeads: Lead[]) => {
       });
       const lastCalledString = `${dateString} at ${timeString}`;
 
-      console.log('✅ LEAD MARKED AS CALLED:', lead.name, 'at', lastCalledString);
-      console.log('📊 TRACKING STATUS: Call attempt logged (iOS cannot track actual call duration)');
-      console.log('🔒 PRIVACY NOTE: iOS prevents apps from accessing call logs or call state');
-
-      const updatedLeads = leadsData.map(l => 
-        l.name === lead.name && l.phone === lead.phone ? {
-          ...l,
-          lastCalled: lastCalledString
-        } : l
-      );
-      
-      setLeadsData(updatedLeads);
-      
-      // Save to appStorage
-      appStorage.saveLeadsData(updatedLeads);
+      // Use a function to get the current leadsData to avoid stale closure
+      setLeadsData(currentLeads => {
+        const updatedLeads = currentLeads.map(l => 
+          l.name === lead.name && l.phone === lead.phone ? {
+            ...l,
+            lastCalled: lastCalledString
+          } : l
+        );
+        
+        // Save to CSV-specific storage immediately using synchronous localStorage
+        try {
+          const currentCSVId = localStorage.getItem('coldcaller-current-csv-id');
+          if (currentCSVId) {
+            const key = `coldcaller-csv-${currentCSVId}-leads`;
+            localStorage.setItem(key, JSON.stringify(updatedLeads));
+          } else {
+            // Fall back to old storage
+            localStorage.setItem('coldcaller-leads-data', JSON.stringify(updatedLeads));
+          }
+        } catch (error) {
+          console.error('Error saving leads data:', error);
+        }
+        
+        return updatedLeads;
+      });
     } catch (error) {
       console.error('Error in markLeadAsCalledWrapper:', error);
     }
-  }, [leadsData]);
+  }, []); // Remove leadsData dependency to avoid stale closure
 
   const resetCallCountWrapper = useCallback((lead: Lead) => {
     try {
-      const updatedLeads = leadsData.map(l => 
-        l.name === lead.name && l.phone === lead.phone 
-          ? { ...l, lastCalled: undefined }
-          : l
-      );
-      setLeadsData(updatedLeads);
-      
-      // Save to appStorage
-      appStorage.saveLeadsData(updatedLeads);
+      // Use a function to get the current leadsData to avoid stale closure
+      setLeadsData(currentLeads => {
+        const updatedLeads = currentLeads.map(l => 
+          l.name === lead.name && l.phone === lead.phone 
+            ? { ...l, lastCalled: undefined }
+            : l
+        );
+        
+        // Save to CSV-specific storage immediately using synchronous localStorage
+        try {
+          const currentCSVId = localStorage.getItem('coldcaller-current-csv-id');
+          if (currentCSVId) {
+            const key = `coldcaller-csv-${currentCSVId}-leads`;
+            localStorage.setItem(key, JSON.stringify(updatedLeads));
+          } else {
+            // Fall back to old storage
+            localStorage.setItem('coldcaller-leads-data', JSON.stringify(updatedLeads));
+          }
+        } catch (error) {
+          console.error('Error saving leads data:', error);
+        }
+        
+        return updatedLeads;
+      });
     } catch (error) {
       console.error('Error in resetCallCountWrapper:', error);
     }
-  }, [leadsData]);
+  }, []); // Remove leadsData dependency to avoid stale closure
 
   const resetAllCallCountsWrapper = useCallback(() => {
     try {
-      const updatedLeads = leadsData.map(l => ({
-        ...l,
-        lastCalled: undefined
-      }));
-      setLeadsData(updatedLeads);
-      
-      // Save to appStorage
-      appStorage.saveLeadsData(updatedLeads);
+      // Use a function to get the current leadsData to avoid stale closure
+      setLeadsData(currentLeads => {
+        const updatedLeads = currentLeads.map(l => ({
+          ...l,
+          lastCalled: undefined
+        }));
+        
+        // Save to CSV-specific storage immediately using synchronous localStorage
+        try {
+          const currentCSVId = localStorage.getItem('coldcaller-current-csv-id');
+          if (currentCSVId) {
+            const key = `coldcaller-csv-${currentCSVId}-leads`;
+            localStorage.setItem(key, JSON.stringify(updatedLeads));
+          } else {
+            // Fall back to old storage
+            localStorage.setItem('coldcaller-leads-data', JSON.stringify(updatedLeads));
+          }
+        } catch (error) {
+          console.error('Error saving leads data:', error);
+        }
+        
+        return updatedLeads;
+      });
     } catch (error) {
       console.error('Error in resetAllCallCountsWrapper:', error);
     }
-  }, [leadsData]);
+  }, []); // Remove leadsData dependency to avoid stale closure
 
   // Function to mark a lead as called when navigating away
   const markLeadAsCalledOnNavigation = useCallback((lead: Lead) => {
-    console.log('Marking lead as called on navigation:', lead.name);
     markLeadAsCalledWrapper(lead);
   }, [markLeadAsCalledWrapper]);
 

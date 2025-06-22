@@ -15,6 +15,7 @@ import { useLeadNavigationReset } from './useLeadNavigationReset';
 interface UseLeadNavigationProps {
   initialLeads: Lead[];
   onCallMade?: () => void;
+  refreshTrigger?: number;
   // Navigation state from parent
   currentIndex: number;
   historyIndex: number;
@@ -29,6 +30,7 @@ interface UseLeadNavigationProps {
 export const useLeadNavigation = ({ 
   initialLeads, 
   onCallMade,
+  refreshTrigger = 0,
   currentIndex,
   historyIndex,
   updateNavigation,
@@ -74,7 +76,7 @@ export const useLeadNavigation = ({
     markLeadAsCalledOnNavigation,
     resetCallCount,
     resetAllCallCounts
-  } = useLeadsData(initialLeads);
+  } = useLeadsData(initialLeads, refreshTrigger);
 
   // Wrap makeCall to include daily call tracking
   const makeCall = (lead: Lead, markAsCalled: boolean = true, onCallMade?: () => void, onTransitionDetected?: () => void) => {

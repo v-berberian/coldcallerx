@@ -26,11 +26,9 @@ export const useLeadNavigationEffects = ({
     // Pass a callback that will be called only when iOS transitions to Phone app
     const onTransitionDetected = () => {
       setCallMadeToCurrentLead(true); // Only set this when iOS actually transitions
-      console.log('🎯 CALL FLAG SET: iOS transition detected - call was actually made to:', lead.name);
     };
     
     makeCall(lead, false, undefined, onTransitionDetected); // Don't mark as called immediately
-    console.log('📞 CALL BUTTON PRESSED: Waiting for iOS transition to Phone app...');
   };
 
   const handleCountdownCompleteWrapper = () => {

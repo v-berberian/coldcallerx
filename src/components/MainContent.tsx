@@ -9,6 +9,7 @@ interface MainContentProps {
   currentIndex: number;
   totalCount: number;
   fileName: string;
+  currentCSVId: string | null;
   timezoneFilter: 'ALL' | 'EST_CST';
   callFilter: 'ALL' | 'UNCALLED';
   shuffleMode: boolean;
@@ -16,6 +17,7 @@ interface MainContentProps {
   callDelay: number;
   onCall: (phone: string) => void;
   onResetCallCount: () => void;
+  onCSVSelect: (csvId: string, leads: Lead[], fileName: string) => void;
   onToggleTimezone: () => void;
   onToggleCallFilter: () => void;
   onToggleShuffle: () => void;
@@ -32,6 +34,8 @@ interface MainContentProps {
   getDelayDisplayType?: () => 'timer' | 'rocket' | '5s' | '10s';
   showAutocomplete?: boolean;
   noLeadsMessage?: string;
+  refreshTrigger?: number;
+  onImportNew?: () => void;
 }
 
 const MainContent: React.FC<MainContentProps> = ({
@@ -39,6 +43,7 @@ const MainContent: React.FC<MainContentProps> = ({
   currentIndex,
   totalCount,
   fileName,
+  currentCSVId,
   timezoneFilter,
   callFilter,
   shuffleMode,
@@ -46,6 +51,7 @@ const MainContent: React.FC<MainContentProps> = ({
   callDelay,
   onCall,
   onResetCallCount,
+  onCSVSelect,
   onToggleTimezone,
   onToggleCallFilter,
   onToggleShuffle,
@@ -61,7 +67,9 @@ const MainContent: React.FC<MainContentProps> = ({
   countdownTime,
   getDelayDisplayType,
   showAutocomplete = false,
-  noLeadsMessage
+  noLeadsMessage,
+  refreshTrigger,
+  onImportNew
 }) => {
   return (
     <div className="flex-1 flex items-start justify-center pt-1 p-3 sm:p-4 min-h-0 px-4 sm:px-6" style={{ minHeight: 'calc(100dvh - 120px)' }}>
@@ -92,9 +100,13 @@ const MainContent: React.FC<MainContentProps> = ({
             currentIndex={currentIndex}
             totalCount={totalCount}
             fileName={fileName}
+            currentCSVId={currentCSVId}
             onCall={onCall}
             onResetCallCount={onResetCallCount}
+            onCSVSelect={onCSVSelect}
             noLeadsMessage={noLeadsMessage}
+            refreshTrigger={refreshTrigger}
+            onImportNew={onImportNew}
           />
         </div>
 

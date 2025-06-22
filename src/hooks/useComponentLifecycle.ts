@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 
 export const useComponentLifecycle = () => {
@@ -7,11 +6,8 @@ export const useComponentLifecycle = () => {
 
   // Progressive component initialization
   useEffect(() => {
-    console.log('ComponentLifecycle: Starting progressive initialization');
-    
     const initializeComponent = async () => {
       await new Promise(resolve => setTimeout(resolve, 50));
-      console.log('ComponentLifecycle: Component ready');
       setComponentReady(true);
     };
 

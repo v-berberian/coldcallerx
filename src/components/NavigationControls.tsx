@@ -16,12 +16,10 @@ const NavigationControls: React.FC<NavigationControlsProps> = ({
   canGoNext
 }) => {
   const handlePrevious = () => {
-    console.log('NavigationControls: Previous button clicked');
     onPrevious();
   };
 
   const handleNext = () => {
-    console.log('NavigationControls: Next button clicked');
     onNext();
   };
 
