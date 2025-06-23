@@ -1,4 +1,3 @@
-
 import { useEffect } from 'react';
 import { Lead } from '../types/lead';
 
@@ -31,20 +30,11 @@ export const useAutoCallEffects = ({
 }: UseAutoCallEffectsProps) => {
   // Handle auto-call trigger - start countdown when conditions are met
   useEffect(() => {
-    console.log('AUTO-CALL EFFECT: Checking conditions', {
-      shouldAutoCall,
-      autoCall,
-      componentReady,
-      leadsInitialized,
-      currentIndex
-    });
-
     if (shouldAutoCall && autoCall && componentReady && leadsInitialized) {
       const currentLeads = getBaseLeads();
       const currentLead = currentLeads[currentIndex];
       
       if (currentLead) {
-        console.log('AUTO-CALL EFFECT: Triggering countdown for lead:', currentLead.name, currentLead.phone);
         setCurrentLeadForAutoCall(currentLead);
         
         // Execute auto-call with the current lead
@@ -56,8 +46,6 @@ export const useAutoCallEffects = ({
             console.error('Error marking lead as called:', error);
           });
         }
-      } else {
-        console.log('AUTO-CALL EFFECT: No current lead found');
       }
       
       // Reset the trigger flag

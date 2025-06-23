@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { FileText, X, ListTodo } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
@@ -98,58 +98,42 @@ const CSVFileSelector: React.FC<CSVFileSelectorProps> = ({
     }, 10);
   };
 
-  const loadCSVFiles = async () => {
+  const loadCSVFiles = useCallback(async () => {
     try {
-      const filesStr = localStorage.getItem('coldcaller-csv-files');
-      const files = filesStr ? JSON.parse(filesStr) : [];
+      const files = await appStorage.getCSVFiles();
       
-      // Filter out files that don't have actual leads data in localStorage
-      const validFiles = files.filter(file => {
-        const leadsKey = `coldcaller-csv-${file.id}-leads`;
-        const leadsData = localStorage.getItem(leadsKey);
-        return leadsData && JSON.parse(leadsData).length > 0;
-      });
+      const validFiles = [];
       
-      // If there are invalid files (files without leads data), clean them up
-      if (validFiles.length !== files.length) {
-        const invalidFiles = files.filter(file => {
-          const leadsKey = `coldcaller-csv-${file.id}-leads`;
-          const leadsData = localStorage.getItem(leadsKey);
-          return !leadsData || JSON.parse(leadsData).length === 0;
-        });
-        
-        // Remove invalid files from localStorage
-        invalidFiles.forEach(file => {
-          localStorage.removeItem(`coldcaller-csv-${file.id}-leads`);
-          localStorage.removeItem(`coldcaller-csv-${file.id}-current-index`);
-        });
-        
-        // Update the CSV files list to only include valid files
-        localStorage.setItem('coldcaller-csv-files', JSON.stringify(validFiles));
-        
-        // If current CSV ID is invalid, clear it
-        if (currentCSVId && !validFiles.find(f => f.id === currentCSVId)) {
-          localStorage.setItem('coldcaller-current-csv-id', '');
+      for (const file of files) {
+        try {
+          const leadsData = await appStorage.getCSVLeadsData(file.id);
+          if (leadsData && leadsData.length > 0) {
+            validFiles.push({
+              ...file,
+              leadsCount: leadsData.length
+            });
+          } else {
+            await handleDeleteCSV(file.id, {} as React.MouseEvent);
+          }
+        } catch (error) {
+          await handleDeleteCSV(file.id, {} as React.MouseEvent);
         }
       }
       
       setCsvFiles(validFiles);
     } catch (error) {
       console.error('Error loading CSV files:', error);
-      setCsvFiles([]);
     }
-  };
+  }, []);
 
   const handleCSVSelect = async (csvId: string) => {
     setLoading(true);
     try {
-      const key = `coldcaller-csv-${csvId}-leads`;
-      const leadsStr = localStorage.getItem(key);
-      const leads = leadsStr ? JSON.parse(leadsStr) : [];
+      const leads = await appStorage.getCSVLeadsData(csvId);
       const file = csvFiles.find(f => f.id === csvId);
       
       if (file && leads.length > 0) {
-        localStorage.setItem('coldcaller-current-csv-id', csvId);
+        await appStorage.saveCurrentCSVId(csvId);
         onCSVSelect(csvId, leads, file.name);
       }
     } catch (error) {
@@ -160,26 +144,43 @@ const CSVFileSelector: React.FC<CSVFileSelectorProps> = ({
   };
 
   const handleDeleteCSV = async (csvId: string, event: React.MouseEvent) => {
-    event.stopPropagation(); // Prevent triggering the select action
+    event.preventDefault();
+    event.stopPropagation();
     
     try {
-      // Remove from localStorage
-      const filesStr = localStorage.getItem('coldcaller-csv-files');
-      const files = filesStr ? JSON.parse(filesStr) : [];
-      const updatedFiles = files.filter(f => f.id !== csvId);
-      localStorage.setItem('coldcaller-csv-files', JSON.stringify(updatedFiles));
+      // Remove the CSV file metadata
+      await appStorage.removeCSVFile(csvId);
       
-      // Remove CSV-specific data
-      localStorage.removeItem(`coldcaller-csv-${csvId}-leads`);
-      localStorage.removeItem(`coldcaller-csv-${csvId}-current-index`);
+      // Remove the CSV leads data
+      await appStorage.removeCSVLeadsData(csvId);
+      
+      // Clean up chunked data if it exists
+      try {
+        const metadata = await appStorage.getCSVMetadata(csvId);
+        if (metadata?.isChunked && metadata.chunksCount) {
+          await appStorage.removeChunkedCSVData?.(csvId);
+        }
+      } catch (error) {
+        // Ignore errors for chunked data cleanup (might not exist)
+      }
+      
+      // Clean up any remaining localStorage items (fallback cleanup)
+      const localStorageKeys = Object.keys(localStorage);
+      const csvKeys = localStorageKeys.filter(key => key.includes(`coldcaller-csv-${csvId}`));
+      csvKeys.forEach(key => {
+        localStorage.removeItem(key);
+      });
       
       // If this was the current CSV, clear the current CSV ID
       if (csvId === currentCSVId) {
-        localStorage.setItem('coldcaller-current-csv-id', '');
+        await appStorage.saveCurrentCSVId('');
       }
       
       // Reload the CSV files list
       await loadCSVFiles();
+      
+      // Get updated files list to check if we need to switch
+      const updatedFiles = await appStorage.getCSVFiles();
       
       // If we deleted the current CSV and there are other CSVs, switch to the first one
       if (csvId === currentCSVId && updatedFiles.length > 0) {
@@ -334,14 +335,19 @@ const CSVFileSelector: React.FC<CSVFileSelectorProps> = ({
                       {file.totalLeads} leads
                     </span>
                   </div>
-                  <button
-                    onClick={(e) => handleDeleteCSV(file.id, e)}
-                    className="ml-1 p-1 rounded-full transition-colors duration-150 flex-shrink-0 focus:outline-none touch-manipulation min-w-[28px] min-h-[28px] flex items-center justify-center hover:bg-muted/30 border-0 focus:border-0 focus:ring-0"
-                    title="Delete CSV file"
-                    style={{ outline: 'none', border: 'none' }}
-                  >
-                    <X className="h-3 w-3" />
-                  </button>
+                  <div className="flex items-center">
+                    {file.id === currentCSVId && (
+                      <div className="w-2 h-2 bg-foreground rounded-full mr-2"></div>
+                    )}
+                    <button
+                      onClick={(e) => handleDeleteCSV(file.id, e)}
+                      className="p-1 rounded-full transition-colors duration-150 flex-shrink-0 focus:outline-none touch-manipulation min-w-[28px] min-h-[28px] flex items-center justify-center hover:bg-muted/30 border-0 focus:border-0 focus:ring-0"
+                      title="Delete CSV file"
+                      style={{ outline: 'none', border: 'none' }}
+                    >
+                      <X className="h-3 w-3" />
+                    </button>
+                  </div>
                 </div>
               </DropdownMenuItem>
             ))}

@@ -36,25 +36,15 @@ const FilterButtons: React.FC<FilterButtonsProps> = ({
   getDelayDisplayType,
   onResetCallDelay
 }) => {
-  const [showTimerIcon, setShowTimerIcon] = useState(autoCall);
-
   const handleAutoCallToggle = () => {
     const wasAutoCallOff = !autoCall;
     onToggleAutoCall();
-    
-    // Reset/show timer icon when auto-call is toggled
-    setShowTimerIcon(!autoCall);
     
     // If we're turning auto-call back on, reset to timer mode (15)
     if (wasAutoCallOff && onResetCallDelay) {
       onResetCallDelay();
     }
   };
-
-  // Reset/show timer icon when auto-call is toggled
-  useEffect(() => {
-    setShowTimerIcon(autoCall);
-  }, [autoCall]);
 
   const renderTimerContent = () => {
     if (isCountdownActive) {
@@ -66,6 +56,7 @@ const FilterButtons: React.FC<FilterButtonsProps> = ({
     }
 
     const displayType = getDelayDisplayType();
+    
     switch (displayType) {
       case 'rocket':
         return <Rocket size={14} />;
@@ -79,13 +70,13 @@ const FilterButtons: React.FC<FilterButtonsProps> = ({
   };
 
   return (
-    <div className="space-y-1 my-[11px] w-full">
+    <div className="space-y-2 my-4 w-full">
       {/* First row: Timezone and Call filters */}
-      <div className="flex w-full gap-0">
-        <div className="flex-1 min-w-0">
+      <div className="flex w-full gap-2">
+        <div className="flex-1">
           <button 
             onClick={onToggleTimezone} 
-            className={`text-sm font-medium transition-all duration-200 touch-manipulation px-3 py-2 rounded-lg border border-border/20 hover:bg-muted/30 active:bg-muted/50 ${
+            className={`w-full text-sm font-medium transition-all duration-200 touch-manipulation px-4 py-3 rounded-lg ${
               timezoneFilter === 'EST_CST' ? 'bg-gradient-to-r from-blue-600 to-blue-600/90 bg-clip-text text-transparent dark:bg-none dark:text-blue-600 animate-button-switch' : 'text-muted-foreground'
             }`} 
             style={{ WebkitTapHighlightColor: 'transparent' }}
@@ -95,10 +86,10 @@ const FilterButtons: React.FC<FilterButtonsProps> = ({
             </span>
           </button>
         </div>
-        <div className="flex-1 min-w-0 flex items-center gap-1 sm:gap-2">
+        <div className="flex-1 relative">
           <button 
             onClick={onToggleCallFilter} 
-            className={`flex-1 min-w-0 text-sm font-medium py-3 px-2 sm:px-3 rounded transition-all duration-200 touch-manipulation select-none ${
+            className={`w-full text-sm font-medium py-3 px-4 rounded-lg transition-all duration-200 touch-manipulation select-none ${
               callFilter === 'UNCALLED' ? 'bg-gradient-to-r from-purple-600 to-purple-600/90 bg-clip-text text-transparent dark:bg-none dark:text-purple-600 animate-button-switch' : 'text-muted-foreground'
             }`} 
             style={{ WebkitTapHighlightColor: 'transparent' }}
@@ -110,7 +101,7 @@ const FilterButtons: React.FC<FilterButtonsProps> = ({
           {callFilter === 'UNCALLED' && (
             <button 
               onClick={onResetAllCalls} 
-              className="text-muted-foreground transition-colors p-2 min-w-[32px] h-[32px] flex items-center justify-center touch-manipulation" 
+              className="absolute right-1 top-1/2 transform -translate-y-1/2 text-muted-foreground transition-colors p-2 min-w-[36px] h-[36px] flex items-center justify-center touch-manipulation rounded" 
               title="Reset all call counts"
               style={{ WebkitTapHighlightColor: 'transparent' }}
             >
@@ -121,11 +112,11 @@ const FilterButtons: React.FC<FilterButtonsProps> = ({
       </div>
 
       {/* Second row: Shuffle and Auto Call */}
-      <div className="flex w-full gap-0">
-        <div className="flex-1 min-w-0">
+      <div className="flex w-full gap-2">
+        <div className="flex-1">
           <button 
             onClick={onToggleShuffle} 
-            className={`text-sm font-medium transition-all duration-200 touch-manipulation px-3 py-2 rounded-lg border border-border/20 hover:bg-muted/30 active:bg-muted/50 ${
+            className={`w-full text-sm font-medium transition-all duration-200 touch-manipulation px-4 py-3 rounded-lg ${
               shuffleMode ? 'bg-gradient-to-r from-orange-600 to-orange-600/90 bg-clip-text text-transparent dark:bg-none dark:text-orange-600 animate-button-switch' : 'text-muted-foreground'
             }`} 
             style={{ WebkitTapHighlightColor: 'transparent' }}
@@ -133,20 +124,20 @@ const FilterButtons: React.FC<FilterButtonsProps> = ({
             <span className="block truncate">Shuffle</span>
           </button>
         </div>
-        <div className="flex-1 min-w-0 relative flex items-center justify-center">
+        <div className="flex-1 relative">
           <button 
             onClick={handleAutoCallToggle} 
-            className={`text-sm font-medium transition-all duration-200 touch-manipulation px-3 py-2 rounded-lg border border-border/20 hover:bg-muted/30 active:bg-muted/50 ${
+            className={`w-full text-sm font-medium transition-all duration-200 touch-manipulation px-4 py-3 rounded-lg ${
               autoCall ? 'bg-gradient-to-r from-green-600 to-green-600/90 bg-clip-text text-transparent dark:bg-none dark:text-green-600 animate-button-switch' : 'text-muted-foreground'
             }`} 
             style={{ WebkitTapHighlightColor: 'transparent' }}
           >
             <span className="block truncate">Auto Call</span>
           </button>
-          {autoCall && showTimerIcon && (
+          {autoCall && (
             <button 
               onClick={onToggleCallDelay}
-              className="absolute right-1 sm:right-2 bg-gradient-to-r from-green-600 to-green-600/90 bg-clip-text text-transparent dark:bg-none dark:text-green-600 text-xs font-medium px-2 sm:px-3 py-2 rounded min-w-[32px] sm:min-w-[40px] flex items-center justify-center select-none touch-manipulation"
+              className="absolute right-1 top-1/2 transform -translate-y-1/2 text-green-600 text-xs font-medium px-3 py-2 rounded min-w-[44px] flex items-center justify-center select-none touch-manipulation"
               style={{ WebkitTapHighlightColor: 'transparent' }}
               title="Click to change delay mode"
             >

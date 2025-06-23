@@ -17,20 +17,14 @@ export const useCsvImporter = ({ onLeadsImported }: UseCsvImporterProps) => {
     return `${sanitizedFileName}_${timestamp}`;
   };
 
-  const checkLocalStorageCapacity = (dataSize: number): boolean => {
+  const checkStorageCapacity = (fileSize: number): boolean => {
     try {
-      // Estimate localStorage usage
       const currentUsage = JSON.stringify(localStorage).length;
-      const estimatedNewUsage = currentUsage + dataSize;
+      const estimatedNewUsage = currentUsage + fileSize;
       const maxCapacity = 50 * 1024 * 1024; // 50MB for iPhone/iOS Safari
-      
-      console.log(`Current localStorage usage: ${(currentUsage / 1024 / 1024).toFixed(2)}MB`);
-      console.log(`Estimated new usage: ${(estimatedNewUsage / 1024 / 1024).toFixed(2)}MB`);
-      console.log(`Max capacity: ${(maxCapacity / 1024 / 1024).toFixed(2)}MB`);
       
       return estimatedNewUsage < maxCapacity;
     } catch (error) {
-      console.error('Error checking localStorage capacity:', error);
       return true; // Assume it's okay if we can't check
     }
   };
@@ -53,12 +47,8 @@ export const useCsvImporter = ({ onLeadsImported }: UseCsvImporterProps) => {
         }
       }
       
-      console.log('localStorage usage breakdown:', usage);
-      console.log(`Total localStorage size: ${(totalSize / 1024 / 1024).toFixed(2)}MB`);
-      
       return usage;
     } catch (error) {
-      console.error('Error analyzing localStorage:', error);
       return {};
     }
   };
@@ -78,10 +68,8 @@ export const useCsvImporter = ({ onLeadsImported }: UseCsvImporterProps) => {
         localStorage.removeItem(key);
       });
       
-      console.log(`Cleared ${keysToRemove.length} app-related keys from localStorage`);
       return true;
     } catch (error) {
-      console.error('Error clearing app data:', error);
       return false;
     }
   };
@@ -94,7 +82,6 @@ export const useCsvImporter = ({ onLeadsImported }: UseCsvImporterProps) => {
 
     // Check file size for large files
     const fileSizeMB = file.size / (1024 * 1024);
-    console.log(`File: ${file.name}, Size: ${fileSizeMB.toFixed(2)}MB`);
     
     if (fileSizeMB > 50) {
       toast.info('Large file detected. Processing may take a moment...');
@@ -112,11 +99,7 @@ export const useCsvImporter = ({ onLeadsImported }: UseCsvImporterProps) => {
             return;
           }
           
-          console.log(`File content length: ${text.length} characters`);
-          console.log(`First 500 characters:`, text.substring(0, 500));
-          
           const leads = await parseCSV(text);
-          console.log(`Parsed ${leads.length} leads`);
           
           if (leads.length === 0) {
             toast.error('No valid leads found in the CSV file. Please check the file format.');
@@ -126,28 +109,24 @@ export const useCsvImporter = ({ onLeadsImported }: UseCsvImporterProps) => {
           const fileName = file.name.replace('.csv', '');
           const csvId = generateCSVId(fileName);
           
-          console.log(`Saving CSV file info: ${fileName} with ID: ${csvId}`);
-          
           // Check if we have enough storage space
           const leadsDataSize = JSON.stringify(leads).length;
-          if (!checkLocalStorageCapacity(leadsDataSize)) {
+          if (!checkStorageCapacity(leadsDataSize)) {
             // Analyze current storage usage
             const usage = analyzeLocalStorageUsage();
             
             // Check if clearing CSV data would help
-            const csvFilesStr = localStorage.getItem('coldcaller-csv-files');
-            const csvFiles = csvFilesStr ? JSON.parse(csvFilesStr) : [];
+            const csvFiles = await appStorage.getCSVFiles();
             let csvDataSize = 0;
             
-            csvFiles.forEach(file => {
-              const leadsKey = `coldcaller-csv-${file.id}-leads`;
-              const leadsData = localStorage.getItem(leadsKey);
-              if (leadsData) {
-                csvDataSize += leadsData.length;
+            for (const file of csvFiles) {
+              try {
+                const leadsData = await appStorage.getCSVLeadsData(file.id);
+                csvDataSize += JSON.stringify(leadsData).length;
+              } catch (error) {
+                // Ignore errors checking file
               }
-            });
-            
-            console.log(`CSV data size: ${(csvDataSize / 1024 / 1024).toFixed(2)}MB`);
+            }
             
             if (csvDataSize > 0) {
               const shouldClear = confirm(
@@ -167,22 +146,17 @@ export const useCsvImporter = ({ onLeadsImported }: UseCsvImporterProps) => {
             } else {
               // If there's no CSV data to clear, automatically clear all app data
               // since there are no usable lists anyway
-              console.log('No CSV data found, automatically clearing all app data to free up storage');
               clearAllAppData();
               // Continue with the import
             }
           }
           
           try {
-            // First, save the leads data to localStorage
-            const key = `coldcaller-csv-${csvId}-leads`;
-            console.log(`Saving leads to localStorage with key: ${key}`);
-            localStorage.setItem(key, JSON.stringify(leads));
-            console.log(`Successfully saved ${leads.length} leads to localStorage`);
+            // First, save the leads data using appStorage
+            await appStorage.saveCSVLeadsData(csvId, leads);
             
             // Only after successful save, add the file to the CSV files list
-            const existingFilesStr = localStorage.getItem('coldcaller-csv-files');
-            const existingFiles = existingFilesStr ? JSON.parse(existingFilesStr) : [];
+            const existingFiles = await appStorage.getCSVFiles();
             const newFileInfo = {
               id: csvId,
               name: fileName,
@@ -200,15 +174,15 @@ export const useCsvImporter = ({ onLeadsImported }: UseCsvImporterProps) => {
               existingFiles.push(newFileInfo);
             }
             
-            localStorage.setItem('coldcaller-csv-files', JSON.stringify(existingFiles));
-            localStorage.setItem('coldcaller-current-csv-id', csvId);
+            await appStorage.saveCSVFiles(existingFiles);
+            await appStorage.saveCurrentCSVId(csvId);
             
             onLeadsImported(leads, fileName, csvId);
             toast.success(`${leads.length} leads imported successfully!`, {
               duration: 1000
             });
           } catch (storageError) {
-            console.error('Error saving to localStorage:', storageError);
+            console.error('Error saving to storage:', storageError);
             toast.error('Failed to save leads to storage. The file may be too large.');
           }
         } catch (parseError) {

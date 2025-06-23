@@ -319,6 +319,43 @@ export class AppStorage {
       console.error('Error removing CSV leads data:', error);
     }
   }
+
+  // Chunked CSV data management
+  async getCSVMetadata(csvId: string): Promise<{ isChunked: boolean; chunksCount: number } | null> {
+    try {
+      const metadata = await this.getItem(getCSVStorageKey(csvId, 'metadata'), null);
+      return metadata;
+    } catch (error) {
+      console.error('Error getting CSV metadata:', error);
+      return null;
+    }
+  }
+
+  async removeChunkedCSVData(csvId: string): Promise<void> {
+    try {
+      const metadata = await this.getCSVMetadata(csvId);
+      if (metadata?.isChunked && metadata.chunksCount) {
+        // Remove all chunk files
+        for (let i = 0; i < metadata.chunksCount; i++) {
+          const chunkKey = `coldcaller-csv-${csvId}-chunk-${i}`;
+          await this.removeItem(chunkKey);
+          
+          // Also clean up from localStorage and sessionStorage as fallback
+          try {
+            localStorage.removeItem(chunkKey);
+            sessionStorage.removeItem(chunkKey);
+          } catch (error) {
+            // Ignore fallback cleanup errors
+          }
+        }
+        
+        // Remove metadata
+        await this.removeItem(getCSVStorageKey(csvId, 'metadata'));
+      }
+    } catch (error) {
+      console.error('Error removing chunked CSV data:', error);
+    }
+  }
 }
 
 // Export singleton instance

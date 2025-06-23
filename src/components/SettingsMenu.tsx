@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Mail, HelpCircle, ChevronDown, Plus, Edit, Trash2, MessageSquare, Check, Upload, FileText, Sun, Moon, Smartphone, Target } from 'lucide-react';
+import { Mail, HelpCircle, ChevronDown, Plus, Edit, Trash2, MessageSquare, Check, Upload, FileText, Sun, Moon, Smartphone, Target, Database } from 'lucide-react';
 import { useTheme } from 'next-themes';
 import {
   Popover,
@@ -20,6 +20,8 @@ import { Textarea } from '@/components/ui/textarea';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Switch } from '@/components/ui/switch';
 import * as Collapsible from '@radix-ui/react-collapsible';
+import { clearColdCallerStorage, quickClearColdCallerStorage } from '@/utils/clearStorage';
+import { useToast } from '@/hooks/use-toast';
 
 interface EmailTemplate {
   id: string;
@@ -49,13 +51,16 @@ const SettingsMenu: React.FC<SettingsMenuProps> = ({ children }) => {
   const [csvGuideOpen, setCsvGuideOpen] = useState(false);
   const [modeOpen, setModeOpen] = useState(false);
   const [dailyGoalsOpen, setDailyGoalsOpen] = useState(false);
+  const [storageOpen, setStorageOpen] = useState(false);
   const [dailyGoalEnabled, setDailyGoalEnabled] = useState(true);
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [isAnimating, setIsAnimating] = useState(false);
   const [shouldRender, setShouldRender] = useState(false);
+  const [isClearingStorage, setIsClearingStorage] = useState(false);
   
   // Theme management
   const { theme, setTheme } = useTheme();
+  const { toast } = useToast();
 
   // Handle template open/close
   const handleTemplatesOpen = (open: boolean) => {
@@ -93,8 +98,36 @@ const SettingsMenu: React.FC<SettingsMenuProps> = ({ children }) => {
     setDailyGoalsOpen(open);
   };
 
+  const handleStorageOpen = (open: boolean) => {
+    setStorageOpen(open);
+  };
+
   const handleMode = (mode: string) => {
     setTheme(mode);
+  };
+
+  const handleClearStorage = async () => {
+    if (isClearingStorage) return;
+    
+    setIsClearingStorage(true);
+    try {
+      await clearColdCallerStorage();
+      toast({
+        title: "Storage Cleared",
+        description: "All app data has been successfully cleared.",
+      });
+      // Close the popover after clearing
+      setIsPopoverOpen(false);
+    } catch (error) {
+      console.error('Error clearing storage:', error);
+      toast({
+        title: "Error",
+        description: "Failed to clear storage. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsClearingStorage(false);
+    }
   };
 
   // Load settings from localStorage on mount
@@ -163,6 +196,7 @@ const SettingsMenu: React.FC<SettingsMenuProps> = ({ children }) => {
         setCsvGuideOpen(false);
         setModeOpen(false);
         setDailyGoalsOpen(false);
+        setStorageOpen(false);
       }
     }}>
       <PopoverTrigger asChild>
@@ -343,6 +377,53 @@ const SettingsMenu: React.FC<SettingsMenuProps> = ({ children }) => {
                         checked={dailyGoalEnabled}
                         onCheckedChange={setDailyGoalEnabled}
                       />
+                    </div>
+                  </div>
+                </Collapsible.Content>
+              </Collapsible.Root>
+
+              {/* Storage Section */}
+              <Collapsible.Root 
+                open={storageOpen} 
+                onOpenChange={handleStorageOpen}
+                className="space-y-2"
+              >
+                <Collapsible.Trigger asChild>
+                  <button className="w-full flex items-center justify-between p-3 rounded-lg border border-border/20 transition-colors">
+                    <div className="flex items-center gap-2">
+                      <Database className="h-4 w-4 text-muted-foreground" />
+                      <span className="text-sm font-medium">Storage</span>
+                    </div>
+                    <ChevronDown className={`h-4 w-4 text-muted-foreground transition-transform duration-75 ${storageOpen ? 'rotate-180' : ''}`} />
+                  </button>
+                </Collapsible.Trigger>
+                <Collapsible.Content 
+                  className="space-y-3 data-[state=open]:animate-template-down data-[state=closed]:animate-template-up overflow-hidden"
+                >
+                  <div className="space-y-3 p-3 pl-8">
+                    <div className="space-y-2">
+                      <p className="text-sm text-muted-foreground">
+                        Clear all stored data including CSV files, call history, and settings.
+                      </p>
+                      <Button 
+                        variant="destructive" 
+                        size="sm" 
+                        onClick={handleClearStorage}
+                        disabled={isClearingStorage}
+                        className="w-full"
+                      >
+                        {isClearingStorage ? (
+                          <>
+                            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                            Clearing...
+                          </>
+                        ) : (
+                          <>
+                            <Trash2 className="h-4 w-4 mr-2" />
+                            Clear All Data
+                          </>
+                        )}
+                      </Button>
                     </div>
                   </div>
                 </Collapsible.Content>

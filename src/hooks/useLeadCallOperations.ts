@@ -1,4 +1,5 @@
 import { Lead } from '../types/lead';
+import { useCallback } from 'react';
 
 interface LeadList {
   id: string;
@@ -21,11 +22,8 @@ export const useLeadCallOperations = ({
   loadDailyStats 
 }: UseLeadCallOperationsProps) => {
 
-  const markLeadAsCalled = async (lead: Lead): Promise<boolean> => {
-    if (!currentLeadList) return false;
-
+  const markLeadAsCalled = useCallback(async (lead: Lead): Promise<boolean> => {
     try {
-      console.log('useLeadCallOperations: Marking lead as called:', lead.name);
       const now = new Date();
       const dateString = now.toLocaleDateString();
       const timeString = now.toLocaleTimeString('en-US', {
@@ -35,60 +33,93 @@ export const useLeadCallOperations = ({
       });
       const lastCalledString = `${dateString} at ${timeString}`;
 
-      // Update local state
       const updatedLeads = leadsData.map(l => 
         l.name === lead.name && l.phone === lead.phone ? {
           ...l,
           lastCalled: lastCalledString
         } : l
       );
+      
       setLeadsData(updatedLeads);
-
-      // Save to localStorage
-      localStorage.setItem('coldcaller-leads', JSON.stringify(updatedLeads));
-
+      
+      // Save to CSV-specific storage immediately using synchronous localStorage
+      try {
+        const currentCSVId = localStorage.getItem('coldcaller-current-csv-id');
+        if (currentCSVId) {
+          const key = `coldcaller-csv-${currentCSVId}-leads`;
+          localStorage.setItem(key, JSON.stringify(updatedLeads));
+        } else {
+          // Fall back to old storage
+          localStorage.setItem('coldcaller-leads-data', JSON.stringify(updatedLeads));
+        }
+      } catch (error) {
+        console.error('Error saving leads data:', error);
+      }
+      
       // Increment daily call count
       await loadDailyStats();
 
       return true;
     } catch (error) {
-      console.error('useLeadCallOperations: Error marking lead as called:', error);
+      console.error('Error in markLeadAsCalled:', error);
       return false;
     }
-  };
+  }, [leadsData, setLeadsData, loadDailyStats]);
 
-  const resetCallCount = async (lead: Lead) => {
-    if (!currentLeadList) return;
+  const resetCallCount = useCallback((lead: Lead) => {
+    try {
+      const updatedLeads = leadsData.map(l => 
+        l.name === lead.name && l.phone === lead.phone 
+          ? { ...l, lastCalled: undefined }
+          : l
+      );
+      
+      setLeadsData(updatedLeads);
+      
+      // Save to CSV-specific storage immediately using synchronous localStorage
+      try {
+        const currentCSVId = localStorage.getItem('coldcaller-current-csv-id');
+        if (currentCSVId) {
+          const key = `coldcaller-csv-${currentCSVId}-leads`;
+          localStorage.setItem(key, JSON.stringify(updatedLeads));
+        } else {
+          // Fall back to old storage
+          localStorage.setItem('coldcaller-leads-data', JSON.stringify(updatedLeads));
+        }
+      } catch (error) {
+        console.error('Error saving leads data:', error);
+      }
+    } catch (error) {
+      console.error('Error in resetCallCount:', error);
+    }
+  }, [leadsData, setLeadsData]);
 
-    console.log('useLeadCallOperations: Resetting call count for:', lead.name);
-    
-    // Update local state
-    const updatedLeads = leadsData.map(l => 
-      l.name === lead.name && l.phone === lead.phone 
-        ? { ...l, lastCalled: undefined }
-        : l
-    );
-    setLeadsData(updatedLeads);
-
-    // Save to localStorage
-    localStorage.setItem('coldcaller-leads', JSON.stringify(updatedLeads));
-  };
-
-  const resetAllCallCounts = async () => {
-    if (!currentLeadList) return;
-
-    console.log('useLeadCallOperations: Resetting all call counts');
-    
-    // Update local state
-    const updatedLeads = leadsData.map(l => ({
-      ...l,
-      lastCalled: undefined
-    }));
-    setLeadsData(updatedLeads);
-
-    // Save to localStorage
-    localStorage.setItem('coldcaller-leads', JSON.stringify(updatedLeads));
-  };
+  const resetAllCallCounts = useCallback(() => {
+    try {
+      const updatedLeads = leadsData.map(lead => ({
+        ...lead,
+        lastCalled: undefined
+      }));
+      
+      setLeadsData(updatedLeads);
+      
+      // Save to CSV-specific storage immediately using synchronous localStorage
+      try {
+        const currentCSVId = localStorage.getItem('coldcaller-current-csv-id');
+        if (currentCSVId) {
+          const key = `coldcaller-csv-${currentCSVId}-leads`;
+          localStorage.setItem(key, JSON.stringify(updatedLeads));
+        } else {
+          // Fall back to old storage
+          localStorage.setItem('coldcaller-leads-data', JSON.stringify(updatedLeads));
+        }
+      } catch (error) {
+        console.error('Error saving leads data:', error);
+      }
+    } catch (error) {
+      console.error('Error in resetAllCallCounts:', error);
+    }
+  }, [leadsData, setLeadsData]);
 
   return {
     markLeadAsCalled,

@@ -73,18 +73,20 @@ export const useLeadsData = (initialLeads: Lead[], refreshTrigger: number = 0) =
 
   useEffect(() => {
     if (isLoaded && leadsData.length > 0) {
-      try {
-        const currentCSVId = localStorage.getItem('coldcaller-current-csv-id');
-        if (currentCSVId) {
-          const key = `coldcaller-csv-${currentCSVId}-leads`;
-          localStorage.setItem(key, JSON.stringify(leadsData));
-        } else {
-          // Fall back to old storage
-          localStorage.setItem('coldcaller-leads-data', JSON.stringify(leadsData));
+      (async () => {
+        try {
+          // Use appStorage for consistency
+          const currentCSVId = await appStorage.getCurrentCSVId();
+          if (currentCSVId) {
+            await appStorage.saveCSVLeadsData(currentCSVId, leadsData);
+          } else {
+            // Fall back to old storage
+            await appStorage.saveLeadsData(leadsData);
+          }
+        } catch (error) {
+          console.error('Error saving leads data:', error);
         }
-      } catch (error) {
-        console.error('Error saving leads data:', error);
-      }
+      })();
     }
   }, [leadsData, isLoaded]);
 
