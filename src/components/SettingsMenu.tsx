@@ -200,7 +200,7 @@ const SettingsMenu: React.FC<SettingsMenuProps> = ({ children }) => {
       }
     }}>
       <PopoverTrigger asChild>
-        <div className={isPopoverOpen ? 'ring-2 ring-primary/50 ring-offset-2 ring-offset-background rounded-lg transition-all duration-200' : ''}>
+        <div className="">
           {children}
         </div>
       </PopoverTrigger>

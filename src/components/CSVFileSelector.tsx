@@ -183,7 +183,7 @@ const CSVFileSelector: React.FC<CSVFileSelectorProps> = ({
           setIsDropdownOpen(open);
         }}>
           <DropdownMenuTrigger asChild>
-            <div className={isDropdownOpen ? 'ring-2 ring-primary/50 ring-offset-2 ring-offset-background rounded-lg transition-all duration-200' : ''}>
+            <div className="">
               <Button 
                 variant="ghost" 
                 size="sm" 
@@ -250,7 +250,7 @@ const CSVFileSelector: React.FC<CSVFileSelectorProps> = ({
         setIsDropdownOpen(open);
       }}>
         <DropdownMenuTrigger asChild>
-          <div className={isDropdownOpen ? 'ring-2 ring-primary/50 ring-offset-2 ring-offset-background rounded-lg transition-all duration-200' : ''}>
+          <div className="">
             <Button 
               variant="ghost" 
               size="sm" 
