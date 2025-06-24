@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Lead } from '../types/lead';
+import { appStorage } from '../utils/storage';
 
 interface LeadList {
   id: string;
@@ -23,9 +24,9 @@ export const useLeadListOperations = () => {
       setCurrentLeadList(leadList);
       setLeadsData(leads);
       
-      // Save to localStorage
-      localStorage.setItem('currentLeadList', JSON.stringify(leadList));
-      localStorage.setItem('leadsData', JSON.stringify(leads));
+      // Save using appStorage methods to avoid quota errors
+      await appStorage.saveCSVLeadsData(leadList.id, leads);
+      await appStorage.saveCurrentCSVId(leadList.id);
       
       return true;
     } catch (error) {
@@ -44,8 +45,8 @@ export const useLeadListOperations = () => {
       if (currentLeadList?.id === leadListId) {
         setCurrentLeadList(null);
         setLeadsData([]);
-        localStorage.removeItem('currentLeadList');
-        localStorage.removeItem('leadsData');
+        await appStorage.removeCSVLeadsData(leadListId);
+        await appStorage.saveCurrentCSVId('');
       }
       return true;
     } catch (error) {

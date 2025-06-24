@@ -93,15 +93,16 @@ export const useLocalCallingScreenState = ({ leads, onCallMade, refreshTrigger =
   // Save state to localStorage whenever it changes
   useEffect(() => {
     if (leadsData.length > 0) {
-      try {
-        const currentCSVId = localStorage.getItem('coldcaller-current-csv-id');
-        if (currentCSVId) {
-          const key = `coldcaller-csv-${currentCSVId}-leads`;
-          localStorage.setItem(key, JSON.stringify(leadsData));
+      (async () => {
+        try {
+          const currentCSVId = await appStorage.getCurrentCSVId();
+          if (currentCSVId) {
+            await appStorage.saveCSVLeadsData(currentCSVId, leadsData);
+          }
+        } catch (error) {
+          console.error('Error saving leads data:', error);
         }
-      } catch (error) {
-        console.error('Error saving leads data:', error);
-      }
+      })();
     }
   }, [leadsData]);
 

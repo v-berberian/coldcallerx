@@ -320,6 +320,76 @@ export class AppStorage {
     }
   }
 
+  // Comprehensive CSV data removal - removes ALL data associated with a CSV ID
+  async removeAllCSVData(csvId: string): Promise<void> {
+    try {
+      // Remove CSV file metadata
+      await this.removeCSVFile(csvId);
+      
+      // Remove CSV leads data
+      await this.removeCSVLeadsData(csvId);
+      
+      // Remove chunked data
+      await this.removeChunkedCSVData(csvId);
+      
+      // Remove any additional CSV-related keys that might exist
+      const additionalKeys = [
+        getCSVStorageKey(csvId, 'metadata'),
+        getCSVStorageKey(csvId, 'settings'),
+        getCSVStorageKey(csvId, 'filters'),
+        getCSVStorageKey(csvId, 'search'),
+        getCSVStorageKey(csvId, 'state'),
+        getCSVStorageKey(csvId, 'progress'),
+        getCSVStorageKey(csvId, 'stats'),
+        getCSVStorageKey(csvId, 'calls'),
+        getCSVStorageKey(csvId, 'history'),
+        getCSVStorageKey(csvId, 'backup'),
+        getCSVStorageKey(csvId, 'temp'),
+        getCSVStorageKey(csvId, 'cache')
+      ];
+      
+      for (const key of additionalKeys) {
+        try {
+          await this.removeItem(key);
+        } catch (error) {
+          // Ignore individual key removal errors
+        }
+      }
+      
+      // Clean up localStorage fallback
+      try {
+        const localStorageKeys = Object.keys(localStorage);
+        const csvKeys = localStorageKeys.filter(key => key.includes(`coldcaller-csv-${csvId}`));
+        csvKeys.forEach(key => localStorage.removeItem(key));
+      } catch (error) {
+        // Ignore localStorage cleanup errors
+      }
+      
+      // Clean up sessionStorage fallback
+      try {
+        const sessionStorageKeys = Object.keys(sessionStorage);
+        const sessionCsvKeys = sessionStorageKeys.filter(key => key.includes(`coldcaller-csv-${csvId}`));
+        sessionCsvKeys.forEach(key => sessionStorage.removeItem(key));
+      } catch (error) {
+        // Ignore sessionStorage cleanup errors
+      }
+      
+      // Clean up Capacitor Preferences (if available)
+      try {
+        const { Preferences } = await import('@capacitor/preferences');
+        const keys = await Preferences.keys();
+        const capacitorCsvKeys = keys.keys.filter(key => key.includes(`coldcaller-csv-${csvId}`));
+        for (const key of capacitorCsvKeys) {
+          await Preferences.remove({ key });
+        }
+      } catch (error) {
+        // Ignore Capacitor cleanup errors
+      }
+    } catch (error) {
+      console.error('Error in comprehensive CSV data removal:', error);
+    }
+  }
+
   // Chunked CSV data management
   async getCSVMetadata(csvId: string): Promise<{ isChunked: boolean; chunksCount: number } | null> {
     try {

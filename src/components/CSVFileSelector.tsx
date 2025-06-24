@@ -148,28 +148,8 @@ const CSVFileSelector: React.FC<CSVFileSelectorProps> = ({
     event.stopPropagation();
     
     try {
-      // Remove the CSV file metadata
-      await appStorage.removeCSVFile(csvId);
-      
-      // Remove the CSV leads data
-      await appStorage.removeCSVLeadsData(csvId);
-      
-      // Clean up chunked data if it exists
-      try {
-        const metadata = await appStorage.getCSVMetadata(csvId);
-        if (metadata?.isChunked && metadata.chunksCount) {
-          await appStorage.removeChunkedCSVData?.(csvId);
-        }
-      } catch (error) {
-        // Ignore errors for chunked data cleanup (might not exist)
-      }
-      
-      // Clean up any remaining localStorage items (fallback cleanup)
-      const localStorageKeys = Object.keys(localStorage);
-      const csvKeys = localStorageKeys.filter(key => key.includes(`coldcaller-csv-${csvId}`));
-      csvKeys.forEach(key => {
-        localStorage.removeItem(key);
-      });
+      // Use comprehensive cleanup method to remove ALL data associated with this CSV
+      await appStorage.removeAllCSVData(csvId);
       
       // If this was the current CSV, clear the current CSV ID
       if (csvId === currentCSVId) {
@@ -243,7 +223,7 @@ const CSVFileSelector: React.FC<CSVFileSelectorProps> = ({
                 >
                   <div className="flex items-center w-full">
                     <span className={`font-normal text-base ${importLoading ? 'text-muted-foreground' : 'text-blue-600'}`}>
-                      {importLoading ? 'Importing...' : '+ Import List'}
+                      {importLoading ? 'Importing...' : 'Import List'}
                     </span>
                   </div>
                 </DropdownMenuItem>
@@ -310,7 +290,7 @@ const CSVFileSelector: React.FC<CSVFileSelectorProps> = ({
               >
                 <div className="flex items-center w-full">
                   <span className={`font-normal text-base ${importLoading ? 'text-muted-foreground' : 'text-blue-600'}`}>
-                    {importLoading ? 'Importing...' : '+ Import List'}
+                    {importLoading ? 'Importing...' : 'Import List'}
                   </span>
                 </div>
               </DropdownMenuItem>

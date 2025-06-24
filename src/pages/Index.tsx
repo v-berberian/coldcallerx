@@ -19,7 +19,9 @@ const Index = () => {
     leadsData,
     currentLeadList,
     importLeadsFromCSV,
-    loadExistingData
+    loadExistingData,
+    setLeadsData,
+    setCurrentLeadList
   } = useLocalLeadOperations();
 
   // Load saved data when component mounts
@@ -87,6 +89,8 @@ const Index = () => {
   const handleAllListsDeleted = () => {
     setHasSavedLists(false);
     setCurrentCSVId(null);
+    setLeadsData([]);
+    setCurrentLeadList(null);
   };
 
   // Show loading until everything is ready
