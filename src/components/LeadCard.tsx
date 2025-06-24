@@ -294,7 +294,7 @@ const LeadCard: React.FC<LeadCardProps> = ({
   };
 
   return (
-    <Card className="shadow-2xl border-border/50 rounded-3xl bg-card min-h-[400px] max-h-[500px] sm:min-h-[420px] sm:max-h-[550px] flex flex-col mb-4">
+    <Card className="shadow-2xl border-border/30 rounded-3xl bg-background/60 backdrop-blur-xl min-h-[400px] max-h-[500px] sm:min-h-[420px] sm:max-h-[550px] flex flex-col mb-4" style={{ backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)' }}>
       <CardContent className="p-4 sm:p-6 space-y-5 sm:space-y-6 flex-1 flex flex-col">
         {/* Top row with lead count and file name */}
         <div className="flex items-center justify-center">
@@ -414,24 +414,24 @@ const LeadCard: React.FC<LeadCardProps> = ({
             <Button 
               onClick={() => handleTextClick()} 
               size="lg" 
-              className="w-24 h-24 sm:w-32 sm:h-32 rounded-full shadow-lg shadow-blue-500/20 bg-gradient-to-b from-[#007AFF] via-[#007AFF] to-[#0056CC] hover:from-[#007AFF]/95 hover:via-[#007AFF]/95 hover:to-[#0056CC]/95 active:from-[#0056CC] active:via-[#0056CC] active:to-[#004499] dark:bg-[#007AFF] dark:hover:bg-[#007AFF]/95 dark:active:bg-[#0056CC] text-white transition-all duration-200 flex items-center justify-center p-0 relative overflow-hidden before:absolute before:inset-0 before:bg-gradient-to-b before:from-white/15 before:to-transparent before:rounded-full active:scale-95"
+              className="w-24 h-24 sm:w-32 sm:h-32 rounded-full shadow-xl shadow-blue-500/20 bg-gradient-to-b from-[#007AFF] via-[#007AFF] to-[#0056CC] hover:from-[#007AFF]/95 hover:via-[#007AFF]/95 hover:to-[#0056CC]/95 active:from-[#0056CC] active:via-[#0056CC] active:to-[#004499] dark:bg-[#007AFF] dark:hover:bg-[#007AFF]/95 dark:active:bg-[#0056CC] text-white transition-all duration-200 flex items-center justify-center p-0 relative overflow-hidden before:absolute before:inset-0 before:bg-gradient-to-b before:from-white/20 before:to-transparent before:rounded-full after:absolute after:inset-0 after:bg-gradient-to-t after:from-black/10 after:to-transparent after:rounded-full active:scale-95"
               style={{
-                boxShadow: '0 8px 16px rgba(0, 122, 255, 0.2), 0 4px 8px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.2)',
+                boxShadow: '0 8px 16px rgba(0, 122, 255, 0.2), 0 4px 8px rgba(0, 0, 0, 0.1), 0 2px 4px rgba(0, 0, 0, 0.05), inset 0 1px 0 rgba(255, 255, 255, 0.3), inset 0 -1px 0 rgba(0, 0, 0, 0.1)',
                 WebkitTapHighlightColor: 'transparent'
               }}
             >
-              <MessageSquare className="h-[32px] w-[32px] sm:h-[40px] sm:w-[40px]" />
+              <MessageSquare className="h-[32px] w-[32px] sm:h-[40px] sm:w-[40px] drop-shadow-md" style={{ filter: 'drop-shadow(0 1px 2px rgba(0, 0, 0, 0.15))' }} />
             </Button>
             <Button 
               onClick={handleCall} 
               size="lg" 
-              className="w-24 h-24 sm:w-32 sm:h-32 rounded-full shadow-lg shadow-green-500/20 bg-gradient-to-b from-green-500 via-green-500 to-green-600 hover:from-green-500/95 hover:via-green-500/95 hover:to-green-600/95 active:from-green-600 active:via-green-600 active:to-green-700 dark:bg-green-500 dark:hover:bg-green-500/95 dark:active:bg-green-600 text-white transition-all duration-200 flex items-center justify-center p-0 relative overflow-hidden before:absolute before:inset-0 before:bg-gradient-to-b before:from-white/15 before:to-transparent before:rounded-full active:scale-95"
+              className="w-24 h-24 sm:w-32 sm:h-32 rounded-full shadow-xl shadow-green-500/20 bg-gradient-to-b from-green-500 via-green-500 to-green-600 hover:from-green-500/95 hover:via-green-500/95 hover:to-green-600/95 active:from-green-600 active:via-green-600 active:to-green-700 dark:bg-green-500 dark:hover:bg-green-500/95 dark:active:bg-green-600 text-white transition-all duration-200 flex items-center justify-center p-0 relative overflow-hidden before:absolute before:inset-0 before:bg-gradient-to-b before:from-white/20 before:to-transparent before:rounded-full after:absolute after:inset-0 after:bg-gradient-to-t after:from-black/10 after:to-transparent after:rounded-full active:scale-95"
               style={{
-                boxShadow: '0 8px 16px rgba(34, 197, 94, 0.2), 0 4px 8px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.2)',
+                boxShadow: '0 8px 16px rgba(34, 197, 94, 0.2), 0 4px 8px rgba(0, 0, 0, 0.1), 0 2px 4px rgba(0, 0, 0, 0.05), inset 0 1px 0 rgba(255, 255, 255, 0.3), inset 0 -1px 0 rgba(0, 0, 0, 0.1)',
                 WebkitTapHighlightColor: 'transparent'
               }}
             >
-              <Phone className="h-[32px] w-[32px] sm:h-[40px] sm:w-[40px]" />
+              <Phone className="h-[32px] w-[32px] sm:h-[40px] sm:w-[40px] drop-shadow-md" style={{ filter: 'drop-shadow(0 1px 2px rgba(0, 0, 0, 0.15))' }} />
             </Button>
           </div>
         </div>

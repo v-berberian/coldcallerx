@@ -264,7 +264,13 @@ const FilterButtons: React.FC<FilterButtonsProps> = ({
               title="Click to change delay mode"
             >
               <span className="transition-all duration-200 ease-out">
-                {renderTimerContent()}
+                {isCountdownActive && countdownTime !== undefined ? (
+                  <span className="font-bold text-green-700 dark:text-green-300">
+                    {countdownTime}s
+                  </span>
+                ) : (
+                  renderTimerContent()
+                )}
               </span>
             </button>
           )}

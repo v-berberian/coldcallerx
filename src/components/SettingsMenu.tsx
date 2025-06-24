@@ -37,7 +37,7 @@ interface TextTemplate {
 }
 
 interface SettingsMenuProps {
-  children: React.ReactNode;
+  children: (isOpen: boolean) => React.ReactNode;
 }
 
 const SettingsMenu: React.FC<SettingsMenuProps> = ({ children }) => {
@@ -201,7 +201,7 @@ const SettingsMenu: React.FC<SettingsMenuProps> = ({ children }) => {
     }}>
       <PopoverTrigger asChild>
         <div className="">
-          {children}
+          {children(isPopoverOpen)}
         </div>
       </PopoverTrigger>
       {shouldRender && (

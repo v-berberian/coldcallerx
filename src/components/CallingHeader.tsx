@@ -101,9 +101,27 @@ const CallingHeader: React.FC<CallingHeaderProps> = ({
         
         <div className="flex-shrink-0">
           <SettingsMenu>
-            <Button variant="ghost" size="icon" className="h-8 w-8 text-base hover:bg-transparent focus:bg-transparent active:bg-transparent">
-              <Settings className="h-5 w-5" />
-            </Button>
+            {(isOpen) => (
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                className={`no-hover h-8 w-8 text-base focus:bg-transparent active:bg-transparent transition-all duration-300 ease-out rounded-lg ${
+                  isOpen 
+                    ? 'text-muted-foreground shadow-[inset_0_2px_4px_rgba(0,0,0,0.2),inset_0_1px_2px_rgba(255,255,255,0.1)] bg-gray-100/50 dark:bg-gray-800/50' 
+                    : 'text-muted-foreground'
+                }`}
+              >
+                <Settings 
+                  className={`h-5 w-5 transition-all duration-300 ease-out ${
+                    isOpen ? 'scale-95' : 'scale-100'
+                  }`}
+                  style={{
+                    filter: isOpen ? 'drop-shadow(inset 0 1px 2px rgba(0,0,0,0.3))' : 'none',
+                    color: 'inherit'
+                  }}
+                />
+              </Button>
+            )}
           </SettingsMenu>
         </div>
       </div>

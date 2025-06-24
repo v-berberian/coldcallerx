@@ -183,22 +183,26 @@ const CSVFileSelector: React.FC<CSVFileSelectorProps> = ({
           setIsDropdownOpen(open);
         }}>
           <DropdownMenuTrigger asChild>
-            <div className="">
-              <Button 
-                variant="ghost" 
-                size="sm" 
-                className={`h-auto p-2 text-base font-normal text-black hover:bg-transparent hover:text-black touch-manipulation min-h-[44px] border-0 focus:border-0 focus:outline-none focus:ring-0 focus:ring-offset-0 active:border-0 active:outline-none active:ring-0 visited:border-0 visited:outline-none visited:ring-0 ${className}`}
-                disabled={importLoading}
-                style={{ 
-                  outline: 'none', 
-                  border: 'none', 
-                  boxShadow: 'none'
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              className={`h-8 w-8 text-base hover:bg-transparent focus:bg-transparent active:bg-transparent transition-all duration-300 ease-out rounded-lg ${
+                isDropdownOpen 
+                  ? 'text-muted-foreground !shadow-[inset_0_2px_4px_rgba(0,0,0,0.2),inset_0_1px_2px_rgba(255,255,255,0.1)] !bg-gray-100/50 dark:!bg-gray-800/50' 
+                  : 'text-muted-foreground'
+              }`}
+              disabled={importLoading}
+              data-no-outline="true"
+            >
+              <FileText 
+                className={`h-5 w-5 transition-all duration-300 ease-out ${
+                  isDropdownOpen ? '!scale-95' : '!scale-100'
+                }`}
+                style={{
+                  filter: isDropdownOpen ? 'drop-shadow(inset 0 1px 2px rgba(0,0,0,0.3)) !important' : 'none'
                 }}
-                data-no-outline="true"
-              >
-                <FileText className="h-5 w-5 text-black dark:text-white" />
-              </Button>
-            </div>
+              />
+            </Button>
           </DropdownMenuTrigger>
           
           {shouldRender && (
@@ -250,22 +254,26 @@ const CSVFileSelector: React.FC<CSVFileSelectorProps> = ({
         setIsDropdownOpen(open);
       }}>
         <DropdownMenuTrigger asChild>
-          <div className="">
-            <Button 
-              variant="ghost" 
-              size="sm" 
-              className={`h-auto p-2 text-base font-normal text-black hover:bg-transparent hover:text-black touch-manipulation min-h-[44px] border-0 focus:border-0 focus:outline-none focus:ring-0 focus:ring-offset-0 active:border-0 active:outline-none active:ring-0 visited:border-0 visited:outline-none visited:ring-0 ${className}`}
-              disabled={loading}
-              style={{ 
-                outline: 'none', 
-                border: 'none', 
-                boxShadow: 'none'
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            className={`h-8 w-8 text-base hover:bg-transparent focus:bg-transparent active:bg-transparent transition-all duration-300 ease-out rounded-lg ${
+              isDropdownOpen 
+                ? 'text-muted-foreground !shadow-[inset_0_2px_4px_rgba(0,0,0,0.2),inset_0_1px_2px_rgba(255,255,255,0.1)] !bg-gray-100/50 dark:!bg-gray-800/50' 
+                : 'text-muted-foreground'
+            }`}
+            disabled={loading}
+            data-no-outline="true"
+          >
+            <FileText 
+              className={`h-5 w-5 transition-all duration-300 ease-out ${
+                isDropdownOpen ? '!scale-95' : '!scale-100'
+              }`}
+              style={{
+                filter: isDropdownOpen ? 'drop-shadow(inset 0 1px 2px rgba(0,0,0,0.3)) !important' : 'none'
               }}
-              data-no-outline="true"
-            >
-              <FileText className="h-5 w-5 text-black dark:text-white" />
-            </Button>
-          </div>
+            />
+          </Button>
         </DropdownMenuTrigger>
         
         {shouldRender && (

@@ -87,6 +87,16 @@ export const useLeadNavigation = ({
 
   const { isAutoCallInProgress, isCountdownActive, countdownTime, executeAutoCall, handleCountdownComplete, resetAutoCall, shouldBlockNavigation } = useAutoCall(makeCall, callDelay);
 
+  // Enhanced toggleCallDelay wrapper that resets countdown when active
+  const toggleCallDelayWrapper = () => {
+    // If countdown is active, reset it first
+    if (isCountdownActive) {
+      resetAutoCall();
+    }
+    // Then toggle the delay setting
+    toggleCallDelay();
+  };
+
   const { handleNext, handlePrevious, selectLead } = useNavigation(
     currentIndex,
     updateNavigation,
@@ -198,7 +208,7 @@ export const useLeadNavigation = ({
     toggleCallFilter: toggleCallFilterWrapper,
     toggleShuffle: toggleShuffleWrapper,
     toggleAutoCall: toggleAutoCallWrapper,
-    toggleCallDelay,
+    toggleCallDelay: toggleCallDelayWrapper,
     resetCallDelay,
     resetLeadsData,
     updateLeadsDataDirectly: setLeadsData, // Expose direct leads data update
