@@ -92,7 +92,7 @@ const FilterButtons: React.FC<FilterButtonsProps> = ({
             {/* Animated background for active state */}
             {timezoneFilter === 'EST_CST' && (
               <div 
-                className="absolute inset-0 bg-gradient-to-r from-blue-500/30 to-blue-600/30 rounded-lg scale-100 opacity-100"
+                className="absolute inset-0 bg-gradient-to-r from-blue-500/20 to-blue-600/20 rounded-lg scale-100 opacity-100"
                 style={{
                   transition: 'all 500ms cubic-bezier(0.4, 0, 0.2, 1)'
                 }}
@@ -134,7 +134,7 @@ const FilterButtons: React.FC<FilterButtonsProps> = ({
             {/* Animated background for active state */}
             {callFilter === 'UNCALLED' && (
               <div 
-                className="absolute inset-0 bg-gradient-to-r from-purple-500/30 to-purple-600/30 rounded-lg scale-100 opacity-100"
+                className="absolute inset-0 bg-gradient-to-r from-purple-500/20 to-purple-600/20 rounded-lg scale-100 opacity-100"
                 style={{
                   transition: 'all 500ms cubic-bezier(0.4, 0, 0.2, 1)'
                 }}
@@ -190,7 +190,7 @@ const FilterButtons: React.FC<FilterButtonsProps> = ({
             {/* Animated background for active state */}
             {shuffleMode && (
               <div 
-                className="absolute inset-0 bg-gradient-to-r from-orange-500/30 to-orange-600/30 rounded-lg scale-100 opacity-100"
+                className="absolute inset-0 bg-gradient-to-r from-orange-500/20 to-orange-600/20 rounded-lg scale-100 opacity-100"
                 style={{
                   transition: 'all 500ms cubic-bezier(0.4, 0, 0.2, 1)'
                 }}
@@ -232,7 +232,7 @@ const FilterButtons: React.FC<FilterButtonsProps> = ({
             {/* Animated background for active state */}
             {autoCall && (
               <div 
-                className="absolute inset-0 bg-gradient-to-r from-green-500/30 to-green-600/30 rounded-lg scale-100 opacity-100"
+                className="absolute inset-0 bg-gradient-to-r from-green-500/20 to-green-600/20 rounded-lg scale-100 opacity-100"
                 style={{
                   transition: 'all 500ms cubic-bezier(0.4, 0, 0.2, 1)'
                 }}
