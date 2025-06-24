@@ -16,16 +16,13 @@ export const useLocalLeadOperations = () => {
 
   const loadExistingData = useCallback(async () => {
     try {
-      // Load current CSV ID and its data using synchronous localStorage
-      const currentCSVId = localStorage.getItem('coldcaller-current-csv-id');
-      const csvFilesStr = localStorage.getItem('coldcaller-csv-files');
-      const csvFiles = csvFilesStr ? JSON.parse(csvFilesStr) : [];
+      // Load current CSV ID and its data using appStorage
+      const currentCSVId = await appStorage.getCurrentCSVId();
+      const csvFiles = await appStorage.getCSVFiles();
       
       if (currentCSVId) {
         // Load data for the current CSV
-        const key = `coldcaller-csv-${currentCSVId}-leads`;
-        const savedLeadsStr = localStorage.getItem(key);
-        const savedLeads = savedLeadsStr ? JSON.parse(savedLeadsStr) : [];
+        const savedLeads = await appStorage.getCSVLeadsData(currentCSVId);
         const currentFile = csvFiles.find(f => f.id === currentCSVId);
         
         if (savedLeads.length > 0) {
@@ -42,8 +39,7 @@ export const useLocalLeadOperations = () => {
         }
       } else {
         // Fallback to old storage for backward compatibility
-        const savedLeadsStr = localStorage.getItem('coldcaller-leads-data');
-        const savedLeads = savedLeadsStr ? JSON.parse(savedLeadsStr) : [];
+        const savedLeads = await appStorage.getLeadsData();
         const savedLeadList = localStorage.getItem('currentLeadList');
         
         if (savedLeads.length > 0) {
@@ -74,13 +70,13 @@ export const useLocalLeadOperations = () => {
       setCurrentLeadList(leadList);
       setLeadsData(leads);
       
-      // Save to CSV-specific storage using synchronous localStorage
-      const key = `coldcaller-csv-${csvId}-leads`;
-      localStorage.setItem(key, JSON.stringify(leads));
-      localStorage.setItem('coldcaller-current-csv-id', csvId);
+      // Save to CSV-specific storage using appStorage
+      await appStorage.saveCSVLeadsData(csvId, leads);
+      await appStorage.saveCurrentCSVId(csvId);
 
       return true;
     } catch (error) {
+      console.error('Error importing leads from CSV:', error);
       return false;
     } finally {
       setLoading(false);
@@ -107,18 +103,15 @@ export const useLocalLeadOperations = () => {
         } : l
       );
       
-      // Save to CSV-specific storage using synchronous localStorage
-      const currentCSVId = localStorage.getItem('coldcaller-current-csv-id');
+      // Save to CSV-specific storage using appStorage
+      const currentCSVId = await appStorage.getCurrentCSVId();
       if (currentCSVId) {
-        const key = `coldcaller-csv-${currentCSVId}-leads`;
-        localStorage.setItem(key, JSON.stringify(updatedLeads));
-      } else {
-        // Fallback to old storage
-        localStorage.setItem('coldcaller-leads-data', JSON.stringify(updatedLeads));
+        await appStorage.saveCSVLeadsData(currentCSVId, updatedLeads);
       }
       
       return updatedLeads;
     } catch (error) {
+      console.error('Error updating lead call count:', error);
       return currentLeadsData;
     }
   }, []);
@@ -132,18 +125,15 @@ export const useLocalLeadOperations = () => {
           : l
       );
       
-      // Save to CSV-specific storage using synchronous localStorage
-      const currentCSVId = localStorage.getItem('coldcaller-current-csv-id');
+      // Save to CSV-specific storage using appStorage
+      const currentCSVId = await appStorage.getCurrentCSVId();
       if (currentCSVId) {
-        const key = `coldcaller-csv-${currentCSVId}-leads`;
-        localStorage.setItem(key, JSON.stringify(updatedLeads));
-      } else {
-        // Fallback to old storage
-        localStorage.setItem('coldcaller-leads-data', JSON.stringify(updatedLeads));
+        await appStorage.saveCSVLeadsData(currentCSVId, updatedLeads);
       }
       
       return updatedLeads;
     } catch (error) {
+      console.error('Error resetting call count:', error);
       return currentLeadsData;
     }
   }, []);
@@ -156,18 +146,15 @@ export const useLocalLeadOperations = () => {
         lastCalled: undefined
       }));
       
-      // Save to CSV-specific storage using synchronous localStorage
-      const currentCSVId = localStorage.getItem('coldcaller-current-csv-id');
+      // Save to CSV-specific storage using appStorage
+      const currentCSVId = await appStorage.getCurrentCSVId();
       if (currentCSVId) {
-        const key = `coldcaller-csv-${currentCSVId}-leads`;
-        localStorage.setItem(key, JSON.stringify(updatedLeads));
-      } else {
-        // Fallback to old storage
-        localStorage.setItem('coldcaller-leads-data', JSON.stringify(updatedLeads));
+        await appStorage.saveCSVLeadsData(currentCSVId, updatedLeads);
       }
       
       return updatedLeads;
     } catch (error) {
+      console.error('Error resetting all call counts:', error);
       return currentLeadsData;
     }
   }, []);

@@ -95,7 +95,7 @@ const FilterButtons: React.FC<FilterButtonsProps> = ({
             style={{ WebkitTapHighlightColor: 'transparent' }}
           >
             <span className="block truncate">
-              {callFilter === 'ALL' ? 'All Numbers' : 'Uncalled Numbers'}
+              {callFilter === 'ALL' ? 'All Numbers' : 'Uncalled'}
             </span>
           </button>
           {callFilter === 'UNCALLED' && (

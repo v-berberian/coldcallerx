@@ -295,8 +295,8 @@ const SearchAutocomplete: React.FC<SearchAutocompleteProps> = ({
 
   const animationClass = isAnimating ? 'animate-slide-down' : 'animate-slide-up';
 
-  // If we have loadMoreResults function and searchResults, use infinite loader
-  if (loadMoreResults && searchResults.length > 0) {
+  // If we have loadMoreResults function, use infinite loader (including for empty results)
+  if (loadMoreResults) {
     // Calculate height based on fullscreen state and number of results
     let listHeight: number;
     let containerStyle: React.CSSProperties = {};
@@ -322,26 +322,32 @@ const SearchAutocomplete: React.FC<SearchAutocompleteProps> = ({
           onTouchStart={(e) => e.stopPropagation()}
           onTouchEnd={(e) => e.stopPropagation()}
         >
-          <InfiniteLoader
-            isItemLoaded={isItemLoaded}
-            itemCount={totalResultsCount}
-            loadMoreItems={handleLoadMoreItems}
-            threshold={5} // Load more when 5 items away from the end
-          >
-            {({ onItemsRendered, ref }) => (
-              <List
-                ref={ref}
-                height={fullscreenHeight}
-                itemCount={totalResultsCount} // Use totalResultsCount instead of searchResults.length
-                itemSize={itemHeight}
-                width="100%"
-                onItemsRendered={onItemsRendered}
-                overscanCount={10}
-              >
-                {renderLeadItem}
-              </List>
-            )}
-          </InfiniteLoader>
+          {searchResults.length === 0 ? (
+            <div className="flex items-center justify-center h-full p-4 text-center text-muted-foreground">
+              No leads found
+            </div>
+          ) : (
+            <InfiniteLoader
+              isItemLoaded={isItemLoaded}
+              itemCount={totalResultsCount}
+              loadMoreItems={handleLoadMoreItems}
+              threshold={5} // Load more when 5 items away from the end
+            >
+              {({ onItemsRendered, ref }) => (
+                <List
+                  ref={ref}
+                  height={fullscreenHeight}
+                  itemCount={totalResultsCount} // Use totalResultsCount instead of searchResults.length
+                  itemSize={itemHeight}
+                  width="100%"
+                  onItemsRendered={onItemsRendered}
+                  overscanCount={10}
+                >
+                  {renderLeadItem}
+                </List>
+              )}
+            </InfiniteLoader>
+          )}
         </div>
       );
     } else {
@@ -369,26 +375,32 @@ const SearchAutocomplete: React.FC<SearchAutocompleteProps> = ({
           onTouchStart={(e) => e.stopPropagation()}
           onTouchEnd={(e) => e.stopPropagation()}
         >
-          <InfiniteLoader
-            isItemLoaded={isItemLoaded}
-            itemCount={totalResultsCount}
-            loadMoreItems={handleLoadMoreItems}
-            threshold={5} // Load more when 5 items away from the end
-          >
-            {({ onItemsRendered, ref }) => (
-              <List
-                ref={ref}
-                height={dynamicHeight}
-                itemCount={searchResults.length}
-                itemSize={itemHeight}
-                width="100%"
-                onItemsRendered={onItemsRendered}
-                overscanCount={10}
-              >
-                {renderLeadItem}
-              </List>
-            )}
-          </InfiniteLoader>
+          {searchResults.length === 0 ? (
+            <div className="flex items-center justify-center h-full p-4 text-center text-muted-foreground">
+              No leads found
+            </div>
+          ) : (
+            <InfiniteLoader
+              isItemLoaded={isItemLoaded}
+              itemCount={totalResultsCount}
+              loadMoreItems={handleLoadMoreItems}
+              threshold={5} // Load more when 5 items away from the end
+            >
+              {({ onItemsRendered, ref }) => (
+                <List
+                  ref={ref}
+                  height={dynamicHeight}
+                  itemCount={searchResults.length}
+                  itemSize={itemHeight}
+                  width="100%"
+                  onItemsRendered={onItemsRendered}
+                  overscanCount={10}
+                >
+                  {renderLeadItem}
+                </List>
+              )}
+            </InfiniteLoader>
+          )}
         </div>
       );
     }
@@ -411,7 +423,7 @@ const SearchAutocomplete: React.FC<SearchAutocompleteProps> = ({
       onTouchEnd={(e) => e.stopPropagation()}
     >
       {searchResults.length === 0 ? (
-        <div className="p-4 text-center text-muted-foreground">
+        <div className="flex items-center justify-center h-full p-4 text-center text-muted-foreground">
           No leads found
         </div>
       ) : (

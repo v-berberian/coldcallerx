@@ -219,20 +219,6 @@ export const useLeadsData = (initialLeads: Lead[], refreshTrigger: number = 0) =
           } : l
         );
         
-        // Save to CSV-specific storage immediately using synchronous localStorage
-        try {
-          const currentCSVId = localStorage.getItem('coldcaller-current-csv-id');
-          if (currentCSVId) {
-            const key = `coldcaller-csv-${currentCSVId}-leads`;
-            localStorage.setItem(key, JSON.stringify(updatedLeads));
-          } else {
-            // Fall back to old storage
-            localStorage.setItem('coldcaller-leads-data', JSON.stringify(updatedLeads));
-          }
-        } catch (error) {
-          console.error('Error saving leads data:', error);
-        }
-        
         return updatedLeads;
       });
     } catch (error) {
@@ -250,20 +236,6 @@ export const useLeadsData = (initialLeads: Lead[], refreshTrigger: number = 0) =
             : l
         );
         
-        // Save to CSV-specific storage immediately using synchronous localStorage
-        try {
-          const currentCSVId = localStorage.getItem('coldcaller-current-csv-id');
-          if (currentCSVId) {
-            const key = `coldcaller-csv-${currentCSVId}-leads`;
-            localStorage.setItem(key, JSON.stringify(updatedLeads));
-          } else {
-            // Fall back to old storage
-            localStorage.setItem('coldcaller-leads-data', JSON.stringify(updatedLeads));
-          }
-        } catch (error) {
-          console.error('Error saving leads data:', error);
-        }
-        
         return updatedLeads;
       });
     } catch (error) {
@@ -279,20 +251,6 @@ export const useLeadsData = (initialLeads: Lead[], refreshTrigger: number = 0) =
           ...l,
           lastCalled: undefined
         }));
-        
-        // Save to CSV-specific storage immediately using synchronous localStorage
-        try {
-          const currentCSVId = localStorage.getItem('coldcaller-current-csv-id');
-          if (currentCSVId) {
-            const key = `coldcaller-csv-${currentCSVId}-leads`;
-            localStorage.setItem(key, JSON.stringify(updatedLeads));
-          } else {
-            // Fall back to old storage
-            localStorage.setItem('coldcaller-leads-data', JSON.stringify(updatedLeads));
-          }
-        } catch (error) {
-          console.error('Error saving leads data:', error);
-        }
         
         return updatedLeads;
       });

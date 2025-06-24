@@ -106,10 +106,11 @@ export const useSearchState = ({ leads, getBaseLeads, leadsData, timezoneFilter,
 
   // Pre-populate search results on mount for instant display
   useEffect(() => {
-    if (searchResults.length === 0 && initialSearchResults.length > 0) {
+    // Only pre-populate if there's no active search query
+    if (searchResults.length === 0 && initialSearchResults.length > 0 && !debouncedSearchQuery.trim()) {
       setSearchResults(initialSearchResults);
     }
-  }, [initialSearchResults, searchResults.length]);
+  }, [initialSearchResults, searchResults.length, debouncedSearchQuery]);
 
   const clearSearch = useCallback(() => {
     setSearchQuery('');
@@ -128,13 +129,13 @@ export const useSearchState = ({ leads, getBaseLeads, leadsData, timezoneFilter,
   }, [searchResults.length, initialSearchResults]);
 
   const handleSearchBlur = useCallback(() => {
-    // Don't close autocomplete if there are results, even with no search query
-    // This allows the autocomplete to stay open when transitioning from fullscreen
-    if (searchResults.length === 0) {
+    // Keep autocomplete open if there's an active search query, even with no results
+    // This allows users to see "No leads found" message
+    if (searchResults.length === 0 && !debouncedSearchQuery.trim()) {
       setTimeout(() => setShowAutocomplete(false), 20);
     }
     // Don't reset search results when blurring - keep current results
-  }, [searchResults.length]);
+  }, [searchResults.length, debouncedSearchQuery]);
 
   const closeAutocomplete = useCallback(() => {
     setShowAutocomplete(false);

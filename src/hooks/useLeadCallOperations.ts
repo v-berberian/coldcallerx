@@ -42,20 +42,6 @@ export const useLeadCallOperations = ({
       
       setLeadsData(updatedLeads);
       
-      // Save to CSV-specific storage immediately using synchronous localStorage
-      try {
-        const currentCSVId = localStorage.getItem('coldcaller-current-csv-id');
-        if (currentCSVId) {
-          const key = `coldcaller-csv-${currentCSVId}-leads`;
-          localStorage.setItem(key, JSON.stringify(updatedLeads));
-        } else {
-          // Fall back to old storage
-          localStorage.setItem('coldcaller-leads-data', JSON.stringify(updatedLeads));
-        }
-      } catch (error) {
-        console.error('Error saving leads data:', error);
-      }
-      
       // Increment daily call count
       await loadDailyStats();
 
@@ -75,20 +61,6 @@ export const useLeadCallOperations = ({
       );
       
       setLeadsData(updatedLeads);
-      
-      // Save to CSV-specific storage immediately using synchronous localStorage
-      try {
-        const currentCSVId = localStorage.getItem('coldcaller-current-csv-id');
-        if (currentCSVId) {
-          const key = `coldcaller-csv-${currentCSVId}-leads`;
-          localStorage.setItem(key, JSON.stringify(updatedLeads));
-        } else {
-          // Fall back to old storage
-          localStorage.setItem('coldcaller-leads-data', JSON.stringify(updatedLeads));
-        }
-      } catch (error) {
-        console.error('Error saving leads data:', error);
-      }
     } catch (error) {
       console.error('Error in resetCallCount:', error);
     }
@@ -102,20 +74,6 @@ export const useLeadCallOperations = ({
       }));
       
       setLeadsData(updatedLeads);
-      
-      // Save to CSV-specific storage immediately using synchronous localStorage
-      try {
-        const currentCSVId = localStorage.getItem('coldcaller-current-csv-id');
-        if (currentCSVId) {
-          const key = `coldcaller-csv-${currentCSVId}-leads`;
-          localStorage.setItem(key, JSON.stringify(updatedLeads));
-        } else {
-          // Fall back to old storage
-          localStorage.setItem('coldcaller-leads-data', JSON.stringify(updatedLeads));
-        }
-      } catch (error) {
-        console.error('Error saving leads data:', error);
-      }
     } catch (error) {
       console.error('Error in resetAllCallCounts:', error);
     }

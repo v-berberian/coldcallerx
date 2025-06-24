@@ -30,8 +30,7 @@ const Index = () => {
         
         // Check if there are any saved CSV files
         try {
-          const csvFilesStr = localStorage.getItem('coldcaller-csv-files');
-          const csvFiles = csvFilesStr ? JSON.parse(csvFilesStr) : [];
+          const csvFiles = await appStorage.getCSVFiles();
           setHasSavedLists(csvFiles.length > 0);
         } catch (error) {
           console.error('Error checking saved CSV files:', error);
@@ -40,7 +39,7 @@ const Index = () => {
         
         // Load current CSV ID
         try {
-          const csvId = localStorage.getItem('coldcaller-current-csv-id');
+          const csvId = await appStorage.getCurrentCSVId();
           setCurrentCSVId(csvId);
         } catch (error) {
           console.error('Error loading current CSV ID:', error);

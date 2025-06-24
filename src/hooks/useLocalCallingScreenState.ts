@@ -98,9 +98,6 @@ export const useLocalCallingScreenState = ({ leads, onCallMade, refreshTrigger =
         if (currentCSVId) {
           const key = `coldcaller-csv-${currentCSVId}-leads`;
           localStorage.setItem(key, JSON.stringify(leadsData));
-        } else {
-          // Fall back to old storage
-          localStorage.setItem('coldcaller-leads-data', JSON.stringify(leadsData));
         }
       } catch (error) {
         console.error('Error saving leads data:', error);
