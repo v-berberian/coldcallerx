@@ -62,41 +62,26 @@ export const useFilterChangeEffects = (
           return;
         }
         
-        const originalIndex = leadsData.findIndex(lead => 
-          lead.name === currentlyViewedLead.name && lead.phone === currentlyViewedLead.phone
-        );
-        
-        let nextIndex = 0;
-        let foundNextLead = false;
-        
-        for (let i = originalIndex + 1; i < leadsData.length; i++) {
-          const leadAtIndex = leadsData[i];
-          const indexInFiltered = newFilteredLeads.findIndex(filteredLead => 
-            filteredLead.name === leadAtIndex.name && filteredLead.phone === leadAtIndex.phone
-          );
-          
-          if (indexInFiltered !== -1) {
-            nextIndex = indexInFiltered;
-            foundNextLead = true;
-            break;
+        // --- Improved: Find the closest lead in the new filtered list by original index ---
+        // Map each filtered lead to its index in the original leadsData
+        const filteredWithOriginalIndices = newFilteredLeads.map(lead => ({
+          lead,
+          originalIndex: leadsData.findIndex(l => l.name === lead.name && l.phone === lead.phone)
+        }));
+        // Find the one with the minimal absolute difference to currentIndex
+        let minDiff = Infinity;
+        let closestIndex = 0;
+        for (let i = 0; i < filteredWithOriginalIndices.length; i++) {
+          const diff = Math.abs(filteredWithOriginalIndices[i].originalIndex - currentIndex);
+          if (
+            diff < minDiff ||
+            (diff === minDiff && filteredWithOriginalIndices[i].originalIndex > currentIndex) // prefer after if tied
+          ) {
+            minDiff = diff;
+            closestIndex = i;
           }
         }
-        
-        if (!foundNextLead) {
-          for (let i = 0; i <= originalIndex; i++) {
-            const leadAtIndex = leadsData[i];
-            const indexInFiltered = newFilteredLeads.findIndex(filteredLead => 
-              filteredLead.name === leadAtIndex.name && filteredLead.phone === leadAtIndex.phone
-            );
-            
-            if (indexInFiltered !== -1) {
-              nextIndex = indexInFiltered;
-              break;
-            }
-          }
-        }
-        
-        setCurrentIndex(nextIndex);
+        setCurrentIndex(closestIndex);
       } else if (newFilteredLeads.length > 0) {
         setCurrentIndex(0);
       }

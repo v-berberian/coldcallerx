@@ -219,6 +219,21 @@ export const useLeadsData = (initialLeads: Lead[], refreshTrigger: number = 0) =
           } : l
         );
         
+        // Save to CSV-specific storage immediately
+        (async () => {
+          try {
+            const currentCSVId = await appStorage.getCurrentCSVId();
+            if (currentCSVId) {
+              await appStorage.saveCSVLeadsData(currentCSVId, updatedLeads);
+            } else {
+              // Fall back to old storage
+              await appStorage.saveLeadsData(updatedLeads);
+            }
+          } catch (error) {
+            console.error('Error saving lead call status:', error);
+          }
+        })();
+        
         return updatedLeads;
       });
     } catch (error) {
@@ -236,6 +251,21 @@ export const useLeadsData = (initialLeads: Lead[], refreshTrigger: number = 0) =
             : l
         );
         
+        // Save to CSV-specific storage immediately
+        (async () => {
+          try {
+            const currentCSVId = await appStorage.getCurrentCSVId();
+            if (currentCSVId) {
+              await appStorage.saveCSVLeadsData(currentCSVId, updatedLeads);
+            } else {
+              // Fall back to old storage
+              await appStorage.saveLeadsData(updatedLeads);
+            }
+          } catch (error) {
+            console.error('Error saving lead call status reset:', error);
+          }
+        })();
+        
         return updatedLeads;
       });
     } catch (error) {
@@ -251,6 +281,21 @@ export const useLeadsData = (initialLeads: Lead[], refreshTrigger: number = 0) =
           ...l,
           lastCalled: undefined
         }));
+        
+        // Save to CSV-specific storage immediately
+        (async () => {
+          try {
+            const currentCSVId = await appStorage.getCurrentCSVId();
+            if (currentCSVId) {
+              await appStorage.saveCSVLeadsData(currentCSVId, updatedLeads);
+            } else {
+              // Fall back to old storage
+              await appStorage.saveLeadsData(updatedLeads);
+            }
+          } catch (error) {
+            console.error('Error saving all call status reset:', error);
+          }
+        })();
         
         return updatedLeads;
       });

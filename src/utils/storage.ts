@@ -270,7 +270,28 @@ export class AppStorage {
   }
 
   async getCSVLeadsData(csvId: string): Promise<Lead[]> {
-    return await this.getItem(getCSVStorageKey(csvId, 'leads'), []);
+    try {
+      // First check if this is chunked data
+      const metadata = await this.getCSVMetadata(csvId);
+      
+      if (metadata?.isChunked) {
+        const leads: Lead[] = [];
+        
+        for (let i = 0; i < metadata.chunksCount; i++) {
+          const chunkKey = `coldcaller-csv-${csvId}-chunk-${i}`;
+          const chunk = await this.getChunkedData(chunkKey, []);
+          leads.push(...chunk);
+        }
+        
+        return leads;
+      } else {
+        // Fallback to single storage method
+        return await this.getItem(getCSVStorageKey(csvId, 'leads'), []);
+      }
+    } catch (error) {
+      console.error('Error getting CSV leads data:', error);
+      return [];
+    }
   }
 
   async saveCSVCurrentIndex(csvId: string, index: number): Promise<void> {
@@ -282,11 +303,11 @@ export class AppStorage {
   }
 
   // CSV file management
-  async saveCSVFiles(csvFiles: Array<{id: string, name: string, fileName: string, totalLeads: number}>): Promise<void> {
+  async saveCSVFiles(csvFiles: Array<{id: string, name: string, fileName: string, totalLeads: number, isChunked?: boolean}>): Promise<void> {
     await this.setItem(STORAGE_KEYS.CSV_FILES, csvFiles);
   }
 
-  async getCSVFiles(): Promise<Array<{id: string, name: string, fileName: string, totalLeads: number}>> {
+  async getCSVFiles(): Promise<Array<{id: string, name: string, fileName: string, totalLeads: number, isChunked?: boolean}>> {
     return await this.getItem(STORAGE_KEYS.CSV_FILES, []);
   }
 
@@ -399,6 +420,21 @@ export class AppStorage {
       console.error('Error getting CSV metadata:', error);
       return null;
     }
+  }
+
+  // Public method to save chunked data
+  async saveChunkedData(csvId: string, chunkKey: string, data: unknown): Promise<void> {
+    await this.setItem(chunkKey, data);
+  }
+
+  // Public method to get chunked data
+  async getChunkedData<T>(chunkKey: string, defaultValue: T): Promise<T> {
+    return await this.getItem(chunkKey, defaultValue);
+  }
+
+  // Public method to save CSV metadata
+  async saveCSVMetadata(csvId: string, metadata: unknown): Promise<void> {
+    await this.setItem(getCSVStorageKey(csvId, 'metadata'), metadata);
   }
 
   async removeChunkedCSVData(csvId: string): Promise<void> {

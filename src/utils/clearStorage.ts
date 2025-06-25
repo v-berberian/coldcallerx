@@ -58,6 +58,11 @@ export const clearColdCallerStorage = async () => {
   }
 };
 
+export const clearAllStorage = async () => {
+  // Alias for clearColdCallerStorage for backward compatibility
+  return clearColdCallerStorage();
+};
+
 export const quickClearColdCallerStorage = () => {
   try {
     // Clear all localStorage
@@ -75,6 +80,7 @@ export const quickClearColdCallerStorage = () => {
 
 // Make functions available globally for debugging
 if (typeof window !== 'undefined') {
-  (window as unknown as { clearColdCallerStorage: typeof clearColdCallerStorage; quickClearColdCallerStorage: typeof quickClearColdCallerStorage }).clearColdCallerStorage = clearColdCallerStorage;
-  (window as unknown as { clearColdCallerStorage: typeof clearColdCallerStorage; quickClearColdCallerStorage: typeof quickClearColdCallerStorage }).quickClearColdCallerStorage = quickClearColdCallerStorage;
+  (window as unknown as { clearColdCallerStorage: typeof clearColdCallerStorage; quickClearColdCallerStorage: typeof quickClearColdCallerStorage; clearAllStorage: typeof clearAllStorage }).clearColdCallerStorage = clearColdCallerStorage;
+  (window as unknown as { clearColdCallerStorage: typeof clearColdCallerStorage; quickClearColdCallerStorage: typeof quickClearColdCallerStorage; clearAllStorage: typeof clearAllStorage }).quickClearColdCallerStorage = quickClearColdCallerStorage;
+  (window as unknown as { clearColdCallerStorage: typeof clearColdCallerStorage; quickClearColdCallerStorage: typeof quickClearColdCallerStorage; clearAllStorage: typeof clearAllStorage }).clearAllStorage = clearAllStorage;
 } 

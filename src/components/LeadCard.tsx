@@ -177,15 +177,27 @@ const LeadCard: React.FC<LeadCardProps> = ({
   const emailValue = lead.email?.trim() ?? '';
   const hasValidEmail = emailValue && emailValue.includes('@');
 
-  // Completely rewrite phone parsing - handle format: "773) 643-4644 (773) 643-9346"
+  // Completely rewrite phone parsing - handle format: \"773) 643-4644 (773) 643-9346\"
   const additionalPhones = lead.additionalPhones ? (() => {
     const rawString = lead.additionalPhones.trim();
 
-    // Use regex to find all phone patterns like "(123) 456-7890" or "123) 456-7890"
-    const phonePattern = /\(?(\d{3})\)?\s*(\d{3})-?(\d{4})/g;
+    // First, normalize the string by replacing various separators with spaces
+    const normalizedString = rawString
+      .replace(/\n/g, ' ')  // Replace newlines with spaces
+      .replace(/\r/g, ' ')  // Replace carriage returns with spaces
+      .replace(/\t/g, ' ')  // Replace tabs with spaces
+      .replace(/,/g, ' ')   // Replace commas with spaces
+      .replace(/;/g, ' ')   // Replace semicolons with spaces
+      .replace(/\s+/g, ' ') // Replace multiple spaces with single space
+      .trim();
+
+    // Use a more comprehensive regex to find all phone patterns
+    // This handles: (123) 456-7890, 123) 456-7890, 123-456-7890, 123.456.7890, 123 456 7890
+    const phonePattern = /\(?(\d{3})\)?[\s\-.]?(\d{3})[\s\-.]?(\d{4})/g;
     const foundPhones = [];
     let match;
-    while ((match = phonePattern.exec(rawString)) !== null) {
+    
+    while ((match = phonePattern.exec(normalizedString)) !== null) {
       const formattedPhone = `(${match[1]}) ${match[2]}-${match[3]}`;
       foundPhones.push(formattedPhone);
     }
@@ -194,12 +206,11 @@ const LeadCard: React.FC<LeadCardProps> = ({
     const primaryPhoneFormatted = formatPhoneNumber(lead.phone);
     const filteredPhones = foundPhones.filter(phone => phone !== primaryPhoneFormatted);
 
-    // Limit to only 3 additional numbers
-    return filteredPhones.slice(0, 3);
+    return filteredPhones;
   })() : [];
   const hasAdditionalPhones = additionalPhones.length > 0;
 
-  // All available phones (primary + up to 3 additional)
+  // All available phones (primary + additional)
   const allPhones = [{
     phone: formatPhoneNumber(lead.phone),
     isPrimary: true

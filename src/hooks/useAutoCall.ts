@@ -18,6 +18,7 @@ export const useAutoCall = (
 
   const executeAutoCall = (lead: Lead) => {
     if (!lead) {
+      console.warn('executeAutoCall called with null/undefined lead');
       return;
     }
     
@@ -45,6 +46,7 @@ export const useAutoCall = (
     
     if (actualDelay === 0) {
       // No delay, make call immediately
+      console.log('Fire mode: Making call immediately to', lead.name);
       setIsAutoCallInProgress(true);
       makeCall(lead, false);
       setTimeout(() => {
@@ -52,6 +54,7 @@ export const useAutoCall = (
       }, 500);
     } else {
       // Start countdown with specified delay
+      console.log(`Starting countdown for ${actualDelay} seconds for`, lead.name);
       setPendingLead(lead);
       setIsCountdownActive(true);
       setIsAutoCallInProgress(true);
@@ -71,6 +74,7 @@ export const useAutoCall = (
             setIsCountdownActive(false);
             
             // Make the call
+            console.log('Countdown complete: Making call to', lead.name);
             makeCall(lead, false);
             
             // Clean up after a short delay

@@ -51,5 +51,5 @@ export const useAutoCallEffects = ({
       // Reset the trigger flag
       setShouldAutoCall(false);
     }
-  }, [shouldAutoCall, autoCall, currentIndex, executeAutoCall, setCurrentLeadForAutoCall, setShouldAutoCall, markLeadAsCalled, componentReady, leadsInitialized, getBaseLeads, callDelay]);
+  }, [shouldAutoCall, autoCall, executeAutoCall, setCurrentLeadForAutoCall, setShouldAutoCall, markLeadAsCalled, componentReady, leadsInitialized, getBaseLeads, callDelay]);
 };

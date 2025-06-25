@@ -190,7 +190,9 @@ const CallingScreenContainer: React.FC<CallingScreenContainerProps> = memo(({
 
   // Handle CSV selection
   const handleCSVSelect = (csvId: string, newLeads: Lead[], newFileName: string) => {
-    memoizedResetLeadsData(newLeads);
+    // For CSV switching, update leads data directly without resetting navigation
+    // This preserves the lastCalled status from storage
+    updateLeadsDataDirectly(newLeads);
     onCSVSelect(csvId, newLeads, newFileName);
     // Trigger refresh of CSV selector
     setRefreshTrigger(prev => prev + 1);

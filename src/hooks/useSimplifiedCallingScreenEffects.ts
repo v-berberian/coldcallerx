@@ -70,5 +70,5 @@ export const useSimplifiedCallingScreenEffects = ({
       // Reset the trigger flag
       setShouldAutoCall(false);
     }
-  }, [shouldAutoCall, autoCall, currentIndex, executeAutoCall, setCurrentLeadForAutoCall, setShouldAutoCall, componentReady, leadsInitialized, getBaseLeads, callDelay]);
+  }, [shouldAutoCall, autoCall, executeAutoCall, setCurrentLeadForAutoCall, setShouldAutoCall, componentReady, leadsInitialized, getBaseLeads, callDelay]);
 };

@@ -473,9 +473,13 @@ button[data-no-outline="true"]:visited,
 button[data-no-outline="true"]:hover {
   outline: none !important;
   border: none !important;
-  box-shadow: none !important;
   ring: none !important;
   ring-offset: none !important;
+}
+
+/* Allow box-shadow to be set via inline styles */
+[data-radix-dropdown-trigger] button[style*="box-shadow"] {
+  box-shadow: inherit !important;
 }
 
 /* Override box-shadow for CSV selector buttons to show 3D effects */
@@ -507,19 +511,13 @@ button.csv-button-override.csv-button-pressed {
 }
 
 /* Disable hover effects on CSV selector and settings buttons */
-button.h-8.w-8.text-base.focus\\:bg-transparent.active\\:bg-transparent.transition-all.duration-300.ease-out.rounded-lg:hover {
+button.no-hover:hover {
   background-color: transparent !important;
   background: transparent !important;
 }
 
 /* Disable hover effects on ghost variant buttons */
 button[data-variant="ghost"]:hover {
-  background-color: transparent !important;
-  background: transparent !important;
-}
-
-/* Specific override for the exact button classes */
-button.h-8.w-8.text-base.focus\\:bg-transparent.active\\:bg-transparent.transition-all.duration-300.ease-out.rounded-lg.text-muted-foreground:hover {
   background-color: transparent !important;
   background: transparent !important;
 }
@@ -550,3 +548,42 @@ button.no-hover:hover .h-5.w-5 {
 }
 
 /* CSV Selector Ultra-Modern Button Effects */
+
+/* Specific shadow override for pressed state */
+.csv-button-pressed {
+  box-shadow: inset 0 2px 4px rgba(0,0,0,0.2), inset 0 1px 2px rgba(255,255,255,0.1) !important;
+}
+
+/* Specific rules for CSV selector icon effects */
+.csv-icon-pressed {
+  transform: scale(0.95) !important;
+}
+
+.csv-icon-normal {
+  transform: scale(1) !important;
+}
+
+/* Ensure background colors work */
+.csv-bg-pressed {
+  background-color: rgba(243, 244, 246, 0.5) !important;
+}
+
+.csv-bg-pressed-dark {
+  background-color: rgba(31, 41, 55, 0.5) !important;
+}
+
+/* Override any conflicting hover effects */
+[data-radix-dropdown-trigger] button.no-hover:hover {
+  background-color: transparent !important;
+  background: transparent !important;
+  color: hsl(var(--muted-foreground)) !important;
+}
+
+[data-radix-dropdown-trigger] button.no-hover:hover svg {
+  color: hsl(var(--muted-foreground)) !important;
+}
+
+/* Ensure icon shadows work */
+.csv-icon-shadow {
+  filter: drop-shadow(inset 0 1px 2px rgba(0,0,0,0.3)) !important;
+}

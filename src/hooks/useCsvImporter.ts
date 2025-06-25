@@ -17,18 +17,6 @@ export const useCsvImporter = ({ onLeadsImported }: UseCsvImporterProps) => {
     return `${sanitizedFileName}_${timestamp}`;
   };
 
-  const checkStorageCapacity = (fileSize: number): boolean => {
-    try {
-      const currentUsage = JSON.stringify(localStorage).length;
-      const estimatedNewUsage = currentUsage + fileSize;
-      const maxCapacity = 50 * 1024 * 1024; // 50MB for iPhone/iOS Safari
-      
-      return estimatedNewUsage < maxCapacity;
-    } catch (error) {
-      return true; // Assume it's okay if we can't check
-    }
-  };
-
   const analyzeLocalStorageUsage = () => {
     try {
       const usage = {};
@@ -47,29 +35,148 @@ export const useCsvImporter = ({ onLeadsImported }: UseCsvImporterProps) => {
         }
       }
       
-      return usage;
+      return { usage, totalSize };
     } catch (error) {
-      return {};
+      return { usage: {}, totalSize: 0 };
     }
   };
 
-  const clearAllAppData = () => {
+  // New function to intelligently clear largest lists
+  const clearLargestLists = async (requiredSpace: number): Promise<boolean> => {
     try {
-      // Clear all app-related localStorage data
-      const keysToRemove = [];
-      for (let i = 0; i < localStorage.length; i++) {
-        const key = localStorage.key(i);
-        if (key && (key.startsWith('coldcaller') || key.startsWith('CapacitorStorage'))) {
-          keysToRemove.push(key);
+      const csvFiles = await appStorage.getCSVFiles();
+      const fileSizes: Array<{id: string, name: string, size: number}> = [];
+      
+      // Calculate size of each CSV file
+      for (const file of csvFiles) {
+        try {
+          const leadsData = await appStorage.getCSVLeadsData(file.id);
+          const size = JSON.stringify(leadsData).length;
+          fileSizes.push({
+            id: file.id,
+            name: file.name,
+            size: size
+          });
+        } catch (error) {
+          // Skip files that can't be read
+          console.warn(`Could not read file ${file.name}:`, error);
         }
       }
       
-      keysToRemove.forEach(key => {
-        localStorage.removeItem(key);
-      });
+      // Sort by size (largest first)
+      fileSizes.sort((a, b) => b.size - a.size);
+      
+      let freedSpace = 0;
+      const filesToDelete: string[] = [];
+      
+      // Calculate which files would need to be deleted
+      for (const file of fileSizes) {
+        if (freedSpace >= requiredSpace) break;
+        
+        filesToDelete.push(file.id);
+        freedSpace += file.size;
+      }
+      
+      if (filesToDelete.length === 0) {
+        return false; // No files to delete
+      }
+      
+      // Show user confirmation with details
+      const totalSizeMB = (freedSpace / 1024 / 1024).toFixed(2);
+      const requiredSizeMB = (requiredSpace / 1024 / 1024).toFixed(2);
+      const fileNames = filesToDelete.map(id => {
+        const file = fileSizes.find(f => f.id === id);
+        return file?.name || 'Unknown file';
+      }).join(', ');
+      
+      const shouldDelete = confirm(
+        `Storage is full. To import this file (${requiredSizeMB}MB), we need to delete the largest existing lists:\n\n` +
+        `Files to delete: ${fileNames}\n` +
+        `Space to free: ${totalSizeMB}MB\n\n` +
+        `Would you like to delete these lists and import the new file?`
+      );
+      
+      if (shouldDelete) {
+        // Delete the files
+        for (const fileId of filesToDelete) {
+          try {
+            await appStorage.removeAllCSVData(fileId);
+          } catch (error) {
+            console.error(`Error deleting file ${fileId}:`, error);
+          }
+        }
+        
+        // Update CSV files list
+        const updatedFiles = csvFiles.filter(file => !filesToDelete.includes(file.id));
+        await appStorage.saveCSVFiles(updatedFiles);
+        
+        return true;
+      }
+      
+      return false;
+    } catch (error) {
+      console.error('Error clearing largest lists:', error);
+      return false;
+    }
+  };
+
+  // New function to check storage capacity and show warning
+  const checkStorageAndWarn = (leadsDataSize: number, totalSize: number): boolean => {
+    const estimatedNewUsage = totalSize + leadsDataSize;
+    const maxCapacity = 50 * 1024 * 1024; // 50MB
+    
+    if (estimatedNewUsage > maxCapacity) {
+      const currentUsageMB = (totalSize / 1024 / 1024).toFixed(2);
+      const requiredSizeMB = (leadsDataSize / 1024 / 1024).toFixed(2);
+      const availableSpaceMB = ((maxCapacity - totalSize) / 1024 / 1024).toFixed(2);
+      
+      const message = `Storage Warning:\n\n` +
+        `Current usage: ${currentUsageMB}MB\n` +
+        `Available space: ${availableSpaceMB}MB\n` +
+        `File requires: ${requiredSizeMB}MB\n\n` +
+        `This file is too large for the available storage space. ` +
+        `Please delete some existing lists or try a smaller file.`;
+      
+      alert(message);
+      return false;
+    }
+    
+    return true;
+  };
+
+  // New function to save large datasets in chunks
+  const saveLeadsInChunks = async (csvId: string, leads: Lead[]): Promise<boolean> => {
+    const CHUNK_SIZE = 1000; // Save 1000 leads per chunk
+    const totalLeads = leads.length;
+    
+    try {
+      // Save metadata about chunking
+      const metadata = {
+        isChunked: true,
+        chunksCount: Math.ceil(totalLeads / CHUNK_SIZE),
+        totalLeads: totalLeads,
+        chunkSize: CHUNK_SIZE
+      };
+      
+      await appStorage.saveCSVMetadata(csvId, metadata);
+      
+      // Save leads in chunks
+      for (let i = 0; i < totalLeads; i += CHUNK_SIZE) {
+        const chunk = leads.slice(i, i + CHUNK_SIZE);
+        const chunkKey = `coldcaller-csv-${csvId}-chunk-${Math.floor(i / CHUNK_SIZE)}`;
+        
+        try {
+          await appStorage.saveChunkedData(csvId, chunkKey, chunk);
+        } catch (error) {
+          console.error(`Error saving chunk ${Math.floor(i / CHUNK_SIZE)}:`, error);
+          // If chunk save fails, throw the error to be handled by the caller
+          throw error;
+        }
+      }
       
       return true;
     } catch (error) {
+      console.error('Error saving leads in chunks:', error);
       return false;
     }
   };
@@ -111,57 +218,67 @@ export const useCsvImporter = ({ onLeadsImported }: UseCsvImporterProps) => {
           
           // Check if we have enough storage space
           const leadsDataSize = JSON.stringify(leads).length;
-          if (!checkStorageCapacity(leadsDataSize)) {
-            // Analyze current storage usage
-            const usage = analyzeLocalStorageUsage();
+          const { totalSize } = analyzeLocalStorageUsage();
+          const estimatedNewUsage = totalSize + leadsDataSize;
+          
+          console.log(`File: ${file.name}, Size: ${(file.size / 1024 / 1024).toFixed(2)}MB`);
+          console.log(`File content length: ${text.length} characters`);
+          console.log(`First 500 characters: ${text.substring(0, 500)}`);
+          console.log(`Parsed ${leads.length} leads`);
+          console.log(`Current localStorage usage: ${(totalSize / 1024 / 1024).toFixed(2)}MB`);
+          console.log(`Estimated new usage: ${(estimatedNewUsage / 1024 / 1024).toFixed(2)}MB`);
+          console.log(`Max capacity: 50.00MB`);
+          
+          // Check storage capacity and warn user if insufficient
+          if (!checkStorageAndWarn(leadsDataSize, totalSize)) {
+            setLoading(false);
+            return;
+          }
+          
+          // If file is large (>10MB estimated), use chunking
+          const shouldUseChunking = leadsDataSize > 10 * 1024 * 1024 || leads.length > 10000;
+          
+          if (shouldUseChunking) {
+            console.log('Using chunked storage for large file');
+            const success = await saveLeadsInChunks(csvId, leads);
             
-            // Check if clearing CSV data would help
-            const csvFiles = await appStorage.getCSVFiles();
-            let csvDataSize = 0;
-            
-            for (const file of csvFiles) {
-              try {
-                const leadsData = await appStorage.getCSVLeadsData(file.id);
-                csvDataSize += JSON.stringify(leadsData).length;
-              } catch (error) {
-                // Ignore errors checking file
-              }
+            if (!success) {
+              toast.error('Failed to save large file. Please try clearing some data or use a smaller file.');
+              setLoading(false);
+              return;
             }
-            
-            if (csvDataSize > 0) {
-              const shouldClear = confirm(
-                `Storage is full (${(JSON.stringify(localStorage).length / 1024 / 1024).toFixed(2)}MB used). ` +
-                `Clearing existing CSV data (${(csvDataSize / 1024 / 1024).toFixed(2)}MB) would free up space. ` +
-                `Would you like to clear existing data and import this file?`
-              );
+          } else {
+            // Try normal storage first
+            try {
+              await appStorage.saveCSVLeadsData(csvId, leads);
+            } catch (storageError) {
+              console.error('Error saving to storage:', storageError);
               
-              if (shouldClear) {
-                clearAllAppData();
-                // Continue with the import
+              if (storageError instanceof Error && storageError.name === 'QuotaExceededError') {
+                // Try chunking as fallback
+                console.log('Storage quota exceeded, trying chunked storage');
+                const success = await saveLeadsInChunks(csvId, leads);
+                
+                if (!success) {
+                  toast.error('Storage is full. Please delete some existing lists or try a smaller file.');
+                  setLoading(false);
+                  return;
+                }
               } else {
-                toast.error('Import cancelled. Please clear some data or try a smaller file.');
-                setLoading(false);
-                return;
+                throw storageError;
               }
-            } else {
-              // If there's no CSV data to clear, automatically clear all app data
-              // since there are no usable lists anyway
-              clearAllAppData();
-              // Continue with the import
             }
           }
           
           try {
-            // First, save the leads data using appStorage
-            await appStorage.saveCSVLeadsData(csvId, leads);
-            
-            // Only after successful save, add the file to the CSV files list
+            // Save file metadata
             const existingFiles = await appStorage.getCSVFiles();
             const newFileInfo = {
               id: csvId,
               name: fileName,
               fileName: file.name,
-              totalLeads: leads.length
+              totalLeads: leads.length,
+              isChunked: shouldUseChunking
             };
             
             // Check if file with same name already exists
@@ -181,9 +298,9 @@ export const useCsvImporter = ({ onLeadsImported }: UseCsvImporterProps) => {
             toast.success(`${leads.length} leads imported successfully!`, {
               duration: 1000
             });
-          } catch (storageError) {
-            console.error('Error saving to storage:', storageError);
-            toast.error('Failed to save leads to storage. The file may be too large.');
+          } catch (metadataError) {
+            console.error('Error saving file metadata:', metadataError);
+            toast.error('File imported but metadata could not be saved.');
           }
         } catch (parseError) {
           console.error('Error parsing CSV:', parseError);
@@ -199,11 +316,14 @@ export const useCsvImporter = ({ onLeadsImported }: UseCsvImporterProps) => {
       };
       reader.readAsText(file);
     } catch (error) {
-      console.error('File processing error:', error);
+      console.error('Error in handleFileProcess:', error);
       toast.error('Error processing file');
       setLoading(false);
     }
   };
 
-  return { loading, handleFileProcess };
+  return {
+    loading,
+    handleFileProcess
+  };
 };

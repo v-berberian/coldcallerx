@@ -78,6 +78,12 @@ export const useLeadNavigationActions = ({
     if (shuffleMode) {
       // In shuffle mode, use navigation history to go to previously shown lead
       const didGoBack = goToPrevious();
+      
+      // If there's no history to go back to, fall back to the last lead in the list
+      if (!didGoBack) {
+        const lastIndex = baseLeads.length - 1;
+        updateNavigation(lastIndex);
+      }
     } else {
       // In sequential mode, use simple list-based navigation
       const prevIndex = currentIndex === 0 ? baseLeads.length - 1 : currentIndex - 1;

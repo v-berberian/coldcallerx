@@ -11,6 +11,8 @@ interface CSVFile {
   name: string;
   fileName: string;
   totalLeads: number;
+  isChunked?: boolean;
+  leadsCount?: number;
 }
 
 interface CSVFileSelectorProps {
@@ -186,20 +188,23 @@ const CSVFileSelector: React.FC<CSVFileSelectorProps> = ({
             <Button 
               variant="ghost" 
               size="icon" 
-              className={`h-8 w-8 text-base hover:bg-transparent focus:bg-transparent active:bg-transparent transition-all duration-300 ease-out rounded-lg ${
-                isDropdownOpen 
-                  ? 'text-muted-foreground !shadow-[inset_0_2px_4px_rgba(0,0,0,0.2),inset_0_1px_2px_rgba(255,255,255,0.1)] !bg-gray-100/50 dark:!bg-gray-800/50' 
-                  : 'text-muted-foreground'
-              }`}
+              className="h-8 w-8 text-base hover:bg-transparent focus:bg-transparent active:bg-transparent transition-all duration-300 ease-out rounded-lg no-hover text-muted-foreground"
               disabled={importLoading}
-              data-no-outline="true"
+              style={{ 
+                WebkitTapHighlightColor: 'transparent',
+                color: 'hsl(var(--muted-foreground))',
+                backgroundColor: isDropdownOpen 
+                  ? (document.documentElement.classList.contains('dark') ? 'rgba(31, 41, 55, 0.5)' : 'rgba(243, 244, 246, 0.5)')
+                  : 'transparent',
+                boxShadow: isDropdownOpen ? 'inset 0 2px 4px rgba(0,0,0,0.2), inset 0 1px 2px rgba(255,255,255,0.1)' : 'none'
+              }}
             >
               <FileText 
-                className={`h-5 w-5 transition-all duration-300 ease-out ${
-                  isDropdownOpen ? '!scale-95' : '!scale-100'
-                }`}
+                className="h-5 w-5 transition-all duration-300 ease-out"
                 style={{
-                  filter: isDropdownOpen ? 'drop-shadow(inset 0 1px 2px rgba(0,0,0,0.3)) !important' : 'none'
+                  color: 'hsl(var(--muted-foreground))',
+                  transform: isDropdownOpen ? 'scale(0.95)' : 'scale(1)',
+                  filter: isDropdownOpen ? 'drop-shadow(inset 0 1px 2px rgba(0,0,0,0.3))' : 'none'
                 }}
               />
             </Button>
@@ -257,20 +262,23 @@ const CSVFileSelector: React.FC<CSVFileSelectorProps> = ({
           <Button 
             variant="ghost" 
             size="icon" 
-            className={`h-8 w-8 text-base hover:bg-transparent focus:bg-transparent active:bg-transparent transition-all duration-300 ease-out rounded-lg ${
-              isDropdownOpen 
-                ? 'text-muted-foreground !shadow-[inset_0_2px_4px_rgba(0,0,0,0.2),inset_0_1px_2px_rgba(255,255,255,0.1)] !bg-gray-100/50 dark:!bg-gray-800/50' 
-                : 'text-muted-foreground'
-            }`}
+            className="h-8 w-8 text-base hover:bg-transparent focus:bg-transparent active:bg-transparent transition-all duration-300 ease-out rounded-lg no-hover text-muted-foreground"
             disabled={loading}
-            data-no-outline="true"
+            style={{ 
+              WebkitTapHighlightColor: 'transparent',
+              color: 'hsl(var(--muted-foreground))',
+              backgroundColor: isDropdownOpen 
+                ? (document.documentElement.classList.contains('dark') ? 'rgba(31, 41, 55, 0.5)' : 'rgba(243, 244, 246, 0.5)')
+                : 'transparent',
+              boxShadow: isDropdownOpen ? 'inset 0 2px 4px rgba(0,0,0,0.2), inset 0 1px 2px rgba(255,255,255,0.1)' : 'none'
+            }}
           >
             <FileText 
-              className={`h-5 w-5 transition-all duration-300 ease-out ${
-                isDropdownOpen ? '!scale-95' : '!scale-100'
-              }`}
+              className="h-5 w-5 transition-all duration-300 ease-out"
               style={{
-                filter: isDropdownOpen ? 'drop-shadow(inset 0 1px 2px rgba(0,0,0,0.3)) !important' : 'none'
+                color: 'hsl(var(--muted-foreground))',
+                transform: isDropdownOpen ? 'scale(0.95)' : 'scale(1)',
+                filter: isDropdownOpen ? 'drop-shadow(inset 0 1px 2px rgba(0,0,0,0.3))' : 'none'
               }}
             />
           </Button>
