@@ -425,10 +425,80 @@ const LeadCard: React.FC<LeadCardProps> = ({
             <Button 
               onClick={() => handleTextClick()} 
               size="lg" 
-              className="w-24 h-24 sm:w-32 sm:h-32 rounded-full shadow-xl shadow-blue-500/20 bg-gradient-to-b from-[#007AFF] via-[#007AFF] to-[#0056CC] hover:from-[#007AFF]/95 hover:via-[#007AFF]/95 hover:to-[#0056CC]/95 active:from-[#0056CC] active:via-[#0056CC] active:to-[#004499] dark:bg-[#007AFF] dark:hover:bg-[#007AFF]/95 dark:active:bg-[#0056CC] text-white transition-all duration-200 flex items-center justify-center p-0 relative overflow-hidden before:absolute before:inset-0 before:bg-gradient-to-b before:from-white/20 before:to-transparent before:rounded-full after:absolute after:inset-0 after:bg-gradient-to-t after:from-black/10 after:to-transparent after:rounded-full active:scale-95"
+              className="w-24 h-24 sm:w-32 sm:h-32 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 active:from-blue-600 active:to-blue-800 text-white transition-all duration-300 flex items-center justify-center p-0 relative overflow-hidden neomorphic-button focus:outline-none"
               style={{
-                boxShadow: '0 8px 16px rgba(0, 122, 255, 0.2), 0 4px 8px rgba(0, 0, 0, 0.1), 0 2px 4px rgba(0, 0, 0, 0.05), inset 0 1px 0 rgba(255, 255, 255, 0.3), inset 0 -1px 0 rgba(0, 0, 0, 0.1)',
-                WebkitTapHighlightColor: 'transparent'
+                boxShadow: `
+                  8px 8px 16px rgba(0, 0, 0, 0.2),
+                  -8px -8px 16px rgba(255, 255, 255, 0.1),
+                  inset 2px 2px 4px rgba(255, 255, 255, 0.2),
+                  inset -2px -2px 4px rgba(0, 0, 0, 0.1)
+                `,
+                WebkitTapHighlightColor: 'transparent',
+                transform: 'translateY(0)',
+                transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
+              }}
+              onMouseDown={(e) => {
+                e.currentTarget.style.transform = 'translateY(2px)';
+                e.currentTarget.style.boxShadow = `
+                  4px 4px 8px rgba(0, 0, 0, 0.3),
+                  -4px -4px 8px rgba(255, 255, 255, 0.05),
+                  inset 4px 4px 8px rgba(0, 0, 0, 0.1),
+                  inset -4px -4px 8px rgba(255, 255, 255, 0.1)
+                `;
+              }}
+              onMouseUp={(e) => {
+                e.currentTarget.style.transform = 'translateY(0)';
+                e.currentTarget.style.boxShadow = `
+                  8px 8px 16px rgba(0, 0, 0, 0.2),
+                  -8px -8px 16px rgba(255, 255, 255, 0.1),
+                  inset 2px 2px 4px rgba(255, 255, 255, 0.2),
+                  inset -2px -2px 4px rgba(0, 0, 0, 0.1)
+                `;
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.transform = 'translateY(0)';
+                e.currentTarget.style.boxShadow = `
+                  8px 8px 16px rgba(0, 0, 0, 0.2),
+                  -8px -8px 16px rgba(255, 255, 255, 0.1),
+                  inset 2px 2px 4px rgba(255, 255, 255, 0.2),
+                  inset -2px -2px 4px rgba(0, 0, 0, 0.1)
+                `;
+              }}
+              onTouchStart={(e) => {
+                e.currentTarget.style.transform = 'translateY(2px)';
+                e.currentTarget.style.boxShadow = `
+                  4px 4px 8px rgba(0, 0, 0, 0.3),
+                  -4px -4px 8px rgba(255, 255, 255, 0.05),
+                  inset 4px 4px 8px rgba(0, 0, 0, 0.1),
+                  inset -4px -4px 8px rgba(255, 255, 255, 0.1)
+                `;
+              }}
+              onTouchEnd={(e) => {
+                e.currentTarget.style.transform = 'translateY(0)';
+                e.currentTarget.style.boxShadow = `
+                  8px 8px 16px rgba(0, 0, 0, 0.2),
+                  -8px -8px 16px rgba(255, 255, 255, 0.1),
+                  inset 2px 2px 4px rgba(255, 255, 255, 0.2),
+                  inset -2px -2px 4px rgba(0, 0, 0, 0.1)
+                `;
+              }}
+              onFocus={(e) => {
+                e.currentTarget.style.transform = 'translateY(0)';
+                e.currentTarget.style.boxShadow = `
+                  8px 8px 16px rgba(0, 0, 0, 0.2),
+                  -8px -8px 16px rgba(255, 255, 255, 0.1),
+                  inset 2px 2px 4px rgba(255, 255, 255, 0.2),
+                  inset -2px -2px 4px rgba(0, 0, 0, 0.1)
+                `;
+              }}
+              onBlur={(e) => {
+                e.currentTarget.style.transform = 'translateY(0)';
+                e.currentTarget.style.boxShadow = `
+                  8px 8px 16px rgba(0, 0, 0, 0.2),
+                  -8px -8px 16px rgba(255, 255, 255, 0.1),
+                  inset 2px 2px 4px rgba(255, 255, 255, 0.2),
+                  inset -2px -2px 4px rgba(0, 0, 0, 0.1)
+                `;
               }}
             >
               <MessageSquare className="h-[32px] w-[32px] sm:h-[40px] sm:w-[40px] drop-shadow-md" style={{ filter: 'drop-shadow(0 1px 2px rgba(0, 0, 0, 0.15))' }} />
@@ -436,10 +506,80 @@ const LeadCard: React.FC<LeadCardProps> = ({
             <Button 
               onClick={handleCall} 
               size="lg" 
-              className="w-24 h-24 sm:w-32 sm:h-32 rounded-full shadow-xl shadow-green-500/20 bg-gradient-to-b from-green-500 via-green-500 to-green-600 hover:from-green-500/95 hover:via-green-500/95 hover:to-green-600/95 active:from-green-600 active:via-green-600 active:to-green-700 dark:bg-green-500 dark:hover:bg-green-500/95 dark:active:bg-green-600 text-white transition-all duration-200 flex items-center justify-center p-0 relative overflow-hidden before:absolute before:inset-0 before:bg-gradient-to-b before:from-white/20 before:to-transparent before:rounded-full after:absolute after:inset-0 after:bg-gradient-to-t after:from-black/10 after:to-transparent after:rounded-full active:scale-95"
+              className="w-24 h-24 sm:w-32 sm:h-32 rounded-full bg-gradient-to-br from-green-400 to-green-600 active:from-green-600 active:to-green-800 text-white transition-all duration-300 flex items-center justify-center p-0 relative overflow-hidden neomorphic-button focus:outline-none"
               style={{
-                boxShadow: '0 8px 16px rgba(34, 197, 94, 0.2), 0 4px 8px rgba(0, 0, 0, 0.1), 0 2px 4px rgba(0, 0, 0, 0.05), inset 0 1px 0 rgba(255, 255, 255, 0.3), inset 0 -1px 0 rgba(0, 0, 0, 0.1)',
-                WebkitTapHighlightColor: 'transparent'
+                boxShadow: `
+                  8px 8px 16px rgba(0, 0, 0, 0.2),
+                  -8px -8px 16px rgba(255, 255, 255, 0.1),
+                  inset 2px 2px 4px rgba(255, 255, 255, 0.2),
+                  inset -2px -2px 4px rgba(0, 0, 0, 0.1)
+                `,
+                WebkitTapHighlightColor: 'transparent',
+                transform: 'translateY(0)',
+                transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
+              }}
+              onMouseDown={(e) => {
+                e.currentTarget.style.transform = 'translateY(2px)';
+                e.currentTarget.style.boxShadow = `
+                  4px 4px 8px rgba(0, 0, 0, 0.3),
+                  -4px -4px 8px rgba(255, 255, 255, 0.05),
+                  inset 4px 4px 8px rgba(0, 0, 0, 0.1),
+                  inset -4px -4px 8px rgba(255, 255, 255, 0.1)
+                `;
+              }}
+              onMouseUp={(e) => {
+                e.currentTarget.style.transform = 'translateY(0)';
+                e.currentTarget.style.boxShadow = `
+                  8px 8px 16px rgba(0, 0, 0, 0.2),
+                  -8px -8px 16px rgba(255, 255, 255, 0.1),
+                  inset 2px 2px 4px rgba(255, 255, 255, 0.2),
+                  inset -2px -2px 4px rgba(0, 0, 0, 0.1)
+                `;
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.transform = 'translateY(0)';
+                e.currentTarget.style.boxShadow = `
+                  8px 8px 16px rgba(0, 0, 0, 0.2),
+                  -8px -8px 16px rgba(255, 255, 255, 0.1),
+                  inset 2px 2px 4px rgba(255, 255, 255, 0.2),
+                  inset -2px -2px 4px rgba(0, 0, 0, 0.1)
+                `;
+              }}
+              onTouchStart={(e) => {
+                e.currentTarget.style.transform = 'translateY(2px)';
+                e.currentTarget.style.boxShadow = `
+                  4px 4px 8px rgba(0, 0, 0, 0.3),
+                  -4px -4px 8px rgba(255, 255, 255, 0.05),
+                  inset 4px 4px 8px rgba(0, 0, 0, 0.1),
+                  inset -4px -4px 8px rgba(255, 255, 255, 0.1)
+                `;
+              }}
+              onTouchEnd={(e) => {
+                e.currentTarget.style.transform = 'translateY(0)';
+                e.currentTarget.style.boxShadow = `
+                  8px 8px 16px rgba(0, 0, 0, 0.2),
+                  -8px -8px 16px rgba(255, 255, 255, 0.1),
+                  inset 2px 2px 4px rgba(255, 255, 255, 0.2),
+                  inset -2px -2px 4px rgba(0, 0, 0, 0.1)
+                `;
+              }}
+              onFocus={(e) => {
+                e.currentTarget.style.transform = 'translateY(0)';
+                e.currentTarget.style.boxShadow = `
+                  8px 8px 16px rgba(0, 0, 0, 0.2),
+                  -8px -8px 16px rgba(255, 255, 255, 0.1),
+                  inset 2px 2px 4px rgba(255, 255, 255, 0.2),
+                  inset -2px -2px 4px rgba(0, 0, 0, 0.1)
+                `;
+              }}
+              onBlur={(e) => {
+                e.currentTarget.style.transform = 'translateY(0)';
+                e.currentTarget.style.boxShadow = `
+                  8px 8px 16px rgba(0, 0, 0, 0.2),
+                  -8px -8px 16px rgba(255, 255, 255, 0.1),
+                  inset 2px 2px 4px rgba(255, 255, 255, 0.2),
+                  inset -2px -2px 4px rgba(0, 0, 0, 0.1)
+                `;
               }}
             >
               <Phone className="h-[32px] w-[32px] sm:h-[40px] sm:w-[40px] drop-shadow-md" style={{ filter: 'drop-shadow(0 1px 2px rgba(0, 0, 0, 0.15))' }} />

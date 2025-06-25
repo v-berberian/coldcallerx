@@ -8,6 +8,7 @@ interface UseAutoCallEffectsProps {
   leadsInitialized: boolean;
   currentIndex: number;
   callDelay: number;
+  isFilterChanging?: boolean;
   getBaseLeads: () => Lead[];
   setCurrentLeadForAutoCall: (lead: Lead | null) => void;
   executeAutoCall: (lead: Lead) => void;
@@ -22,6 +23,7 @@ export const useAutoCallEffects = ({
   leadsInitialized,
   currentIndex,
   callDelay,
+  isFilterChanging = false,
   getBaseLeads,
   setCurrentLeadForAutoCall,
   executeAutoCall,
@@ -30,7 +32,8 @@ export const useAutoCallEffects = ({
 }: UseAutoCallEffectsProps) => {
   // Handle auto-call trigger - start countdown when conditions are met
   useEffect(() => {
-    if (shouldAutoCall && autoCall && componentReady && leadsInitialized) {
+    // Don't start auto call if filters are currently changing
+    if (shouldAutoCall && autoCall && componentReady && leadsInitialized && !isFilterChanging) {
       const currentLeads = getBaseLeads();
       const currentLead = currentLeads[currentIndex];
       
@@ -51,5 +54,5 @@ export const useAutoCallEffects = ({
       // Reset the trigger flag
       setShouldAutoCall(false);
     }
-  }, [shouldAutoCall, autoCall, executeAutoCall, setCurrentLeadForAutoCall, setShouldAutoCall, markLeadAsCalled, componentReady, leadsInitialized, getBaseLeads, callDelay]);
+  }, [shouldAutoCall, autoCall, executeAutoCall, setCurrentLeadForAutoCall, setShouldAutoCall, markLeadAsCalled, componentReady, leadsInitialized, getBaseLeads, callDelay, isFilterChanging]);
 };

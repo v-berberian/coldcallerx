@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Mail, HelpCircle, ChevronDown, Plus, Edit, Trash2, MessageSquare, Check, Upload, FileText, Sun, Moon, Smartphone, Target, Database } from 'lucide-react';
+import { Mail, HelpCircle, ChevronDown, Plus, Edit, Trash2, MessageSquare, Check, Upload, FileText, Sun, Moon, Smartphone, Database } from 'lucide-react';
 import { useTheme } from 'next-themes';
 import {
   Popover,
@@ -50,9 +50,7 @@ const SettingsMenu: React.FC<SettingsMenuProps> = ({ children }) => {
   const [helpOpen, setHelpOpen] = useState(false);
   const [csvGuideOpen, setCsvGuideOpen] = useState(false);
   const [modeOpen, setModeOpen] = useState(false);
-  const [dailyGoalsOpen, setDailyGoalsOpen] = useState(false);
   const [storageOpen, setStorageOpen] = useState(false);
-  const [dailyGoalEnabled, setDailyGoalEnabled] = useState(true);
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [isAnimating, setIsAnimating] = useState(false);
   const [shouldRender, setShouldRender] = useState(false);
@@ -92,10 +90,6 @@ const SettingsMenu: React.FC<SettingsMenuProps> = ({ children }) => {
 
   const handleCsvGuideOpen = (open: boolean) => {
     setCsvGuideOpen(open);
-  };
-
-  const handleDailyGoalsOpen = (open: boolean) => {
-    setDailyGoalsOpen(open);
   };
 
   const handleStorageOpen = (open: boolean) => {
@@ -138,16 +132,6 @@ const SettingsMenu: React.FC<SettingsMenuProps> = ({ children }) => {
     if (savedEmailBody) setEmailTemplateBody(savedEmailBody);
     const savedTextMessage = localStorage.getItem('textTemplateMessage');
     if (savedTextMessage) setTextTemplateMessage(savedTextMessage);
-    
-    // Load daily goal setting
-    const savedDailyGoal = localStorage.getItem('dailyGoalEnabled');
-    if (savedDailyGoal !== null) {
-      setDailyGoalEnabled(savedDailyGoal === 'true');
-    } else {
-      // Default to true if not set
-      setDailyGoalEnabled(true);
-      localStorage.setItem('dailyGoalEnabled', 'true');
-    }
   }, []);
 
   // Save email template changes
@@ -160,15 +144,6 @@ const SettingsMenu: React.FC<SettingsMenuProps> = ({ children }) => {
   useEffect(() => {
     localStorage.setItem('textTemplateMessage', textTemplateMessage);
   }, [textTemplateMessage]);
-
-  // Save daily goal setting
-  useEffect(() => {
-    localStorage.setItem('dailyGoalEnabled', dailyGoalEnabled.toString());
-    // Dispatch a custom event to notify other components
-    window.dispatchEvent(new CustomEvent('dailyGoalSettingChanged', { 
-      detail: { enabled: dailyGoalEnabled } 
-    }));
-  }, [dailyGoalEnabled]);
 
   // Animation effect for disappearing
   useEffect(() => {
@@ -195,7 +170,6 @@ const SettingsMenu: React.FC<SettingsMenuProps> = ({ children }) => {
         setHelpOpen(false);
         setCsvGuideOpen(false);
         setModeOpen(false);
-        setDailyGoalsOpen(false);
         setStorageOpen(false);
       }
     }}>
@@ -344,39 +318,6 @@ const SettingsMenu: React.FC<SettingsMenuProps> = ({ children }) => {
                         <span className="text-sm font-medium">Device</span>
                       </div>
                       {(theme || 'system') === 'system' && <Check className="h-4 w-4 text-primary" />}
-                    </div>
-                  </div>
-                </Collapsible.Content>
-              </Collapsible.Root>
-
-              {/* Daily Goals Section */}
-              <Collapsible.Root 
-                open={dailyGoalsOpen} 
-                onOpenChange={handleDailyGoalsOpen}
-                className="space-y-2"
-              >
-                <Collapsible.Trigger asChild>
-                  <button className="w-full flex items-center justify-between p-3 rounded-lg border border-border/20 transition-colors">
-                    <div className="flex items-center gap-2">
-                      <Target className="h-4 w-4 text-muted-foreground" />
-                      <span className="text-sm font-medium">Daily Goals</span>
-                    </div>
-                    <ChevronDown className={`h-4 w-4 text-muted-foreground transition-transform duration-75 ${dailyGoalsOpen ? 'rotate-180' : ''}`} />
-                  </button>
-                </Collapsible.Trigger>
-                <Collapsible.Content 
-                  className="space-y-3 data-[state=open]:animate-template-down data-[state=closed]:animate-template-up overflow-hidden"
-                >
-                  <div className="space-y-3 p-3 pl-8">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <Target className="h-4 w-4 text-muted-foreground" />
-                        <span className="text-sm font-medium">Calls</span>
-                      </div>
-                      <Switch
-                        checked={dailyGoalEnabled}
-                        onCheckedChange={setDailyGoalEnabled}
-                      />
                     </div>
                   </div>
                 </Collapsible.Content>

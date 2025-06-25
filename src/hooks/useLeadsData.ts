@@ -107,19 +107,9 @@ export const useLeadsData = (initialLeads: Lead[], refreshTrigger: number = 0) =
           onTransitionDetected();
         }
         
-        // Call the callback to increment daily call count
-        if (onCallMade) {
-          onCallMade();
-        }
-        
         // Mark the lead as called
         if (markAsCalled) {
           markLeadAsCalledWrapper(lead);
-        } else {
-          // Call the callback to increment daily call count
-          if (onCallMade) {
-            onCallMade();
-          }
         }
       }
     };
@@ -156,17 +146,12 @@ export const useLeadsData = (initialLeads: Lead[], refreshTrigger: number = 0) =
     const cleanupTimeout = setTimeout(() => {
       cleanupListeners();
       
-      // If no transition was detected, don't mark the call
+      // If no transition was detected, still mark the call
       if (!transitionDetected) {
-        // If no transition was detected, don't mark the call
         callMarked = true;
         
         if (onTransitionDetected) {
           onTransitionDetected();
-        }
-        
-        if (onCallMade) {
-          onCallMade();
         }
         
         if (markAsCalled) {
@@ -179,15 +164,16 @@ export const useLeadsData = (initialLeads: Lead[], refreshTrigger: number = 0) =
           onTransitionDetected();
         }
         
-        if (onCallMade) {
-          onCallMade();
-        }
-        
         if (markAsCalled) {
           markLeadAsCalledWrapper(lead);
         }
       }
     }, 5000); // 5 second timeout to give more time for iOS transition
+    
+    // Increment daily call count immediately when call is initiated
+    if (onCallMade) {
+      onCallMade();
+    }
     
     // Initiate the call
     window.location.href = `tel:${phoneNumber}`;

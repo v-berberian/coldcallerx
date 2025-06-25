@@ -587,3 +587,151 @@ button.no-hover:hover .h-5.w-5 {
 .csv-icon-shadow {
   filter: drop-shadow(inset 0 1px 2px rgba(0,0,0,0.3)) !important;
 }
+
+/* Neomorphic Button Styles */
+.neomorphic-button {
+  position: relative;
+  border: none;
+  outline: none;
+  cursor: pointer;
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+}
+
+.neomorphic-button::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  border-radius: inherit;
+  background: linear-gradient(145deg, rgba(255, 255, 255, 0.1), rgba(0, 0, 0, 0.05));
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+}
+
+.neomorphic-button:hover::before {
+  opacity: 1;
+}
+
+.neomorphic-button:active::before {
+  opacity: 0.5;
+}
+
+/* Dark mode adjustments for neomorphic buttons */
+@media (prefers-color-scheme: dark) {
+  .neomorphic-button {
+    box-shadow: 
+      8px 8px 16px rgba(0, 0, 0, 0.4),
+      -8px -8px 16px rgba(255, 255, 255, 0.05),
+      inset 2px 2px 4px rgba(255, 255, 255, 0.1),
+      inset -2px -2px 4px rgba(0, 0, 0, 0.2) !important;
+  }
+  
+  .neomorphic-button:active {
+    box-shadow: 
+      4px 4px 8px rgba(0, 0, 0, 0.5),
+      -4px -4px 8px rgba(255, 255, 255, 0.02),
+      inset 4px 4px 8px rgba(0, 0, 0, 0.2),
+      inset -4px -4px 8px rgba(255, 255, 255, 0.05) !important;
+  }
+}
+
+/* Light mode adjustments for neomorphic buttons */
+@media (prefers-color-scheme: light) {
+  .neomorphic-button {
+    box-shadow: 
+      8px 8px 16px rgba(0, 0, 0, 0.15),
+      -8px -8px 16px rgba(255, 255, 255, 0.8),
+      inset 2px 2px 4px rgba(255, 255, 255, 0.3),
+      inset -2px -2px 4px rgba(0, 0, 0, 0.05) !important;
+  }
+  
+  .neomorphic-button:active {
+    box-shadow: 
+      4px 4px 8px rgba(0, 0, 0, 0.2),
+      -4px -4px 8px rgba(255, 255, 255, 0.6),
+      inset 4px 4px 8px rgba(0, 0, 0, 0.05),
+      inset -4px -4px 8px rgba(255, 255, 255, 0.2) !important;
+  }
+}
+
+/* Ultra-modern progress bar animations */
+@keyframes shimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+@keyframes sparkle {
+  0%, 100% {
+    opacity: 0;
+    transform: scale(0);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes progress-glow {
+  0%, 100% {
+    box-shadow: 0 0 20px rgba(59, 130, 246, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 30px rgba(59, 130, 246, 0.6);
+  }
+}
+
+@keyframes goal-reached-pulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+}
+
+.progress-shimmer {
+  animation: shimmer 2s infinite;
+}
+
+.progress-sparkle {
+  animation: sparkle 1.5s ease-in-out infinite;
+}
+
+.progress-glow {
+  animation: progress-glow 2s ease-in-out infinite;
+}
+
+.goal-reached-pulse {
+  animation: goal-reached-pulse 1s ease-in-out infinite;
+}
+
+/* Smooth backdrop blur for progress bar */
+.progress-backdrop {
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+}
+
+/* Ultra-modern gradient animations */
+@keyframes gradient-shift {
+  0%, 100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}
+
+.gradient-animate {
+  background-size: 200% 200%;
+  animation: gradient-shift 3s ease infinite;
+}

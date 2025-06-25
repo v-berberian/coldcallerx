@@ -11,8 +11,6 @@ const STORAGE_KEYS = {
   SHUFFLE_MODE: 'coldcaller-shuffle-mode',
   AUTO_CALL: 'coldcaller-auto-call',
   CALL_DELAY: 'coldcaller-call-delay',
-  DAILY_CALL_COUNT: 'coldcaller-daily-call-count',
-  LAST_OPENED_DATE: 'coldcaller-last-opened-date',
   APP_SETTINGS: 'coldcaller-app-settings',
   CSV_FILES: 'coldcaller-csv-files',
   CURRENT_CSV_ID: 'coldcaller-current-csv-id'
@@ -25,7 +23,6 @@ const getCSVStorageKey = (csvId: string, key: string) => `coldcaller-csv-${csvId
 export interface AppSettings {
   theme?: 'light' | 'dark' | 'system';
   autoCallDelay?: number;
-  dailyCallGoal?: number;
   timezone?: string;
 }
 
@@ -175,23 +172,6 @@ export class AppStorage {
     return await this.getItem(STORAGE_KEYS.CALL_DELAY, 0);
   }
 
-  // Daily call tracking
-  async saveDailyCallCount(count: number): Promise<void> {
-    await this.setItem(STORAGE_KEYS.DAILY_CALL_COUNT, count);
-  }
-
-  async getDailyCallCount(): Promise<number> {
-    return await this.getItem(STORAGE_KEYS.DAILY_CALL_COUNT, 0);
-  }
-
-  async saveLastOpenedDate(date: string): Promise<void> {
-    await this.setItem(STORAGE_KEYS.LAST_OPENED_DATE, date);
-  }
-
-  async getLastOpenedDate(): Promise<string> {
-    return await this.getItem(STORAGE_KEYS.LAST_OPENED_DATE, '');
-  }
-
   // App settings
   async saveAppSettings(settings: AppSettings): Promise<void> {
     await this.setItem(STORAGE_KEYS.APP_SETTINGS, settings);
@@ -199,19 +179,6 @@ export class AppStorage {
 
   async getAppSettings(): Promise<AppSettings> {
     return await this.getItem(STORAGE_KEYS.APP_SETTINGS, {});
-  }
-
-  // Check if we need to reset daily count (new day)
-  async shouldResetDailyCount(): Promise<boolean> {
-    const lastOpened = await this.getLastOpenedDate();
-    const today = new Date().toDateString();
-    
-    if (lastOpened !== today) {
-      await this.saveLastOpenedDate(today);
-      return true;
-    }
-    
-    return false;
   }
 
   // Clear all app data
@@ -232,8 +199,6 @@ export class AppStorage {
       shuffleMode: await this.getShuffleMode(),
       autoCall: await this.getAutoCall(),
       callDelay: await this.getCallDelay(),
-      dailyCallCount: await this.getDailyCallCount(),
-      lastOpenedDate: await this.getLastOpenedDate(),
       appSettings: await this.getAppSettings(),
       exportDate: new Date().toISOString(),
     };
@@ -254,8 +219,6 @@ export class AppStorage {
       if (data.shuffleMode !== undefined) await this.saveShuffleMode(data.shuffleMode);
       if (data.autoCall !== undefined) await this.saveAutoCall(data.autoCall);
       if (data.callDelay !== undefined) await this.saveCallDelay(data.callDelay);
-      if (data.dailyCallCount !== undefined) await this.saveDailyCallCount(data.dailyCallCount);
-      if (data.lastOpenedDate) await this.saveLastOpenedDate(data.lastOpenedDate);
       if (data.appSettings) await this.saveAppSettings(data.appSettings);
       
       return true;

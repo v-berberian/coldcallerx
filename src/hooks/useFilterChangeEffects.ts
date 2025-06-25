@@ -15,84 +15,91 @@ export const useFilterChangeEffects = (
   resetNavigation: (index: number) => void
 ) => {
   useEffect(() => {
-    // Don't auto-navigate during auto-call operations or when filters are changing
-    // IMPORTANT: Don't navigate during auto-call to prevent jumping away from called leads
-    if (isAutoCallInProgress || isFilterChanging) {
-      return;
-    }
-
-    // Early return if leadsData is not ready
-    if (!leadsData || leadsData.length === 0) {
-      return;
-    }
-
-    setFilterChanging(true);
-    
-    try {
-      const baseLeadsBeforeFilter = filterLeadsByTimezone(leadsData, 'ALL');
-      const currentlyViewedLead = baseLeadsBeforeFilter[currentIndex];
-      
-      let newFilteredLeads = filterLeadsByTimezone(leadsData, timezoneFilter);
-      if (callFilter === 'UNCALLED') {
-        newFilteredLeads = newFilteredLeads.filter(lead => !lead.lastCalled);
-      }
-      
-      // Safety check: if no leads match the filter, reset to first available lead
-      if (newFilteredLeads.length === 0) {
-        setCurrentIndex(0);
-        setTimeout(() => {
-          setFilterChanging(false);
-        }, 100);
+    // Add a small delay to prevent race conditions when quickly toggling filters and auto call
+    const timeoutId = setTimeout(() => {
+      // Don't auto-navigate during auto-call operations or when filters are changing
+      // IMPORTANT: Don't navigate during auto-call to prevent jumping away from called leads
+      if (isAutoCallInProgress || isFilterChanging) {
         return;
       }
+
+      // Early return if leadsData is not ready
+      if (!leadsData || leadsData.length === 0) {
+        return;
+      }
+
+      setFilterChanging(true);
       
-      if (currentlyViewedLead) {
-        const currentLeadMatchesNewFilter = newFilteredLeads.some(lead => 
-          lead.name === currentlyViewedLead.name && lead.phone === currentlyViewedLead.phone
-        );
+      try {
+        const baseLeadsBeforeFilter = filterLeadsByTimezone(leadsData, 'ALL');
+        const currentlyViewedLead = baseLeadsBeforeFilter[currentIndex];
         
-        if (currentLeadMatchesNewFilter) {
-          const newIndexOfCurrentLead = newFilteredLeads.findIndex(lead => 
-            lead.name === currentlyViewedLead.name && lead.phone === currentlyViewedLead.phone
-          );
-          setCurrentIndex(newIndexOfCurrentLead);
+        let newFilteredLeads = filterLeadsByTimezone(leadsData, timezoneFilter);
+        if (callFilter === 'UNCALLED') {
+          newFilteredLeads = newFilteredLeads.filter(lead => !lead.lastCalled);
+        }
+        
+        // Safety check: if no leads match the filter, reset to first available lead
+        if (newFilteredLeads.length === 0) {
+          setCurrentIndex(0);
           setTimeout(() => {
             setFilterChanging(false);
           }, 100);
           return;
         }
         
-        // --- Improved: Find the closest lead in the new filtered list by original index ---
-        // Map each filtered lead to its index in the original leadsData
-        const filteredWithOriginalIndices = newFilteredLeads.map(lead => ({
-          lead,
-          originalIndex: leadsData.findIndex(l => l.name === lead.name && l.phone === lead.phone)
-        }));
-        // Find the one with the minimal absolute difference to currentIndex
-        let minDiff = Infinity;
-        let closestIndex = 0;
-        for (let i = 0; i < filteredWithOriginalIndices.length; i++) {
-          const diff = Math.abs(filteredWithOriginalIndices[i].originalIndex - currentIndex);
-          if (
-            diff < minDiff ||
-            (diff === minDiff && filteredWithOriginalIndices[i].originalIndex > currentIndex) // prefer after if tied
-          ) {
-            minDiff = diff;
-            closestIndex = i;
+        if (currentlyViewedLead) {
+          const currentLeadMatchesNewFilter = newFilteredLeads.some(lead => 
+            lead.name === currentlyViewedLead.name && lead.phone === currentlyViewedLead.phone
+          );
+          
+          if (currentLeadMatchesNewFilter) {
+            const newIndexOfCurrentLead = newFilteredLeads.findIndex(lead => 
+              lead.name === currentlyViewedLead.name && lead.phone === currentlyViewedLead.phone
+            );
+            setCurrentIndex(newIndexOfCurrentLead);
+            setTimeout(() => {
+              setFilterChanging(false);
+            }, 100);
+            return;
           }
+          
+          // --- Improved: Find the closest lead in the new filtered list by original index ---
+          // Map each filtered lead to its index in the original leadsData
+          const filteredWithOriginalIndices = newFilteredLeads.map(lead => ({
+            lead,
+            originalIndex: leadsData.findIndex(l => l.name === lead.name && l.phone === lead.phone)
+          }));
+          // Find the one with the minimal absolute difference to currentIndex
+          let minDiff = Infinity;
+          let closestIndex = 0;
+          for (let i = 0; i < filteredWithOriginalIndices.length; i++) {
+            const diff = Math.abs(filteredWithOriginalIndices[i].originalIndex - currentIndex);
+            if (
+              diff < minDiff ||
+              (diff === minDiff && filteredWithOriginalIndices[i].originalIndex > currentIndex) // prefer after if tied
+            ) {
+              minDiff = diff;
+              closestIndex = i;
+            }
+          }
+          setCurrentIndex(closestIndex);
+        } else if (newFilteredLeads.length > 0) {
+          setCurrentIndex(0);
         }
-        setCurrentIndex(closestIndex);
-      } else if (newFilteredLeads.length > 0) {
+      } catch (error) {
+        // Fallback: reset to first lead if there's an error
         setCurrentIndex(0);
       }
-    } catch (error) {
-      // Fallback: reset to first lead if there's an error
-      setCurrentIndex(0);
-    }
-    
-    setTimeout(() => {
-      setFilterChanging(false);
-    }, 100);
+      
+      setTimeout(() => {
+        setFilterChanging(false);
+      }, 100);
+    }, 50); // Small delay to prevent race conditions
+
+    return () => {
+      clearTimeout(timeoutId);
+    };
   }, [timezoneFilter, callFilter]); // Remove leadsData dependency to prevent navigation when leads are called
 
   useEffect(() => {

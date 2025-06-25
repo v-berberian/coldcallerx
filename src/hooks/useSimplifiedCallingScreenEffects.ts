@@ -17,6 +17,7 @@ interface UseSimplifiedCallingScreenEffectsProps {
   setCurrentLeadForAutoCall: (lead: Lead | null) => void;
   executeAutoCall: (lead: Lead) => void;
   getBaseLeads: () => Lead[];
+  isFilterChanging?: boolean;
 }
 
 export const useSimplifiedCallingScreenEffects = ({
@@ -33,7 +34,8 @@ export const useSimplifiedCallingScreenEffects = ({
   getBaseLeads,
   currentIndex,
   autoCall,
-  callDelay
+  callDelay,
+  isFilterChanging = false
 }: UseSimplifiedCallingScreenEffectsProps) => {
   
   // Progressive component initialization
@@ -56,7 +58,8 @@ export const useSimplifiedCallingScreenEffects = ({
 
   // Handle auto-call trigger - start countdown when conditions are met
   useEffect(() => {
-    if (shouldAutoCall && autoCall && componentReady && leadsInitialized) {
+    // Don't start auto call if filters are currently changing
+    if (shouldAutoCall && autoCall && componentReady && leadsInitialized && !isFilterChanging) {
       const currentLeads = getBaseLeads();
       const currentLead = currentLeads[currentIndex];
       
@@ -70,5 +73,5 @@ export const useSimplifiedCallingScreenEffects = ({
       // Reset the trigger flag
       setShouldAutoCall(false);
     }
-  }, [shouldAutoCall, autoCall, executeAutoCall, setCurrentLeadForAutoCall, setShouldAutoCall, componentReady, leadsInitialized, getBaseLeads, callDelay]);
+  }, [shouldAutoCall, autoCall, executeAutoCall, setCurrentLeadForAutoCall, setShouldAutoCall, componentReady, leadsInitialized, getBaseLeads, callDelay, isFilterChanging]);
 };

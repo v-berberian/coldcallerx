@@ -194,6 +194,7 @@ export const useLeadNavigation = ({
     currentLeadForAutoCall,
     setCurrentLeadForAutoCall,
     isCountdownActive,
+    isFilterChanging,
     getBaseLeads,
     getDelayDisplayType,
     makeCall: makeCallWrapper,
