@@ -1,4 +1,3 @@
-
 import { Lead, CallFilter } from '../types/lead';
 
 export const useLeadSelection = () => {
@@ -49,13 +48,9 @@ export const useLeadSelection = () => {
       // All leads have been shown, pick any random lead (cycle complete)
       console.log('All leads have been shown, cycling complete - picking any random lead');
       const randomIndex = Math.floor(Math.random() * baseLeads.length);
-      const randomLead = baseLeads[randomIndex];
-      const nextIndex = baseLeads.findIndex(lead => 
-        lead.name === randomLead.name && lead.phone === randomLead.phone
-      );
       return {
-        index: nextIndex,
-        lead: randomLead
+        index: randomIndex,
+        lead: baseLeads[randomIndex]
       };
     }
   };

@@ -20,7 +20,9 @@ interface UseLeadNavigationProps {
   currentIndex: number;
   historyIndex: number;
   updateNavigation: (index: number) => void;
+  updateNavigationWithHistory: (index: number, addToHistory?: boolean) => void;
   goToPrevious: () => boolean;
+  goToPreviousFromHistory: () => boolean;
   resetNavigation: (index: number) => void;
   setCurrentIndex: (index: number) => void;
   restoreFromLocalStorage: (totalLeads: number) => Promise<void>;
@@ -34,7 +36,9 @@ export const useLeadNavigation = ({
   currentIndex,
   historyIndex,
   updateNavigation,
+  updateNavigationWithHistory,
   goToPrevious,
+  goToPreviousFromHistory,
   resetNavigation,
   setCurrentIndex,
   restoreFromLocalStorage,
@@ -100,6 +104,7 @@ export const useLeadNavigation = ({
   const { handleNext, handlePrevious, selectLead } = useNavigation(
     currentIndex,
     updateNavigation,
+    updateNavigationWithHistory,
     resetNavigation,
     shuffleMode,
     callFilter,
@@ -131,7 +136,9 @@ export const useLeadNavigation = ({
     autoCall,
     setShouldAutoCall,
     goToPrevious,
-    callMadeToCurrentLead
+    goToPreviousFromHistory,
+    callMadeToCurrentLead,
+    callDelay
   });
 
   const { makeCallWrapper, handleCountdownCompleteWrapper } = useLeadNavigationEffects({

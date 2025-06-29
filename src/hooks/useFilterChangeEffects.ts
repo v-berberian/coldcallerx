@@ -54,6 +54,7 @@ export const useFilterChangeEffects = (
           );
           
           if (currentLeadMatchesNewFilter) {
+            // Current lead is still visible in new filter, stay on it
             const newIndexOfCurrentLead = newFilteredLeads.findIndex(lead => 
               lead.name === currentlyViewedLead.name && lead.phone === currentlyViewedLead.phone
             );
@@ -64,26 +65,50 @@ export const useFilterChangeEffects = (
             return;
           }
           
-          // --- Improved: Find the closest lead in the new filtered list by original index ---
-          // Map each filtered lead to its index in the original leadsData
-          const filteredWithOriginalIndices = newFilteredLeads.map(lead => ({
-            lead,
-            originalIndex: leadsData.findIndex(l => l.name === lead.name && l.phone === lead.phone)
-          }));
-          // Find the one with the minimal absolute difference to currentIndex
-          let minDiff = Infinity;
-          let closestIndex = 0;
-          for (let i = 0; i < filteredWithOriginalIndices.length; i++) {
-            const diff = Math.abs(filteredWithOriginalIndices[i].originalIndex - currentIndex);
-            if (
-              diff < minDiff ||
-              (diff === minDiff && filteredWithOriginalIndices[i].originalIndex > currentIndex) // prefer after if tied
-            ) {
-              minDiff = diff;
-              closestIndex = i;
+          // Current lead is not visible in new filter - need to find appropriate replacement
+          if (callFilter === 'UNCALLED') {
+            // Switching to UNCALLED filter - find the last uncalled lead before current position
+            const allLeadsWithTimezone = filterLeadsByTimezone(leadsData, timezoneFilter);
+            let lastUncalledIndex = -1;
+            
+            // Find the last uncalled lead before the current position
+            for (let i = currentIndex - 1; i >= 0; i--) {
+              const lead = allLeadsWithTimezone[i];
+              if (lead && !lead.lastCalled) {
+                lastUncalledIndex = i;
+                break;
+              }
+            }
+            
+            if (lastUncalledIndex !== -1) {
+              // Find this lead in the new filtered list
+              const targetLead = allLeadsWithTimezone[lastUncalledIndex];
+              const newIndex = newFilteredLeads.findIndex(lead => 
+                lead.name === targetLead.name && lead.phone === targetLead.phone
+              );
+              if (newIndex !== -1) {
+                setCurrentIndex(newIndex);
+              } else {
+                // Fallback to first uncalled lead
+                setCurrentIndex(0);
+              }
+            } else {
+              // No uncalled leads before current position, go to first uncalled lead
+              setCurrentIndex(0);
+            }
+          } else {
+            // Switching to ALL filter - find the same lead in the full list
+            const allLeadsWithTimezone = filterLeadsByTimezone(leadsData, timezoneFilter);
+            const newIndex = allLeadsWithTimezone.findIndex(lead => 
+              lead.name === currentlyViewedLead.name && lead.phone === currentlyViewedLead.phone
+            );
+            if (newIndex !== -1) {
+              setCurrentIndex(newIndex);
+            } else {
+              // Fallback to first lead
+              setCurrentIndex(0);
             }
           }
-          setCurrentIndex(closestIndex);
         } else if (newFilteredLeads.length > 0) {
           setCurrentIndex(0);
         }

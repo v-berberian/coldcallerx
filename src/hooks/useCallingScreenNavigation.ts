@@ -42,6 +42,7 @@ export const useCallingScreenNavigation = ({
     currentIndex,
     historyIndex,
     updateNavigation,
+    updateNavigationWithHistory,
     goToPrevious,
     resetNavigation,
     setCurrentIndex
@@ -65,6 +66,7 @@ export const useCallingScreenNavigation = ({
   const { handleNext, handlePrevious, selectLead } = useNavigation(
     currentIndex,
     updateNavigation,
+    updateNavigationWithHistory,
     resetNavigation,
     shuffleMode,
     callFilter,

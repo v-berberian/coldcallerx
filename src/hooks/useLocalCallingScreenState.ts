@@ -18,7 +18,7 @@ export const useLocalCallingScreenState = ({ leads, onCallMade, refreshTrigger =
   const localStorageRestoredRef = useRef(false);
 
   // Use the new async hooks
-  const { currentIndex, updateNavigation, isLoaded: navLoaded, historyIndex, goToPrevious, resetNavigation, setCurrentIndex, restoreFromLocalStorage, syncFromCloudSession } = useNavigationState();
+  const { currentIndex, updateNavigation, updateNavigationWithHistory, isLoaded: navLoaded, historyIndex, goToPrevious, goToPreviousFromHistory, resetNavigation, setCurrentIndex, restoreFromLocalStorage, syncFromCloudSession } = useNavigationState();
   const { leadsData, setLeadsData, isLoaded: leadsLoaded } = useLeadsData(leads);
 
   // Wait for both to load
@@ -62,7 +62,9 @@ export const useLocalCallingScreenState = ({ leads, onCallMade, refreshTrigger =
     currentIndex,
     historyIndex,
     updateNavigation,
+    updateNavigationWithHistory,
     goToPrevious,
+    goToPreviousFromHistory,
     resetNavigation,
     setCurrentIndex,
     restoreFromLocalStorage,
@@ -110,7 +112,13 @@ export const useLocalCallingScreenState = ({ leads, onCallMade, refreshTrigger =
   useEffect(() => {
     const saveCurrentIndex = async () => {
       try {
-        await appStorage.saveCurrentLeadIndex(currentIndex);
+        const currentCSVId = await appStorage.getCurrentCSVId();
+        if (currentCSVId) {
+          await appStorage.saveCSVCurrentIndex(currentCSVId, currentIndex);
+        } else {
+          // Fallback to global storage if no CSV ID
+          await appStorage.saveCurrentLeadIndex(currentIndex);
+        }
       } catch (error) {
         console.error('Error saving current index:', error);
       }
@@ -232,22 +240,6 @@ export const useLocalCallingScreenState = ({ leads, onCallMade, refreshTrigger =
 
     restoreState();
   }, [leadsData.length, setSearchQuery]);
-
-  // Check if we need to reset daily count (new day)
-  useEffect(() => {
-    const checkDailyReset = async () => {
-      try {
-        const shouldReset = await appStorage.shouldResetDailyCount();
-        if (shouldReset) {
-          // Reset daily call count logic can be added here
-        }
-      } catch (error) {
-        console.error('Error checking daily reset:', error);
-      }
-    };
-
-    checkDailyReset();
-  }, []);
 
   // Memoize resetLeadsData to prevent infinite loops
   const memoizedResetLeadsData = useCallback((newLeads: Lead[]) => {

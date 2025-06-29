@@ -18,6 +18,7 @@ interface CallingScreenContainerProps {
   currentCSVId: string | null;
   onCSVSelect: (csvId: string, leads: Lead[], fileName: string) => void;
   onAllListsDeleted?: () => void;
+  refreshTrigger?: number;
 }
 
 const CallingScreenContainer: React.FC<CallingScreenContainerProps> = memo(({
@@ -27,12 +28,11 @@ const CallingScreenContainer: React.FC<CallingScreenContainerProps> = memo(({
   onLeadsImported,
   currentCSVId,
   onCSVSelect,
-  onAllListsDeleted
+  onAllListsDeleted,
+  refreshTrigger: externalRefreshTrigger = 0
 }) => {
   const { importLeadsFromCSV, updateLeadCallCount, resetCallCount, resetAllCallCounts } = useLocalLeadOperations();
   
-  const [refreshTrigger, setRefreshTrigger] = useState(0);
-
   const {
     componentReady,
     setComponentReady,
@@ -80,7 +80,7 @@ const CallingScreenContainer: React.FC<CallingScreenContainerProps> = memo(({
     handleSearchBlur,
     closeAutocomplete,
     getDelayDisplayType
-  } = useLocalCallingScreenState({ leads, onCallMade: undefined, refreshTrigger });
+  } = useLocalCallingScreenState({ leads, onCallMade: undefined, refreshTrigger: externalRefreshTrigger });
 
   useSimplifiedCallingScreenEffects({
     componentReady,
@@ -139,8 +139,6 @@ const CallingScreenContainer: React.FC<CallingScreenContainerProps> = memo(({
     const success = await importLeadsFromCSV(newLeads, newFileName, csvId);
     if (success) {
       onLeadsImported(newLeads, newFileName, csvId);
-      // Trigger refresh of CSV selector
-      setRefreshTrigger(prev => prev + 1);
     }
   };
 
@@ -150,8 +148,6 @@ const CallingScreenContainer: React.FC<CallingScreenContainerProps> = memo(({
     // This preserves the lastCalled status from storage
     updateLeadsDataDirectly(newLeads);
     onCSVSelect(csvId, newLeads, newFileName);
-    // Trigger refresh of CSV selector
-    setRefreshTrigger(prev => prev + 1);
   };
 
   // Show loading until component is ready
@@ -190,7 +186,7 @@ const CallingScreenContainer: React.FC<CallingScreenContainerProps> = memo(({
             onLeadsImported={handleLeadsImported}
             onCSVSelect={handleCSVSelect}
             currentCSVId={currentCSVId}
-            refreshTrigger={refreshTrigger}
+            refreshTrigger={externalRefreshTrigger}
             loadMoreResults={loadMoreResults}
             loadedResultsCount={loadedResultsCount}
             totalResultsCount={allSearchResults?.length || 0}
@@ -229,7 +225,7 @@ const CallingScreenContainer: React.FC<CallingScreenContainerProps> = memo(({
         onLeadsImported={handleLeadsImported}
         onCSVSelect={handleCSVSelect}
         currentCSVId={currentCSVId}
-        refreshTrigger={refreshTrigger}
+        refreshTrigger={externalRefreshTrigger}
         loadMoreResults={loadMoreResults}
         loadedResultsCount={loadedResultsCount}
         totalResultsCount={allSearchResults?.length || 0}
@@ -269,7 +265,7 @@ const CallingScreenContainer: React.FC<CallingScreenContainerProps> = memo(({
           canGoNext={currentLeads.length > 1}
           getDelayDisplayType={getDelayDisplayType}
           noLeadsMessage={!currentLead ? "No Leads Found" : undefined}
-          refreshTrigger={refreshTrigger}
+          refreshTrigger={externalRefreshTrigger}
           onImportNew={() => {
             // Trigger the CSV importer by clicking the import button in the header
             const importButton = document.querySelector('[data-import-csv]') as HTMLElement;

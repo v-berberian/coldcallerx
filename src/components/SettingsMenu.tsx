@@ -410,10 +410,10 @@ const SettingsMenu: React.FC<SettingsMenuProps> = ({ children }) => {
                         <div className="space-y-2">
                           <p className="text-sm font-medium text-foreground">CSV Column Order:</p>
                           <div className="text-xs text-muted-foreground space-y-1">
-                            <div><span className="font-medium">A:</span> Company (optional)</div>
-                            <div><span className="font-medium">B:</span> Name (required)</div>
-                            <div><span className="font-medium">C:</span> Phone (required)</div>
-                            <div><span className="font-medium">D:</span> Additional Phones (optional)</div>
+                            <div><span className="font-medium">A:</span> Company (optional, searchable)</div>
+                            <div><span className="font-medium">B:</span> Name (required, searchable)</div>
+                            <div><span className="font-medium">C:</span> Phone (required, searchable)</div>
+                            <div><span className="font-medium">D:</span> Additional Phones (optional, searchable)</div>
                             <div><span className="font-medium">E:</span> Email (optional)</div>
                           </div>
                         </div>
@@ -424,6 +424,7 @@ const SettingsMenu: React.FC<SettingsMenuProps> = ({ children }) => {
                             <div>• Additional phones can be separated by spaces or commas</div>
                             <div>• Email addresses should be valid format</div>
                             <div>• First row can be headers (will be skipped)</div>
+                            <div>• Use the search bar to find leads by name, company, or phone</div>
                           </div>
                         </div>
                       </div>

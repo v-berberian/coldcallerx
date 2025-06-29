@@ -138,6 +138,7 @@ const CallingHeader: React.FC<CallingHeaderProps> = ({
           isFullscreen={isFullscreen}
           fileName={fileName} 
           ref={searchBarRef}
+          onCloseAutocomplete={onCloseAutocomplete}
         />
         
         {/* Autocomplete Dropdown */}

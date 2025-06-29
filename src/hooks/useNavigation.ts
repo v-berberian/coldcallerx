@@ -4,6 +4,7 @@ import { useLeadSelection } from './useLeadSelection';
 export const useNavigation = (
   currentIndex: number,
   updateNavigation: (index: number) => void,
+  updateNavigationWithHistory: (index: number, addToHistory?: boolean) => void,
   resetNavigation: (index: number) => void,
   shuffleMode: boolean,
   callFilter: CallFilter,
@@ -17,16 +18,21 @@ export const useNavigation = (
   const { getNextLeadInSequential, getNextLeadInShuffle } = useLeadSelection();
 
   const handleNext = (baseLeads: Lead[]) => {
+    console.log('handleNext called - shuffleMode:', shuffleMode, 'baseLeads.length:', baseLeads.length, 'currentIndex:', currentIndex);
+    
     // Block navigation during filter changes or when countdown is 1 second or less
     if (isFilterChanging) {
+      console.log('Navigation blocked: isFilterChanging');
       return;
     }
     
     if (shouldBlockNavigation) {
+      console.log('Navigation blocked: shouldBlockNavigation');
       return;
     }
     
     if (baseLeads.length === 0) {
+      console.log('Navigation blocked: no leads');
       return;
     }
 
@@ -37,8 +43,10 @@ export const useNavigation = (
     let nextIndex: number;
     
     if (shuffleMode) {
+      console.log('Using shuffle navigation');
       const result = getNextLeadInShuffle(baseLeads, currentIndex, callFilter, shownLeadsInShuffle);
       nextIndex = result.index;
+      console.log('Shuffle result - nextIndex:', nextIndex, 'lead:', result.lead?.name);
       
       // Add the current lead to shown leads in shuffle
       if (currentLead) {
@@ -47,12 +55,19 @@ export const useNavigation = (
         newShownLeads.add(leadKey);
         setShownLeadsInShuffle(newShownLeads);
       }
+      
+      // Use history-aware navigation for shuffle mode
+      console.log('Calling updateNavigationWithHistory with index:', nextIndex);
+      updateNavigationWithHistory(nextIndex, true);
     } else {
+      console.log('Using sequential navigation');
       const result = getNextLeadInSequential(baseLeads, currentIndex);
       nextIndex = result.index;
+      console.log('Sequential result - nextIndex:', nextIndex, 'lead:', result.lead?.name);
+      
+      // Use regular navigation for sequential mode
+      updateNavigation(nextIndex);
     }
-    
-    updateNavigation(nextIndex);
   };
 
   const handlePrevious = () => {
@@ -82,7 +97,13 @@ export const useNavigation = (
     // Find the lead's index in the filtered baseLeads array for proper navigation context
     const leadIndex = baseLeads.findIndex(l => l.name === lead.name && l.phone === lead.phone);
     if (leadIndex !== -1) {
-      updateNavigation(leadIndex);
+      if (shuffleMode) {
+        // Use history-aware navigation for shuffle mode
+        updateNavigationWithHistory(leadIndex, true);
+      } else {
+        // Use regular navigation for sequential mode
+        updateNavigation(leadIndex);
+      }
       
       // If in shuffle mode, add this lead to shown leads
       if (shuffleMode) {

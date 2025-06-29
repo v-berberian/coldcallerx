@@ -16,6 +16,7 @@ interface CallingScreenProps {
   currentCSVId: string | null;
   onCSVSelect: (csvId: string, leads: Lead[], fileName: string) => void;
   onAllListsDeleted?: () => void;
+  refreshTrigger?: number;
 }
 
 const CallingScreen: React.FC<CallingScreenProps> = ({ 
@@ -25,7 +26,8 @@ const CallingScreen: React.FC<CallingScreenProps> = ({
   onLeadsImported,
   currentCSVId,
   onCSVSelect,
-  onAllListsDeleted
+  onAllListsDeleted,
+  refreshTrigger = 0
 }) => {
   return (
     <CallingScreenContainer 
@@ -36,6 +38,7 @@ const CallingScreen: React.FC<CallingScreenProps> = ({
       currentCSVId={currentCSVId}
       onCSVSelect={onCSVSelect}
       onAllListsDeleted={onAllListsDeleted}
+      refreshTrigger={refreshTrigger}
     />
   );
 };

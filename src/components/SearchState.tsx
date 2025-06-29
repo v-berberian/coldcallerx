@@ -63,9 +63,15 @@ export const useSearchState = ({ leads, getBaseLeads, leadsData, timezoneFilter,
     for (let i = 0; i < length; i++) {
       const lead = leads[i];
       const name = lead.name.toLowerCase();
-      const phone = lead.phone;
+      const phone = lead.phone.toLowerCase();
+      const company = lead.company?.toLowerCase() || '';
+      const additionalPhones = lead.additionalPhones?.toLowerCase() || '';
       
-      if (name.includes(searchTerm) || phone.includes(searchTerm)) {
+      // Search across name, phone, company, and additional phones
+      if (name.includes(searchTerm) || 
+          phone.includes(searchTerm) || 
+          company.includes(searchTerm) ||
+          additionalPhones.includes(searchTerm)) {
         results.push(lead);
       }
     }

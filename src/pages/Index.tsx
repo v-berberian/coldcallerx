@@ -14,6 +14,7 @@ const Index = () => {
   const [showContent, setShowContent] = useState(false);
   const [currentCSVId, setCurrentCSVId] = useState<string | null>(null);
   const [hasSavedLists, setHasSavedLists] = useState(false);
+  const [csvSwitchTrigger, setCsvSwitchTrigger] = useState(0);
 
   const {
     leadsData,
@@ -90,6 +91,9 @@ const Index = () => {
       
       // Save the current CSV ID
       await appStorage.saveCurrentCSVId(csvId);
+      
+      // Trigger restoration of the current index for this CSV
+      setCsvSwitchTrigger(prev => prev + 1);
     } catch (error) {
       console.error('Error in handleCSVSelect:', error);
     }
@@ -209,6 +213,7 @@ const Index = () => {
         currentCSVId={currentCSVId}
         onCSVSelect={handleCSVSelect}
         onAllListsDeleted={handleAllListsDeleted}
+        refreshTrigger={csvSwitchTrigger}
       />
     </div>
   );

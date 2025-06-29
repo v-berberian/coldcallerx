@@ -1,4 +1,4 @@
-import React, { useState, useRef, forwardRef, useImperativeHandle } from 'react';
+import React, { useState, useRef, forwardRef, useImperativeHandle, useEffect } from 'react';
 import { X, Maximize2, Minimize2 } from 'lucide-react';
 
 interface SearchBarProps {
@@ -10,6 +10,7 @@ interface SearchBarProps {
   onToggleFullscreen?: () => void;
   isFullscreen?: boolean;
   fileName: string;
+  onCloseAutocomplete?: () => void;
 }
 
 export interface SearchBarRef {
@@ -25,12 +26,13 @@ const SearchBar = forwardRef<SearchBarRef, SearchBarProps>(({
   onClearSearch,
   onToggleFullscreen,
   isFullscreen,
-  fileName
+  fileName,
+  onCloseAutocomplete
 }, ref) => {
   const [isFocused, setIsFocused] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   
-  const staticPlaceholder = "Search and view leads";
+  const staticPlaceholder = "Search by name, company, or phone";
 
   // Expose blur and focus methods
   useImperativeHandle(ref, () => ({
@@ -42,6 +44,29 @@ const SearchBar = forwardRef<SearchBarRef, SearchBarProps>(({
     }
   }));
 
+  // Handle keyboard events
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      // Check if the input is focused and we're in collapsed mode (not fullscreen)
+      if (isFocused && !isFullscreen && inputRef.current === document.activeElement) {
+        // Handle "Done" key on iOS keyboard
+        if (event.key === 'Done' || event.key === 'Enter') {
+          event.preventDefault();
+          // Close autocomplete and blur the input
+          if (onCloseAutocomplete) {
+            onCloseAutocomplete();
+          }
+          inputRef.current?.blur();
+        }
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [isFocused, isFullscreen, onCloseAutocomplete]);
+
   const handleFocus = () => {
     setIsFocused(true);
     // Only trigger focus if we're not already showing autocomplete (prevents reset)
@@ -52,6 +77,10 @@ const SearchBar = forwardRef<SearchBarRef, SearchBarProps>(({
 
   const handleBlur = () => {
     setIsFocused(false);
+    // Close autocomplete when input loses focus (including iOS keyboard toolbar "Done" button)
+    if (onCloseAutocomplete) {
+      onCloseAutocomplete();
+    }
     // Only trigger blur if we're not in fullscreen mode and not transitioning from fullscreen
     // This prevents search results from being reset when shrinking from fullscreen
     if (!isFullscreen) {
@@ -96,6 +125,7 @@ const SearchBar = forwardRef<SearchBarRef, SearchBarProps>(({
         onFocus={handleFocus} 
         onBlur={handleBlur} 
         onClick={handleInputClick}
+        enterKeyHint="done"
         className="w-full px-4 py-2 bg-card text-card-foreground rounded-xl border border-border placeholder:text-center placeholder:text-muted-foreground text-center focus:border-primary/50 focus:bg-card shadow-sm"
         ref={inputRef}
       />

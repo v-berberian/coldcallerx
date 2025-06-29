@@ -19,7 +19,9 @@ interface UseLeadNavigationActionsProps {
   autoCall: boolean;
   setShouldAutoCall: (should: boolean) => void;
   goToPrevious: () => boolean;
+  goToPreviousFromHistory: () => boolean;
   callMadeToCurrentLead: boolean;
+  callDelay: number;
 }
 
 export const useLeadNavigationActions = ({
@@ -34,8 +36,10 @@ export const useLeadNavigationActions = ({
   autoCall,
   setShouldAutoCall,
   goToPrevious,
+  goToPreviousFromHistory,
   markLeadAsCalledOnNavigation,
-  callMadeToCurrentLead
+  callMadeToCurrentLead,
+  callDelay
 }: UseLeadNavigationActionsProps) => {
 
   const handleNextWrapper = (baseLeads: Lead[]) => {
@@ -55,7 +59,16 @@ export const useLeadNavigationActions = ({
     
     // Set flag to trigger auto-call after navigation
     if (autoCall) {
-      setShouldAutoCall(true);
+      // Add a small delay for rocket mode to allow the app to process the call end
+      if (callDelay === 0) {
+        // Rocket mode - add a small delay to allow call processing
+        setTimeout(() => {
+          setShouldAutoCall(true);
+        }, 200); // 200ms delay for rocket mode
+      } else {
+        // Other modes - trigger immediately
+        setShouldAutoCall(true);
+      }
     }
   };
 
@@ -77,7 +90,7 @@ export const useLeadNavigationActions = ({
     
     if (shuffleMode) {
       // In shuffle mode, use navigation history to go to previously shown lead
-      const didGoBack = goToPrevious();
+      const didGoBack = goToPreviousFromHistory();
       
       // If there's no history to go back to, fall back to the last lead in the list
       if (!didGoBack) {
@@ -92,6 +105,20 @@ export const useLeadNavigationActions = ({
     
     // Reset call state after navigation
     setCallMadeToCurrentLead(false);
+    
+    // Set flag to trigger auto-call after navigation (same as next button)
+    if (autoCall) {
+      // Add a small delay for rocket mode to allow the app to process the call end
+      if (callDelay === 0) {
+        // Rocket mode - add a small delay to allow call processing
+        setTimeout(() => {
+          setShouldAutoCall(true);
+        }, 200); // 200ms delay for rocket mode
+      } else {
+        // Other modes - trigger immediately
+        setShouldAutoCall(true);
+      }
+    }
   };
 
   const selectLeadWrapper = (lead: Lead, baseLeads: Lead[], leadsData: Lead[]) => {
