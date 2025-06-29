@@ -118,6 +118,16 @@ select:focus-visible:ring-offset-0 {
   box-shadow: none !important;
 }
 
+/* Hide cursor when caret-transparent class is applied */
+.caret-transparent {
+  caret-color: transparent !important;
+}
+
+/* Ensure cursor is visible when typing */
+input:not(.caret-transparent) {
+  caret-color: auto !important;
+}
+
 /* Glass morphism utilities */
 @layer utilities {
   .glass-morphism {

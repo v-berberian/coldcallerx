@@ -202,13 +202,18 @@ const SearchAutocomplete: React.FC<SearchAutocompleteProps> = ({
         const searchArea = target.closest('.search-area');
         const autocompleteArea = target.closest('.search-autocomplete-container');
         
+        console.log('Document click - target:', target, 'searchArea:', searchArea, 'autocompleteArea:', autocompleteArea);
+        
         // If clicking outside both search area and autocomplete, close it
         if (!searchArea && !autocompleteArea) {
+          console.log('Closing autocomplete - clicked outside');
           if (onCloseAutocomplete) {
             onCloseAutocomplete();
           } else if (onAnimationComplete) {
             onAnimationComplete();
           }
+        } else {
+          console.log('Not closing autocomplete - clicked inside search area or autocomplete');
         }
       };
 

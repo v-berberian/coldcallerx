@@ -30,9 +30,11 @@ const SearchBar = forwardRef<SearchBarRef, SearchBarProps>(({
   onCloseAutocomplete
 }, ref) => {
   const [isFocused, setIsFocused] = useState(false);
+  const [hasStartedTyping, setHasStartedTyping] = useState(false);
+  const [isTogglingFullscreen, setIsTogglingFullscreen] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   
-  const staticPlaceholder = "Search by name, company, or phone";
+  const staticPlaceholder = "Search and View Leads";
 
   // Expose blur and focus methods
   useImperativeHandle(ref, () => ({
@@ -43,6 +45,13 @@ const SearchBar = forwardRef<SearchBarRef, SearchBarProps>(({
       inputRef.current?.focus();
     }
   }));
+
+  // Reset typing state when search query is cleared
+  useEffect(() => {
+    if (!searchQuery) {
+      setHasStartedTyping(false);
+    }
+  }, [searchQuery]);
 
   // Handle keyboard events
   useEffect(() => {
@@ -77,10 +86,15 @@ const SearchBar = forwardRef<SearchBarRef, SearchBarProps>(({
 
   const handleBlur = () => {
     setIsFocused(false);
-    // Close autocomplete when input loses focus (including iOS keyboard toolbar "Done" button)
-    if (onCloseAutocomplete) {
+    
+    // Don't close autocomplete when:
+    // 1. We're in fullscreen mode (user might dismiss keyboard but want to keep autocomplete)
+    // 2. We're toggling fullscreen (maximize button was clicked)
+    // 3. The input is being blurred as part of fullscreen toggle
+    if (onCloseAutocomplete && !isTogglingFullscreen && !isFullscreen) {
       onCloseAutocomplete();
     }
+    
     // Only trigger blur if we're not in fullscreen mode and not transitioning from fullscreen
     // This prevents search results from being reset when shrinking from fullscreen
     if (!isFullscreen) {
@@ -88,20 +102,43 @@ const SearchBar = forwardRef<SearchBarRef, SearchBarProps>(({
     }
   };
 
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    // Set typing state when user starts typing
+    if (!hasStartedTyping && value.length > 0) {
+      setHasStartedTyping(true);
+    }
+    onSearchChange(value);
+  };
+
   const handleFullscreenToggle = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
+    e.nativeEvent.stopImmediatePropagation();
     
-    if (isFullscreen) {
-      // When shrinking from fullscreen, focus the input to bring back keyboard
-      inputRef.current?.focus();
-    } else {
-      // When expanding to fullscreen, hide keyboard
-      inputRef.current?.blur();
-    }
+    console.log('Maximize button clicked, preventing event propagation');
     
-    // Call the fullscreen toggle function
+    // Set flag to prevent autocomplete from closing
+    setIsTogglingFullscreen(true);
+    
+    // Call the fullscreen toggle function first
     onToggleFullscreen?.();
+    
+    // Then handle input focus/blur after a short delay to ensure flag is set
+    setTimeout(() => {
+      if (isFullscreen) {
+        // When shrinking from fullscreen, focus the input to bring back keyboard
+        inputRef.current?.focus();
+      } else {
+        // When expanding to fullscreen, hide keyboard
+        inputRef.current?.blur();
+      }
+      
+      // Reset flag after the blur/focus operation
+      setTimeout(() => {
+        setIsTogglingFullscreen(false);
+      }, 50);
+    }, 10);
   };
 
   const handleInputClick = () => {
@@ -121,20 +158,25 @@ const SearchBar = forwardRef<SearchBarRef, SearchBarProps>(({
         type="text" 
         placeholder={searchQuery ? "" : staticPlaceholder}
         value={searchQuery} 
-        onChange={e => onSearchChange(e.target.value)} 
+        onChange={handleInputChange} 
         onFocus={handleFocus} 
         onBlur={handleBlur} 
         onClick={handleInputClick}
         enterKeyHint="done"
-        className="w-full px-4 py-2 bg-card text-card-foreground rounded-xl border border-border placeholder:text-center placeholder:text-muted-foreground text-center focus:border-primary/50 focus:bg-card shadow-sm"
+        className={`w-full px-4 py-2 bg-card text-card-foreground rounded-xl border border-border placeholder:text-center placeholder:text-muted-foreground text-center focus:border-primary/50 focus:bg-card shadow-sm ${!hasStartedTyping && isFocused ? 'caret-transparent' : ''}`}
         ref={inputRef}
+        style={{
+          caretColor: (!hasStartedTyping && isFocused) ? 'transparent' : 'auto'
+        }}
       />
       {/* Fullscreen button on the left */}
       {(isFocused || isFullscreen) && (
         <button 
           onClick={handleFullscreenToggle}
           onMouseDown={(e) => e.preventDefault()}
-          className="absolute left-3 top-1/2 transform -translate-y-1/2 hover:bg-muted/50 rounded-full p-1 transition-colors"
+          onTouchStart={(e) => e.stopPropagation()}
+          onTouchEnd={(e) => e.stopPropagation()}
+          className="absolute left-3 top-1/2 transform -translate-y-1/2 rounded-full p-1 transition-colors"
         >
           {isFullscreen ? <Minimize2 className="h-4 w-4 text-muted-foreground" /> : <Maximize2 className="h-4 w-4 text-muted-foreground" />}
         </button>
@@ -143,6 +185,8 @@ const SearchBar = forwardRef<SearchBarRef, SearchBarProps>(({
       {searchQuery && (
         <button 
           onClick={onClearSearch} 
+          onTouchStart={(e) => e.stopPropagation()}
+          onTouchEnd={(e) => e.stopPropagation()}
           className="absolute right-3 top-1/2 transform -translate-y-1/2 hover:bg-muted/50 rounded-full p-1 transition-colors"
         >
           <X className="h-4 w-4 text-muted-foreground" />
