@@ -37,17 +37,49 @@ const FilterButtons: React.FC<FilterButtonsProps> = ({
   onResetCallDelay
 }) => {
   const [isResetAnimating, setIsResetAnimating] = useState(false);
+  const [isAnyFilterAnimating, setIsAnyFilterAnimating] = useState(false);
 
-  const handleResetClick = () => {
+  const handleFilterClick = (handler: () => void, filterName: string) => (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    // Prevent rapid successive clicks
+    if (isAnyFilterAnimating) {
+      console.log(`Filter click blocked - animation in progress: ${filterName}`);
+      return;
+    }
+    
+    console.log(`Filter button clicked: ${filterName}`);
+    setIsAnyFilterAnimating(true);
+    
+    // Call the handler
+    handler();
+    
+    // Reset animation flag after animation completes
+    setTimeout(() => {
+      setIsAnyFilterAnimating(false);
+    }, 150); // Slightly longer than animation duration to ensure completion
+  };
+
+  const handleResetClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    e.nativeEvent.stopImmediatePropagation();
+    console.log('Reset button clicked, current callFilter:', callFilter);
+    console.log('Reset button event:', e);
     setIsResetAnimating(true);
-    onResetAllCalls();
+    
+    // Add a small delay to ensure event handling is complete
+    setTimeout(() => {
+      onResetAllCalls();
+    }, 10);
   };
 
   useEffect(() => {
     if (isResetAnimating) {
       const timer = setTimeout(() => {
         setIsResetAnimating(false);
-      }, 150); // Match the animation duration
+      }, 100); // Match the animation duration
       return () => clearTimeout(timer);
     }
   }, [isResetAnimating]);
@@ -77,15 +109,15 @@ const FilterButtons: React.FC<FilterButtonsProps> = ({
       <div className="flex w-full gap-2">
         <div className="flex-1">
           <button 
-            onClick={onToggleTimezone} 
-            className={`group relative w-full text-sm font-medium px-4 py-3 rounded-lg overflow-hidden transition-all duration-150 ease-out touch-manipulation ${
+            onClick={handleFilterClick(onToggleTimezone, 'timezone')} 
+            className={`group relative w-full text-sm font-medium px-4 py-3 rounded-lg overflow-hidden transition-all duration-100 ease-out touch-manipulation ${
               timezoneFilter === 'EST_CST' 
                 ? 'text-blue-700 dark:text-blue-300 shadow-lg shadow-blue-500/30' 
                 : 'text-muted-foreground/70'
             }`} 
             style={{ 
               WebkitTapHighlightColor: 'transparent',
-              transition: 'all 150ms cubic-bezier(0.4, 0, 0.2, 1)'
+              transition: 'all 100ms cubic-bezier(0.25, 0.46, 0.45, 0.94)'
             }}
           >
             {/* Animated background for active state */}
@@ -93,7 +125,8 @@ const FilterButtons: React.FC<FilterButtonsProps> = ({
               <div 
                 className="absolute inset-0 bg-gradient-to-r from-blue-500/20 to-blue-600/20 rounded-lg scale-100 opacity-100 pointer-events-none"
                 style={{
-                  transition: 'all 150ms cubic-bezier(0.4, 0, 0.2, 1)'
+                  transition: 'all 100ms cubic-bezier(0.25, 0.46, 0.45, 0.94)',
+                  pointerEvents: 'none'
                 }}
               />
             )}
@@ -103,12 +136,13 @@ const FilterButtons: React.FC<FilterButtonsProps> = ({
               <div 
                 className="absolute inset-0 bg-gray-200/20 dark:bg-gray-700/20 rounded-lg scale-100 opacity-100 pointer-events-none"
                 style={{
-                  transition: 'all 150ms cubic-bezier(0.4, 0, 0.2, 1)'
+                  transition: 'all 100ms cubic-bezier(0.25, 0.46, 0.45, 0.94)',
+                  pointerEvents: 'none'
                 }}
               />
             )}
             
-            <span className={`relative z-10 block truncate transition-all duration-150 ease-out ${
+            <span className={`relative z-10 block truncate transition-all duration-100 ease-out ${
               timezoneFilter === 'EST_CST' ? 'scale-100 opacity-100' : 'scale-95 opacity-90'
             }`}>
               {timezoneFilter === 'ALL' ? 'All States' : 'EST, CST & CDT'}
@@ -118,15 +152,15 @@ const FilterButtons: React.FC<FilterButtonsProps> = ({
         
         <div className="flex-1 relative">
           <button 
-            onClick={onToggleCallFilter} 
-            className={`group relative w-full text-sm font-medium px-4 py-3 rounded-lg overflow-hidden transition-all duration-150 ease-out touch-manipulation ${
+            onClick={handleFilterClick(onToggleCallFilter, 'callFilter')} 
+            className={`group relative w-full text-sm font-medium px-4 py-3 rounded-lg overflow-hidden transition-all duration-100 ease-out touch-manipulation ${
               callFilter === 'UNCALLED' 
                 ? 'text-purple-700 dark:text-purple-300 shadow-lg shadow-purple-500/30' 
                 : 'text-muted-foreground/70'
             }`} 
             style={{ 
               WebkitTapHighlightColor: 'transparent',
-              transition: 'all 150ms cubic-bezier(0.4, 0, 0.2, 1)'
+              transition: 'all 100ms cubic-bezier(0.25, 0.46, 0.45, 0.94)'
             }}
           >
             {/* Animated background for active state */}
@@ -134,7 +168,8 @@ const FilterButtons: React.FC<FilterButtonsProps> = ({
               <div 
                 className="absolute inset-0 bg-gradient-to-r from-purple-500/20 to-purple-600/20 rounded-lg scale-100 opacity-100 pointer-events-none"
                 style={{
-                  transition: 'all 150ms cubic-bezier(0.4, 0, 0.2, 1)'
+                  transition: 'all 100ms cubic-bezier(0.25, 0.46, 0.45, 0.94)',
+                  pointerEvents: 'none'
                 }}
               />
             )}
@@ -144,12 +179,13 @@ const FilterButtons: React.FC<FilterButtonsProps> = ({
               <div 
                 className="absolute inset-0 bg-gray-200/20 dark:bg-gray-700/20 rounded-lg scale-100 opacity-100 pointer-events-none"
                 style={{
-                  transition: 'all 150ms cubic-bezier(0.4, 0, 0.2, 1)'
+                  transition: 'all 100ms cubic-bezier(0.25, 0.46, 0.45, 0.94)',
+                  pointerEvents: 'none'
                 }}
               />
             )}
             
-            <span className={`relative z-10 block truncate transition-all duration-150 ease-out ${
+            <span className={`relative z-10 block truncate transition-all duration-100 ease-out ${
               callFilter === 'UNCALLED' ? 'scale-100 opacity-100' : 'scale-95 opacity-90'
             }`}>
               {callFilter === 'ALL' ? 'All Numbers' : 'Uncalled'}
@@ -159,11 +195,13 @@ const FilterButtons: React.FC<FilterButtonsProps> = ({
           {callFilter === 'UNCALLED' && (
             <button 
               onClick={handleResetClick} 
-              className="group absolute right-1 top-1/2 transform -translate-y-1/2 text-purple-700 dark:text-purple-300 p-2 min-w-[36px] h-[36px] flex items-center justify-center touch-manipulation rounded-full transition-all duration-150 ease-out active:scale-95" 
+              className="group absolute right-2 top-1/2 transform -translate-y-1/2 text-purple-600 dark:text-purple-400 text-xs font-medium px-3 py-2 rounded-full w-[44px] h-[32px] flex items-center justify-center select-none touch-manipulation transition-all duration-100 ease-out bg-purple-100 dark:bg-purple-900/20 shadow-md shadow-purple-500/20 active:scale-95 z-30" 
               title="Reset all call counts"
               style={{ WebkitTapHighlightColor: 'transparent' }}
+              onMouseDown={(e) => e.stopPropagation()}
+              onTouchStart={(e) => e.stopPropagation()}
             >
-              <RotateCcw size={14} className={`transition-transform duration-150 ease-in-out ${isResetAnimating ? 'rotate-180' : 'rotate-0'}`} />
+              <RotateCcw size={16} className={`transition-transform duration-100 ease-in-out ${isResetAnimating ? 'rotate-180' : 'rotate-0'}`} />
             </button>
           )}
         </div>
@@ -173,15 +211,15 @@ const FilterButtons: React.FC<FilterButtonsProps> = ({
       <div className="flex w-full gap-2">
         <div className="flex-1">
           <button 
-            onClick={onToggleShuffle} 
-            className={`group relative w-full text-sm font-medium px-4 py-3 rounded-lg overflow-hidden transition-all duration-150 ease-out touch-manipulation ${
+            onClick={handleFilterClick(onToggleShuffle, 'shuffle')} 
+            className={`group relative w-full text-sm font-medium px-4 py-3 rounded-lg overflow-hidden transition-all duration-100 ease-out touch-manipulation ${
               shuffleMode 
                 ? 'text-orange-700 dark:text-orange-300 shadow-lg shadow-orange-500/30' 
                 : 'text-muted-foreground/70'
             }`} 
             style={{ 
               WebkitTapHighlightColor: 'transparent',
-              transition: 'all 150ms cubic-bezier(0.4, 0, 0.2, 1)'
+              transition: 'all 100ms cubic-bezier(0.25, 0.46, 0.45, 0.94)'
             }}
           >
             {/* Animated background for active state */}
@@ -189,7 +227,8 @@ const FilterButtons: React.FC<FilterButtonsProps> = ({
               <div 
                 className="absolute inset-0 bg-gradient-to-r from-orange-500/20 to-orange-600/20 rounded-lg scale-100 opacity-100 pointer-events-none"
                 style={{
-                  transition: 'all 150ms cubic-bezier(0.4, 0, 0.2, 1)'
+                  transition: 'all 100ms cubic-bezier(0.25, 0.46, 0.45, 0.94)',
+                  pointerEvents: 'none'
                 }}
               />
             )}
@@ -199,12 +238,13 @@ const FilterButtons: React.FC<FilterButtonsProps> = ({
               <div 
                 className="absolute inset-0 bg-gray-200/20 dark:bg-gray-700/20 rounded-lg scale-100 opacity-100 pointer-events-none"
                 style={{
-                  transition: 'all 150ms cubic-bezier(0.4, 0, 0.2, 1)'
+                  transition: 'all 100ms cubic-bezier(0.25, 0.46, 0.45, 0.94)',
+                  pointerEvents: 'none'
                 }}
               />
             )}
             
-            <span className={`relative z-10 block truncate transition-all duration-150 ease-out ${
+            <span className={`relative z-10 block truncate transition-all duration-100 ease-out ${
               shuffleMode ? 'scale-100 opacity-100' : 'scale-95 opacity-90'
             }`}>
               Shuffle
@@ -214,15 +254,15 @@ const FilterButtons: React.FC<FilterButtonsProps> = ({
         
         <div className="flex-1 relative">
           <button 
-            onClick={onToggleAutoCall} 
-            className={`group relative w-full text-sm font-medium px-4 py-3 rounded-lg overflow-hidden transition-all duration-150 ease-out touch-manipulation ${
+            onClick={handleFilterClick(onToggleAutoCall, 'autoCall')} 
+            className={`group relative w-full text-sm font-medium px-4 py-3 rounded-lg overflow-hidden transition-all duration-100 ease-out touch-manipulation ${
               autoCall 
                 ? 'text-green-700 dark:text-green-300 shadow-lg shadow-green-500/30' 
                 : 'text-muted-foreground/70'
             }`} 
             style={{ 
               WebkitTapHighlightColor: 'transparent',
-              transition: 'all 150ms cubic-bezier(0.4, 0, 0.2, 1)'
+              transition: 'all 100ms cubic-bezier(0.25, 0.46, 0.45, 0.94)'
             }}
           >
             {/* Animated background for active state */}
@@ -230,7 +270,8 @@ const FilterButtons: React.FC<FilterButtonsProps> = ({
               <div 
                 className="absolute inset-0 bg-gradient-to-r from-green-500/20 to-green-600/20 rounded-lg scale-100 opacity-100 pointer-events-none"
                 style={{
-                  transition: 'all 150ms cubic-bezier(0.4, 0, 0.2, 1)'
+                  transition: 'all 100ms cubic-bezier(0.25, 0.46, 0.45, 0.94)',
+                  pointerEvents: 'none'
                 }}
               />
             )}
@@ -240,12 +281,13 @@ const FilterButtons: React.FC<FilterButtonsProps> = ({
               <div 
                 className="absolute inset-0 bg-gray-200/20 dark:bg-gray-700/20 rounded-lg scale-100 opacity-100 pointer-events-none"
                 style={{
-                  transition: 'all 150ms cubic-bezier(0.4, 0, 0.2, 1)'
+                  transition: 'all 100ms cubic-bezier(0.25, 0.46, 0.45, 0.94)',
+                  pointerEvents: 'none'
                 }}
               />
             )}
             
-            <span className={`relative z-10 block truncate transition-all duration-150 ease-out ${
+            <span className={`relative z-10 block truncate transition-all duration-100 ease-out ${
               autoCall ? 'scale-100 opacity-100' : 'scale-95 opacity-90'
             }`}>
               Auto Call
@@ -258,7 +300,7 @@ const FilterButtons: React.FC<FilterButtonsProps> = ({
                 console.log('Auto call delay button clicked');
                 onToggleCallDelay();
               }}
-              className="group absolute right-1 top-1/2 transform -translate-y-1/2 text-green-600 dark:text-green-400 text-xs font-medium px-3 py-2 rounded-full w-[44px] h-[32px] flex items-center justify-center select-none touch-manipulation transition-all duration-150 ease-out bg-green-100 dark:bg-green-900/20 shadow-md shadow-green-500/20 active:scale-95 z-20"
+              className="group absolute right-1 top-1/2 transform -translate-y-1/2 text-green-600 dark:text-green-400 text-xs font-medium px-3 py-2 rounded-full w-[44px] h-[32px] flex items-center justify-center select-none touch-manipulation transition-all duration-100 ease-out bg-green-100 dark:bg-green-900/20 shadow-md shadow-green-500/20 active:scale-95 z-20"
               style={{ WebkitTapHighlightColor: 'transparent' }}
               title="Click to change delay mode"
             >
