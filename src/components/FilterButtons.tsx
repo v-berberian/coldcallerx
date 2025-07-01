@@ -37,28 +37,15 @@ const FilterButtons: React.FC<FilterButtonsProps> = ({
   onResetCallDelay
 }) => {
   const [isResetAnimating, setIsResetAnimating] = useState(false);
-  const [isAnyFilterAnimating, setIsAnyFilterAnimating] = useState(false);
 
   const handleFilterClick = (handler: () => void, filterName: string) => (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
     
-    // Prevent rapid successive clicks
-    if (isAnyFilterAnimating) {
-      console.log(`Filter click blocked - animation in progress: ${filterName}`);
-      return;
-    }
-    
     console.log(`Filter button clicked: ${filterName}`);
-    setIsAnyFilterAnimating(true);
     
-    // Call the handler
+    // Call the handler immediately
     handler();
-    
-    // Reset animation flag after animation completes
-    setTimeout(() => {
-      setIsAnyFilterAnimating(false);
-    }, 150); // Slightly longer than animation duration to ensure completion
   };
 
   const handleResetClick = (e: React.MouseEvent) => {
@@ -195,13 +182,13 @@ const FilterButtons: React.FC<FilterButtonsProps> = ({
           {callFilter === 'UNCALLED' && (
             <button 
               onClick={handleResetClick} 
-              className="group absolute right-2 top-1/2 transform -translate-y-1/2 text-purple-600 dark:text-purple-400 text-xs font-medium px-3 py-2 rounded-full w-[44px] h-[32px] flex items-center justify-center select-none touch-manipulation transition-all duration-100 ease-out bg-purple-100 dark:bg-purple-900/20 shadow-md shadow-purple-500/20 active:scale-95 z-30" 
+              className="group absolute right-1 top-1/2 transform -translate-y-1/2 text-purple-600 dark:text-purple-400 text-xs font-medium px-3 py-2 rounded-full w-[44px] h-[32px] flex items-center justify-center select-none touch-manipulation transition-all duration-100 ease-out bg-purple-100 dark:bg-purple-900/20 shadow-md shadow-purple-500/20 active:scale-95 z-30" 
               title="Reset all call counts"
               style={{ WebkitTapHighlightColor: 'transparent' }}
               onMouseDown={(e) => e.stopPropagation()}
               onTouchStart={(e) => e.stopPropagation()}
             >
-              <RotateCcw size={16} className={`transition-transform duration-100 ease-in-out ${isResetAnimating ? 'rotate-180' : 'rotate-0'}`} />
+              <RotateCcw size={12} className={`w-3 h-3 flex-shrink-0 text-purple-600 dark:text-purple-400 transition-transform duration-100 ease-in-out ${isResetAnimating ? 'rotate-180' : 'rotate-0'}`} />
             </button>
           )}
         </div>

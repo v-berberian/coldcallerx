@@ -61,29 +61,18 @@ const SearchAutocomplete: React.FC<SearchAutocompleteProps> = ({
 
   // Render individual lead item for virtualized list
   const renderLeadItem = useCallback(({ index, style }: { index: number; style: React.CSSProperties }) => {
-    console.log('SearchAutocomplete: renderLeadItem called for index:', index);
-    
-    // Use allSearchResults in fullscreen mode, searchResults in normal mode
+    // Determine which data source to use based on fullscreen state
     const dataSource = isFullscreen ? allSearchResults : searchResults;
     const lead = dataSource[index];
     
-    console.log('SearchAutocomplete: dataSource length:', dataSource.length, 'lead at index:', index, lead ? lead.name : 'undefined');
-    
-    // If the item hasn't been loaded yet, show a loading placeholder
     if (!lead) {
-      console.log('SearchAutocomplete: No lead found at index:', index);
       return (
         <div style={style} key={`loading-${index}`}>
           <div className="w-full px-4 py-4 text-left border-b border-border/10 last:border-b-0">
-            <div className="flex justify-between items-start">
-              <div className="flex-1 min-w-0 mr-3">
-                <div className="h-4 bg-muted/30 rounded animate-pulse mb-1"></div>
-                <div className="h-3 bg-muted/20 rounded animate-pulse mb-1"></div>
-                <div className="h-3 bg-muted/20 rounded animate-pulse"></div>
-              </div>
-              <div className="flex-shrink-0 text-xs text-muted-foreground">
-                {index + 1}/{totalResultsCount}
-              </div>
+            <div className="animate-pulse">
+              <div className="h-4 bg-muted rounded mb-2"></div>
+              <div className="h-3 bg-muted rounded mb-1"></div>
+              <div className="h-3 bg-muted rounded"></div>
             </div>
           </div>
         </div>
@@ -105,15 +94,53 @@ const SearchAutocomplete: React.FC<SearchAutocompleteProps> = ({
       }
     };
 
+    // For virtualized lists, we need a different approach since react-window handles scrolling
+    // We'll use a combination of click and touch events that work better with virtualized lists
+    let touchStartTime = 0;
+    let touchStartY = 0;
+    let touchStartX = 0;
+    let hasMoved = false;
+    const moveThreshold = 10; // Slightly higher threshold for virtualized lists
+    const timeThreshold = 300; // Maximum time for a tap
+
     const handleTouchStart = (e: React.TouchEvent) => {
       console.log('SearchAutocomplete: Touch start on lead:', lead.name);
-      e.preventDefault();
+      e.stopPropagation();
+      
+      // Reset tracking
+      hasMoved = false;
+      touchStartTime = Date.now();
+      touchStartY = e.touches[0].clientY;
+      touchStartX = e.touches[0].clientX;
+    };
+
+    const handleTouchMove = (e: React.TouchEvent) => {
+      console.log('SearchAutocomplete: Touch move on lead:', lead.name);
+      e.stopPropagation();
+      
+      // Check if finger has moved significantly
+      const currentY = e.touches[0].clientY;
+      const currentX = e.touches[0].clientX;
+      const deltaY = Math.abs(currentY - touchStartY);
+      const deltaX = Math.abs(currentX - touchStartX);
+      
+      if (deltaY > moveThreshold || deltaX > moveThreshold) {
+        hasMoved = true;
+      }
     };
 
     const handleTouchEnd = (e: React.TouchEvent) => {
-      console.log('SearchAutocomplete: Touch end on lead:', lead.name);
-      e.preventDefault();
-      handleLeadClick();
+      console.log('SearchAutocomplete: Touch end on lead:', lead.name, 'hasMoved:', hasMoved);
+      e.stopPropagation();
+      
+      const touchDuration = Date.now() - touchStartTime;
+      
+      // Only trigger lead selection if:
+      // 1. No significant movement occurred
+      // 2. Touch duration is short (indicating a tap, not a long press)
+      if (!hasMoved && touchDuration < timeThreshold) {
+        handleLeadClick();
+      }
     };
 
     console.log('SearchAutocomplete: Rendering lead item for:', lead.name);
@@ -123,6 +150,7 @@ const SearchAutocomplete: React.FC<SearchAutocompleteProps> = ({
         <button
           onClick={handleLeadClick}
           onTouchStart={handleTouchStart}
+          onTouchMove={handleTouchMove}
           onTouchEnd={handleTouchEnd}
           className="w-full px-4 py-4 text-left border-b border-border/10 last:border-b-0 transition-colors duration-75 cursor-pointer hover:bg-muted/50 active:bg-muted/70 touch-manipulation"
           style={{ WebkitTapHighlightColor: 'transparent' }}
@@ -230,107 +258,63 @@ const SearchAutocomplete: React.FC<SearchAutocompleteProps> = ({
     };
   }, [shouldRender]);
 
-  // Separate useEffect for click outside detection
+  // iOS-friendly touch detection - only close on true taps outside
   useEffect(() => {
-    if (shouldRender && (onAnimationComplete || onCloseAutocomplete)) {
-      const handleDocumentClick = (event: MouseEvent) => {
-        const target = event.target as Element;
-        
-        // Check if the click target is part of the search area
-        const searchArea = target.closest('.search-area');
+    if (!shouldRender) return;
+
+    let touchStartY = 0;
+    let touchStartX = 0;
+    let hasMoved = false;
+    const moveThreshold = 5; // Very small threshold for iOS
+
+    const handleTouchStart = (e: TouchEvent) => {
+      hasMoved = false;
+      touchStartY = e.touches[0].clientY;
+      touchStartX = e.touches[0].clientX;
+    };
+
+    const handleTouchMove = (e: TouchEvent) => {
+      const currentY = e.touches[0].clientY;
+      const currentX = e.touches[0].clientX;
+      const deltaY = Math.abs(currentY - touchStartY);
+      const deltaX = Math.abs(currentX - touchStartX);
+      
+      // If finger moved more than threshold, mark as moved
+      if (deltaY > moveThreshold || deltaX > moveThreshold) {
+        hasMoved = true;
+      }
+    };
+
+    const handleTouchEnd = (e: TouchEvent) => {
+      // Only close if:
+      // 1. No movement occurred (true tap)
+      // 2. Touch ended outside autocomplete
+      if (!hasMoved) {
+        const target = e.target as Element;
         const autocompleteArea = target.closest('.search-autocomplete-container');
-        
-        console.log('Document click - target:', target, 'searchArea:', searchArea, 'autocompleteArea:', autocompleteArea);
-        
-        // If clicking outside both search area and autocomplete, close it
-        if (!searchArea && !autocompleteArea) {
-          console.log('Closing autocomplete - clicked outside');
-          if (onCloseAutocomplete) {
-            onCloseAutocomplete();
-          } else if (onAnimationComplete) {
-            onAnimationComplete();
-          }
-        } else {
-          console.log('Not closing autocomplete - clicked inside search area or autocomplete');
-        }
-      };
-
-      const handleDocumentTouch = (event: TouchEvent) => {
-        const target = event.target as Element;
-        
-        // Check if the touch target is part of the search area
         const searchArea = target.closest('.search-area');
-        const autocompleteArea = target.closest('.search-autocomplete-container');
         
-        // If touching outside both search area and autocomplete, close it
-        if (!searchArea && !autocompleteArea) {
-          // On mobile, prevent default to avoid any mobile browser quirks
-          if (isMobile) {
-            event.preventDefault();
-            // Force close keyboard on mobile
-            const input = document.querySelector('input[type="text"]') as HTMLInputElement;
-            if (input) {
-              input.blur();
-              document.body.focus();
-            }
-          }
-          if (onCloseAutocomplete) {
-            onCloseAutocomplete();
-          } else if (onAnimationComplete) {
-            onAnimationComplete();
-          }
+        if (!autocompleteArea && !searchArea) {
+          onCloseAutocomplete?.();
         }
-      };
+      }
+      
+      // Reset state
+      hasMoved = false;
+      touchStartY = 0;
+      touchStartX = 0;
+    };
 
-      const handleDocumentTouchEnd = (event: TouchEvent) => {
-        const target = event.target as Element;
-        
-        // Check if the touch target is part of the search area
-        const searchArea = target.closest('.search-area');
-        const autocompleteArea = target.closest('.search-autocomplete-container');
-        
-        // If touching outside both search area and autocomplete, close it
-        if (!searchArea && !autocompleteArea) {
-          // On mobile, force close keyboard
-          if (isMobile) {
-            const input = document.querySelector('input[type="text"]') as HTMLInputElement;
-            if (input) {
-              input.blur();
-              document.body.focus();
-            }
-          }
-          if (onCloseAutocomplete) {
-            onCloseAutocomplete();
-          } else if (onAnimationComplete) {
-            onAnimationComplete();
-          }
-        }
-      };
+    document.addEventListener('touchstart', handleTouchStart, { passive: true });
+    document.addEventListener('touchmove', handleTouchMove, { passive: true });
+    document.addEventListener('touchend', handleTouchEnd, { passive: true });
 
-      const handleKeyDown = (event: KeyboardEvent) => {
-        if (event.key === 'Escape' || event.key === 'Enter') {
-          if (onCloseAutocomplete) {
-            onCloseAutocomplete();
-          } else if (onAnimationComplete) {
-            onAnimationComplete();
-          }
-        }
-      };
-
-      // Add event listeners for both click and touch
-      document.body.addEventListener('click', handleDocumentClick);
-      document.body.addEventListener('touchstart', handleDocumentTouch, { passive: false });
-      document.body.addEventListener('touchend', handleDocumentTouchEnd);
-      document.addEventListener('keydown', handleKeyDown);
-
-      return () => {
-        document.body.removeEventListener('click', handleDocumentClick);
-        document.body.removeEventListener('touchstart', handleDocumentTouch);
-        document.body.removeEventListener('touchend', handleDocumentTouchEnd);
-        document.removeEventListener('keydown', handleKeyDown);
-      };
-    }
-  }, [shouldRender, onAnimationComplete, onCloseAutocomplete]);
+    return () => {
+      document.removeEventListener('touchstart', handleTouchStart);
+      document.removeEventListener('touchmove', handleTouchMove);
+      document.removeEventListener('touchend', handleTouchEnd);
+    };
+  }, [shouldRender, onCloseAutocomplete]);
 
   if (!shouldRender) {
     return null;
@@ -461,10 +445,11 @@ const SearchAutocomplete: React.FC<SearchAutocompleteProps> = ({
       className={`absolute top-full left-0 right-0 z-50 mt-1 rounded-3xl shadow-lg overflow-hidden ${animationClass} bg-background/15 backdrop-blur-sm border border-white/10 search-autocomplete-container`}
       style={{ 
         height: `${fallbackHeight}px`,
-        transition: 'height 0.3s ease-in-out',
-        marginBottom: '0.25rem', // Account for the removed mb-1 class
+        touchAction: 'pan-y', // Allow vertical scrolling, prevent horizontal
+        pointerEvents: 'auto'
       }}
       onTouchStart={(e) => e.stopPropagation()}
+      onTouchMove={(e) => e.stopPropagation()}
       onTouchEnd={(e) => e.stopPropagation()}
     >
       {searchResults.length === 0 ? (
@@ -490,15 +475,48 @@ const SearchAutocomplete: React.FC<SearchAutocompleteProps> = ({
             }
           };
 
+          // Track touch state for this specific lead button
+          let touchStartY = 0;
+          let touchStartX = 0;
+          let hasMoved = false;
+          const moveThreshold = 5;
+
           const handleTouchStart = (e: React.TouchEvent) => {
             console.log('SearchAutocomplete: FALLBACK Touch start on lead:', lead.name);
             e.preventDefault();
+            e.stopPropagation();
+            
+            // Reset movement tracking
+            hasMoved = false;
+            touchStartY = e.touches[0].clientY;
+            touchStartX = e.touches[0].clientX;
+          };
+
+          const handleTouchMove = (e: React.TouchEvent) => {
+            console.log('SearchAutocomplete: FALLBACK Touch move on lead:', lead.name);
+            e.preventDefault();
+            e.stopPropagation();
+            
+            // Check if finger has moved significantly
+            const currentY = e.touches[0].clientY;
+            const currentX = e.touches[0].clientX;
+            const deltaY = Math.abs(currentY - touchStartY);
+            const deltaX = Math.abs(currentX - touchStartX);
+            
+            if (deltaY > moveThreshold || deltaX > moveThreshold) {
+              hasMoved = true;
+            }
           };
 
           const handleTouchEnd = (e: React.TouchEvent) => {
-            console.log('SearchAutocomplete: FALLBACK Touch end on lead:', lead.name);
+            console.log('SearchAutocomplete: FALLBACK Touch end on lead:', lead.name, 'hasMoved:', hasMoved);
             e.preventDefault();
-            handleLeadClick();
+            e.stopPropagation();
+            
+            // Only trigger lead selection if no movement occurred (it was a tap, not a scroll)
+            if (!hasMoved) {
+              handleLeadClick();
+            }
           };
 
           return (
@@ -506,6 +524,7 @@ const SearchAutocomplete: React.FC<SearchAutocompleteProps> = ({
               key={`${lead.name}-${lead.phone}-${index}`}
               onClick={handleLeadClick}
               onTouchStart={handleTouchStart}
+              onTouchMove={handleTouchMove}
               onTouchEnd={handleTouchEnd}
               className="w-full px-4 py-4 text-left border-b border-border/10 last:border-b-0 transition-colors duration-75 cursor-pointer hover:bg-muted/50 active:bg-muted/70 touch-manipulation"
               style={{ WebkitTapHighlightColor: 'transparent' }}

@@ -745,3 +745,146 @@ button.no-hover:hover .h-5.w-5 {
   background-size: 200% 200%;
   animation: gradient-shift 3s ease infinite;
 }
+
+/* Super modern lead content change animations */
+@keyframes lead-content-fade-out {
+  0% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    filter: blur(0px);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-4px) scale(0.98);
+    filter: blur(1px);
+  }
+}
+
+@keyframes lead-content-fade-in {
+  0% {
+    opacity: 0;
+    transform: translateY(4px) scale(0.98);
+    filter: blur(1px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    filter: blur(0px);
+  }
+}
+
+@keyframes lead-icon-fade-out {
+  0% {
+    opacity: 1;
+    transform: scale(1) rotate(0deg);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(0.8) rotate(-5deg);
+  }
+}
+
+@keyframes lead-icon-fade-in {
+  0% {
+    opacity: 0;
+    transform: scale(0.8) rotate(5deg);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) rotate(0deg);
+  }
+}
+
+@keyframes lead-arrow-fade-out {
+  0% {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translateX(-2px) scale(0.9);
+  }
+}
+
+@keyframes lead-arrow-fade-in {
+  0% {
+    opacity: 0;
+    transform: translateX(2px) scale(0.9);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+  }
+}
+
+/* Ultra-fast animation classes for lead content */
+.animate-lead-content-fade-out {
+  animation: lead-content-fade-out 0.112s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+.animate-lead-content-fade-in {
+  animation: lead-content-fade-in 0.112s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+.animate-lead-icon-fade-out {
+  animation: lead-icon-fade-out 0.09s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  transform-origin: center center;
+}
+
+.animate-lead-icon-fade-in {
+  animation: lead-icon-fade-in 0.09s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  transform-origin: center center;
+}
+
+.animate-lead-arrow-fade-out {
+  animation: lead-arrow-fade-out 0.075s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  transform-origin: center center;
+}
+
+.animate-lead-arrow-fade-in {
+  animation: lead-arrow-fade-in 0.075s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  transform-origin: center center;
+}
+
+/* Instant state classes for immediate transitions */
+.lead-content-hidden {
+  opacity: 0;
+  transform: translateY(-4px) scale(0.98);
+  filter: blur(1px);
+  pointer-events: none;
+}
+
+.lead-content-visible {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+  filter: blur(0px);
+  pointer-events: auto;
+}
+
+.lead-icon-hidden {
+  opacity: 0;
+  transform: scale(0.8) rotate(-5deg);
+  pointer-events: none;
+  transform-origin: center center;
+}
+
+.lead-icon-visible {
+  opacity: 1;
+  transform: scale(1) rotate(0deg);
+  pointer-events: auto;
+  transform-origin: center center;
+}
+
+.lead-arrow-hidden {
+  opacity: 0;
+  transform: translateX(-2px) scale(0.9);
+  pointer-events: none;
+  transform-origin: center center;
+}
+
+.lead-arrow-visible {
+  opacity: 1;
+  transform: translateX(0) scale(1);
+  pointer-events: auto;
+  transform-origin: center center;
+}

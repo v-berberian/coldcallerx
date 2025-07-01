@@ -83,13 +83,13 @@ const MainContent: React.FC<MainContentProps> = ({
           callDelay={callDelay}
           isCountdownActive={isCountdownActive}
           countdownTime={countdownTime}
-          onToggleTimezone={showAutocomplete ? () => {} : onToggleTimezone}
-          onToggleCallFilter={showAutocomplete ? () => {} : onToggleCallFilter}
-          onToggleShuffle={showAutocomplete ? () => {} : onToggleShuffle}
-          onToggleAutoCall={showAutocomplete ? () => {} : onToggleAutoCall}
-          onToggleCallDelay={showAutocomplete ? () => {} : onToggleCallDelay}
-          onResetCallDelay={showAutocomplete ? () => {} : onResetCallDelay}
-          onResetAllCalls={showAutocomplete ? () => {} : onResetAllCalls}
+          onToggleTimezone={onToggleTimezone}
+          onToggleCallFilter={onToggleCallFilter}
+          onToggleShuffle={onToggleShuffle}
+          onToggleAutoCall={onToggleAutoCall}
+          onToggleCallDelay={onToggleCallDelay}
+          onResetCallDelay={onResetCallDelay}
+          onResetAllCalls={onResetAllCalls}
           getDelayDisplayType={getDelayDisplayType}
         />
 
@@ -113,10 +113,10 @@ const MainContent: React.FC<MainContentProps> = ({
         {/* Navigation Controls */}
         <div className="pt-3 sm:pt-4">
           <NavigationControls
-            onPrevious={showAutocomplete ? () => {} : onPrevious}
-            onNext={showAutocomplete ? () => {} : onNext}
-            canGoPrevious={!showAutocomplete && canGoPrevious}
-            canGoNext={!showAutocomplete && canGoNext}
+            onPrevious={onPrevious}
+            onNext={onNext}
+            canGoPrevious={canGoPrevious}
+            canGoNext={canGoNext}
           />
         </div>
       </div>

@@ -324,17 +324,19 @@ const CSVFileSelector: React.FC<CSVFileSelectorProps> = ({
                 }`}
                 style={{ outline: 'none', border: 'none' }}
               >
-                <div className="flex items-center justify-between w-full">
+                <div className="flex items-baseline justify-between w-full">
                   <div className="flex flex-col items-start flex-1 min-w-0 pr-2">
-                    <span className="font-normal truncate w-full text-base">{file.name}</span>
+                    <div className="flex items-baseline">
+                      <span className="font-normal truncate text-base">{file.name}</span>
+                      {file.id === currentCSVId && (
+                        <div className="w-2 h-2 bg-foreground rounded-full ml-2 flex-shrink-0"></div>
+                      )}
+                    </div>
                     <span className="text-sm text-muted-foreground mt-0.5">
                       {file.totalLeads} leads
                     </span>
                   </div>
-                  <div className="flex items-center">
-                    {file.id === currentCSVId && (
-                      <div className="w-2 h-2 bg-foreground rounded-full mr-2"></div>
-                    )}
+                  <div className="flex items-baseline">
                     <button
                       onClick={(e) => handleDeleteCSV(file.id, e)}
                       className="p-1 rounded-full transition-colors duration-150 flex-shrink-0 focus:outline-none touch-manipulation min-w-[28px] min-h-[28px] flex items-center justify-center hover:bg-muted/30 border-0 focus:border-0 focus:ring-0"

@@ -49,6 +49,47 @@ const LeadCard: React.FC<LeadCardProps> = ({
   const [selectedTextTemplateId, setSelectedTextTemplateId] = useState<string>('');
   const [selectedPhone, setSelectedPhone] = useState(formatPhoneNumber(lead.phone));
 
+  // Animation state management
+  const [isAnimating, setIsAnimating] = useState(false);
+  const [animationPhase, setAnimationPhase] = useState<'visible' | 'fading-out' | 'hidden' | 'fading-in'>('visible');
+  const [displayLead, setDisplayLead] = useState(lead);
+
+  // Handle lead changes with smooth animations
+  useEffect(() => {
+    if (displayLead.name !== lead.name || displayLead.phone !== lead.phone) {
+      // Start fade out animation
+      setIsAnimating(true);
+      setAnimationPhase('fading-out');
+      
+      // After fade out, update content and fade in
+      const fadeOutTimer = setTimeout(() => {
+        setDisplayLead(lead);
+        setAnimationPhase('hidden');
+        
+        // Force a reflow to ensure the hidden state is applied
+        requestAnimationFrame(() => {
+          setAnimationPhase('fading-in');
+          
+          // After fade in, complete the animation
+          const fadeInTimer = setTimeout(() => {
+            setAnimationPhase('visible');
+            setIsAnimating(false);
+          }, 112); // Match the CSS animation duration (25% faster)
+          
+          return () => clearTimeout(fadeInTimer);
+        });
+      }, 112); // Match the CSS animation duration (25% faster)
+      
+      return () => clearTimeout(fadeOutTimer);
+    }
+  }, [lead, displayLead]);
+
+  // Reset selectedPhone to primary phone when lead changes
+  useEffect(() => {
+    const primaryPhone = formatPhoneNumber(lead.phone);
+    setSelectedPhone(primaryPhone);
+  }, [lead.phone, lead.name]);
+
   // Load templates and selections from localStorage
   useEffect(() => {
     // Load templates from SettingsMenu format
@@ -101,12 +142,6 @@ const LeadCard: React.FC<LeadCardProps> = ({
       setSelectedTextTemplateId(savedSelectedTextTemplate);
     }
   }, []);
-
-  // Reset selectedPhone to primary phone when lead changes
-  useEffect(() => {
-    const primaryPhone = formatPhoneNumber(lead.phone);
-    setSelectedPhone(primaryPhone);
-  }, [lead.phone, lead.name]);
 
   // Listen for template changes from SettingsMenu
   useEffect(() => {
@@ -171,15 +206,15 @@ const LeadCard: React.FC<LeadCardProps> = ({
   }
 
   // Use stable key based on lead data instead of changing cardKey
-  const leadKey = `${lead.name}-${lead.phone}`;
+  const leadKey = `${displayLead.name}-${displayLead.phone}`;
 
   // Email is now guaranteed to be a string or undefined from the importer
-  const emailValue = lead.email?.trim() ?? '';
+  const emailValue = displayLead.email?.trim() ?? '';
   const hasValidEmail = emailValue && emailValue.includes('@');
 
   // Completely rewrite phone parsing - handle format: \"773) 643-4644 (773) 643-9346\"
-  const additionalPhones = lead.additionalPhones ? (() => {
-    const rawString = lead.additionalPhones.trim();
+  const additionalPhones = displayLead.additionalPhones ? (() => {
+    const rawString = displayLead.additionalPhones.trim();
 
     // First, normalize the string by replacing various separators with spaces
     const normalizedString = rawString
@@ -201,27 +236,20 @@ const LeadCard: React.FC<LeadCardProps> = ({
       const formattedPhone = `(${match[1]}) ${match[2]}-${match[3]}`;
       foundPhones.push(formattedPhone);
     }
-
-    // Remove the primary phone if it appears in the additional phones
-    const primaryPhoneFormatted = formatPhoneNumber(lead.phone);
-    const filteredPhones = foundPhones.filter(phone => phone !== primaryPhoneFormatted);
-
-    return filteredPhones;
+    
+    return foundPhones;
   })() : [];
+
   const hasAdditionalPhones = additionalPhones.length > 0;
+  
+  // Create array of all phones with primary phone first
+  const allPhones = [
+    { phone: formatPhoneNumber(displayLead.phone), isPrimary: true },
+    ...additionalPhones.map(phone => ({ phone, isPrimary: false }))
+  ];
 
-  // All available phones (primary + additional)
-  const allPhones = [{
-    phone: formatPhoneNumber(lead.phone),
-    isPrimary: true
-  }, ...additionalPhones.map(phone => ({
-    phone,
-    isPrimary: false
-  }))];
-
-  // Calculate state from currently selected phone number
-  const cleanSelectedPhone = selectedPhone.replace(/\D/g, '');
-  const leadState = getStateFromAreaCode(cleanSelectedPhone);
+  // Get state from area code for display
+  const leadState = getStateFromAreaCode(displayLead.phone);
 
   // Handle phone selection
   const handlePhoneSelect = (phone: string) => {
@@ -246,19 +274,19 @@ const LeadCard: React.FC<LeadCardProps> = ({
     
     if (templateToUse) {
       // Parse name into first and last name
-      const nameParts = lead.name.trim().split(' ');
+      const nameParts = displayLead.name.trim().split(' ');
       const firstName = nameParts[0] || '';
       const lastName = nameParts.slice(1).join(' ') || '';
       
       // Replace placeholders in template
       const subject = templateToUse.subject
-        .replace('{name}', lead.name)
-        .replace('{company}', lead.company || '')
+        .replace('{name}', displayLead.name)
+        .replace('{company}', displayLead.company || '')
         .replace('{{first_name}}', firstName)
         .replace('{{last_name}}', lastName);
       const body = templateToUse.body
-        .replace('{name}', lead.name)
-        .replace('{company}', lead.company || '')
+        .replace('{name}', displayLead.name)
+        .replace('{company}', displayLead.company || '')
         .replace('{phone}', selectedPhone)
         .replace('{{first_name}}', firstName)
         .replace('{{last_name}}', lastName);
@@ -278,13 +306,13 @@ const LeadCard: React.FC<LeadCardProps> = ({
     
     if (templateToUse) {
       // Parse name into first and last name
-      const nameParts = lead.name.trim().split(' ');
+      const nameParts = displayLead.name.trim().split(' ');
       const firstName = nameParts[0] || '';
       const lastName = nameParts.slice(1).join(' ') || '';
       
       const message = templateToUse.message
-        .replace('{name}', lead.name)
-        .replace('{company}', lead.company || '')
+        .replace('{name}', displayLead.name)
+        .replace('{company}', displayLead.company || '')
         .replace('{{first_name}}', firstName)
         .replace('{{last_name}}', lastName);
         
@@ -306,7 +334,7 @@ const LeadCard: React.FC<LeadCardProps> = ({
 
   return (
     <Card className="shadow-2xl border-border/30 rounded-3xl bg-background/60 backdrop-blur-xl min-h-[400px] max-h-[500px] sm:min-h-[420px] sm:max-h-[550px] flex flex-col mb-4" style={{ backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)' }}>
-      <CardContent className="p-4 sm:p-6 space-y-5 sm:space-y-6 flex-1 flex flex-col">
+      <CardContent className="p-3 sm:p-5 space-y-4 sm:space-y-5 flex-1 flex flex-col">
         {/* Top row with lead count and file name */}
         <div className="flex items-center justify-center">
           <p className="text-sm text-muted-foreground opacity-40">
@@ -315,40 +343,62 @@ const LeadCard: React.FC<LeadCardProps> = ({
         </div>
 
         {/* Lead info - Main content area with animation */}
-        <div key={leadKey} className="text-center space-y-5 sm:space-y-6 flex-1 flex flex-col justify-center animate-fade-in">
+        <div 
+          key={`${displayLead.name}-${displayLead.phone}`} 
+          className={`text-center space-y-4 sm:space-y-5 flex-1 flex flex-col justify-center ${
+            animationPhase === 'fading-out' ? 'animate-lead-content-fade-out' :
+            animationPhase === 'fading-in' ? 'animate-lead-content-fade-in' :
+            animationPhase === 'hidden' ? 'lead-content-hidden' :
+            'lead-content-visible'
+          }`}
+        >
           {/* State and timezone - always show, with fallback */}
           <p className="text-sm text-muted-foreground">
             {leadState || 'Unknown State'}
           </p>
           
           {/* Group 1: Name and Company */}
-          <div className="space-y-2">
+          <div className="space-y-1">
             <div className="flex items-center justify-center px-2">
               <h2 className="text-2xl sm:text-3xl font-bold text-center break-words leading-tight bg-gradient-to-r from-foreground to-foreground/95 bg-clip-text text-transparent dark:bg-none dark:text-foreground">
-                {lead.name}
+                {displayLead.name}
               </h2>
             </div>
             
-            {lead.company && (
+            {displayLead.company && (
               <div className="flex items-center justify-center px-2">
                 <p className="text-base sm:text-lg font-medium text-center break-words leading-relaxed bg-gradient-to-r from-muted-foreground to-muted-foreground/90 bg-clip-text text-transparent dark:bg-none dark:text-muted-foreground">
-                  {lead.company}
+                  {displayLead.company}
                 </p>
               </div>
             )}
           </div>
           
           {/* Group 2: Phone and Email */}
-          <div className="space-y-3">
+          <div className="space-y-2">
             {/* Phone number with icon positioned to the left */}
             <div className="flex items-center justify-center">
-              <div className="relative">
-                <Phone className="absolute -left-6 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <div className="flex items-center gap-2">
+                <Phone 
+                  className={`h-4 w-4 text-muted-foreground flex-shrink-0 ${
+                    animationPhase === 'fading-out' ? 'animate-lead-icon-fade-out' :
+                    animationPhase === 'fading-in' ? 'animate-lead-icon-fade-in' :
+                    animationPhase === 'hidden' ? 'lead-icon-hidden' :
+                    'lead-icon-visible'
+                  }`}
+                />
                 {hasAdditionalPhones ? (
                   <DropdownMenu>
                     <DropdownMenuTrigger className="flex items-center gap-1 cursor-pointer hover:text-foreground transition-colors">
                       <p className="text-base sm:text-lg bg-gradient-to-r from-muted-foreground to-muted-foreground/95 bg-clip-text text-transparent dark:bg-none dark:text-muted-foreground">{selectedPhone}</p>
-                      <ChevronDown className="h-4 w-4 text-muted-foreground" />
+                      <ChevronDown 
+                        className={`h-4 w-4 text-muted-foreground ${
+                          animationPhase === 'fading-out' ? 'animate-lead-arrow-fade-out' :
+                          animationPhase === 'fading-in' ? 'animate-lead-arrow-fade-in' :
+                          animationPhase === 'hidden' ? 'lead-arrow-hidden' :
+                          'lead-arrow-visible'
+                        }`}
+                      />
                     </DropdownMenuTrigger>
                     <DropdownMenuContent 
                       side="bottom" 
@@ -368,7 +418,7 @@ const LeadCard: React.FC<LeadCardProps> = ({
                                 {phoneData.phone}
                               </span>
                               {selectedPhone === phoneData.phone && !phoneData.isPrimary && (
-                                <div className="w-2 h-2 bg-foreground rounded-full ml-2"></div>
+                                <div className="w-2 h-2 bg-foreground rounded-full ml-2 flex-shrink-0 self-center"></div>
                               )}
                             </div>
                           </DropdownMenuItem>
@@ -385,8 +435,15 @@ const LeadCard: React.FC<LeadCardProps> = ({
             {/* Email with icon positioned to the left */}
             {hasValidEmail && (
               <div className="flex items-center justify-center">
-                <div className="relative">
-                  <Mail className="absolute -left-6 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <div className="flex items-center gap-2">
+                  <Mail 
+                    className={`h-4 w-4 text-muted-foreground flex-shrink-0 ${
+                      animationPhase === 'fading-out' ? 'animate-lead-icon-fade-out' :
+                      animationPhase === 'fading-in' ? 'animate-lead-icon-fade-in' :
+                      animationPhase === 'hidden' ? 'lead-icon-hidden' :
+                      'lead-icon-visible'
+                    }`}
+                  />
                   <button
                     onClick={() => handleEmailClick()}
                     className="text-sm text-muted-foreground text-center break-words hover:text-muted-foreground/80 hover:underline transition-colors duration-200 cursor-pointer"
@@ -401,13 +458,13 @@ const LeadCard: React.FC<LeadCardProps> = ({
         </div>
 
         {/* Group 3: Last Called and Action Buttons */}
-        <div className="space-y-4">
+        <div className="space-y-3">
           {/* Last called section above buttons */}
-          {lead.lastCalled && (
+          {displayLead.lastCalled && (
             <div className="flex items-center justify-center">
               <div className="flex items-center">
                 <p className="text-sm text-muted-foreground transition-opacity duration-300 ease-in-out opacity-100 whitespace-nowrap my-0 py-0">
-                  Last called: {lead.lastCalled}
+                  Last called: {displayLead.lastCalled}
                 </p>
                 <button
                   onClick={onResetCallCount}
@@ -421,7 +478,7 @@ const LeadCard: React.FC<LeadCardProps> = ({
           )}
           
           {/* Action Buttons - Call and Text */}
-          <div className="flex gap-24 justify-center">
+          <div className="flex justify-center items-center space-x-16 sm:space-x-20">
             <Button 
               onClick={() => handleTextClick()} 
               size="lg" 
