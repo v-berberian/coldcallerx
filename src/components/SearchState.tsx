@@ -46,8 +46,9 @@ export const useSearchState = ({ leads, getBaseLeads, leadsData, timezoneFilter,
 
   // Pre-initialize search results with all leads for instant display
   const initialSearchResults = useMemo(() => {
-    return baseLeads.slice(0, INITIAL_RESULTS);
-  }, [baseLeads]);
+    // Use leadsData (all leads) instead of baseLeads (filtered leads) for search
+    return leadsData.slice(0, INITIAL_RESULTS);
+  }, [leadsData]);
 
   // Ultra-optimized search function with incremental loading
   const performSearch = useCallback((query: string, leads: Lead[]) => {
@@ -82,10 +83,12 @@ export const useSearchState = ({ leads, getBaseLeads, leadsData, timezoneFilter,
   // Memoized search results - get all matching results
   const allSearchResults = useMemo(() => {
     if (!debouncedSearchQuery.trim()) {
-      return baseLeads; // Show all leads when no search query
+      // Use leadsData (all leads) instead of baseLeads (filtered leads) for search
+      return leadsData; // Show all leads when no search query
     }
-    return performSearch(debouncedSearchQuery, baseLeads);
-  }, [debouncedSearchQuery, baseLeads, performSearch]);
+    // Use leadsData (all leads) instead of baseLeads (filtered leads) for search
+    return performSearch(debouncedSearchQuery, leadsData);
+  }, [debouncedSearchQuery, leadsData, performSearch]);
 
   // Get only the loaded portion of results
   const visibleSearchResults = useMemo(() => {
@@ -135,13 +138,10 @@ export const useSearchState = ({ leads, getBaseLeads, leadsData, timezoneFilter,
   }, [searchResults.length, initialSearchResults]);
 
   const handleSearchBlur = useCallback(() => {
-    // Keep autocomplete open if there's an active search query, even with no results
-    // This allows users to see "No leads found" message
-    if (searchResults.length === 0 && !debouncedSearchQuery.trim()) {
-      setTimeout(() => setShowAutocomplete(false), 20);
-    }
-    // Don't reset search results when blurring - keep current results
-  }, [searchResults.length, debouncedSearchQuery]);
+    // Don't close autocomplete on blur - let the user control when to close it
+    // This prevents accidental closing when clicking buttons or other UI elements
+    // The autocomplete will only close when explicitly requested (e.g., clicking outside, pressing escape)
+  }, []);
 
   const closeAutocomplete = useCallback(() => {
     setShowAutocomplete(false);

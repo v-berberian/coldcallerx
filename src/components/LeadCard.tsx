@@ -474,13 +474,16 @@ const LeadCard: React.FC<LeadCardProps> = ({
                 `;
               }}
               onTouchEnd={(e) => {
-                e.currentTarget.style.transform = 'translateY(0)';
-                e.currentTarget.style.boxShadow = `
-                  8px 8px 16px rgba(0, 0, 0, 0.2),
-                  -8px -8px 16px rgba(255, 255, 255, 0.1),
-                  inset 2px 2px 4px rgba(255, 255, 255, 0.2),
-                  inset -2px -2px 4px rgba(0, 0, 0, 0.1)
-                `;
+                // Ensure minimum animation duration for visual feedback
+                setTimeout(() => {
+                  e.currentTarget.style.transform = 'translateY(0)';
+                  e.currentTarget.style.boxShadow = `
+                    8px 8px 16px rgba(0, 0, 0, 0.2),
+                    -8px -8px 16px rgba(255, 255, 255, 0.1),
+                    inset 2px 2px 4px rgba(255, 255, 255, 0.2),
+                    inset -2px -2px 4px rgba(0, 0, 0, 0.1)
+                  `;
+                }, 150); // Minimum 150ms press animation
               }}
               onFocus={(e) => {
                 e.currentTarget.style.transform = 'translateY(0)';
@@ -555,13 +558,16 @@ const LeadCard: React.FC<LeadCardProps> = ({
                 `;
               }}
               onTouchEnd={(e) => {
-                e.currentTarget.style.transform = 'translateY(0)';
-                e.currentTarget.style.boxShadow = `
-                  8px 8px 16px rgba(0, 0, 0, 0.2),
-                  -8px -8px 16px rgba(255, 255, 255, 0.1),
-                  inset 2px 2px 4px rgba(255, 255, 255, 0.2),
-                  inset -2px -2px 4px rgba(0, 0, 0, 0.1)
-                `;
+                // Ensure minimum animation duration for visual feedback
+                setTimeout(() => {
+                  e.currentTarget.style.transform = 'translateY(0)';
+                  e.currentTarget.style.boxShadow = `
+                    8px 8px 16px rgba(0, 0, 0, 0.2),
+                    -8px -8px 16px rgba(255, 255, 255, 0.1),
+                    inset 2px 2px 4px rgba(255, 255, 255, 0.2),
+                    inset -2px -2px 4px rgba(0, 0, 0, 0.1)
+                  `;
+                }, 150); // Minimum 150ms press animation
               }}
               onFocus={(e) => {
                 e.currentTarget.style.transform = 'translateY(0)';

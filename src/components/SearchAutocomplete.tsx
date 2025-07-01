@@ -38,6 +38,16 @@ const SearchAutocomplete: React.FC<SearchAutocompleteProps> = ({
   onLeadSelect,
   leadsData = []
 }) => {
+  console.log('SearchAutocomplete: Component rendered with props:', {
+    isVisible,
+    isFullscreen,
+    searchResultsLength: searchResults.length,
+    allSearchResultsLength: allSearchResults.length,
+    leadsDataLength: leadsData.length,
+    hasOnLeadSelect: !!onLeadSelect,
+    hasLoadMoreResults: !!loadMoreResults
+  });
+  
   const [isAnimating, setIsAnimating] = useState(false);
   const [shouldRender, setShouldRender] = useState(false);
 
@@ -51,12 +61,17 @@ const SearchAutocomplete: React.FC<SearchAutocompleteProps> = ({
 
   // Render individual lead item for virtualized list
   const renderLeadItem = useCallback(({ index, style }: { index: number; style: React.CSSProperties }) => {
+    console.log('SearchAutocomplete: renderLeadItem called for index:', index);
+    
     // Use allSearchResults in fullscreen mode, searchResults in normal mode
     const dataSource = isFullscreen ? allSearchResults : searchResults;
     const lead = dataSource[index];
     
+    console.log('SearchAutocomplete: dataSource length:', dataSource.length, 'lead at index:', index, lead ? lead.name : 'undefined');
+    
     // If the item hasn't been loaded yet, show a loading placeholder
     if (!lead) {
+      console.log('SearchAutocomplete: No lead found at index:', index);
       return (
         <div style={style} key={`loading-${index}`}>
           <div className="w-full px-4 py-4 text-left border-b border-border/10 last:border-b-0">
@@ -76,18 +91,41 @@ const SearchAutocomplete: React.FC<SearchAutocompleteProps> = ({
     }
 
     const handleLeadClick = () => {
+      console.log('SearchAutocomplete: handleLeadClick called for lead:', lead.name, lead.phone);
+      console.log('SearchAutocomplete: onLeadSelect function exists:', !!onLeadSelect);
+      console.log('SearchAutocomplete: onCloseAutocomplete function exists:', !!onCloseAutocomplete);
+      
       onLeadSelect?.(lead);
+      console.log('SearchAutocomplete: onLeadSelect called');
+      
       // Explicitly close the autocomplete when a lead is selected
       if (onCloseAutocomplete) {
+        console.log('SearchAutocomplete: calling onCloseAutocomplete');
         onCloseAutocomplete();
       }
     };
 
+    const handleTouchStart = (e: React.TouchEvent) => {
+      console.log('SearchAutocomplete: Touch start on lead:', lead.name);
+      e.preventDefault();
+    };
+
+    const handleTouchEnd = (e: React.TouchEvent) => {
+      console.log('SearchAutocomplete: Touch end on lead:', lead.name);
+      e.preventDefault();
+      handleLeadClick();
+    };
+
+    console.log('SearchAutocomplete: Rendering lead item for:', lead.name);
+    
     return (
       <div style={style} key={`${lead.name}-${lead.phone}-${index}`}>
         <button
           onClick={handleLeadClick}
-          className="w-full px-4 py-4 text-left border-b border-border/10 last:border-b-0 transition-colors duration-75 cursor-default hover:bg-muted/50"
+          onTouchStart={handleTouchStart}
+          onTouchEnd={handleTouchEnd}
+          className="w-full px-4 py-4 text-left border-b border-border/10 last:border-b-0 transition-colors duration-75 cursor-pointer hover:bg-muted/50 active:bg-muted/70 touch-manipulation"
+          style={{ WebkitTapHighlightColor: 'transparent' }}
         >
           <div className="flex justify-between items-start">
             <div className="flex-1 min-w-0 mr-3">
@@ -202,13 +240,18 @@ const SearchAutocomplete: React.FC<SearchAutocompleteProps> = ({
         const searchArea = target.closest('.search-area');
         const autocompleteArea = target.closest('.search-autocomplete-container');
         
+        console.log('Document click - target:', target, 'searchArea:', searchArea, 'autocompleteArea:', autocompleteArea);
+        
         // If clicking outside both search area and autocomplete, close it
         if (!searchArea && !autocompleteArea) {
+          console.log('Closing autocomplete - clicked outside');
           if (onCloseAutocomplete) {
             onCloseAutocomplete();
           } else if (onAnimationComplete) {
             onAnimationComplete();
           }
+        } else {
+          console.log('Not closing autocomplete - clicked inside search area or autocomplete');
         }
       };
 
@@ -277,7 +320,7 @@ const SearchAutocomplete: React.FC<SearchAutocompleteProps> = ({
       // Add event listeners for both click and touch
       document.body.addEventListener('click', handleDocumentClick);
       document.body.addEventListener('touchstart', handleDocumentTouch, { passive: false });
-      document.body.addEventListener('touchend', handleDocumentTouchEnd, { passive: true });
+      document.body.addEventListener('touchend', handleDocumentTouchEnd);
       document.addEventListener('keydown', handleKeyDown);
 
       return () => {
@@ -297,6 +340,7 @@ const SearchAutocomplete: React.FC<SearchAutocompleteProps> = ({
 
   // If we have loadMoreResults function, use infinite loader (including for empty results)
   if (loadMoreResults) {
+    console.log('SearchAutocomplete: Using virtualized rendering with loadMoreResults');
     // Calculate height based on fullscreen state and number of results
     let listHeight: number;
     let containerStyle: React.CSSProperties = {};
@@ -407,6 +451,7 @@ const SearchAutocomplete: React.FC<SearchAutocompleteProps> = ({
   }
 
   // Fallback to original rendering for non-virtualized content
+  console.log('SearchAutocomplete: Using fallback rendering (non-virtualized)');
   const contactsToShow = Math.min(3, searchResults.length);
   const heightBuffer = 4; // Small buffer to ensure last item is fully visible
   const fallbackHeight = Math.max(searchResults.length * itemHeight + heightBuffer, itemHeight); // Dynamic height based on actual results
@@ -428,20 +473,42 @@ const SearchAutocomplete: React.FC<SearchAutocompleteProps> = ({
         </div>
       ) : (
         searchResults.map((lead, index) => {
+          console.log('SearchAutocomplete: FALLBACK mapping lead:', lead.name, 'at index:', index);
+          
           const handleLeadClick = () => {
+            console.log('SearchAutocomplete: FALLBACK handleLeadClick called for lead:', lead.name, lead.phone);
+            console.log('SearchAutocomplete: FALLBACK onLeadSelect function exists:', !!onLeadSelect);
+            console.log('SearchAutocomplete: FALLBACK onCloseAutocomplete function exists:', !!onCloseAutocomplete);
+            
             onLeadSelect?.(lead);
+            console.log('SearchAutocomplete: FALLBACK onLeadSelect called');
+            
             // Explicitly close the autocomplete when a lead is selected
             if (onCloseAutocomplete) {
+              console.log('SearchAutocomplete: FALLBACK calling onCloseAutocomplete');
               onCloseAutocomplete();
             }
+          };
+
+          const handleTouchStart = (e: React.TouchEvent) => {
+            console.log('SearchAutocomplete: FALLBACK Touch start on lead:', lead.name);
+            e.preventDefault();
+          };
+
+          const handleTouchEnd = (e: React.TouchEvent) => {
+            console.log('SearchAutocomplete: FALLBACK Touch end on lead:', lead.name);
+            e.preventDefault();
+            handleLeadClick();
           };
 
           return (
             <button
               key={`${lead.name}-${lead.phone}-${index}`}
               onClick={handleLeadClick}
-              className="w-full px-4 py-4 text-left border-b border-border/10 last:border-b-0 transition-colors duration-75 cursor-default hover:bg-muted/50"
-              style={{ height: `${itemHeight}px` }} // Ensure consistent height
+              onTouchStart={handleTouchStart}
+              onTouchEnd={handleTouchEnd}
+              className="w-full px-4 py-4 text-left border-b border-border/10 last:border-b-0 transition-colors duration-75 cursor-pointer hover:bg-muted/50 active:bg-muted/70 touch-manipulation"
+              style={{ WebkitTapHighlightColor: 'transparent' }}
             >
               <div className="flex justify-between items-start">
                 <div className="flex-1 min-w-0 mr-3">

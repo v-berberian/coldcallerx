@@ -35,13 +35,16 @@ export const useNavigationState = () => {
   }, []);
 
   const updateNavigation = useCallback((index: number) => {
+    console.log('useNavigationState: updateNavigation called with index:', index, 'currentIndex:', currentIndex);
     setHistoryIndex(prevHistory => {
       return currentIndex;
     });
     setCurrentIndex(index);
+    console.log('useNavigationState: currentIndex updated to:', index);
   }, [currentIndex]);
 
   const updateNavigationWithHistory = useCallback((index: number, addToHistory: boolean = true) => {
+    console.log('useNavigationState: updateNavigationWithHistory called with index:', index, 'addToHistory:', addToHistory, 'currentIndex:', currentIndex);
     if (addToHistory) {
       setNavigationHistory(prevHistory => {
         // Add current index to history if it's different from the last item
@@ -57,6 +60,7 @@ export const useNavigationState = () => {
       return currentIndex;
     });
     setCurrentIndex(index);
+    console.log('useNavigationState: currentIndex updated to:', index);
   }, [currentIndex]);
 
   const resetNavigation = useCallback((index: number) => {
