@@ -38,22 +38,18 @@ const FilterButtons: React.FC<FilterButtonsProps> = ({
 }) => {
   const [isResetAnimating, setIsResetAnimating] = useState(false);
 
-  const handleFilterClick = (handler: () => void, filterName: string) => (e: React.MouseEvent) => {
+  const handleFilterClick = (handler: () => void, filterName: string) => (e: React.MouseEvent | React.TouchEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    
-    console.log(`Filter button clicked: ${filterName}`);
     
     // Call the handler immediately
     handler();
   };
 
-  const handleResetClick = (e: React.MouseEvent) => {
+  const handleResetClick = (e: React.MouseEvent | React.TouchEvent) => {
     e.preventDefault();
     e.stopPropagation();
     e.nativeEvent.stopImmediatePropagation();
-    console.log('Reset button clicked, current callFilter:', callFilter);
-    console.log('Reset button event:', e);
     setIsResetAnimating(true);
     
     // Add a small delay to ensure event handling is complete
@@ -104,7 +100,8 @@ const FilterButtons: React.FC<FilterButtonsProps> = ({
             }`} 
             style={{ 
               WebkitTapHighlightColor: 'transparent',
-              transition: 'all 100ms cubic-bezier(0.25, 0.46, 0.45, 0.94)'
+              transition: 'all 100ms cubic-bezier(0.25, 0.46, 0.45, 0.94)',
+              touchAction: 'manipulation'
             }}
           >
             {/* Animated background for active state */}
@@ -147,7 +144,8 @@ const FilterButtons: React.FC<FilterButtonsProps> = ({
             }`} 
             style={{ 
               WebkitTapHighlightColor: 'transparent',
-              transition: 'all 100ms cubic-bezier(0.25, 0.46, 0.45, 0.94)'
+              transition: 'all 100ms cubic-bezier(0.25, 0.46, 0.45, 0.94)',
+              touchAction: 'manipulation'
             }}
           >
             {/* Animated background for active state */}
@@ -184,9 +182,11 @@ const FilterButtons: React.FC<FilterButtonsProps> = ({
               onClick={handleResetClick} 
               className="group absolute right-1 top-1/2 transform -translate-y-1/2 text-purple-600 dark:text-purple-400 text-xs font-medium px-3 py-2 rounded-full w-[44px] h-[32px] flex items-center justify-center select-none touch-manipulation transition-all duration-100 ease-out bg-purple-100 dark:bg-purple-900/20 shadow-md shadow-purple-500/20 active:scale-95 z-30" 
               title="Reset all call counts"
-              style={{ WebkitTapHighlightColor: 'transparent' }}
+              style={{ 
+                WebkitTapHighlightColor: 'transparent',
+                touchAction: 'manipulation'
+              }}
               onMouseDown={(e) => e.stopPropagation()}
-              onTouchStart={(e) => e.stopPropagation()}
             >
               <RotateCcw size={12} className={`w-3 h-3 flex-shrink-0 text-purple-600 dark:text-purple-400 transition-transform duration-100 ease-in-out ${isResetAnimating ? 'rotate-180' : 'rotate-0'}`} />
             </button>
@@ -206,7 +206,8 @@ const FilterButtons: React.FC<FilterButtonsProps> = ({
             }`} 
             style={{ 
               WebkitTapHighlightColor: 'transparent',
-              transition: 'all 100ms cubic-bezier(0.25, 0.46, 0.45, 0.94)'
+              transition: 'all 100ms cubic-bezier(0.25, 0.46, 0.45, 0.94)',
+              touchAction: 'manipulation'
             }}
           >
             {/* Animated background for active state */}
@@ -249,7 +250,8 @@ const FilterButtons: React.FC<FilterButtonsProps> = ({
             }`} 
             style={{ 
               WebkitTapHighlightColor: 'transparent',
-              transition: 'all 100ms cubic-bezier(0.25, 0.46, 0.45, 0.94)'
+              transition: 'all 100ms cubic-bezier(0.25, 0.46, 0.45, 0.94)',
+              touchAction: 'manipulation'
             }}
           >
             {/* Animated background for active state */}
@@ -284,11 +286,13 @@ const FilterButtons: React.FC<FilterButtonsProps> = ({
           {autoCall && (
             <button 
               onClick={() => {
-                console.log('Auto call delay button clicked');
                 onToggleCallDelay();
               }}
               className="group absolute right-1 top-1/2 transform -translate-y-1/2 text-green-600 dark:text-green-400 text-xs font-medium px-3 py-2 rounded-full w-[44px] h-[32px] flex items-center justify-center select-none touch-manipulation transition-all duration-100 ease-out bg-green-100 dark:bg-green-900/20 shadow-md shadow-green-500/20 active:scale-95 z-20"
-              style={{ WebkitTapHighlightColor: 'transparent' }}
+              style={{ 
+                WebkitTapHighlightColor: 'transparent',
+                touchAction: 'manipulation'
+              }}
               title="Click to change delay mode"
             >
               <div className="w-full h-full flex items-center justify-center">
