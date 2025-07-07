@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from '@/components/ui/dropdown-menu';
@@ -6,6 +6,7 @@ import { X, Phone, Mail, ChevronDown, Check, MessageSquare, Upload, Settings } f
 import { formatPhoneNumber } from '../utils/phoneUtils';
 import { getStateFromAreaCode } from '../utils/timezoneUtils';
 import { Lead } from '@/types/lead';
+import { AnimatePresence, motion } from 'framer-motion';
 
 interface EmailTemplate {
   id: string;
@@ -25,11 +26,15 @@ interface LeadCardProps {
   currentIndex: number;
   totalCount: number;
   fileName: string;
+  currentCSVId?: string | null;
   onCall: (phone: string) => void;
   onResetCallCount: () => void;
   onDeleteLead?: (lead: Lead) => void;
+  onCSVSelect?: (csvId: string, leads: Lead[], fileName: string) => void;
   noLeadsMessage?: string;
+  refreshTrigger?: number;
   onImportNew?: () => void;
+  navigationDirection?: 'forward' | 'backward';
 }
 
 const LeadCard: React.FC<LeadCardProps> = ({
@@ -37,52 +42,21 @@ const LeadCard: React.FC<LeadCardProps> = ({
   currentIndex,
   totalCount,
   fileName,
+  currentCSVId,
   onCall,
   onResetCallCount,
   onDeleteLead,
+  onCSVSelect,
   noLeadsMessage,
-  onImportNew
+  refreshTrigger,
+  onImportNew,
+  navigationDirection = 'forward'
 }) => {
   const [emailTemplates, setEmailTemplates] = useState<EmailTemplate[]>([]);
   const [textTemplates, setTextTemplates] = useState<TextTemplate[]>([]);
   const [selectedEmailTemplateId, setSelectedEmailTemplateId] = useState<string>('');
   const [selectedTextTemplateId, setSelectedTextTemplateId] = useState<string>('');
   const [selectedPhone, setSelectedPhone] = useState(formatPhoneNumber(lead.phone));
-
-  // Animation state management
-  const [isAnimating, setIsAnimating] = useState(false);
-  const [animationPhase, setAnimationPhase] = useState<'visible' | 'fading-out' | 'hidden' | 'fading-in'>('visible');
-  const [displayLead, setDisplayLead] = useState(lead);
-
-  // Handle lead changes with smooth animations
-  useEffect(() => {
-    if (displayLead.name !== lead.name || displayLead.phone !== lead.phone) {
-      // Start fade out animation
-      setIsAnimating(true);
-      setAnimationPhase('fading-out');
-      
-      // After fade out, update content and fade in
-      const fadeOutTimer = setTimeout(() => {
-        setDisplayLead(lead);
-        setAnimationPhase('hidden');
-        
-        // Force a reflow to ensure the hidden state is applied
-        requestAnimationFrame(() => {
-          setAnimationPhase('fading-in');
-          
-          // After fade in, complete the animation
-          const fadeInTimer = setTimeout(() => {
-            setAnimationPhase('visible');
-            setIsAnimating(false);
-          }, 112); // Match the CSS animation duration (25% faster)
-          
-          return () => clearTimeout(fadeInTimer);
-        });
-      }, 112); // Match the CSS animation duration (25% faster)
-      
-      return () => clearTimeout(fadeOutTimer);
-    }
-  }, [lead, displayLead]);
 
   // Reset selectedPhone to primary phone when lead changes
   useEffect(() => {
@@ -205,16 +179,13 @@ const LeadCard: React.FC<LeadCardProps> = ({
     );
   }
 
-  // Use stable key based on lead data instead of changing cardKey
-  const leadKey = `${displayLead.name}-${displayLead.phone}`;
-
   // Email is now guaranteed to be a string or undefined from the importer
-  const emailValue = displayLead.email?.trim() ?? '';
+  const emailValue = lead.email?.trim() ?? '';
   const hasValidEmail = emailValue && emailValue.includes('@');
 
   // Completely rewrite phone parsing - handle format: \"773) 643-4644 (773) 643-9346\"
-  const additionalPhones = displayLead.additionalPhones ? (() => {
-    const rawString = displayLead.additionalPhones.trim();
+  const additionalPhones = lead.additionalPhones ? (() => {
+    const rawString = lead.additionalPhones.trim();
 
     // First, normalize the string by replacing various separators with spaces
     const normalizedString = rawString
@@ -236,20 +207,20 @@ const LeadCard: React.FC<LeadCardProps> = ({
       const formattedPhone = `(${match[1]}) ${match[2]}-${match[3]}`;
       foundPhones.push(formattedPhone);
     }
-    
+
     return foundPhones;
   })() : [];
 
   const hasAdditionalPhones = additionalPhones.length > 0;
-  
+
   // Create array of all phones with primary phone first
   const allPhones = [
-    { phone: formatPhoneNumber(displayLead.phone), isPrimary: true },
+    { phone: formatPhoneNumber(lead.phone), isPrimary: true },
     ...additionalPhones.map(phone => ({ phone, isPrimary: false }))
   ];
 
   // Get state from area code for display
-  const leadState = getStateFromAreaCode(displayLead.phone);
+  const leadState = getStateFromAreaCode(lead.phone);
 
   // Handle phone selection
   const handlePhoneSelect = (phone: string) => {
@@ -265,6 +236,15 @@ const LeadCard: React.FC<LeadCardProps> = ({
   const selectedEmailTemplate = emailTemplates.find(t => t.id === selectedEmailTemplateId);
   const selectedTextTemplate = textTemplates.find(t => t.id === selectedTextTemplateId);
 
+  // Helper function to parse name into first and last name
+  const parseName = (name: string) => {
+    const nameParts = name.trim().split(' ');
+    return {
+      firstName: nameParts[0] || '',
+      lastName: nameParts.slice(1).join(' ') || ''
+    };
+  };
+
   // Create mailto link with template
   const createMailtoLink = (template?: EmailTemplate) => {
     if (!hasValidEmail) return '';
@@ -274,19 +254,17 @@ const LeadCard: React.FC<LeadCardProps> = ({
     
     if (templateToUse) {
       // Parse name into first and last name
-      const nameParts = displayLead.name.trim().split(' ');
-      const firstName = nameParts[0] || '';
-      const lastName = nameParts.slice(1).join(' ') || '';
+      const { firstName, lastName } = parseName(lead.name);
       
       // Replace placeholders in template
       const subject = templateToUse.subject
-        .replace('{name}', displayLead.name)
-        .replace('{company}', displayLead.company || '')
+        .replace('{name}', lead.name)
+        .replace('{company}', lead.company || '')
         .replace('{{first_name}}', firstName)
         .replace('{{last_name}}', lastName);
       const body = templateToUse.body
-        .replace('{name}', displayLead.name)
-        .replace('{company}', displayLead.company || '')
+        .replace('{name}', lead.name)
+        .replace('{company}', lead.company || '')
         .replace('{phone}', selectedPhone)
         .replace('{{first_name}}', firstName)
         .replace('{{last_name}}', lastName);
@@ -306,13 +284,11 @@ const LeadCard: React.FC<LeadCardProps> = ({
     
     if (templateToUse) {
       // Parse name into first and last name
-      const nameParts = displayLead.name.trim().split(' ');
-      const firstName = nameParts[0] || '';
-      const lastName = nameParts.slice(1).join(' ') || '';
+      const { firstName, lastName } = parseName(lead.name);
       
       const message = templateToUse.message
-        .replace('{name}', displayLead.name)
-        .replace('{company}', displayLead.company || '')
+        .replace('{name}', lead.name)
+        .replace('{company}', lead.company || '')
         .replace('{{first_name}}', firstName)
         .replace('{{last_name}}', lastName);
         
@@ -333,72 +309,66 @@ const LeadCard: React.FC<LeadCardProps> = ({
   };
 
   return (
-    <Card className="shadow-2xl border-border/30 rounded-3xl bg-background/60 backdrop-blur-xl min-h-[400px] max-h-[500px] sm:min-h-[420px] sm:max-h-[550px] flex flex-col mb-4" style={{ backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)' }}>
-      <CardContent className="p-3 sm:p-5 space-y-4 sm:space-y-5 flex-1 flex flex-col">
+    <Card className="shadow-2xl border-border/30 rounded-3xl bg-background/60 backdrop-blur-xl min-h-[400px] max-h-[500px] sm:min-h-[420px] sm:max-h-[550px] flex flex-col mb-4 overflow-hidden" style={{ backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)' }}>
+      <CardContent className="flex-1 flex flex-col overflow-hidden">
         {/* Top row with lead count and file name */}
-        <div className="flex items-center justify-center">
+        <div className="flex items-center justify-center p-3 sm:p-5 pb-0">
           <p className="text-sm text-muted-foreground opacity-40">
             {currentIndex + 1}/{totalCount}
           </p>
         </div>
 
-        {/* Lead info - Main content area with animation */}
-        <div 
-          key={`${displayLead.name}-${displayLead.phone}`} 
-          className={`text-center space-y-4 sm:space-y-5 flex-1 flex flex-col justify-center ${
-            animationPhase === 'fading-out' ? 'animate-lead-content-fade-out' :
-            animationPhase === 'fading-in' ? 'animate-lead-content-fade-in' :
-            animationPhase === 'hidden' ? 'lead-content-hidden' :
-            'lead-content-visible'
-          }`}
-        >
+        {/* Lead info - Main content area */}
+        <div className="flex-1 flex flex-col justify-center">
+          <AnimatePresence mode="popLayout" initial={false}>
+            <motion.div
+              key={`${lead.phone}-${currentIndex}`}
+              initial={{ 
+                opacity: 0, 
+                scale: 0.8, 
+                filter: 'blur(20px)', 
+                x: navigationDirection === 'forward' ? 120 : -120 
+              }}
+              animate={{ opacity: 1, scale: 1, filter: 'blur(0px)', x: 0 }}
+              exit={{ 
+                opacity: 0, 
+                scale: 0.8, 
+                filter: 'blur(20px)', 
+                x: navigationDirection === 'forward' ? -120 : 120 
+              }}
+              transition={{ duration: 0.25, ease: [0.4, 0.2, 0.2, 1] }}
+              className="text-center space-y-4 sm:space-y-5 p-3 sm:p-5"
+            >
           {/* State and timezone - always show, with fallback */}
           <p className="text-sm text-muted-foreground">
             {leadState || 'Unknown State'}
           </p>
-          
           {/* Group 1: Name and Company */}
-          <div className="space-y-1">
+            <div className="space-y-1">
             <div className="flex items-center justify-center px-2">
               <h2 className="text-2xl sm:text-3xl font-bold text-center break-words leading-tight bg-gradient-to-r from-foreground to-foreground/95 bg-clip-text text-transparent dark:bg-none dark:text-foreground">
-                {displayLead.name}
+                {lead.name}
               </h2>
             </div>
-            
-            {displayLead.company && (
+            {lead.company && (
               <div className="flex items-center justify-center px-2">
                 <p className="text-base sm:text-lg font-medium text-center break-words leading-relaxed bg-gradient-to-r from-muted-foreground to-muted-foreground/90 bg-clip-text text-transparent dark:bg-none dark:text-muted-foreground">
-                  {displayLead.company}
+                  {lead.company}
                 </p>
               </div>
             )}
           </div>
-          
           {/* Group 2: Phone and Email */}
-          <div className="space-y-2">
+            <div className="space-y-2">
             {/* Phone number with icon positioned to the left */}
             <div className="flex items-center justify-center">
-              <div className="flex items-center gap-2">
-                <Phone 
-                  className={`h-4 w-4 text-muted-foreground flex-shrink-0 ${
-                    animationPhase === 'fading-out' ? 'animate-lead-icon-fade-out' :
-                    animationPhase === 'fading-in' ? 'animate-lead-icon-fade-in' :
-                    animationPhase === 'hidden' ? 'lead-icon-hidden' :
-                    'lead-icon-visible'
-                  }`}
-                />
+                <div className="flex items-center gap-2">
+                  <Phone className="h-4 w-4 text-muted-foreground flex-shrink-0" />
                 {hasAdditionalPhones ? (
                   <DropdownMenu>
                     <DropdownMenuTrigger className="flex items-center gap-1 cursor-pointer hover:text-foreground transition-colors">
                       <p className="text-base sm:text-lg bg-gradient-to-r from-muted-foreground to-muted-foreground/95 bg-clip-text text-transparent dark:bg-none dark:text-muted-foreground">{selectedPhone}</p>
-                      <ChevronDown 
-                        className={`h-4 w-4 text-muted-foreground ${
-                          animationPhase === 'fading-out' ? 'animate-lead-arrow-fade-out' :
-                          animationPhase === 'fading-in' ? 'animate-lead-arrow-fade-in' :
-                          animationPhase === 'hidden' ? 'lead-arrow-hidden' :
-                          'lead-arrow-visible'
-                        }`}
-                      />
+                      <ChevronDown className="h-4 w-4 text-muted-foreground" />
                     </DropdownMenuTrigger>
                     <DropdownMenuContent 
                       side="bottom" 
@@ -418,7 +388,7 @@ const LeadCard: React.FC<LeadCardProps> = ({
                                 {phoneData.phone}
                               </span>
                               {selectedPhone === phoneData.phone && !phoneData.isPrimary && (
-                                <div className="w-2 h-2 bg-foreground rounded-full ml-2 flex-shrink-0 self-center"></div>
+                                  <div className="w-2 h-2 bg-foreground rounded-full ml-2 flex-shrink-0 self-center"></div>
                               )}
                             </div>
                           </DropdownMenuItem>
@@ -431,19 +401,11 @@ const LeadCard: React.FC<LeadCardProps> = ({
                 )}
               </div>
             </div>
-            
             {/* Email with icon positioned to the left */}
             {hasValidEmail && (
               <div className="flex items-center justify-center">
-                <div className="flex items-center gap-2">
-                  <Mail 
-                    className={`h-4 w-4 text-muted-foreground flex-shrink-0 ${
-                      animationPhase === 'fading-out' ? 'animate-lead-icon-fade-out' :
-                      animationPhase === 'fading-in' ? 'animate-lead-icon-fade-in' :
-                      animationPhase === 'hidden' ? 'lead-icon-hidden' :
-                      'lead-icon-visible'
-                    }`}
-                  />
+                  <div className="flex items-center gap-2">
+                    <Mail className="h-4 w-4 text-muted-foreground flex-shrink-0" />
                   <button
                     onClick={() => handleEmailClick()}
                     className="text-sm text-muted-foreground text-center break-words hover:text-muted-foreground/80 hover:underline transition-colors duration-200 cursor-pointer"
@@ -455,16 +417,18 @@ const LeadCard: React.FC<LeadCardProps> = ({
               </div>
             )}
           </div>
+          </motion.div>
+        </AnimatePresence>
         </div>
 
         {/* Group 3: Last Called and Action Buttons */}
-        <div className="space-y-3">
+        <div className="space-y-3 p-3 sm:p-5 pt-0">
           {/* Last called section above buttons */}
-          {displayLead.lastCalled && (
+          {lead.lastCalled && (
             <div className="flex items-center justify-center">
               <div className="flex items-center">
                 <p className="text-sm text-muted-foreground transition-opacity duration-300 ease-in-out opacity-100 whitespace-nowrap my-0 py-0">
-                  Last called: {displayLead.lastCalled}
+                  Last called: {lead.lastCalled}
                 </p>
                 <button
                   onClick={onResetCallCount}
@@ -478,61 +442,33 @@ const LeadCard: React.FC<LeadCardProps> = ({
           )}
           
           {/* Action Buttons - Call and Text */}
-          <div className="flex justify-center items-center space-x-16 sm:space-x-20">
-            <Button 
-              onClick={() => handleTextClick()} 
-              size="lg" 
-              className="w-24 h-24 sm:w-32 sm:h-32 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 active:from-blue-600 active:to-blue-800 text-white transition-all duration-300 flex items-center justify-center p-0 relative overflow-hidden neomorphic-button focus:outline-none"
-              style={{
-                boxShadow: `
-                  8px 8px 16px rgba(0, 0, 0, 0.2),
-                  -8px -8px 16px rgba(255, 255, 255, 0.1),
-                  inset 2px 2px 4px rgba(255, 255, 255, 0.2),
-                  inset -2px -2px 4px rgba(0, 0, 0, 0.1)
-                `,
-                WebkitTapHighlightColor: 'transparent',
-                transform: 'translateY(0)',
-                transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
-              }}
-              onMouseDown={(e) => {
-                e.currentTarget.style.transform = 'translateY(2px)';
-                e.currentTarget.style.boxShadow = `
-                  4px 4px 8px rgba(0, 0, 0, 0.3),
-                  -4px -4px 8px rgba(255, 255, 255, 0.05),
-                  inset 4px 4px 8px rgba(0, 0, 0, 0.1),
-                  inset -4px -4px 8px rgba(255, 255, 255, 0.1)
-                `;
-              }}
-              onMouseUp={(e) => {
-                e.currentTarget.style.transform = 'translateY(0)';
-                e.currentTarget.style.boxShadow = `
-                  8px 8px 16px rgba(0, 0, 0, 0.2),
-                  -8px -8px 16px rgba(255, 255, 255, 0.1),
-                  inset 2px 2px 4px rgba(255, 255, 255, 0.2),
-                  inset -2px -2px 4px rgba(0, 0, 0, 0.1)
-                `;
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.transform = 'translateY(0)';
-                e.currentTarget.style.boxShadow = `
-                  8px 8px 16px rgba(0, 0, 0, 0.2),
-                  -8px -8px 16px rgba(255, 255, 255, 0.1),
-                  inset 2px 2px 4px rgba(255, 255, 255, 0.2),
-                  inset -2px -2px 4px rgba(0, 0, 0, 0.1)
-                `;
-              }}
-              onTouchStart={(e) => {
-                e.currentTarget.style.transform = 'translateY(2px)';
-                e.currentTarget.style.boxShadow = `
-                  4px 4px 8px rgba(0, 0, 0, 0.3),
-                  -4px -4px 8px rgba(255, 255, 255, 0.05),
-                  inset 4px 4px 8px rgba(0, 0, 0, 0.1),
-                  inset -4px -4px 8px rgba(255, 255, 255, 0.1)
-                `;
-              }}
-              onTouchEnd={(e) => {
-                // Ensure minimum animation duration for visual feedback
-                setTimeout(() => {
+          <div className="flex w-full gap-3">
+            <div className="flex-1 flex justify-center" style={{ marginLeft: '-1.5rem' }}>
+              <Button 
+                onClick={() => handleTextClick()} 
+                size="lg" 
+                className="w-24 h-24 sm:w-32 sm:h-32 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 active:from-blue-600 active:to-blue-800 text-white transition-all duration-300 flex items-center justify-center p-0 relative overflow-hidden neomorphic-button focus:outline-none"
+                style={{
+                  boxShadow: `
+                    8px 8px 16px rgba(0, 0, 0, 0.2),
+                    -8px -8px 16px rgba(255, 255, 255, 0.1),
+                    inset 2px 2px 4px rgba(255, 255, 255, 0.2),
+                    inset -2px -2px 4px rgba(0, 0, 0, 0.1)
+                  `,
+                  WebkitTapHighlightColor: 'transparent',
+                  transform: 'translateY(0)',
+                  transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
+                }}
+                onMouseDown={(e) => {
+                  e.currentTarget.style.transform = 'translateY(2px)';
+                  e.currentTarget.style.boxShadow = `
+                    4px 4px 8px rgba(0, 0, 0, 0.3),
+                    -4px -4px 8px rgba(255, 255, 255, 0.05),
+                    inset 4px 4px 8px rgba(0, 0, 0, 0.1),
+                    inset -4px -4px 8px rgba(255, 255, 255, 0.1)
+                  `;
+                }}
+                onMouseUp={(e) => {
                   e.currentTarget.style.transform = 'translateY(0)';
                   e.currentTarget.style.boxShadow = `
                     8px 8px 16px rgba(0, 0, 0, 0.2),
@@ -540,83 +476,8 @@ const LeadCard: React.FC<LeadCardProps> = ({
                     inset 2px 2px 4px rgba(255, 255, 255, 0.2),
                     inset -2px -2px 4px rgba(0, 0, 0, 0.1)
                   `;
-                }, 150); // Minimum 150ms press animation
-              }}
-              onFocus={(e) => {
-                e.currentTarget.style.transform = 'translateY(0)';
-                e.currentTarget.style.boxShadow = `
-                  8px 8px 16px rgba(0, 0, 0, 0.2),
-                  -8px -8px 16px rgba(255, 255, 255, 0.1),
-                  inset 2px 2px 4px rgba(255, 255, 255, 0.2),
-                  inset -2px -2px 4px rgba(0, 0, 0, 0.1)
-                `;
-              }}
-              onBlur={(e) => {
-                e.currentTarget.style.transform = 'translateY(0)';
-                e.currentTarget.style.boxShadow = `
-                  8px 8px 16px rgba(0, 0, 0, 0.2),
-                  -8px -8px 16px rgba(255, 255, 255, 0.1),
-                  inset 2px 2px 4px rgba(255, 255, 255, 0.2),
-                  inset -2px -2px 4px rgba(0, 0, 0, 0.1)
-                `;
-              }}
-            >
-              <MessageSquare className="h-[32px] w-[32px] sm:h-[40px] sm:w-[40px] drop-shadow-md" style={{ filter: 'drop-shadow(0 1px 2px rgba(0, 0, 0, 0.15))' }} />
-            </Button>
-            <Button 
-              onClick={handleCall} 
-              size="lg" 
-              className="w-24 h-24 sm:w-32 sm:h-32 rounded-full bg-gradient-to-br from-green-400 to-green-600 active:from-green-600 active:to-green-800 text-white transition-all duration-300 flex items-center justify-center p-0 relative overflow-hidden neomorphic-button focus:outline-none"
-              style={{
-                boxShadow: `
-                  8px 8px 16px rgba(0, 0, 0, 0.2),
-                  -8px -8px 16px rgba(255, 255, 255, 0.1),
-                  inset 2px 2px 4px rgba(255, 255, 255, 0.2),
-                  inset -2px -2px 4px rgba(0, 0, 0, 0.1)
-                `,
-                WebkitTapHighlightColor: 'transparent',
-                transform: 'translateY(0)',
-                transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
-              }}
-              onMouseDown={(e) => {
-                e.currentTarget.style.transform = 'translateY(2px)';
-                e.currentTarget.style.boxShadow = `
-                  4px 4px 8px rgba(0, 0, 0, 0.3),
-                  -4px -4px 8px rgba(255, 255, 255, 0.05),
-                  inset 4px 4px 8px rgba(0, 0, 0, 0.1),
-                  inset -4px -4px 8px rgba(255, 255, 255, 0.1)
-                `;
-              }}
-              onMouseUp={(e) => {
-                e.currentTarget.style.transform = 'translateY(0)';
-                e.currentTarget.style.boxShadow = `
-                  8px 8px 16px rgba(0, 0, 0, 0.2),
-                  -8px -8px 16px rgba(255, 255, 255, 0.1),
-                  inset 2px 2px 4px rgba(255, 255, 255, 0.2),
-                  inset -2px -2px 4px rgba(0, 0, 0, 0.1)
-                `;
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.transform = 'translateY(0)';
-                e.currentTarget.style.boxShadow = `
-                  8px 8px 16px rgba(0, 0, 0, 0.2),
-                  -8px -8px 16px rgba(255, 255, 255, 0.1),
-                  inset 2px 2px 4px rgba(255, 255, 255, 0.2),
-                  inset -2px -2px 4px rgba(0, 0, 0, 0.1)
-                `;
-              }}
-              onTouchStart={(e) => {
-                e.currentTarget.style.transform = 'translateY(2px)';
-                e.currentTarget.style.boxShadow = `
-                  4px 4px 8px rgba(0, 0, 0, 0.3),
-                  -4px -4px 8px rgba(255, 255, 255, 0.05),
-                  inset 4px 4px 8px rgba(0, 0, 0, 0.1),
-                  inset -4px -4px 8px rgba(255, 255, 255, 0.1)
-                `;
-              }}
-              onTouchEnd={(e) => {
-                // Ensure minimum animation duration for visual feedback
-                setTimeout(() => {
+                }}
+                onMouseLeave={(e) => {
                   e.currentTarget.style.transform = 'translateY(0)';
                   e.currentTarget.style.boxShadow = `
                     8px 8px 16px rgba(0, 0, 0, 0.2),
@@ -624,29 +485,134 @@ const LeadCard: React.FC<LeadCardProps> = ({
                     inset 2px 2px 4px rgba(255, 255, 255, 0.2),
                     inset -2px -2px 4px rgba(0, 0, 0, 0.1)
                   `;
-                }, 150); // Minimum 150ms press animation
-              }}
-              onFocus={(e) => {
-                e.currentTarget.style.transform = 'translateY(0)';
-                e.currentTarget.style.boxShadow = `
-                  8px 8px 16px rgba(0, 0, 0, 0.2),
-                  -8px -8px 16px rgba(255, 255, 255, 0.1),
-                  inset 2px 2px 4px rgba(255, 255, 255, 0.2),
-                  inset -2px -2px 4px rgba(0, 0, 0, 0.1)
-                `;
-              }}
-              onBlur={(e) => {
-                e.currentTarget.style.transform = 'translateY(0)';
-                e.currentTarget.style.boxShadow = `
-                  8px 8px 16px rgba(0, 0, 0, 0.2),
-                  -8px -8px 16px rgba(255, 255, 255, 0.1),
-                  inset 2px 2px 4px rgba(255, 255, 255, 0.2),
-                  inset -2px -2px 4px rgba(0, 0, 0, 0.1)
-                `;
-              }}
-            >
-              <Phone className="h-[32px] w-[32px] sm:h-[40px] sm:w-[40px] drop-shadow-md" style={{ filter: 'drop-shadow(0 1px 2px rgba(0, 0, 0, 0.15))' }} />
-            </Button>
+                }}
+                onTouchStart={(e) => {
+                  e.currentTarget.style.transform = 'translateY(2px)';
+                  e.currentTarget.style.boxShadow = `
+                    4px 4px 8px rgba(0, 0, 0, 0.3),
+                    -4px -4px 8px rgba(255, 255, 255, 0.05),
+                    inset 4px 4px 8px rgba(0, 0, 0, 0.1),
+                    inset -4px -4px 8px rgba(255, 255, 255, 0.1)
+                  `;
+                }}
+                onTouchEnd={(e) => {
+                  setTimeout(() => {
+                    e.currentTarget.style.transform = 'translateY(0)';
+                    e.currentTarget.style.boxShadow = `
+                      8px 8px 16px rgba(0, 0, 0, 0.2),
+                      -8px -8px 16px rgba(255, 255, 255, 0.1),
+                      inset 2px 2px 4px rgba(255, 255, 255, 0.2),
+                      inset -2px -2px 4px rgba(0, 0, 0, 0.1)
+                    `;
+                  }, 150);
+                }}
+                onFocus={(e) => {
+                  e.currentTarget.style.transform = 'translateY(0)';
+                  e.currentTarget.style.boxShadow = `
+                    8px 8px 16px rgba(0, 0, 0, 0.2),
+                    -8px -8px 16px rgba(255, 255, 255, 0.1),
+                    inset 2px 2px 4px rgba(255, 255, 255, 0.2),
+                    inset -2px -2px 4px rgba(0, 0, 0, 0.1)
+                  `;
+                }}
+                onBlur={(e) => {
+                  e.currentTarget.style.transform = 'translateY(0)';
+                  e.currentTarget.style.boxShadow = `
+                    8px 8px 16px rgba(0, 0, 0, 0.2),
+                    -8px -8px 16px rgba(255, 255, 255, 0.1),
+                    inset 2px 2px 4px rgba(255, 255, 255, 0.2),
+                    inset -2px -2px 4px rgba(0, 0, 0, 0.1)
+                  `;
+                }}
+              >
+                <MessageSquare className="h-[32px] w-[32px] sm:h-[40px] sm:w-[40px] drop-shadow-md mx-auto" style={{ filter: 'drop-shadow(0 1px 2px rgba(0, 0, 0, 0.15))' }} />
+              </Button>
+            </div>
+            <div className="flex-1 flex justify-center" style={{ marginRight: '-1.5rem' }}>
+              <Button 
+                onClick={handleCall} 
+                size="lg" 
+                className="w-24 h-24 sm:w-32 sm:h-32 rounded-full bg-gradient-to-br from-green-400 to-green-600 active:from-green-600 active:to-green-800 text-white transition-all duration-300 flex items-center justify-center p-0 relative overflow-hidden neomorphic-button focus:outline-none"
+                style={{
+                  boxShadow: `
+                    8px 8px 16px rgba(0, 0, 0, 0.2),
+                    -8px -8px 16px rgba(255, 255, 255, 0.1),
+                    inset 2px 2px 4px rgba(255, 255, 255, 0.2),
+                    inset -2px -2px 4px rgba(0, 0, 0, 0.1)
+                  `,
+                  WebkitTapHighlightColor: 'transparent',
+                  transform: 'translateY(0)',
+                  transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
+                }}
+                onMouseDown={(e) => {
+                  e.currentTarget.style.transform = 'translateY(2px)';
+                  e.currentTarget.style.boxShadow = `
+                    4px 4px 8px rgba(0, 0, 0, 0.3),
+                    -4px -4px 8px rgba(255, 255, 255, 0.05),
+                    inset 4px 4px 8px rgba(0, 0, 0, 0.1),
+                    inset -4px -4px 8px rgba(255, 255, 255, 0.1)
+                  `;
+                }}
+                onMouseUp={(e) => {
+                  e.currentTarget.style.transform = 'translateY(0)';
+                  e.currentTarget.style.boxShadow = `
+                    8px 8px 16px rgba(0, 0, 0, 0.2),
+                    -8px -8px 16px rgba(255, 255, 255, 0.1),
+                    inset 2px 2px 4px rgba(255, 255, 255, 0.2),
+                    inset -2px -2px 4px rgba(0, 0, 0, 0.1)
+                  `;
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.transform = 'translateY(0)';
+                  e.currentTarget.style.boxShadow = `
+                    8px 8px 16px rgba(0, 0, 0, 0.2),
+                    -8px -8px 16px rgba(255, 255, 255, 0.1),
+                    inset 2px 2px 4px rgba(255, 255, 255, 0.2),
+                    inset -2px -2px 4px rgba(0, 0, 0, 0.1)
+                  `;
+                }}
+                onTouchStart={(e) => {
+                  e.currentTarget.style.transform = 'translateY(2px)';
+                  e.currentTarget.style.boxShadow = `
+                    4px 4px 8px rgba(0, 0, 0, 0.3),
+                    -4px -4px 8px rgba(255, 255, 255, 0.05),
+                    inset 4px 4px 8px rgba(0, 0, 0, 0.1),
+                    inset -4px -4px 8px rgba(255, 255, 255, 0.1)
+                  `;
+                }}
+                onTouchEnd={(e) => {
+                  setTimeout(() => {
+                    e.currentTarget.style.transform = 'translateY(0)';
+                    e.currentTarget.style.boxShadow = `
+                      8px 8px 16px rgba(0, 0, 0, 0.2),
+                      -8px -8px 16px rgba(255, 255, 255, 0.1),
+                      inset 2px 2px 4px rgba(255, 255, 255, 0.2),
+                      inset -2px -2px 4px rgba(0, 0, 0, 0.1)
+                    `;
+                  }, 150);
+                }}
+                onFocus={(e) => {
+                  e.currentTarget.style.transform = 'translateY(0)';
+                  e.currentTarget.style.boxShadow = `
+                    8px 8px 16px rgba(0, 0, 0, 0.2),
+                    -8px -8px 16px rgba(255, 255, 255, 0.1),
+                    inset 2px 2px 4px rgba(255, 255, 255, 0.2),
+                    inset -2px -2px 4px rgba(0, 0, 0, 0.1)
+                  `;
+                }}
+                onBlur={(e) => {
+                  e.currentTarget.style.transform = 'translateY(0)';
+                  e.currentTarget.style.boxShadow = `
+                    8px 8px 16px rgba(0, 0, 0, 0.2),
+                    -8px -8px 16px rgba(255, 255, 255, 0.1),
+                    inset 2px 2px 4px rgba(255, 255, 255, 0.2),
+                    inset -2px -2px 4px rgba(0, 0, 0, 0.1)
+                  `;
+                }}
+              >
+                <Phone className="h-[32px] w-[32px] sm:h-[40px] sm:w-[40px] drop-shadow-md mx-auto" style={{ filter: 'drop-shadow(0 1px 2px rgba(0, 0, 0, 0.15))' }} />
+              </Button>
+            </div>
           </div>
         </div>
       </CardContent>

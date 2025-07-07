@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Lead } from '../types/lead';
 import FilterButtons from './FilterButtons';
 import LeadCard from './LeadCard';
@@ -71,9 +71,21 @@ const MainContent: React.FC<MainContentProps> = ({
   refreshTrigger,
   onImportNew
 }) => {
+  const [navigationDirection, setNavigationDirection] = useState<'forward' | 'backward'>('forward');
+
+  // Create wrapped navigation functions that set direction
+  const handlePrevious = () => {
+    setNavigationDirection('backward');
+    onPrevious();
+  };
+
+  const handleNext = () => {
+    setNavigationDirection('forward');
+    onNext();
+  };
   return (
-    <div className="flex-1 flex items-start justify-center pt-1 p-3 sm:p-4 min-h-0 px-4 sm:px-6" style={{ minHeight: 'calc(100dvh - 120px)' }}>
-      <div className="w-full max-w-sm space-y-1 flex flex-col min-h-full">
+    <div className="flex-1 flex items-start justify-center pt-1 p-3 sm:p-4 min-h-0" style={{ minHeight: 'calc(100dvh - 120px)' }}>
+      <div className="w-full space-y-1 flex flex-col min-h-full">
         {/* Filter Buttons */}
         <FilterButtons
           timezoneFilter={timezoneFilter}
@@ -107,14 +119,15 @@ const MainContent: React.FC<MainContentProps> = ({
             noLeadsMessage={noLeadsMessage}
             refreshTrigger={refreshTrigger}
             onImportNew={onImportNew}
+            navigationDirection={navigationDirection}
           />
         </div>
 
         {/* Navigation Controls */}
         <div className="pt-3 sm:pt-4">
           <NavigationControls
-            onPrevious={onPrevious}
-            onNext={onNext}
+            onPrevious={handlePrevious}
+            onNext={handleNext}
             canGoPrevious={canGoPrevious}
             canGoNext={canGoNext}
           />

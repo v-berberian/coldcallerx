@@ -184,7 +184,8 @@ export const useLeadNavigation = ({
     setFilterChanging,
     setCurrentIndex,
     getBaseLeads,
-    resetNavigation
+    resetNavigation,
+    updateNavigationWithHistory
   );
 
   return {

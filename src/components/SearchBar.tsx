@@ -153,7 +153,7 @@ const SearchBar = forwardRef<SearchBarRef, SearchBarProps>(({
   };
 
   return (
-    <div className="relative search-area max-w-sm mx-auto" onTouchStart={(e) => e.stopPropagation()} onTouchEnd={(e) => e.stopPropagation()}>
+    <div className="relative search-area w-full" onTouchStart={(e) => e.stopPropagation()} onTouchEnd={(e) => e.stopPropagation()}>
       <input 
         type="text" 
         placeholder={searchQuery ? "" : staticPlaceholder}

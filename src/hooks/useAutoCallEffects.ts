@@ -33,7 +33,7 @@ export const useAutoCallEffects = ({
   // Handle auto-call trigger - start countdown when conditions are met
   useEffect(() => {
     // Don't start auto call if filters are currently changing
-    if (shouldAutoCall && autoCall && componentReady && leadsInitialized && !isFilterChanging) {
+    if (shouldAutoCall && autoCall && componentReady && leadsInitialized) {
       const currentLeads = getBaseLeads();
       const currentLead = currentLeads[currentIndex];
       

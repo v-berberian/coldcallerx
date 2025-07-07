@@ -57,12 +57,12 @@ const CallingHeader: React.FC<CallingHeaderProps> = ({
   const searchBarRef = useRef<SearchBarRef>(null);
 
   React.useEffect(() => {
-    console.log('showAutocomplete changed to:', showAutocomplete, 'current isAutocompleteVisible:', isAutocompleteVisible);
+
     if (showAutocomplete) {
       setIsAutocompleteVisible(true);
     } else {
       // Reset fullscreen state when autocomplete closes
-      console.log('Resetting fullscreen state because showAutocomplete is false');
+
       setIsFullscreen(false);
       // Delay hiding to allow slide-up animation
       const timer = setTimeout(() => {
@@ -73,7 +73,7 @@ const CallingHeader: React.FC<CallingHeaderProps> = ({
   }, [showAutocomplete]);
 
   const handleToggleFullscreen = () => {
-    console.log('Toggle fullscreen called, current state:', isFullscreen);
+
     setIsFullscreen(!isFullscreen);
     // Keep the autocomplete visible when toggling fullscreen
     // The autocomplete will automatically adjust its height based on isFullscreen prop

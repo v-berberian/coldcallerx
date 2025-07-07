@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { Lead, TimezoneFilter, CallFilter } from '../types/lead';
 import { filterLeadsByTimezone } from '../utils/timezoneUtils';
 
@@ -12,119 +12,162 @@ export const useFilterChangeEffects = (
   setFilterChanging: (isChanging: boolean) => void,
   setCurrentIndex: (index: number) => void,
   getBaseLeads: () => Lead[],
-  resetNavigation: (index: number) => void
+  resetNavigation: (index: number) => void,
+  updateNavigationWithHistory: (index: number, addToHistory?: boolean) => void
 ) => {
+  // Track previous filter state to restore position when toggling filters
+  const previousFilterState = useRef<{
+    timezoneFilter: TimezoneFilter;
+    callFilter: CallFilter;
+    currentIndex: number;
+    currentLead: Lead | null;
+  } | null>(null);
   useEffect(() => {
-    // Add a small delay to prevent race conditions when quickly toggling filters and auto call
-    const timeoutId = setTimeout(() => {
-      // Don't auto-navigate during auto-call operations or when filters are changing
-      // IMPORTANT: Don't navigate during auto-call to prevent jumping away from called leads
-      if (isAutoCallInProgress || isFilterChanging) {
-        return;
-      }
+    // Don't auto-navigate during auto-call operations to prevent jumping away from called leads
+    if (isAutoCallInProgress) {
+      return;
+    }
 
-      // Early return if leadsData is not ready
-      if (!leadsData || leadsData.length === 0) {
-        return;
-      }
+    // Early return if leadsData is not ready
+    if (!leadsData || leadsData.length === 0) {
+      return;
+    }
 
-      setFilterChanging(true);
+    setFilterChanging(true);
       
-      try {
-        const baseLeadsBeforeFilter = filterLeadsByTimezone(leadsData, 'ALL');
-        const currentlyViewedLead = baseLeadsBeforeFilter[currentIndex];
+    try {
+      // Use the same timezone filter for both before and after to ensure index consistency
+      const baseLeadsBeforeFilter = filterLeadsByTimezone(leadsData, timezoneFilter);
+      const currentlyViewedLead = baseLeadsBeforeFilter[currentIndex];
+      
+      // Check if we're toggling back to a previous filter state
+      const isTogglingBack = previousFilterState.current && 
+        previousFilterState.current.timezoneFilter === timezoneFilter &&
+        previousFilterState.current.callFilter === callFilter;
+      
+      if (isTogglingBack && previousFilterState.current?.currentLead) {
+        // We're toggling back to a previous filter state, try to restore the exact position
+        const targetLead = previousFilterState.current.currentLead;
+        const newIndex = baseLeadsBeforeFilter.findIndex(lead => 
+          lead.name === targetLead.name && lead.phone === targetLead.phone
+        );
         
-        let newFilteredLeads = filterLeadsByTimezone(leadsData, timezoneFilter);
-        if (callFilter === 'UNCALLED') {
-          newFilteredLeads = newFilteredLeads.filter(lead => !lead.lastCalled);
+        if (newIndex !== -1) {
+          updateNavigationWithHistory(newIndex, false);
+          setTimeout(() => {
+            setFilterChanging(false);
+          }, 100);
+          return;
         }
+      }
+      
+      let newFilteredLeads = filterLeadsByTimezone(leadsData, timezoneFilter);
+      if (callFilter === 'UNCALLED') {
+        newFilteredLeads = newFilteredLeads.filter(lead => !lead.lastCalled);
+      }
+      
+      // Safety check: if no leads match the filter, reset to first available lead
+      if (newFilteredLeads.length === 0) {
+        updateNavigationWithHistory(0, false);
+        setTimeout(() => {
+          setFilterChanging(false);
+        }, 100);
+        return;
+      }
+      
+      if (currentlyViewedLead) {
+        const currentLeadMatchesNewFilter = newFilteredLeads.some(lead => 
+          lead.name === currentlyViewedLead.name && lead.phone === currentlyViewedLead.phone
+        );
         
-        // Safety check: if no leads match the filter, reset to first available lead
-        if (newFilteredLeads.length === 0) {
-          setCurrentIndex(0);
+        if (currentLeadMatchesNewFilter) {
+          // Current lead is still visible in new filter, stay on it
+          const newIndexOfCurrentLead = newFilteredLeads.findIndex(lead => 
+            lead.name === currentlyViewedLead.name && lead.phone === currentlyViewedLead.phone
+          );
+          updateNavigationWithHistory(newIndexOfCurrentLead, false);
           setTimeout(() => {
             setFilterChanging(false);
           }, 100);
           return;
         }
         
-        if (currentlyViewedLead) {
-          const currentLeadMatchesNewFilter = newFilteredLeads.some(lead => 
-            lead.name === currentlyViewedLead.name && lead.phone === currentlyViewedLead.phone
-          );
+        // Current lead is not visible in new filter - need to find appropriate replacement
+        if (callFilter === 'UNCALLED') {
+          // Switching to UNCALLED filter - find the closest uncalled lead
+          // First try to find an uncalled lead at or before the current position
+          let closestUncalledIndex = -1;
           
-          if (currentLeadMatchesNewFilter) {
-            // Current lead is still visible in new filter, stay on it
-            const newIndexOfCurrentLead = newFilteredLeads.findIndex(lead => 
-              lead.name === currentlyViewedLead.name && lead.phone === currentlyViewedLead.phone
-            );
-            setCurrentIndex(newIndexOfCurrentLead);
-            setTimeout(() => {
-              setFilterChanging(false);
-            }, 100);
-            return;
+          // Search backwards from current position to find the closest uncalled lead
+          for (let i = currentIndex; i >= 0; i--) {
+            const lead = baseLeadsBeforeFilter[i];
+            if (lead && !lead.lastCalled) {
+              closestUncalledIndex = i;
+              break;
+            }
           }
           
-          // Current lead is not visible in new filter - need to find appropriate replacement
-          if (callFilter === 'UNCALLED') {
-            // Switching to UNCALLED filter - find the last uncalled lead before current position
-            const allLeadsWithTimezone = filterLeadsByTimezone(leadsData, timezoneFilter);
-            let lastUncalledIndex = -1;
-            
-            // Find the last uncalled lead before the current position
-            for (let i = currentIndex - 1; i >= 0; i--) {
-              const lead = allLeadsWithTimezone[i];
+          // If not found before current position, search forward
+          if (closestUncalledIndex === -1) {
+            for (let i = currentIndex + 1; i < baseLeadsBeforeFilter.length; i++) {
+              const lead = baseLeadsBeforeFilter[i];
               if (lead && !lead.lastCalled) {
-                lastUncalledIndex = i;
+                closestUncalledIndex = i;
                 break;
               }
             }
-            
-            if (lastUncalledIndex !== -1) {
-              // Find this lead in the new filtered list
-              const targetLead = allLeadsWithTimezone[lastUncalledIndex];
-              const newIndex = newFilteredLeads.findIndex(lead => 
-                lead.name === targetLead.name && lead.phone === targetLead.phone
-              );
-              if (newIndex !== -1) {
-                setCurrentIndex(newIndex);
-              } else {
-                // Fallback to first uncalled lead
-                setCurrentIndex(0);
-              }
-            } else {
-              // No uncalled leads before current position, go to first uncalled lead
-              setCurrentIndex(0);
-            }
-          } else {
-            // Switching to ALL filter - find the same lead in the full list
-            const allLeadsWithTimezone = filterLeadsByTimezone(leadsData, timezoneFilter);
-            const newIndex = allLeadsWithTimezone.findIndex(lead => 
-              lead.name === currentlyViewedLead.name && lead.phone === currentlyViewedLead.phone
+          }
+          
+          if (closestUncalledIndex !== -1) {
+            // Find this lead in the new filtered list
+            const targetLead = baseLeadsBeforeFilter[closestUncalledIndex];
+            const newIndex = newFilteredLeads.findIndex(lead => 
+              lead.name === targetLead.name && lead.phone === targetLead.phone
             );
             if (newIndex !== -1) {
-              setCurrentIndex(newIndex);
+              updateNavigationWithHistory(newIndex, false); // Don't add to history since this is a filter change
             } else {
-              // Fallback to first lead
-              setCurrentIndex(0);
+              // Fallback to first uncalled lead
+              updateNavigationWithHistory(0, false);
             }
+          } else {
+            // No uncalled leads found, go to first uncalled lead
+            updateNavigationWithHistory(0, false);
           }
-        } else if (newFilteredLeads.length > 0) {
-          setCurrentIndex(0);
+        } else {
+          // Switching to ALL filter - find the same lead in the full list
+          // Since we're using the same timezone filter, the index should be the same
+          const newIndex = newFilteredLeads.findIndex(lead => 
+            lead.name === currentlyViewedLead.name && lead.phone === currentlyViewedLead.phone
+          );
+          if (newIndex !== -1) {
+            updateNavigationWithHistory(newIndex, false); // Don't add to history since this is a filter change
+          } else {
+            // Fallback to first lead
+            updateNavigationWithHistory(0, false);
+          }
         }
-      } catch (error) {
-        // Fallback: reset to first lead if there's an error
-        setCurrentIndex(0);
+      } else if (newFilteredLeads.length > 0) {
+        updateNavigationWithHistory(0, false);
       }
       
-      setTimeout(() => {
-        setFilterChanging(false);
-      }, 100);
-    }, 50); // Small delay to prevent race conditions
-
-    return () => {
-      clearTimeout(timeoutId);
-    };
+      // Update previous filter state for future reference
+      if (currentlyViewedLead) {
+        previousFilterState.current = {
+          timezoneFilter,
+          callFilter,
+          currentIndex,
+          currentLead: currentlyViewedLead
+        };
+      }
+    } catch (error) {
+      // Fallback: reset to first lead if there's an error
+      updateNavigationWithHistory(0, false);
+    }
+    
+    setTimeout(() => {
+      setFilterChanging(false);
+    }, 100);
   }, [timezoneFilter, callFilter]); // Remove leadsData dependency to prevent navigation when leads are called
 
   useEffect(() => {
@@ -135,3 +178,4 @@ export const useFilterChangeEffects = (
     }
   }, [timezoneFilter, callFilter, currentIndex]);
 };
+
