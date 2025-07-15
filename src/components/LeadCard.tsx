@@ -57,12 +57,29 @@ const LeadCard: React.FC<LeadCardProps> = ({
   const [selectedEmailTemplateId, setSelectedEmailTemplateId] = useState<string>('');
   const [selectedTextTemplateId, setSelectedTextTemplateId] = useState<string>('');
   const [selectedPhone, setSelectedPhone] = useState(formatPhoneNumber(lead.phone));
+  
+  // Swipe to delete state
+  const [isSwiping, setIsSwiping] = useState(false);
+  const [swipeOffset, setSwipeOffset] = useState(0);
+  const [isDeleteMode, setIsDeleteMode] = useState(false);
+  const [cardHeight, setCardHeight] = useState<number>(0);
+  const cardRef = useRef<HTMLDivElement>(null);
+  const touchStartX = useRef<number>(0);
+  const touchStartY = useRef<number>(0);
 
   // Reset selectedPhone to primary phone when lead changes
   useEffect(() => {
     const primaryPhone = formatPhoneNumber(lead.phone);
     setSelectedPhone(primaryPhone);
   }, [lead.phone, lead.name]);
+
+  // Measure card height for delete background
+  useEffect(() => {
+    if (cardRef.current) {
+      const height = cardRef.current.offsetHeight;
+      setCardHeight(height);
+    }
+  }, [lead, currentIndex, totalCount]);
 
   // Load templates and selections from localStorage
   useEffect(() => {
@@ -308,8 +325,176 @@ const LeadCard: React.FC<LeadCardProps> = ({
     window.location.href = createSmsLink(template);
   };
 
+  // Touch gesture handlers for swipe to delete
+  const handleTouchStart = (e: React.TouchEvent) => {
+    const touchX = e.touches[0].clientX;
+    const touchY = e.touches[0].clientY;
+    const cardRect = cardRef.current?.getBoundingClientRect();
+    
+    if (cardRect) {
+      const cardRight = cardRect.right;
+      const cardLeft = cardRect.left;
+      const cardWidth = cardRight - cardLeft;
+      const rightEdgeArea = cardWidth * 0.2; // 20% of card width from right edge
+      
+      // Only allow swiping if touch starts in the right edge area
+      if (touchX >= cardRight - rightEdgeArea) {
+        touchStartX.current = touchX;
+        touchStartY.current = touchY;
+        setIsSwiping(true);
+      }
+    }
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    if (!isSwiping) return;
+    
+    const touchX = e.touches[0].clientX;
+    const touchY = e.touches[0].clientY;
+    const deltaX = touchX - touchStartX.current;
+    const deltaY = Math.abs(touchY - touchStartY.current);
+    
+    // Only allow horizontal swiping (prevent vertical scrolling interference)
+    if (deltaY < 50 && deltaX < 0) {
+      // Animate to full delete state
+      setIsSwiping(false); // Enable transitions
+      setSwipeOffset(-100);
+      setIsDeleteMode(true);
+    }
+  };
+
+  const handleTouchEnd = () => {
+    if (!isSwiping) return;
+    
+    setIsSwiping(false);
+    // Card is already in full delete state, no need to adjust
+  };
+
+  const handleDeleteClick = () => {
+    if (onDeleteLead) {
+      setSwipeOffset(-400);
+      setTimeout(() => {
+        onDeleteLead(lead);
+      }, 300);
+    }
+  };
+
+  const handleCardClick = (e: React.MouseEvent) => {
+    // If card is in delete mode, tap anywhere to slide back immediately
+    if (isDeleteMode && swipeOffset < 0) {
+      setSwipeOffset(0);
+      setIsDeleteMode(false);
+      e.preventDefault();
+      e.stopPropagation();
+    }
+  };
+
   return (
-    <Card className="shadow-2xl border-border/30 rounded-3xl bg-background/60 backdrop-blur-xl min-h-[400px] max-h-[500px] sm:min-h-[420px] sm:max-h-[550px] flex flex-col mb-4 overflow-hidden" style={{ backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)' }}>
+    <div className="relative">
+      {/* Delete background indicator */}
+      <div 
+        className="absolute bg-red-500 rounded-3xl flex items-center justify-end pointer-events-none"
+        style={{ 
+          opacity: isDeleteMode ? 1 : 0,
+          height: cardHeight > 0 ? `${cardHeight}px` : 'auto',
+          width: '50%',
+          top: 0,
+          right: 0,
+          bottom: 0,
+          transition: 'opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
+        }}
+      >
+        <X className="h-8 w-8 text-white mr-4" />
+      </div>
+      
+      <motion.div
+        ref={cardRef}
+        className="relative"
+        style={{
+          transform: `translateX(${swipeOffset}px)`,
+          transition: isSwiping 
+            ? 'none' 
+            : 'transform 0.25s cubic-bezier(0.4, 0, 0.2, 1)'
+        }}
+        onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleTouchEnd}
+      >
+        <Card 
+          className="shadow-2xl border-border/30 rounded-3xl bg-background min-h-[400px] max-h-[500px] sm:min-h-[420px] sm:max-h-[550px] flex flex-col mb-4 overflow-hidden" 
+          onClick={handleCardClick}
+          onTouchStart={(e) => {
+            // If card is in delete mode, tap anywhere to slide back immediately
+            if (isDeleteMode && swipeOffset < 0) {
+              setSwipeOffset(0);
+              setIsDeleteMode(false);
+              e.preventDefault();
+              e.stopPropagation();
+            }
+          }}
+          style={{
+            pointerEvents: 'auto'
+          }}
+        >
+          {/* Single overlay blocker for delete mode */}
+          {isDeleteMode && (
+            <div 
+              className="absolute inset-0 z-[99999] bg-transparent"
+              style={{ 
+                touchAction: 'none',
+                pointerEvents: 'auto',
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                right: 0,
+                bottom: 0,
+                WebkitTouchCallout: 'none',
+                WebkitUserSelect: 'none',
+                userSelect: 'none',
+                zIndex: 99999
+              }}
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                setSwipeOffset(0);
+                setIsDeleteMode(false);
+              }}
+              onTouchStart={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                setSwipeOffset(0);
+                setIsDeleteMode(false);
+              }}
+              onTouchMove={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+              }}
+              onTouchEnd={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+              }}
+              onMouseDown={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                setSwipeOffset(0);
+                setIsDeleteMode(false);
+              }}
+              onMouseUp={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+              }}
+              onPointerDown={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                setSwipeOffset(0);
+                setIsDeleteMode(false);
+              }}
+              onPointerUp={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+              }}
+            />
+          )}
       <CardContent className="flex-1 flex flex-col overflow-hidden">
         {/* Top row with lead count and file name */}
         <div className="flex items-center justify-center p-3 sm:p-5 pb-0">
@@ -366,7 +551,12 @@ const LeadCard: React.FC<LeadCardProps> = ({
                   <Phone className="h-4 w-4 text-muted-foreground flex-shrink-0" />
                 {hasAdditionalPhones ? (
                   <DropdownMenu>
-                    <DropdownMenuTrigger className="flex items-center gap-1 cursor-pointer hover:text-foreground transition-colors">
+                    <DropdownMenuTrigger 
+                      className="flex items-center gap-1 cursor-pointer hover:text-foreground transition-colors"
+                      style={{
+                        pointerEvents: isDeleteMode ? 'none' : 'auto'
+                      }}
+                    >
                       <p className="text-base sm:text-lg bg-gradient-to-r from-muted-foreground to-muted-foreground/95 bg-clip-text text-transparent dark:bg-none dark:text-muted-foreground">{selectedPhone}</p>
                       <ChevronDown className="h-4 w-4 text-muted-foreground" />
                     </DropdownMenuTrigger>
@@ -410,6 +600,9 @@ const LeadCard: React.FC<LeadCardProps> = ({
                     onClick={() => handleEmailClick()}
                     className="text-sm text-muted-foreground text-center break-words hover:text-muted-foreground/80 hover:underline transition-colors duration-200 cursor-pointer"
                     title="Click to send email"
+                    style={{
+                      pointerEvents: isDeleteMode ? 'none' : 'auto'
+                    }}
                   >
                     {emailValue}
                   </button>
@@ -434,6 +627,9 @@ const LeadCard: React.FC<LeadCardProps> = ({
                   onClick={onResetCallCount}
                   className="ml-2 p-1 bg-muted rounded transition-colors"
                   title="Clear last called"
+                  style={{
+                    pointerEvents: isDeleteMode ? 'none' : 'auto'
+                  }}
                 >
                   <X className="h-3 w-3 text-muted-foreground" />
                 </button>
@@ -617,6 +813,8 @@ const LeadCard: React.FC<LeadCardProps> = ({
         </div>
       </CardContent>
     </Card>
+      </motion.div>
+    </div>
   );
 };
 
