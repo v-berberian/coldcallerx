@@ -22,6 +22,7 @@ import { Switch } from '@/components/ui/switch';
 import * as Collapsible from '@radix-ui/react-collapsible';
 import { clearColdCallerStorage, quickClearColdCallerStorage } from '@/utils/clearStorage';
 import { useToast } from '@/hooks/use-toast';
+import { useSettingsMenu } from '@/hooks/useSettingsMenu';
 
 interface EmailTemplate {
   id: string;
@@ -41,9 +42,16 @@ interface SettingsMenuProps {
 }
 
 const SettingsMenu: React.FC<SettingsMenuProps> = ({ children }) => {
-  const [emailTemplateSubject, setEmailTemplateSubject] = useState('');
-  const [emailTemplateBody, setEmailTemplateBody] = useState('');
-  const [textTemplateMessage, setTextTemplateMessage] = useState('');
+  // Use the settings menu hook
+  const {
+    emailSubject,
+    emailBody,
+    textMessage,
+    handleEmailSubjectChange,
+    handleEmailBodyChange,
+    handleTextMessageChange
+  } = useSettingsMenu();
+
   const [templatesOpen, setTemplatesOpen] = useState(false);
   const [emailOpen, setEmailOpen] = useState(false);
   const [textOpen, setTextOpen] = useState(false);
@@ -124,26 +132,7 @@ const SettingsMenu: React.FC<SettingsMenuProps> = ({ children }) => {
     }
   };
 
-  // Load settings from localStorage on mount
-  useEffect(() => {
-    const savedEmailSubject = localStorage.getItem('emailTemplateSubject');
-    if (savedEmailSubject) setEmailTemplateSubject(savedEmailSubject);
-    const savedEmailBody = localStorage.getItem('emailTemplateBody');
-    if (savedEmailBody) setEmailTemplateBody(savedEmailBody);
-    const savedTextMessage = localStorage.getItem('textTemplateMessage');
-    if (savedTextMessage) setTextTemplateMessage(savedTextMessage);
-  }, []);
 
-  // Save email template changes
-  useEffect(() => {
-    localStorage.setItem('emailTemplateSubject', emailTemplateSubject);
-    localStorage.setItem('emailTemplateBody', emailTemplateBody);
-  }, [emailTemplateSubject, emailTemplateBody]);
-
-  // Save text template changes
-  useEffect(() => {
-    localStorage.setItem('textTemplateMessage', textTemplateMessage);
-  }, [textTemplateMessage]);
 
   // Animation effect for disappearing
   useEffect(() => {
@@ -227,8 +216,8 @@ const SettingsMenu: React.FC<SettingsMenuProps> = ({ children }) => {
                         <Label htmlFor="textMessage">Message</Label>
                         <Textarea
                           id="textMessage"
-                          value={textTemplateMessage}
-                          onChange={(e) => setTextTemplateMessage(e.target.value)}
+                                          value={textMessage}
+                onChange={(e) => handleTextMessageChange(e.target.value)}
                           placeholder="Enter text message"
                           className="w-full h-32 resize-none"
                         />
@@ -258,8 +247,8 @@ const SettingsMenu: React.FC<SettingsMenuProps> = ({ children }) => {
                         <Label htmlFor="emailSubject">Subject</Label>
                         <Input
                           id="emailSubject"
-                          value={emailTemplateSubject}
-                          onChange={(e) => setEmailTemplateSubject(e.target.value)}
+                                          value={emailSubject}
+                onChange={(e) => handleEmailSubjectChange(e.target.value)}
                           placeholder="Enter email subject"
                           className="w-full"
                         />
@@ -268,8 +257,8 @@ const SettingsMenu: React.FC<SettingsMenuProps> = ({ children }) => {
                         <Label htmlFor="emailBody">Body</Label>
                         <Textarea
                           id="emailBody"
-                          value={emailTemplateBody}
-                          onChange={(e) => setEmailTemplateBody(e.target.value)}
+                                          value={emailBody}
+                onChange={(e) => handleEmailBodyChange(e.target.value)}
                           placeholder="Enter email body"
                           className="w-full h-32 resize-none"
                         />

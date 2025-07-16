@@ -114,7 +114,9 @@ export const useLeadNavigation = ({
     // Pass the markLeadAsCalledOnNavigation function but don't call it unconditionally
     markLeadAsCalledOnNavigation,
     shownLeadsInShuffle,
-    setShownLeadsInShuffle
+    setShownLeadsInShuffle,
+    toggleCallFilter,
+    toggleTimezoneFilter
   );
 
   const { handleNextWrapper, handlePreviousWrapper, selectLeadWrapper } = useLeadNavigationActions({

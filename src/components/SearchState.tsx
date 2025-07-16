@@ -145,6 +145,9 @@ export const useSearchState = ({ leads, getBaseLeads, leadsData, timezoneFilter,
 
   const closeAutocomplete = useCallback(() => {
     setShowAutocomplete(false);
+    // Clear the search query when autocomplete closes
+    setSearchQuery('');
+    setLoadedResultsCount(INITIAL_RESULTS);
     
     // On mobile, also blur the input to close the keyboard
     if (/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {

@@ -2,6 +2,14 @@ import { Lead, CallFilter } from '../types/lead';
 
 export const useLeadSelection = () => {
   const getNextLeadInSequential = (baseLeads: Lead[], currentIndex: number) => {
+    // If there's only one lead or no leads, don't navigate
+    if (baseLeads.length <= 1) {
+      return {
+        index: currentIndex,
+        lead: baseLeads[currentIndex]
+      };
+    }
+    
     const nextIndex = (currentIndex + 1) % baseLeads.length;
     return {
       index: nextIndex,

@@ -33,25 +33,18 @@ export const useCallingScreenActions = ({
 }: CallingScreenActionsProps) => {
   
   const handleLeadSelect = (lead: Lead) => {
-    console.log('CallingScreenActions: handleLeadSelect called for lead:', lead.name, lead.phone);
-    
     const baseLeads = getBaseLeads();
-    console.log('CallingScreenActions: baseLeads length:', baseLeads.length);
     
     const leadIndexInBaseLeads = baseLeads.findIndex(l => 
       l.name === lead.name && l.phone === lead.phone
     );
-    console.log('CallingScreenActions: leadIndexInBaseLeads:', leadIndexInBaseLeads);
     
     if (leadIndexInBaseLeads !== -1) {
-      console.log('CallingScreenActions: calling selectLead with lead:', lead.name);
       selectLead(lead, baseLeads, leadsData);
     } else {
-      console.log('CallingScreenActions: lead not found in baseLeads, calling selectLead anyway');
       selectLead(lead, baseLeads, leadsData);
     }
     
-    console.log('CallingScreenActions: clearing search query and closing autocomplete');
     setSearchQuery('');
     setShowAutocomplete(false);
   };

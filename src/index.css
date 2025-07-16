@@ -181,6 +181,49 @@ input:not(.caret-transparent) {
   button, input, select, textarea {
     touch-action: manipulation;
   }
+  
+  /* Additional iOS optimizations */
+  * {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+  
+  /* Optimize scrolling performance */
+  .overflow-y-auto, .overflow-y-scroll {
+    -webkit-overflow-scrolling: touch;
+    scroll-behavior: smooth;
+  }
+  
+  /* Prevent text selection on interactive elements */
+  button, [role="button"], .cursor-pointer {
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    user-select: none;
+  }
+  
+  /* Optimize animations for iOS */
+  .animate-slide-down, .animate-slide-up {
+    -webkit-transform: translateZ(0);
+    transform: translateZ(0);
+    will-change: transform;
+  }
+  
+  /* Prevent iOS Safari from adding margins to body */
+  body {
+    -webkit-text-size-adjust: 100%;
+    -ms-text-size-adjust: 100%;
+  }
+  
+  /* Optimize input fields for iOS */
+  input, textarea {
+    -webkit-appearance: none;
+    border-radius: 0;
+  }
+  
+  /* Prevent iOS Safari from zooming on input focus */
+  input[type="text"], input[type="email"], input[type="tel"], textarea {
+    font-size: 16px;
+  }
 }
 
 /* Prevent pull-to-refresh on mobile */
@@ -436,6 +479,9 @@ body.progress-bar-visible {
   -moz-user-select: none;
   -ms-user-select: none;
   user-select: none;
+  /* Additional iOS performance optimizations */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 /* Allow text selection only for specific elements that need it */

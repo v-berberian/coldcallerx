@@ -166,7 +166,7 @@ const CallingScreenContainer: React.FC<CallingScreenContainerProps> = memo(({
   // Clamp currentIndex to valid range for filtered leads
   const safeCurrentIndex = Math.max(0, Math.min(currentIndex, currentLeads.length - 1));
   const currentLead = currentLeads[safeCurrentIndex];
-  
+
   if (leadsData.length === 0) {
     return (
       <div className="h-[100dvh] overflow-hidden fixed inset-0">

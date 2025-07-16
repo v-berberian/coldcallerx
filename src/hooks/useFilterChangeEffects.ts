@@ -15,13 +15,6 @@ export const useFilterChangeEffects = (
   resetNavigation: (index: number) => void,
   updateNavigationWithHistory: (index: number, addToHistory?: boolean) => void
 ) => {
-  // Track previous filter state to restore position when toggling filters
-  const previousFilterState = useRef<{
-    timezoneFilter: TimezoneFilter;
-    callFilter: CallFilter;
-    currentIndex: number;
-    currentLead: Lead | null;
-  } | null>(null);
   useEffect(() => {
     // Don't auto-navigate during auto-call operations to prevent jumping away from called leads
     if (isAutoCallInProgress) {
@@ -36,30 +29,8 @@ export const useFilterChangeEffects = (
     setFilterChanging(true);
       
     try {
-      // Use the same timezone filter for both before and after to ensure index consistency
-      const baseLeadsBeforeFilter = filterLeadsByTimezone(leadsData, timezoneFilter);
-      const currentlyViewedLead = baseLeadsBeforeFilter[currentIndex];
-      
-      // Check if we're toggling back to a previous filter state
-      const isTogglingBack = previousFilterState.current && 
-        previousFilterState.current.timezoneFilter === timezoneFilter &&
-        previousFilterState.current.callFilter === callFilter;
-      
-      if (isTogglingBack && previousFilterState.current?.currentLead) {
-        // We're toggling back to a previous filter state, try to restore the exact position
-        const targetLead = previousFilterState.current.currentLead;
-        const newIndex = baseLeadsBeforeFilter.findIndex(lead => 
-          lead.name === targetLead.name && lead.phone === targetLead.phone
-        );
-        
-        if (newIndex !== -1) {
-          updateNavigationWithHistory(newIndex, false);
-          setTimeout(() => {
-            setFilterChanging(false);
-          }, 100);
-          return;
-        }
-      }
+      // Get the current lead from the original unfiltered list to ensure we have the correct lead
+      const currentlyViewedLead = leadsData[currentIndex];
       
       let newFilteredLeads = filterLeadsByTimezone(leadsData, timezoneFilter);
       if (callFilter === 'UNCALLED') {
@@ -100,7 +71,7 @@ export const useFilterChangeEffects = (
           
           // Search backwards from current position to find the closest uncalled lead
           for (let i = currentIndex; i >= 0; i--) {
-            const lead = baseLeadsBeforeFilter[i];
+            const lead = leadsData[i]; // Use leadsData directly
             if (lead && !lead.lastCalled) {
               closestUncalledIndex = i;
               break;
@@ -109,8 +80,8 @@ export const useFilterChangeEffects = (
           
           // If not found before current position, search forward
           if (closestUncalledIndex === -1) {
-            for (let i = currentIndex + 1; i < baseLeadsBeforeFilter.length; i++) {
-              const lead = baseLeadsBeforeFilter[i];
+            for (let i = currentIndex + 1; i < leadsData.length; i++) {
+              const lead = leadsData[i]; // Use leadsData directly
               if (lead && !lead.lastCalled) {
                 closestUncalledIndex = i;
                 break;
@@ -120,7 +91,7 @@ export const useFilterChangeEffects = (
           
           if (closestUncalledIndex !== -1) {
             // Find this lead in the new filtered list
-            const targetLead = baseLeadsBeforeFilter[closestUncalledIndex];
+            const targetLead = leadsData[closestUncalledIndex]; // Use leadsData directly
             const newIndex = newFilteredLeads.findIndex(lead => 
               lead.name === targetLead.name && lead.phone === targetLead.phone
             );
@@ -149,16 +120,6 @@ export const useFilterChangeEffects = (
         }
       } else if (newFilteredLeads.length > 0) {
         updateNavigationWithHistory(0, false);
-      }
-      
-      // Update previous filter state for future reference
-      if (currentlyViewedLead) {
-        previousFilterState.current = {
-          timezoneFilter,
-          callFilter,
-          currentIndex,
-          currentLead: currentlyViewedLead
-        };
       }
     } catch (error) {
       // Fallback: reset to first lead if there's an error

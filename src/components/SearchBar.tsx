@@ -1,5 +1,6 @@
 import React, { useState, useRef, forwardRef, useImperativeHandle, useEffect } from 'react';
-import { X, Maximize2, Minimize2 } from 'lucide-react';
+import { createPortal } from 'react-dom';
+import { X, Maximize2, Minimize2, Filter } from 'lucide-react';
 
 interface SearchBarProps {
   searchQuery: string;
@@ -11,6 +12,8 @@ interface SearchBarProps {
   isFullscreen?: boolean;
   fileName: string;
   onCloseAutocomplete?: () => void;
+  onFilterClick?: () => void;
+  onFilterSelect?: (filter: string) => void;
 }
 
 export interface SearchBarRef {
@@ -27,11 +30,14 @@ const SearchBar = forwardRef<SearchBarRef, SearchBarProps>(({
   onToggleFullscreen,
   isFullscreen,
   fileName,
-  onCloseAutocomplete
+  onCloseAutocomplete,
+  onFilterClick,
+  onFilterSelect
 }, ref) => {
   const [isFocused, setIsFocused] = useState(false);
   const [hasStartedTyping, setHasStartedTyping] = useState(false);
   const [isTogglingFullscreen, setIsTogglingFullscreen] = useState(false);
+  const [showFilterDropdown, setShowFilterDropdown] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   
   const staticPlaceholder = "Search and View Leads";
@@ -52,6 +58,24 @@ const SearchBar = forwardRef<SearchBarRef, SearchBarProps>(({
       setHasStartedTyping(false);
     }
   }, [searchQuery]);
+
+  // Handle click outside to close filter dropdown
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (showFilterDropdown) {
+        const target = event.target as Element;
+        // Check if click is outside the filter button and dropdown
+        if (!target.closest('.filter-dropdown-container')) {
+          setShowFilterDropdown(false);
+        }
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [showFilterDropdown]);
 
   // Handle keyboard events
   useEffect(() => {
@@ -91,6 +115,7 @@ const SearchBar = forwardRef<SearchBarRef, SearchBarProps>(({
     // 1. We're in fullscreen mode (user might dismiss keyboard but want to keep autocomplete)
     // 2. We're toggling fullscreen (maximize button was clicked)
     // 3. The input is being blurred as part of fullscreen toggle
+    // 4. We're clearing the search (X button was clicked)
     if (onCloseAutocomplete && !isTogglingFullscreen && !isFullscreen) {
       onCloseAutocomplete();
     }
@@ -141,6 +166,17 @@ const SearchBar = forwardRef<SearchBarRef, SearchBarProps>(({
     }, 10);
   };
 
+  const handleFilterClick = (e: React.MouseEvent | React.TouchEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setShowFilterDropdown(!showFilterDropdown);
+  };
+
+  const handleFilterSelect = (filter: string) => {
+    setShowFilterDropdown(false);
+    onFilterSelect?.(filter);
+  };
+
   const handleInputClick = () => {
     // If in fullscreen mode, collapse when input is clicked
     if (isFullscreen) {
@@ -181,13 +217,61 @@ const SearchBar = forwardRef<SearchBarRef, SearchBarProps>(({
           {isFullscreen ? <Minimize2 className="h-4 w-4 text-muted-foreground" /> : <Maximize2 className="h-4 w-4 text-muted-foreground" />}
         </button>
       )}
-      {/* X button on the right */}
+      {/* Filter button on the right - only show when focused or when there's text */}
+      {/* Temporarily hidden - will be reimplemented later */}
+      {/* {(isFocused || searchQuery) && (
+        <div className="absolute top-1/2 transform -translate-y-1/2 right-3 filter-dropdown-container">
+          <button 
+            onMouseDown={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              handleFilterClick(e);
+            }}
+            className="rounded-full p-1.5 transition-colors duration-75 hover:bg-muted/50 active:bg-muted/70"
+          >
+            <Filter className="h-4 w-4 text-muted-foreground" />
+          </button>
+          
+          <!- Filter dropdown ->
+          {showFilterDropdown && createPortal(
+            <div 
+              className="fixed bg-background border border-border/15 rounded-xl shadow-lg z-[999999] w-[80px] filter-dropdown-container animate-slide-down-fast"
+              style={{
+                top: inputRef.current?.getBoundingClientRect().bottom + 4,
+                right: window.innerWidth - (inputRef.current?.getBoundingClientRect().right || 0) + 12
+              }}
+            >
+              <button
+                onClick={() => handleFilterSelect('current')}
+                className="w-full px-4 py-3 text-center text-sm border-b border-border/10 last:border-b-0 transition-colors duration-75 cursor-default hover:bg-muted/50 rounded-t-xl"
+              >
+                Current List
+              </button>
+              <button
+                onClick={() => handleFilterSelect('all')}
+                className="w-full px-4 py-3 text-center text-sm border-b border-border/10 last:border-b-0 transition-colors duration-75 cursor-default hover:bg-muted/50 rounded-b-xl"
+              >
+                All Lists
+              </button>
+            </div>,
+            document.body
+          )}
+        </div>
+      )} */}
+      {/* X button on the right (when there's a search query) */}
       {searchQuery && (
         <button 
-          onClick={onClearSearch} 
-          onTouchStart={(e) => e.stopPropagation()}
+          onMouseDown={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            onClearSearch();
+          }}
+          onTouchStart={(e) => {
+            e.stopPropagation();
+            onClearSearch();
+          }}
           onTouchEnd={(e) => e.stopPropagation()}
-          className="absolute right-3 top-1/2 transform -translate-y-1/2 hover:bg-muted/50 rounded-full p-1 transition-colors"
+          className="absolute right-3 top-1/2 transform -translate-y-1/2 rounded-full p-1 transition-colors"
         >
           <X className="h-4 w-4 text-muted-foreground" />
         </button>
@@ -195,5 +279,7 @@ const SearchBar = forwardRef<SearchBarRef, SearchBarProps>(({
     </div>
   );
 });
+
+SearchBar.displayName = 'SearchBar';
 
 export default SearchBar;

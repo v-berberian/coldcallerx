@@ -141,6 +141,14 @@ const CallingHeader: React.FC<CallingHeaderProps> = ({
           fileName={fileName} 
           ref={searchBarRef}
           onCloseAutocomplete={onCloseAutocomplete}
+          onFilterClick={() => {
+            // TODO: Implement filter functionality
+            console.log('Filter button clicked');
+          }}
+          onFilterSelect={(filter) => {
+            console.log('Filter selected:', filter);
+            // TODO: Implement filter selection logic
+          }}
         />
         
         {/* Autocomplete Dropdown */}

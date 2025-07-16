@@ -27,6 +27,8 @@ interface UseCallingScreenNavigationProps {
   goToPrevious: () => boolean;
   callMadeToCurrentLead: boolean;
   callDelay: number;
+  toggleCallFilter?: () => void;
+  toggleTimezoneFilter?: () => void;
 }
 
 export const useCallingScreenNavigation = ({
@@ -36,7 +38,9 @@ export const useCallingScreenNavigation = ({
   callDelay,
   shuffleMode,
   callFilter,
-  isFilterChanging
+  isFilterChanging,
+  toggleCallFilter,
+  toggleTimezoneFilter
 }: UseCallingScreenNavigationProps) => {
   const {
     currentIndex,
@@ -77,7 +81,9 @@ export const useCallingScreenNavigation = ({
     // The wrapper functions will handle the conditional calling
     markLeadAsCalledOnNavigation,
     shownLeadsInShuffle,
-    setShownLeadsInShuffle
+    setShownLeadsInShuffle,
+    toggleCallFilter,
+    toggleTimezoneFilter
   );
 
   return {

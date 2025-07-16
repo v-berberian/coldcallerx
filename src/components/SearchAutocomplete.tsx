@@ -3,6 +3,8 @@ import { FixedSizeList as List } from 'react-window';
 import InfiniteLoader from 'react-window-infinite-loader';
 import { Card } from '@/components/ui/card';
 import { Lead } from '../types/lead';
+import { useSearchVirtualization } from '@/hooks/useSearchVirtualization';
+import { useSearchTouchHandling } from '@/hooks/useSearchTouchHandling';
 
 interface SearchAutocompleteProps {
   isVisible: boolean;
@@ -39,22 +41,27 @@ const SearchAutocomplete: React.FC<SearchAutocompleteProps> = ({
   leadsData = []
 }) => {
 
-  
   const [isAnimating, setIsAnimating] = useState(false);
   const [shouldRender, setShouldRender] = useState(false);
 
   // Check if we're on a mobile device
   const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
 
-  // Check if item is loaded
-  const isItemLoaded = useCallback((index: number) => {
-    return index < loadedResultsCount;
-  }, [loadedResultsCount]);
+  // Use the extracted hooks
+  const { isItemLoaded, handleLoadMoreItems, getDataSource } = useSearchVirtualization(
+    searchResults,
+    allSearchResults,
+    isFullscreen,
+    loadedResultsCount,
+    totalResultsCount,
+    loadMoreResults
+  );
+
+  const { createTouchHandlers } = useSearchTouchHandling(onLeadSelect, onCloseAutocomplete);
 
   // Render individual lead item for virtualized list
   const renderLeadItem = useCallback(({ index, style }: { index: number; style: React.CSSProperties }) => {
-    // Determine which data source to use based on fullscreen state
-    const dataSource = isFullscreen ? allSearchResults : searchResults;
+    const dataSource = getDataSource();
     const lead = dataSource[index];
     
     if (!lead) {
@@ -80,50 +87,12 @@ const SearchAutocomplete: React.FC<SearchAutocompleteProps> = ({
       }
     };
 
-    // For virtualized lists, we need a different approach since react-window handles scrolling
-    // We'll use a combination of click and touch events that work better with virtualized lists
-    let touchStartTime = 0;
-    let touchStartY = 0;
-    let touchStartX = 0;
-    let hasMoved = false;
-    const moveThreshold = 10; // Slightly higher threshold for virtualized lists
-    const timeThreshold = 300; // Maximum time for a tap
+    // Get touch handlers from the hook
+    const { handleTouchStart, handleTouchMove, handleTouchEnd } = createTouchHandlers();
 
-    const handleTouchStart = (e: React.TouchEvent) => {
-      e.stopPropagation();
-      
-      // Reset tracking
-      hasMoved = false;
-      touchStartTime = Date.now();
-      touchStartY = e.touches[0].clientY;
-      touchStartX = e.touches[0].clientX;
-    };
-
-    const handleTouchMove = (e: React.TouchEvent) => {
-      e.stopPropagation();
-      
-      // Check if finger has moved significantly
-      const currentY = e.touches[0].clientY;
-      const currentX = e.touches[0].clientX;
-      const deltaY = Math.abs(currentY - touchStartY);
-      const deltaX = Math.abs(currentX - touchStartX);
-      
-      if (deltaY > moveThreshold || deltaX > moveThreshold) {
-        hasMoved = true;
-      }
-    };
-
-    const handleTouchEnd = (e: React.TouchEvent) => {
-      e.stopPropagation();
-      
-      const touchDuration = Date.now() - touchStartTime;
-      
-      // Only trigger lead selection if:
-      // 1. No significant movement occurred
-      // 2. Touch duration is short (indicating a tap, not a long press)
-      if (!hasMoved && touchDuration < timeThreshold) {
-        handleLeadClick();
-      }
+    // Create a wrapper for handleTouchEnd that includes the lead
+    const handleTouchEndWithLead = (e: React.TouchEvent) => {
+      handleTouchEnd(e, lead);
     };
 
 
@@ -131,10 +100,14 @@ const SearchAutocomplete: React.FC<SearchAutocompleteProps> = ({
     return (
       <div style={style} key={`${lead.name}-${lead.phone}-${index}`}>
         <button
-          onClick={handleLeadClick}
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            handleLeadClick();
+          }}
           onTouchStart={handleTouchStart}
           onTouchMove={handleTouchMove}
-          onTouchEnd={handleTouchEnd}
+          onTouchEnd={handleTouchEndWithLead}
           className="w-full px-4 py-4 text-left border-b border-border/10 last:border-b-0 transition-colors duration-75 cursor-pointer hover:bg-muted/50 active:bg-muted/70 touch-manipulation"
           style={{ WebkitTapHighlightColor: 'transparent' }}
         >
@@ -155,13 +128,7 @@ const SearchAutocomplete: React.FC<SearchAutocompleteProps> = ({
     );
   }, [isFullscreen, allSearchResults, searchResults, onLeadSelect, onCloseAutocomplete, leadsData, totalResultsCount]);
 
-  // Handle loading more items
-  const handleLoadMoreItems = useCallback((startIndex: number, stopIndex: number) => {
-    if (loadMoreResults && loadedResultsCount < totalResultsCount) {
-      loadMoreResults();
-    }
-    return Promise.resolve();
-  }, [loadMoreResults, loadedResultsCount, totalResultsCount]);
+
 
   useEffect(() => {
     if (isVisible) {

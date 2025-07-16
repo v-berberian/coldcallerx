@@ -99,6 +99,10 @@ export const useLeadNavigationActions = ({
       }
     } else {
       // In sequential mode, use simple list-based navigation
+      // If there's only one lead, don't navigate
+      if (baseLeads.length <= 1) {
+        return;
+      }
       const prevIndex = currentIndex === 0 ? baseLeads.length - 1 : currentIndex - 1;
       updateNavigation(prevIndex);
     }

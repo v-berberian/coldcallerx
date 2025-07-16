@@ -1,6 +1,24 @@
 import { Lead, CallFilter } from '../types/lead';
 import { useLeadSelection } from './useLeadSelection';
 
+interface UseNavigationProps {
+  currentIndex: number;
+  updateNavigation: (index: number) => void;
+  updateNavigationWithHistory: (index: number, addToHistory?: boolean) => void;
+  resetNavigation: (index: number) => void;
+  shuffleMode: boolean;
+  callFilter: CallFilter;
+  isFilterChanging: boolean;
+  isAutoCallInProgress: boolean;
+  shouldBlockNavigation: boolean;
+  markLeadAsCalledOnNavigation: (lead: Lead) => void;
+  shownLeadsInShuffle: Set<string>;
+  setShownLeadsInShuffle: (shown: Set<string>) => void;
+  // Add filter toggle functions
+  toggleCallFilter?: () => void;
+  toggleTimezoneFilter?: () => void;
+}
+
 export const useNavigation = (
   currentIndex: number,
   updateNavigation: (index: number) => void,
@@ -13,7 +31,9 @@ export const useNavigation = (
   shouldBlockNavigation: boolean,
   markLeadAsCalledOnNavigation: (lead: Lead) => void,
   shownLeadsInShuffle: Set<string>,
-  setShownLeadsInShuffle: (shown: Set<string>) => void
+  setShownLeadsInShuffle: (shown: Set<string>) => void,
+  toggleCallFilter?: () => void,
+  toggleTimezoneFilter?: () => void
 ) => {
   const { getNextLeadInSequential, getNextLeadInShuffle } = useLeadSelection();
 
@@ -86,9 +106,27 @@ export const useNavigation = (
       // Find the index in allLeads
       const allLeadsIndex = allLeads.findIndex(l => l.name === lead.name && l.phone === lead.phone);
       if (allLeadsIndex !== -1) {
-        // Use the index from allLeads directly - this will work because the navigation system
-        // uses the same index for both filtered and unfiltered arrays
-        leadIndex = allLeadsIndex;
+        // The lead exists in allLeads but not in the current filtered view
+        // This means the current filters are hiding this lead
+        
+        // Check if the lead is not visible due to call filter (UNCALLED filter)
+        // If the lead has been called (lastCalled exists) and we're in UNCALLED filter mode,
+        // we need to temporarily switch to ALL filter mode to show this lead
+        if (callFilter === 'UNCALLED' && lead.lastCalled) {
+          // Temporarily switch to ALL filter mode to show the called lead
+          if (toggleCallFilter) {
+            toggleCallFilter();
+          }
+          
+          // Use the index from allLeads as a fallback
+          leadIndex = allLeadsIndex;
+        } else {
+          // The lead should be visible in the current filter mode
+          // This might be a timezone filter issue or other filter issue
+          
+          // Use the index from allLeads as a fallback
+          leadIndex = allLeadsIndex;
+        }
       } else {
         return;
       }

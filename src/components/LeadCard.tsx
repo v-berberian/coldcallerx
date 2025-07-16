@@ -7,19 +7,9 @@ import { formatPhoneNumber } from '../utils/phoneUtils';
 import { getStateFromAreaCode } from '../utils/timezoneUtils';
 import { Lead } from '@/types/lead';
 import { AnimatePresence, motion } from 'framer-motion';
-
-interface EmailTemplate {
-  id: string;
-  name: string;
-  subject: string;
-  body: string;
-}
-
-interface TextTemplate {
-  id: string;
-  name: string;
-  message: string;
-}
+import { useLeadCardTemplates, EmailTemplate, TextTemplate } from '@/hooks/useLeadCardTemplates';
+import { useLeadCardSwipe } from '@/hooks/useLeadCardSwipe';
+import { useLeadCardActions } from '@/hooks/useLeadCardActions';
 
 interface LeadCardProps {
   lead: Lead;
@@ -52,136 +42,48 @@ const LeadCard: React.FC<LeadCardProps> = ({
   onImportNew,
   navigationDirection = 'forward'
 }) => {
-  const [emailTemplates, setEmailTemplates] = useState<EmailTemplate[]>([]);
-  const [textTemplates, setTextTemplates] = useState<TextTemplate[]>([]);
-  const [selectedEmailTemplateId, setSelectedEmailTemplateId] = useState<string>('');
-  const [selectedTextTemplateId, setSelectedTextTemplateId] = useState<string>('');
-  const [selectedPhone, setSelectedPhone] = useState(formatPhoneNumber(lead.phone));
-  
-  // Swipe to delete state
-  const [isSwiping, setIsSwiping] = useState(false);
-  const [swipeOffset, setSwipeOffset] = useState(0);
-  const [isDeleteMode, setIsDeleteMode] = useState(false);
-  const [cardHeight, setCardHeight] = useState<number>(0);
-  const cardRef = useRef<HTMLDivElement>(null);
-  const touchStartX = useRef<number>(0);
-  const touchStartY = useRef<number>(0);
+  // Use the extracted hooks
+  const {
+    emailTemplates,
+    textTemplates,
+    selectedEmailTemplateId,
+    selectedTextTemplateId,
+    setSelectedEmailTemplateId,
+    setSelectedTextTemplateId
+  } = useLeadCardTemplates();
+
+  const {
+    isSwiping,
+    swipeOffset,
+    isDeleteMode,
+    cardHeight,
+    cardRef,
+    measureCardHeight,
+    handleTouchStart,
+    handleTouchMove,
+    handleTouchEnd,
+    handleDeleteClick,
+    handleCardClick,
+    resetSwipe
+  } = useLeadCardSwipe(onDeleteLead);
+
+  const {
+    selectedPhone,
+    updateSelectedPhone,
+    handlePhoneSelect,
+    handleEmailClick,
+    handleTextClick
+  } = useLeadCardActions(lead);
 
   // Reset selectedPhone to primary phone when lead changes
   useEffect(() => {
-    const primaryPhone = formatPhoneNumber(lead.phone);
-    setSelectedPhone(primaryPhone);
-  }, [lead.phone, lead.name]);
+    updateSelectedPhone();
+  }, [lead.phone, lead.name, updateSelectedPhone]);
 
   // Measure card height for delete background
   useEffect(() => {
-    if (cardRef.current) {
-      const height = cardRef.current.offsetHeight;
-      setCardHeight(height);
-    }
-  }, [lead, currentIndex, totalCount]);
-
-  // Load templates and selections from localStorage
-  useEffect(() => {
-    // Load templates from SettingsMenu format
-    const emailSubject = localStorage.getItem('emailTemplateSubject') || '';
-    const emailBody = localStorage.getItem('emailTemplateBody') || '';
-    const textMessage = localStorage.getItem('textTemplateMessage') || '';
-
-    // Create template objects from SettingsMenu data
-    if (emailSubject || emailBody) {
-      const emailTemplate: EmailTemplate = {
-        id: 'settings-email',
-        name: 'Settings Email Template',
-        subject: emailSubject,
-        body: emailBody
-      };
-      setEmailTemplates([emailTemplate]);
-      setSelectedEmailTemplateId('settings-email');
-    }
-
-    if (textMessage) {
-      const textTemplate: TextTemplate = {
-        id: 'settings-text',
-        name: 'Settings Text Template',
-        message: textMessage
-      };
-      setTextTemplates([textTemplate]);
-      setSelectedTextTemplateId('settings-text');
-    }
-
-    // Also load legacy templates if they exist
-    const savedEmailTemplates = localStorage.getItem('emailTemplates');
-    if (savedEmailTemplates) {
-      const legacyTemplates = JSON.parse(savedEmailTemplates);
-      setEmailTemplates(prev => [...prev, ...legacyTemplates]);
-    }
-
-    const savedTextTemplates = localStorage.getItem('textTemplates');
-    if (savedTextTemplates) {
-      const legacyTemplates = JSON.parse(savedTextTemplates);
-      setTextTemplates(prev => [...prev, ...legacyTemplates]);
-    }
-
-    const savedSelectedEmailTemplate = localStorage.getItem('selectedEmailTemplate');
-    if (savedSelectedEmailTemplate) {
-      setSelectedEmailTemplateId(savedSelectedEmailTemplate);
-    }
-
-    const savedSelectedTextTemplate = localStorage.getItem('selectedTextTemplate');
-    if (savedSelectedTextTemplate) {
-      setSelectedTextTemplateId(savedSelectedTextTemplate);
-    }
-  }, []);
-
-  // Listen for template changes from SettingsMenu
-  useEffect(() => {
-    const handleStorageChange = () => {
-      const emailSubject = localStorage.getItem('emailTemplateSubject') || '';
-      const emailBody = localStorage.getItem('emailTemplateBody') || '';
-      const textMessage = localStorage.getItem('textTemplateMessage') || '';
-
-      // Update email template
-      if (emailSubject || emailBody) {
-        const emailTemplate: EmailTemplate = {
-          id: 'settings-email',
-          name: 'Settings Email Template',
-          subject: emailSubject,
-          body: emailBody
-        };
-        setEmailTemplates(prev => {
-          const filtered = prev.filter(t => t.id !== 'settings-email');
-          return [emailTemplate, ...filtered];
-        });
-        setSelectedEmailTemplateId('settings-email');
-      }
-
-      // Update text template
-      if (textMessage) {
-        const textTemplate: TextTemplate = {
-          id: 'settings-text',
-          name: 'Settings Text Template',
-          message: textMessage
-        };
-        setTextTemplates(prev => {
-          const filtered = prev.filter(t => t.id !== 'settings-text');
-          return [textTemplate, ...filtered];
-        });
-        setSelectedTextTemplateId('settings-text');
-      }
-    };
-
-    // Listen for storage events (when localStorage changes in other tabs/windows)
-    window.addEventListener('storage', handleStorageChange);
-    
-    // Also check for changes periodically (for same-tab updates)
-    const interval = setInterval(handleStorageChange, 1000);
-
-    return () => {
-      window.removeEventListener('storage', handleStorageChange);
-      clearInterval(interval);
-    };
-  }, []);
+    measureCardHeight();
+  }, [lead, currentIndex, totalCount, measureCardHeight]);
 
   // If we have a noLeadsMessage, show the empty state
   if (noLeadsMessage) {
@@ -221,7 +123,9 @@ const LeadCard: React.FC<LeadCardProps> = ({
     let match;
     
     while ((match = phonePattern.exec(normalizedString)) !== null) {
-      const formattedPhone = `(${match[1]}) ${match[2]}-${match[3]}`;
+      // Use the same formatPhoneNumber function for consistency
+      const digits = match[1] + match[2] + match[3];
+      const formattedPhone = formatPhoneNumber(digits);
       foundPhones.push(formattedPhone);
     }
 
@@ -239,11 +143,6 @@ const LeadCard: React.FC<LeadCardProps> = ({
   // Get state from area code for display
   const leadState = getStateFromAreaCode(lead.phone);
 
-  // Handle phone selection
-  const handlePhoneSelect = (phone: string) => {
-    setSelectedPhone(phone);
-  };
-
   // Modified onCall to use selected phone
   const handleCall = () => {
     onCall(selectedPhone);
@@ -252,142 +151,6 @@ const LeadCard: React.FC<LeadCardProps> = ({
   // Get the selected templates
   const selectedEmailTemplate = emailTemplates.find(t => t.id === selectedEmailTemplateId);
   const selectedTextTemplate = textTemplates.find(t => t.id === selectedTextTemplateId);
-
-  // Helper function to parse name into first and last name
-  const parseName = (name: string) => {
-    const nameParts = name.trim().split(' ');
-    return {
-      firstName: nameParts[0] || '',
-      lastName: nameParts.slice(1).join(' ') || ''
-    };
-  };
-
-  // Create mailto link with template
-  const createMailtoLink = (template?: EmailTemplate) => {
-    if (!hasValidEmail) return '';
-    
-    // Use selected template if no specific template provided and we have a default selected
-    const templateToUse = template || selectedEmailTemplate;
-    
-    if (templateToUse) {
-      // Parse name into first and last name
-      const { firstName, lastName } = parseName(lead.name);
-      
-      // Replace placeholders in template
-      const subject = templateToUse.subject
-        .replace('{name}', lead.name)
-        .replace('{company}', lead.company || '')
-        .replace('{{first_name}}', firstName)
-        .replace('{{last_name}}', lastName);
-      const body = templateToUse.body
-        .replace('{name}', lead.name)
-        .replace('{company}', lead.company || '')
-        .replace('{phone}', selectedPhone)
-        .replace('{{first_name}}', firstName)
-        .replace('{{last_name}}', lastName);
-        
-      return `mailto:${emailValue}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-    }
-    
-    return `mailto:${emailValue}`;
-  };
-
-  // Create SMS link with template
-  const createSmsLink = (template?: TextTemplate) => {
-    const cleanPhone = selectedPhone.replace(/\D/g, '');
-    
-    // Use selected template if no specific template provided and we have a default selected
-    const templateToUse = template || selectedTextTemplate;
-    
-    if (templateToUse) {
-      // Parse name into first and last name
-      const { firstName, lastName } = parseName(lead.name);
-      
-      const message = templateToUse.message
-        .replace('{name}', lead.name)
-        .replace('{company}', lead.company || '')
-        .replace('{{first_name}}', firstName)
-        .replace('{{last_name}}', lastName);
-        
-      return `sms:${cleanPhone}?body=${encodeURIComponent(message)}`;
-    }
-    
-    return `sms:${cleanPhone}`;
-  };
-
-  const handleEmailClick = (template?: EmailTemplate) => {
-    const templateToUse = template || selectedEmailTemplate;
-    window.location.href = createMailtoLink(template);
-  };
-
-  const handleTextClick = (template?: TextTemplate) => {
-    const templateToUse = template || selectedTextTemplate;
-    window.location.href = createSmsLink(template);
-  };
-
-  // Touch gesture handlers for swipe to delete
-  const handleTouchStart = (e: React.TouchEvent) => {
-    const touchX = e.touches[0].clientX;
-    const touchY = e.touches[0].clientY;
-    const cardRect = cardRef.current?.getBoundingClientRect();
-    
-    if (cardRect) {
-      const cardRight = cardRect.right;
-      const cardLeft = cardRect.left;
-      const cardWidth = cardRight - cardLeft;
-      const rightEdgeArea = cardWidth * 0.2; // 20% of card width from right edge
-      
-      // Only allow swiping if touch starts in the right edge area
-      if (touchX >= cardRight - rightEdgeArea) {
-        touchStartX.current = touchX;
-        touchStartY.current = touchY;
-        setIsSwiping(true);
-      }
-    }
-  };
-
-  const handleTouchMove = (e: React.TouchEvent) => {
-    if (!isSwiping) return;
-    
-    const touchX = e.touches[0].clientX;
-    const touchY = e.touches[0].clientY;
-    const deltaX = touchX - touchStartX.current;
-    const deltaY = Math.abs(touchY - touchStartY.current);
-    
-    // Only allow horizontal swiping (prevent vertical scrolling interference)
-    if (deltaY < 50 && deltaX < 0) {
-      // Animate to full delete state
-      setIsSwiping(false); // Enable transitions
-      setSwipeOffset(-100);
-      setIsDeleteMode(true);
-    }
-  };
-
-  const handleTouchEnd = () => {
-    if (!isSwiping) return;
-    
-    setIsSwiping(false);
-    // Card is already in full delete state, no need to adjust
-  };
-
-  const handleDeleteClick = () => {
-    if (onDeleteLead) {
-      setSwipeOffset(-400);
-      setTimeout(() => {
-        onDeleteLead(lead);
-      }, 300);
-    }
-  };
-
-  const handleCardClick = (e: React.MouseEvent) => {
-    // If card is in delete mode, tap anywhere to slide back immediately
-    if (isDeleteMode && swipeOffset < 0) {
-      setSwipeOffset(0);
-      setIsDeleteMode(false);
-      e.preventDefault();
-      e.stopPropagation();
-    }
-  };
 
   return (
     <div className="relative">
@@ -423,15 +186,7 @@ const LeadCard: React.FC<LeadCardProps> = ({
         <Card 
           className="shadow-2xl border-border/30 rounded-3xl bg-background min-h-[400px] max-h-[500px] sm:min-h-[420px] sm:max-h-[550px] flex flex-col mb-4 overflow-hidden" 
           onClick={handleCardClick}
-          onTouchStart={(e) => {
-            // If card is in delete mode, tap anywhere to slide back immediately
-            if (isDeleteMode && swipeOffset < 0) {
-              setSwipeOffset(0);
-              setIsDeleteMode(false);
-              e.preventDefault();
-              e.stopPropagation();
-            }
-          }}
+          onTouchStart={handleCardClick}
           style={{
             pointerEvents: 'auto'
           }}
@@ -453,18 +208,8 @@ const LeadCard: React.FC<LeadCardProps> = ({
                 userSelect: 'none',
                 zIndex: 99999
               }}
-              onClick={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                setSwipeOffset(0);
-                setIsDeleteMode(false);
-              }}
-              onTouchStart={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                setSwipeOffset(0);
-                setIsDeleteMode(false);
-              }}
+              onClick={handleCardClick}
+              onTouchStart={handleCardClick}
               onTouchMove={(e) => {
                 e.preventDefault();
                 e.stopPropagation();
@@ -473,22 +218,12 @@ const LeadCard: React.FC<LeadCardProps> = ({
                 e.preventDefault();
                 e.stopPropagation();
               }}
-              onMouseDown={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                setSwipeOffset(0);
-                setIsDeleteMode(false);
-              }}
+              onMouseDown={handleCardClick}
               onMouseUp={(e) => {
                 e.preventDefault();
                 e.stopPropagation();
               }}
-              onPointerDown={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                setSwipeOffset(0);
-                setIsDeleteMode(false);
-              }}
+              onPointerDown={handleCardClick}
               onPointerUp={(e) => {
                 e.preventDefault();
                 e.stopPropagation();
@@ -597,7 +332,7 @@ const LeadCard: React.FC<LeadCardProps> = ({
                   <div className="flex items-center gap-2">
                     <Mail className="h-4 w-4 text-muted-foreground flex-shrink-0" />
                   <button
-                    onClick={() => handleEmailClick()}
+                    onClick={() => handleEmailClick(selectedEmailTemplate)}
                     className="text-sm text-muted-foreground text-center break-words hover:text-muted-foreground/80 hover:underline transition-colors duration-200 cursor-pointer"
                     title="Click to send email"
                     style={{
@@ -641,7 +376,7 @@ const LeadCard: React.FC<LeadCardProps> = ({
           <div className="flex w-full gap-3">
             <div className="flex-1 flex justify-center" style={{ marginLeft: '-1.5rem' }}>
               <Button 
-                onClick={() => handleTextClick()} 
+                onClick={() => handleTextClick(selectedTextTemplate)} 
                 size="lg" 
                 className="w-24 h-24 sm:w-32 sm:h-32 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 active:from-blue-600 active:to-blue-800 text-white transition-all duration-300 flex items-center justify-center p-0 relative overflow-hidden neomorphic-button focus:outline-none"
                 style={{
