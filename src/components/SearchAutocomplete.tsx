@@ -108,14 +108,14 @@ const SearchAutocomplete: React.FC<SearchAutocompleteProps> = ({
           onTouchStart={handleTouchStart}
           onTouchMove={handleTouchMove}
           onTouchEnd={handleTouchEndWithLead}
-          className="w-full px-4 py-4 text-left border-b border-border/10 last:border-b-0 transition-colors duration-75 cursor-pointer hover:bg-muted/50 active:bg-muted/70 touch-manipulation"
+          className="w-full px-4 py-4 text-left border-b border-border/10 last:border-b-0 transition-colors duration-75 cursor-pointer active:bg-muted/70 touch-manipulation"
           style={{ WebkitTapHighlightColor: 'transparent' }}
         >
           <div className="flex justify-between items-start">
-            <div className="flex-1 min-w-0 mr-3">
-              <p className="font-medium text-foreground truncate mb-1">{lead.name}</p>
+            <div className="flex-1 min-w-0 mr-3 flex flex-col gap-1">
+              <p className="font-medium text-foreground truncate">{lead.name}</p>
               {lead.company && (
-                <p className="text-xs text-muted-foreground truncate mb-1">{lead.company}</p>
+                <p className="text-xs text-muted-foreground truncate">{lead.company}</p>
               )}
               <p className="text-sm text-muted-foreground break-all">{lead.phone}</p>
             </div>
@@ -239,12 +239,16 @@ const SearchAutocomplete: React.FC<SearchAutocompleteProps> = ({
       // Only close if:
       // 1. No movement occurred (true tap)
       // 2. Touch ended outside autocomplete
+      // 3. Touch is not on interactive elements like buttons, popovers, etc.
       if (!hasMoved) {
         const target = e.target as Element;
         const autocompleteArea = target.closest('.search-autocomplete-container');
         const searchArea = target.closest('.search-area');
         
-        if (!autocompleteArea && !searchArea) {
+        // Don't close autocomplete if touching interactive elements
+        const isInteractiveElement = target.closest('button, [role="button"], [data-radix-popper-content-wrapper], [data-radix-popover-trigger], [data-radix-popover-content]');
+        
+        if (!autocompleteArea && !searchArea && !isInteractiveElement) {
           onCloseAutocomplete?.();
         }
       }
@@ -348,7 +352,7 @@ const SearchAutocomplete: React.FC<SearchAutocompleteProps> = ({
 
       return (
         <div 
-          className={`z-50 mt-1 rounded-xl shadow-lg overflow-hidden ${animationClass} bg-background/15 backdrop-blur-sm border border-border/15 search-autocomplete-container`} 
+          className={`z-50 rounded-xl shadow-lg overflow-hidden ${animationClass} bg-background/15 backdrop-blur-sm border border-border/15 search-autocomplete-container`} 
           style={{ ...containerStyle, overflow: 'hidden' }}
           onTouchStart={(e) => e.stopPropagation()}
           onTouchEnd={(e) => e.stopPropagation()}
@@ -465,7 +469,7 @@ const SearchAutocomplete: React.FC<SearchAutocompleteProps> = ({
               onTouchStart={handleTouchStart}
               onTouchMove={handleTouchMove}
               onTouchEnd={handleTouchEnd}
-              className="w-full px-4 py-4 text-left border-b border-border/10 last:border-b-0 transition-colors duration-75 cursor-pointer hover:bg-muted/50 active:bg-muted/70 touch-manipulation"
+              className="w-full px-4 py-4 text-left border-b border-border/10 last:border-b-0 transition-colors duration-75 cursor-pointer active:bg-muted/70 touch-manipulation"
               style={{ WebkitTapHighlightColor: 'transparent' }}
             >
               <div className="flex justify-between items-start">

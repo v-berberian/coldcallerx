@@ -1,7 +1,7 @@
 
 {
-  "name": "ColdCall X",
-  "short_name": "ColdCall X",
+  "name": "Cold Call X",
+  "short_name": "Cold Call X",
   "description": "Professional mobile cold calling app",
   "start_url": "/",
   "display": "standalone",

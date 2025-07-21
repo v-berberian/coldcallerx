@@ -113,11 +113,21 @@ export const useLocalCallingScreenState = ({ leads, onCallMade, refreshTrigger =
     const saveCurrentIndex = async () => {
       try {
         const currentCSVId = await appStorage.getCurrentCSVId();
+        console.log('Saving current index:', currentIndex, 'for CSV ID:', currentCSVId);
+        
+        // Don't save index 0 on initial load to avoid overwriting valid saved index
+        if (currentIndex === 0) {
+          console.log('Skipping save of index 0 to avoid overwriting valid saved index');
+          return;
+        }
+        
         if (currentCSVId) {
           await appStorage.saveCSVCurrentIndex(currentCSVId, currentIndex);
+          console.log('Successfully saved current index:', currentIndex);
         } else {
-          // Fallback to global storage if no CSV ID
+          // Fallback to global storage
           await appStorage.saveCurrentLeadIndex(currentIndex);
+          console.log('Saved to global storage:', currentIndex);
         }
       } catch (error) {
         console.error('Error saving current index:', error);
@@ -137,49 +147,9 @@ export const useLocalCallingScreenState = ({ leads, onCallMade, refreshTrigger =
     saveSearchQuery();
   }, [searchQuery]);
 
-  useEffect(() => {
-    const saveTimezoneFilter = async () => {
-      try {
-        await appStorage.saveTimezoneFilter(timezoneFilter);
-      } catch (error) {
-        console.error('Error saving timezone filter:', error);
-      }
-    };
-    saveTimezoneFilter();
-  }, [timezoneFilter]);
-
-  useEffect(() => {
-    const saveCallFilter = async () => {
-      try {
-        await appStorage.saveCallFilter(callFilter);
-      } catch (error) {
-        console.error('Error saving call filter:', error);
-      }
-    };
-    saveCallFilter();
-  }, [callFilter]);
-
-  useEffect(() => {
-    const saveShuffleMode = async () => {
-      try {
-        await appStorage.saveShuffleMode(shuffleMode);
-      } catch (error) {
-        console.error('Error saving shuffle mode:', error);
-      }
-    };
-    saveShuffleMode();
-  }, [shuffleMode]);
-
-  useEffect(() => {
-    const saveAutoCall = async () => {
-      try {
-        await appStorage.saveAutoCall(autoCall);
-      } catch (error) {
-        console.error('Error saving auto call:', error);
-      }
-    };
-    saveAutoCall();
-  }, [autoCall]);
+  // Note: Filter states are handled by useFilters hook automatically
+  // The useFilters hook loads and applies filter states on initialization
+  // So we don't need to manually save them here
 
   useEffect(() => {
     const saveCallDelay = async () => {
@@ -203,33 +173,9 @@ export const useLocalCallingScreenState = ({ leads, onCallMade, refreshTrigger =
             setSearchQuery(savedSearchQuery);
           }
 
-          // Restore filters
-          const savedTimezoneFilter = await appStorage.getTimezoneFilter();
-          if (savedTimezoneFilter !== 'all') {
-            // Note: We'll need to trigger the filter change
-            // This will be handled by the filter hooks
-          }
-
-          const savedCallFilter = await appStorage.getCallFilter();
-          if (savedCallFilter !== 'all') {
-            // This will be handled by the filter hooks
-          }
-
-          // Restore app modes
-          const savedShuffleMode = await appStorage.getShuffleMode();
-          if (savedShuffleMode) {
-            // This will be handled by the mode hooks
-          }
-
-          const savedAutoCall = await appStorage.getAutoCall();
-          if (savedAutoCall) {
-            // This will be handled by the auto call hooks
-          }
-
-          const savedCallDelay = await appStorage.getCallDelay();
-          if (savedCallDelay > 0) {
-            // This will be handled by the call delay hooks
-          }
+          // Note: Filter states are handled by useFilters hook automatically
+          // The useFilters hook loads and applies filter states on initialization
+          // So we don't need to manually restore them here
 
           localStorageRestoredRef.current = true;
         } catch (error) {
@@ -251,17 +197,38 @@ export const useLocalCallingScreenState = ({ leads, onCallMade, refreshTrigger =
     updateLeadsDataDirectly(updatedLeads);
   }, [updateLeadsDataDirectly]);
 
-  // Only restore from localStorage when leads are ready
+  // Only restore from localStorage when leads are ready and filtered
   useEffect(() => {
     if (
       leadsData.length > 0 && 
       leadsInitialized && 
       !localStorageRestoredRef.current
     ) {
-      restoreFromLocalStorage(leadsData.length);
-      localStorageRestoredRef.current = true;
+      // Add a longer delay to ensure all state is stable before restoring
+      const timer = setTimeout(async () => {
+        try {
+          // Get the filtered leads to ensure we have the correct total count
+          const baseLeads = getBaseLeads();
+          console.log('Restoring index with', baseLeads.length, 'filtered leads');
+          
+          if (baseLeads.length > 0) {
+            // Only restore if we don't already have a valid index
+            if (currentIndex === 0) {
+              await restoreFromLocalStorage(baseLeads.length);
+            } else {
+              console.log('Skipping restoration - current index already set to:', currentIndex);
+            }
+          }
+          localStorageRestoredRef.current = true;
+        } catch (error) {
+          console.error('Error in delayed restoration:', error);
+          localStorageRestoredRef.current = true;
+        }
+      }, 500); // Increased delay to 500ms
+      
+      return () => clearTimeout(timer);
     }
-  }, [leadsData.length, leadsInitialized, restoreFromLocalStorage]);
+  }, [leadsData.length, leadsInitialized, restoreFromLocalStorage, getBaseLeads, currentIndex]);
 
   // Local reset functions - use the actual ones from useLeadNavigation
   const resetCallCount = useCallback(async (lead: Lead) => {
@@ -280,6 +247,59 @@ export const useLocalCallingScreenState = ({ leads, onCallMade, refreshTrigger =
     }
   }, [leadNavigationResetAllCallCounts]);
 
+  // Debug function to test current index saving
+  const testCurrentIndexSave = useCallback(async () => {
+    try {
+      const currentCSVId = await appStorage.getCurrentCSVId();
+      console.log('Testing current index save - Current index:', currentIndex, 'CSV ID:', currentCSVId);
+      
+      if (currentCSVId) {
+        await appStorage.saveCSVCurrentIndex(currentCSVId, currentIndex);
+        console.log('Test save successful - saved index:', currentIndex);
+        
+        // Test retrieval
+        const retrievedIndex = await appStorage.getCSVCurrentIndex(currentCSVId);
+        console.log('Test retrieval - retrieved index:', retrievedIndex);
+      }
+    } catch (error) {
+      console.error('Error in test current index save:', error);
+    }
+  }, [currentIndex]);
+
+  // Save current index when component unmounts or app is about to close
+  useEffect(() => {
+    const handleBeforeUnload = () => {
+      // Save current index immediately when app is about to close
+      const saveCurrentIndex = async () => {
+        try {
+          const currentCSVId = await appStorage.getCurrentCSVId();
+          // Only save if we have a valid index (not 0) and CSV ID
+          if (currentCSVId && currentIndex > 0) {
+            await appStorage.saveCSVCurrentIndex(currentCSVId, currentIndex);
+            console.log('Saved current index on app close:', currentIndex);
+          } else {
+            console.log('Skipping save on app close - invalid index or CSV ID. Index:', currentIndex, 'CSV ID:', currentCSVId);
+          }
+        } catch (error) {
+          console.error('Error saving current index on app close:', error);
+        }
+      };
+      saveCurrentIndex();
+    };
+
+    // Add event listener for beforeunload
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    
+    // Cleanup function
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+      // Also save when component unmounts, but only if we have a valid index
+      if (currentIndex > 0) {
+        handleBeforeUnload();
+      }
+    };
+  }, [currentIndex]);
+
   return {
     componentReady,
     setComponentReady,
@@ -297,8 +317,8 @@ export const useLocalCallingScreenState = ({ leads, onCallMade, refreshTrigger =
     currentLeadForAutoCall,
     setCurrentLeadForAutoCall,
     isCountdownActive,
-    isFilterChanging,
     countdownTime,
+    isFilterChanging,
     getBaseLeads,
     makeCall,
     executeAutoCall,
@@ -330,6 +350,7 @@ export const useLocalCallingScreenState = ({ leads, onCallMade, refreshTrigger =
     closeAutocomplete,
     getDelayDisplayType,
     updateNavigation,
-    isLoaded
+    isLoaded,
+    testCurrentIndexSave
   };
 };

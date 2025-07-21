@@ -484,6 +484,12 @@ body.progress-bar-visible {
   -moz-osx-font-smoothing: grayscale;
 }
 
+button, [role="button"], .no-select, .touch-manipulation {
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
 /* Allow text selection only for specific elements that need it */
 input, textarea, [contenteditable] {
   -webkit-touch-callout: default;
@@ -660,6 +666,169 @@ button.no-hover:hover .h-5.w-5 {
 
 [data-radix-dropdown-trigger] button.no-hover:hover svg {
   color: hsl(var(--muted-foreground)) !important;
+}
+
+/* Override any conflicting hover effects for popover triggers (settings menu) */
+[data-radix-popover-trigger] button.no-hover:hover {
+  background-color: transparent !important;
+  background: transparent !important;
+  color: hsl(var(--muted-foreground)) !important;
+}
+
+[data-radix-popover-trigger] button.no-hover:hover svg {
+  color: hsl(var(--muted-foreground)) !important;
+}
+
+/* Additional specific rules for CSV selector */
+button.no-hover:hover {
+  background-color: transparent !important;
+  background: transparent !important;
+  color: inherit !important;
+  transform: none !important;
+  box-shadow: none !important;
+}
+
+button.no-hover:hover svg {
+  color: inherit !important;
+  transform: none !important;
+  filter: none !important;
+}
+
+/* Force disable hover on ghost variant buttons */
+button[data-variant="ghost"].no-hover:hover,
+button.no-hover[data-variant="ghost"]:hover {
+  background-color: transparent !important;
+  background: transparent !important;
+  color: hsl(var(--muted-foreground)) !important;
+}
+
+button[data-variant="ghost"].no-hover:hover svg,
+button.no-hover[data-variant="ghost"]:hover svg {
+  color: hsl(var(--muted-foreground)) !important;
+  transform: none !important;
+  filter: none !important;
+}
+
+/* Force disable hover on CSV selector and settings buttons */
+.csv-selector-button:hover,
+.settings-selector-button:hover {
+  background-color: transparent !important;
+  background: transparent !important;
+  color: hsl(var(--muted-foreground)) !important;
+  transform: none !important;
+  box-shadow: none !important;
+}
+
+.csv-selector-button:hover svg,
+.settings-selector-button:hover svg {
+  color: hsl(var(--muted-foreground)) !important;
+  transform: none !important;
+  filter: none !important;
+}
+
+/* Maximum specificity to override any hover effects */
+button[class*="csv-selector-button"]:hover,
+button[class*="settings-selector-button"]:hover {
+  background-color: transparent !important;
+  background: transparent !important;
+  color: hsl(var(--muted-foreground)) !important;
+  transform: none !important;
+  box-shadow: none !important;
+}
+
+button[class*="csv-selector-button"]:hover svg,
+button[class*="settings-selector-button"]:hover svg {
+  color: hsl(var(--muted-foreground)) !important;
+  transform: none !important;
+  filter: none !important;
+}
+
+/* Override any Radix UI hover effects */
+[data-radix-dropdown-trigger] button:hover,
+[data-radix-popover-trigger] button:hover {
+  background-color: transparent !important;
+  background: transparent !important;
+  color: hsl(var(--muted-foreground)) !important;
+}
+
+[data-radix-dropdown-trigger] button:hover svg,
+[data-radix-popover-trigger] button:hover svg {
+  color: hsl(var(--muted-foreground)) !important;
+  transform: none !important;
+  filter: none !important;
+}
+
+/* Force settings button animation to work */
+.settings-selector-button svg {
+  transition: transform 0.3s ease-out, filter 0.3s ease-out !important;
+}
+
+/* Ensure settings button transform and filter work when open */
+[data-radix-popover-trigger] .settings-selector-button svg {
+  transition: transform 0.3s ease-out, filter 0.3s ease-out !important;
+}
+
+/* Debug: Force settings button animation with maximum specificity */
+[data-radix-popover-trigger] button.settings-selector-button svg {
+  transition: transform 0.3s ease-out, filter 0.3s ease-out !important;
+  will-change: transform, filter !important;
+}
+
+/* Override any conflicting transform rules */
+[data-radix-popover-trigger] button.settings-selector-button svg[style*="transform"] {
+  transition: transform 0.3s ease-out, filter 0.3s ease-out !important;
+}
+
+/* Debug: Add visible red background when settings is open to test state */
+[data-radix-popover-trigger] button.settings-selector-button[style*="background"] {
+  background-color: red !important;
+}
+
+/* Force settings button to work with maximum specificity */
+button.settings-selector-button[style] {
+  background-color: var(--background-color) !important;
+  box-shadow: var(--box-shadow) !important;
+}
+
+button.settings-selector-button[style] svg {
+  transform: var(--transform) !important;
+  filter: var(--filter) !important;
+}
+
+button.settings-selector-button[data-state="open"] svg,
+[data-radix-popover-trigger] button.settings-selector-button[data-state="open"] svg {
+  transform: scale(0.95) !important;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.1)) !important;
+  transition: transform 0.3s ease-out, filter 0.3s ease-out !important;
+}
+
+/* Alternative approach: target by attribute */
+button[class*="settings-selector-button"] svg {
+  transition: transform 0.3s ease-out, filter 0.3s ease-out !important;
+}
+
+button[class*="settings-selector-button"][data-state="open"] svg,
+button[class*="settings-selector-button"][aria-expanded="true"] svg {
+  transform: scale(0.95) !important;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.1)) !important;
+}
+
+/* Target by data-settings-open attribute */
+button[data-settings-open="true"] svg {
+  transform: scale(0.95) !important;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.1)) !important;
+  transition: transform 0.3s ease-out, filter 0.3s ease-out !important;
+}
+
+button[data-settings-open="false"] svg {
+  transform: scale(1) !important;
+  filter: none !important;
+  transition: transform 0.3s ease-out, filter 0.3s ease-out !important;
+}
+
+/* Ensure all settings buttons have transition */
+.settings-selector-button svg {
+  transition: transform 0.3s ease-out, filter 0.3s ease-out !important;
 }
 
 /* Ensure icon shadows work */

@@ -199,10 +199,12 @@ const SearchBar = forwardRef<SearchBarRef, SearchBarProps>(({
         onBlur={handleBlur} 
         onClick={handleInputClick}
         enterKeyHint="done"
-        className={`w-full px-4 py-2 bg-card text-card-foreground rounded-xl border border-border placeholder:text-center placeholder:text-muted-foreground text-center focus:border-primary/50 focus:bg-card shadow-sm ${!hasStartedTyping && isFocused ? 'caret-transparent' : ''}`}
+        className={`w-full py-2 bg-card text-card-foreground rounded-xl border border-border placeholder:text-center placeholder:text-muted-foreground text-center focus:border-primary/50 focus:bg-card shadow-sm ${!hasStartedTyping && isFocused ? 'caret-transparent' : ''}`}
         ref={inputRef}
         style={{
-          caretColor: (!hasStartedTyping && isFocused) ? 'transparent' : 'auto'
+          caretColor: (!hasStartedTyping && isFocused) ? 'transparent' : 'auto',
+          paddingLeft: '2.5rem',
+          paddingRight: searchQuery ? '2.5rem' : '1rem'
         }}
       />
       {/* Fullscreen button on the left */}

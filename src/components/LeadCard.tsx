@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from '@/components/ui/dropdown-menu';
@@ -25,6 +25,7 @@ interface LeadCardProps {
   refreshTrigger?: number;
   onImportNew?: () => void;
   navigationDirection?: 'forward' | 'backward';
+  onSwipeReset?: (resetSwipe: () => void) => void;
 }
 
 const LeadCard: React.FC<LeadCardProps> = ({
@@ -40,7 +41,8 @@ const LeadCard: React.FC<LeadCardProps> = ({
   noLeadsMessage,
   refreshTrigger,
   onImportNew,
-  navigationDirection = 'forward'
+  navigationDirection = 'forward',
+  onSwipeReset
 }) => {
   // Use the extracted hooks
   const {
@@ -84,6 +86,13 @@ const LeadCard: React.FC<LeadCardProps> = ({
   useEffect(() => {
     measureCardHeight();
   }, [lead, currentIndex, totalCount, measureCardHeight]);
+
+  // Pass resetSwipe function up to parent
+  useEffect(() => {
+    if (onSwipeReset) {
+      onSwipeReset(resetSwipe);
+    }
+  }, [onSwipeReset, resetSwipe]);
 
   // If we have a noLeadsMessage, show the empty state
   if (noLeadsMessage) {
@@ -184,52 +193,13 @@ const LeadCard: React.FC<LeadCardProps> = ({
         onTouchEnd={handleTouchEnd}
       >
         <Card 
-          className="shadow-2xl border-border/30 rounded-3xl bg-background min-h-[400px] max-h-[500px] sm:min-h-[420px] sm:max-h-[550px] flex flex-col mb-4 overflow-hidden" 
+          className="shadow-2xl border-border/30 rounded-3xl bg-background min-h-[400px] max-h-[500px] sm:min-h-[420px] sm:max-h-[550px] flex flex-col mb-4 overflow-hidden relative" 
           onClick={handleCardClick}
           onTouchStart={handleCardClick}
           style={{
             pointerEvents: 'auto'
           }}
         >
-          {/* Single overlay blocker for delete mode */}
-          {isDeleteMode && (
-            <div 
-              className="absolute inset-0 z-[99999] bg-transparent"
-              style={{ 
-                touchAction: 'none',
-                pointerEvents: 'auto',
-                position: 'absolute',
-                top: 0,
-                left: 0,
-                right: 0,
-                bottom: 0,
-                WebkitTouchCallout: 'none',
-                WebkitUserSelect: 'none',
-                userSelect: 'none',
-                zIndex: 99999
-              }}
-              onClick={handleCardClick}
-              onTouchStart={handleCardClick}
-              onTouchMove={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-              }}
-              onTouchEnd={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-              }}
-              onMouseDown={handleCardClick}
-              onMouseUp={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-              }}
-              onPointerDown={handleCardClick}
-              onPointerUp={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-              }}
-            />
-          )}
       <CardContent className="flex-1 flex flex-col overflow-hidden">
         {/* Top row with lead count and file name */}
         <div className="flex items-center justify-center p-3 sm:p-5 pb-0">
@@ -287,10 +257,11 @@ const LeadCard: React.FC<LeadCardProps> = ({
                 {hasAdditionalPhones ? (
                   <DropdownMenu>
                     <DropdownMenuTrigger 
-                      className="flex items-center gap-1 cursor-pointer hover:text-foreground transition-colors"
+                      className="flex items-center gap-1 cursor-pointer transition-colors"
                       style={{
                         pointerEvents: isDeleteMode ? 'none' : 'auto'
                       }}
+                      disabled={isDeleteMode}
                     >
                       <p className="text-base sm:text-lg bg-gradient-to-r from-muted-foreground to-muted-foreground/95 bg-clip-text text-transparent dark:bg-none dark:text-muted-foreground">{selectedPhone}</p>
                       <ChevronDown className="h-4 w-4 text-muted-foreground" />
@@ -306,7 +277,7 @@ const LeadCard: React.FC<LeadCardProps> = ({
                           <DropdownMenuItem 
                             key={index} 
                             onClick={() => handlePhoneSelect(phoneData.phone)}
-                            className="w-full px-4 py-3 text-left border-b border-border/10 last:border-b-0 transition-colors duration-75 cursor-pointer hover:bg-muted/50 relative"
+                            className="w-full px-4 py-3 text-left border-b border-border/10 last:border-b-0 transition-colors duration-75 cursor-pointer relative"
                           >
                             <div className="flex justify-between items-center w-full">
                               <span className={`text-foreground ${phoneData.isPrimary ? 'font-bold' : 'font-medium'}`}>
@@ -333,7 +304,7 @@ const LeadCard: React.FC<LeadCardProps> = ({
                     <Mail className="h-4 w-4 text-muted-foreground flex-shrink-0" />
                   <button
                     onClick={() => handleEmailClick(selectedEmailTemplate)}
-                    className="text-sm text-muted-foreground text-center break-words hover:text-muted-foreground/80 hover:underline transition-colors duration-200 cursor-pointer"
+                    className="text-sm text-muted-foreground text-center break-words transition-colors duration-200 cursor-pointer"
                     title="Click to send email"
                     style={{
                       pointerEvents: isDeleteMode ? 'none' : 'auto'
@@ -375,8 +346,11 @@ const LeadCard: React.FC<LeadCardProps> = ({
           {/* Action Buttons - Call and Text */}
           <div className="flex w-full gap-3">
             <div className="flex-1 flex justify-center" style={{ marginLeft: '-1.5rem' }}>
+              {!isDeleteMode ? (
               <Button 
-                onClick={() => handleTextClick(selectedTextTemplate)} 
+                  onClick={e => {
+                    handleTextClick(selectedTextTemplate);
+                  }}
                 size="lg" 
                 className="w-24 h-24 sm:w-32 sm:h-32 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 active:from-blue-600 active:to-blue-800 text-white transition-all duration-300 flex items-center justify-center p-0 relative overflow-hidden neomorphic-button focus:outline-none"
                 style={{
@@ -388,9 +362,11 @@ const LeadCard: React.FC<LeadCardProps> = ({
                   `,
                   WebkitTapHighlightColor: 'transparent',
                   transform: 'translateY(0)',
-                  transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
+                    transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                    pointerEvents: 'auto',
+                    touchAction: 'manipulation'
                 }}
-                onMouseDown={(e) => {
+                  onMouseDown={e => {
                   e.currentTarget.style.transform = 'translateY(2px)';
                   e.currentTarget.style.boxShadow = `
                     4px 4px 8px rgba(0, 0, 0, 0.3),
@@ -399,7 +375,7 @@ const LeadCard: React.FC<LeadCardProps> = ({
                     inset -4px -4px 8px rgba(255, 255, 255, 0.1)
                   `;
                 }}
-                onMouseUp={(e) => {
+                  onMouseUp={e => {
                   e.currentTarget.style.transform = 'translateY(0)';
                   e.currentTarget.style.boxShadow = `
                     8px 8px 16px rgba(0, 0, 0, 0.2),
@@ -408,7 +384,7 @@ const LeadCard: React.FC<LeadCardProps> = ({
                     inset -2px -2px 4px rgba(0, 0, 0, 0.1)
                   `;
                 }}
-                onMouseLeave={(e) => {
+                  onMouseLeave={e => {
                   e.currentTarget.style.transform = 'translateY(0)';
                   e.currentTarget.style.boxShadow = `
                     8px 8px 16px rgba(0, 0, 0, 0.2),
@@ -417,7 +393,7 @@ const LeadCard: React.FC<LeadCardProps> = ({
                     inset -2px -2px 4px rgba(0, 0, 0, 0.1)
                   `;
                 }}
-                onTouchStart={(e) => {
+                  onTouchStart={e => {
                   e.currentTarget.style.transform = 'translateY(2px)';
                   e.currentTarget.style.boxShadow = `
                     4px 4px 8px rgba(0, 0, 0, 0.3),
@@ -426,7 +402,7 @@ const LeadCard: React.FC<LeadCardProps> = ({
                     inset -4px -4px 8px rgba(255, 255, 255, 0.1)
                   `;
                 }}
-                onTouchEnd={(e) => {
+                  onTouchEnd={e => {
                   setTimeout(() => {
                     e.currentTarget.style.transform = 'translateY(0)';
                     e.currentTarget.style.boxShadow = `
@@ -437,7 +413,7 @@ const LeadCard: React.FC<LeadCardProps> = ({
                     `;
                   }, 150);
                 }}
-                onFocus={(e) => {
+                  onFocus={e => {
                   e.currentTarget.style.transform = 'translateY(0)';
                   e.currentTarget.style.boxShadow = `
                     8px 8px 16px rgba(0, 0, 0, 0.2),
@@ -446,7 +422,7 @@ const LeadCard: React.FC<LeadCardProps> = ({
                     inset -2px -2px 4px rgba(0, 0, 0, 0.1)
                   `;
                 }}
-                onBlur={(e) => {
+                  onBlur={e => {
                   e.currentTarget.style.transform = 'translateY(0)';
                   e.currentTarget.style.boxShadow = `
                     8px 8px 16px rgba(0, 0, 0, 0.2),
@@ -458,10 +434,24 @@ const LeadCard: React.FC<LeadCardProps> = ({
               >
                 <MessageSquare className="h-[32px] w-[32px] sm:h-[40px] sm:w-[40px] drop-shadow-md mx-auto" style={{ filter: 'drop-shadow(0 1px 2px rgba(0, 0, 0, 0.15))' }} />
               </Button>
+              ) : (
+                <div 
+                  className="w-24 h-24 sm:w-32 sm:h-32 rounded-full bg-gradient-to-br from-blue-400/50 to-blue-600/50 text-white/50 flex items-center justify-center"
+                  style={{
+                    pointerEvents: 'none',
+                    touchAction: 'none'
+                  }}
+                >
+                  <MessageSquare className="h-[32px] w-[32px] sm:h-[40px] sm:w-[40px] drop-shadow-md mx-auto" style={{ filter: 'drop-shadow(0 1px 2px rgba(0, 0, 0, 0.15))' }} />
+                </div>
+              )}
             </div>
             <div className="flex-1 flex justify-center" style={{ marginRight: '-1.5rem' }}>
+              {!isDeleteMode ? (
               <Button 
-                onClick={handleCall} 
+                  onClick={e => {
+                    handleCall();
+                  }}
                 size="lg" 
                 className="w-24 h-24 sm:w-32 sm:h-32 rounded-full bg-gradient-to-br from-green-400 to-green-600 active:from-green-600 active:to-green-800 text-white transition-all duration-300 flex items-center justify-center p-0 relative overflow-hidden neomorphic-button focus:outline-none"
                 style={{
@@ -473,9 +463,11 @@ const LeadCard: React.FC<LeadCardProps> = ({
                   `,
                   WebkitTapHighlightColor: 'transparent',
                   transform: 'translateY(0)',
-                  transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
+                    transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                    pointerEvents: 'auto',
+                    touchAction: 'manipulation'
                 }}
-                onMouseDown={(e) => {
+                  onMouseDown={e => {
                   e.currentTarget.style.transform = 'translateY(2px)';
                   e.currentTarget.style.boxShadow = `
                     4px 4px 8px rgba(0, 0, 0, 0.3),
@@ -484,7 +476,7 @@ const LeadCard: React.FC<LeadCardProps> = ({
                     inset -4px -4px 8px rgba(255, 255, 255, 0.1)
                   `;
                 }}
-                onMouseUp={(e) => {
+                  onMouseUp={e => {
                   e.currentTarget.style.transform = 'translateY(0)';
                   e.currentTarget.style.boxShadow = `
                     8px 8px 16px rgba(0, 0, 0, 0.2),
@@ -493,7 +485,7 @@ const LeadCard: React.FC<LeadCardProps> = ({
                     inset -2px -2px 4px rgba(0, 0, 0, 0.1)
                   `;
                 }}
-                onMouseLeave={(e) => {
+                  onMouseLeave={e => {
                   e.currentTarget.style.transform = 'translateY(0)';
                   e.currentTarget.style.boxShadow = `
                     8px 8px 16px rgba(0, 0, 0, 0.2),
@@ -502,7 +494,7 @@ const LeadCard: React.FC<LeadCardProps> = ({
                     inset -2px -2px 4px rgba(0, 0, 0, 0.1)
                   `;
                 }}
-                onTouchStart={(e) => {
+                  onTouchStart={e => {
                   e.currentTarget.style.transform = 'translateY(2px)';
                   e.currentTarget.style.boxShadow = `
                     4px 4px 8px rgba(0, 0, 0, 0.3),
@@ -511,7 +503,7 @@ const LeadCard: React.FC<LeadCardProps> = ({
                     inset -4px -4px 8px rgba(255, 255, 255, 0.1)
                   `;
                 }}
-                onTouchEnd={(e) => {
+                  onTouchEnd={e => {
                   setTimeout(() => {
                     e.currentTarget.style.transform = 'translateY(0)';
                     e.currentTarget.style.boxShadow = `
@@ -522,7 +514,7 @@ const LeadCard: React.FC<LeadCardProps> = ({
                     `;
                   }, 150);
                 }}
-                onFocus={(e) => {
+                  onFocus={e => {
                   e.currentTarget.style.transform = 'translateY(0)';
                   e.currentTarget.style.boxShadow = `
                     8px 8px 16px rgba(0, 0, 0, 0.2),
@@ -531,7 +523,7 @@ const LeadCard: React.FC<LeadCardProps> = ({
                     inset -2px -2px 4px rgba(0, 0, 0, 0.1)
                   `;
                 }}
-                onBlur={(e) => {
+                  onBlur={e => {
                   e.currentTarget.style.transform = 'translateY(0)';
                   e.currentTarget.style.boxShadow = `
                     8px 8px 16px rgba(0, 0, 0, 0.2),
@@ -543,12 +535,25 @@ const LeadCard: React.FC<LeadCardProps> = ({
               >
                 <Phone className="h-[32px] w-[32px] sm:h-[40px] sm:w-[40px] drop-shadow-md mx-auto" style={{ filter: 'drop-shadow(0 1px 2px rgba(0, 0, 0, 0.15))' }} />
               </Button>
+              ) : (
+                <div 
+                  className="w-24 h-24 sm:w-32 sm:h-32 rounded-full bg-gradient-to-br from-green-400/50 to-green-600/50 text-white/50 flex items-center justify-center"
+                  style={{
+                    pointerEvents: 'none',
+                    touchAction: 'none'
+                  }}
+                >
+                  <Phone className="h-[32px] w-[32px] sm:h-[40px] sm:w-[40px] drop-shadow-md mx-auto" style={{ filter: 'drop-shadow(0 1px 2px rgba(0, 0, 0, 0.15))' }} />
+                </div>
+              )}
             </div>
           </div>
         </div>
       </CardContent>
     </Card>
       </motion.div>
+      
+
     </div>
   );
 };

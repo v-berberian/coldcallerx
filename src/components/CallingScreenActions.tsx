@@ -14,6 +14,7 @@ interface CallingScreenActionsProps {
   resetCallCount: (currentLeadsData: Lead[], lead: Lead) => Promise<Lead[]>;
   resetAllCallCounts: (currentLeadsData: Lead[]) => Promise<Lead[]>;
   onLeadsDataUpdate: (updatedLeads: Lead[]) => void;
+  resetSwipe?: () => void;
 }
 
 export const useCallingScreenActions = ({
@@ -29,7 +30,8 @@ export const useCallingScreenActions = ({
   updateLeadCallCount,
   resetCallCount,
   resetAllCallCounts,
-  onLeadsDataUpdate
+  onLeadsDataUpdate,
+  resetSwipe
 }: CallingScreenActionsProps) => {
   
   const handleLeadSelect = (lead: Lead) => {
@@ -68,6 +70,11 @@ export const useCallingScreenActions = ({
       const currentLeads = getBaseLeads();
       const currentLead = currentLeads[currentIndex];
       
+      // Close delete menu if open
+      if (resetSwipe) {
+        resetSwipe();
+      }
+      
       handleNext(currentLeads);
     } catch (error) {
       console.error('CallingScreenActions: Error in handleNextWrapper:', error);
@@ -77,6 +84,12 @@ export const useCallingScreenActions = ({
   const handlePreviousWrapper = () => {
     try {
       const currentLeads = getBaseLeads();
+      
+      // Close delete menu if open
+      if (resetSwipe) {
+        resetSwipe();
+      }
+      
       handlePrevious(currentLeads);
     } catch (error) {
       console.error('CallingScreenActions: Error in handlePreviousWrapper:', error);

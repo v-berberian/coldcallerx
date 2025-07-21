@@ -2,7 +2,7 @@ import type { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
   appId: 'com.coldcallerx.app',
-  appName: 'ColdCall X',
+  appName: 'Cold Call X',
   webDir: 'dist'
 };
 

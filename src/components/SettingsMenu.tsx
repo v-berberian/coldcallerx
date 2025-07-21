@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Mail, HelpCircle, ChevronDown, Plus, Edit, Trash2, MessageSquare, Check, Upload, FileText, Sun, Moon, Smartphone, Database } from 'lucide-react';
+import { Mail, HelpCircle, ChevronDown, Plus, Edit, Trash2, MessageSquare, Check, Upload, FileText, Sun, Moon, Smartphone, Database, Settings } from 'lucide-react';
 import { useTheme } from 'next-themes';
 import {
   Popover,
@@ -38,7 +38,7 @@ interface TextTemplate {
 }
 
 interface SettingsMenuProps {
-  children: (isOpen: boolean) => React.ReactNode;
+  children?: (isOpen: boolean) => React.ReactNode;
 }
 
 const SettingsMenu: React.FC<SettingsMenuProps> = ({ children }) => {
@@ -60,8 +60,6 @@ const SettingsMenu: React.FC<SettingsMenuProps> = ({ children }) => {
   const [modeOpen, setModeOpen] = useState(false);
   const [storageOpen, setStorageOpen] = useState(false);
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
-  const [isAnimating, setIsAnimating] = useState(false);
-  const [shouldRender, setShouldRender] = useState(false);
   const [isClearingStorage, setIsClearingStorage] = useState(false);
   
   // Theme management
@@ -134,21 +132,6 @@ const SettingsMenu: React.FC<SettingsMenuProps> = ({ children }) => {
 
 
 
-  // Animation effect for disappearing
-  useEffect(() => {
-    if (isPopoverOpen) {
-      setShouldRender(true);
-      setIsAnimating(true);
-    } else if (shouldRender) {
-      setIsAnimating(false);
-      // Fade out animation duration - same as autocomplete
-      const timer = setTimeout(() => {
-        setShouldRender(false);
-      }, 20); // Same 20ms as autocomplete for fast disappearance
-      return () => clearTimeout(timer);
-    }
-  }, [isPopoverOpen, shouldRender]);
-
   return (
     <Popover onOpenChange={(open) => {
       setIsPopoverOpen(open);
@@ -163,17 +146,37 @@ const SettingsMenu: React.FC<SettingsMenuProps> = ({ children }) => {
       }
     }}>
       <PopoverTrigger asChild>
-        <div className="">
-          {children(isPopoverOpen)}
-        </div>
-      </PopoverTrigger>
-      {shouldRender && (
-        <PopoverContent 
-          className={`w-screen p-0 border-border/20 shadow-lg max-h-[95vh] overflow-y-auto ${isAnimating ? 'animate-slide-down' : 'animate-slide-up'}`}
-          sideOffset={5}
-          align="center"
-          data-settings-menu="true"
+        <Button
+          variant="ghost"
+          size="icon"
+          className="h-8 w-8 text-base focus:bg-transparent active:bg-transparent transition-all duration-300 ease-out rounded-lg no-hover settings-selector-button text-muted-foreground"
+          style={{ 
+            WebkitTapHighlightColor: 'transparent',
+            backgroundColor: isPopoverOpen ? (document.documentElement.classList.contains('dark') ? 'rgba(31, 41, 55, 0.5)' : 'rgba(243, 244, 246, 0.5)') : 'transparent',
+            color: 'hsl(var(--muted-foreground))',
+            boxShadow: isPopoverOpen ? 'inset 0 2px 4px rgba(0,0,0,0.2), inset 0 1px 2px rgba(255,255,255,0.1)' : 'none',
+            '--background-color': isPopoverOpen ? (document.documentElement.classList.contains('dark') ? 'rgba(31, 41, 55, 0.5)' : 'rgba(243, 244, 246, 0.5)') : 'transparent',
+            '--box-shadow': isPopoverOpen ? 'inset 0 2px 4px rgba(0,0,0,0.2), inset 0 1px 2px rgba(255,255,255,0.1)' : 'none',
+            '--transform': isPopoverOpen ? 'scale(0.95)' : 'scale(1)',
+            '--filter': isPopoverOpen ? 'drop-shadow(0 1px 2px rgba(0,0,0,0.1))' : 'none'
+          } as React.CSSProperties}
         >
+          <Settings 
+            className="h-5 w-5 transition-all duration-300 ease-out"
+            style={{
+              color: 'hsl(var(--muted-foreground))',
+              transform: isPopoverOpen ? 'scale(0.95)' : 'scale(1)',
+              filter: isPopoverOpen ? 'drop-shadow(0 1px 2px rgba(0,0,0,0.1))' : 'none'
+            }}
+          />
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent 
+        className="w-screen p-0 border-border/20 shadow-lg max-h-[95vh] overflow-y-auto animate-slide-down"
+        sideOffset={5}
+        align="center"
+        data-settings-menu="true"
+      >
           <div className="p-4 space-y-4 pb-8">
             <div className="space-y-4">
               {/* Templates Section */}
@@ -424,7 +427,6 @@ const SettingsMenu: React.FC<SettingsMenuProps> = ({ children }) => {
             </div>
           </div>
         </PopoverContent>
-      )}
     </Popover>
   );
 };

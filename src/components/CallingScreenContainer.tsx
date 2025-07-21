@@ -106,6 +106,9 @@ const CallingScreenContainer: React.FC<CallingScreenContainerProps> = memo(({
     updateLeadsDataDirectly(updatedLeads);
   };
 
+  // Store the resetSwipe function for navigation handlers
+  const [resetSwipe, setResetSwipe] = useState<(() => void) | null>(null);
+
   // Handle full leads data reset (for CSV import)
   const handleLeadsDataReset = (updatedLeads: Lead[]) => {
     memoizedResetLeadsData(updatedLeads);
@@ -131,7 +134,8 @@ const CallingScreenContainer: React.FC<CallingScreenContainerProps> = memo(({
     updateLeadCallCount: resetCallCount,
     resetCallCount: resetCallCount,
     resetAllCallCounts: resetAllCallCounts,
-    onLeadsDataUpdate: handleLeadsDataUpdate
+    onLeadsDataUpdate: handleLeadsDataUpdate,
+    resetSwipe
   });
 
   // Handle CSV import locally
@@ -148,6 +152,11 @@ const CallingScreenContainer: React.FC<CallingScreenContainerProps> = memo(({
     // This preserves the lastCalled status from storage
     updateLeadsDataDirectly(newLeads);
     onCSVSelect(csvId, newLeads, newFileName);
+  };
+
+  // Handle swipe reset callback to pass to navigation handlers
+  const handleSwipeReset = (resetFn: () => void) => {
+    setResetSwipe(() => resetFn);
   };
 
   // Show loading until component is ready
@@ -273,6 +282,7 @@ const CallingScreenContainer: React.FC<CallingScreenContainerProps> = memo(({
               importButton.click();
             }
           }}
+          onSwipeReset={handleSwipeReset}
         />
       </div>
     </div>

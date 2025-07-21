@@ -133,10 +133,14 @@ export const useFilterChangeEffects = (
 
   useEffect(() => {
     const baseLeads = getBaseLeads();
-    // Add null check for baseLeads
-    if (baseLeads && currentIndex >= baseLeads.length && baseLeads.length > 0) {
-      resetNavigation(0);
+    // Only reset if current index is truly out of bounds and we have leads
+    if (baseLeads && baseLeads.length > 0 && currentIndex >= baseLeads.length) {
+      // Find the closest valid index instead of always resetting to 0
+      const closestIndex = Math.min(currentIndex, baseLeads.length - 1);
+      if (closestIndex !== currentIndex) {
+        resetNavigation(closestIndex);
+      }
     }
-  }, [timezoneFilter, callFilter, currentIndex]);
+  }, [timezoneFilter, callFilter, currentIndex, getBaseLeads, resetNavigation]);
 };
 

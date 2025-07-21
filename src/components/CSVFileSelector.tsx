@@ -36,8 +36,6 @@ const CSVFileSelector: React.FC<CSVFileSelectorProps> = ({
   const [currentFile, setCurrentFile] = useState<CSVFile | null>(null);
   const [loading, setLoading] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-  const [isAnimating, setIsAnimating] = useState(false);
-  const [shouldRender, setShouldRender] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   
   // Use the CSV importer hook for handling file processing
@@ -65,21 +63,6 @@ const CSVFileSelector: React.FC<CSVFileSelectorProps> = ({
     }
   }, [currentCSVId, csvFiles]);
 
-  // Animation effect for disappearing - same as settings menu
-  useEffect(() => {
-    if (isDropdownOpen) {
-      setShouldRender(true);
-      setIsAnimating(true);
-    } else if (shouldRender) {
-      setIsAnimating(false);
-      // Fade out animation duration - same as settings menu
-      const timer = setTimeout(() => {
-        setShouldRender(false);
-      }, 20); // Same 20ms as settings menu for fast disappearance
-      return () => clearTimeout(timer);
-    }
-  }, [isDropdownOpen, shouldRender]);
-
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
@@ -92,8 +75,6 @@ const CSVFileSelector: React.FC<CSVFileSelectorProps> = ({
   };
 
   const handleImportNew = () => {
-    // Keep dropdown open when importing
-    setIsDropdownOpen(true);
     // Add a small delay to ensure the dropdown state is set
     setTimeout(() => {
       fileInputRef.current?.click();
@@ -188,7 +169,7 @@ const CSVFileSelector: React.FC<CSVFileSelectorProps> = ({
             <Button 
               variant="ghost" 
               size="icon" 
-              className="h-8 w-8 text-base hover:bg-transparent focus:bg-transparent active:bg-transparent transition-all duration-300 ease-out rounded-lg no-hover text-muted-foreground"
+              className="h-8 w-8 text-base focus:bg-transparent active:bg-transparent transition-all duration-300 ease-out rounded-lg no-hover csv-selector-button text-muted-foreground"
               disabled={importLoading}
               style={{ 
                 WebkitTapHighlightColor: 'transparent',
@@ -210,10 +191,9 @@ const CSVFileSelector: React.FC<CSVFileSelectorProps> = ({
             </Button>
           </DropdownMenuTrigger>
           
-          {shouldRender && (
             <DropdownMenuContent 
               align="end" 
-              className={`w-64 bg-background/15 backdrop-blur-sm border border-border/15 rounded-xl shadow-2xl [&>*]:focus:bg-transparent [&>*]:focus:outline-none z-50 border-0 focus:border-0 focus:outline-none focus:ring-0 ${isAnimating ? 'animate-slide-down' : 'animate-slide-up'}`}
+            className="w-64 bg-background/15 backdrop-blur-sm border border-border/15 rounded-xl shadow-2xl [&>*]:focus:bg-transparent [&>*]:focus:outline-none z-50 border-0 focus:border-0 focus:outline-none focus:ring-0"
               sideOffset={8}
               collisionPadding={16}
               style={{ outline: 'none', border: 'none' }}
@@ -227,7 +207,7 @@ const CSVFileSelector: React.FC<CSVFileSelectorProps> = ({
                     handleImportNew();
                   }}
                   disabled={importLoading}
-                  className="text-base px-3 py-3 cursor-pointer transition-colors duration-150 hover:bg-transparent focus:bg-transparent focus:outline-none touch-manipulation border-0 focus:border-0 focus:ring-0"
+                className="text-base px-3 py-3 cursor-pointer transition-colors duration-150 focus:bg-transparent focus:outline-none touch-manipulation border-0 focus:border-0 focus:ring-0"
                   style={{ outline: 'none', border: 'none' }}
                 >
                   <div className="flex items-center w-full">
@@ -238,8 +218,6 @@ const CSVFileSelector: React.FC<CSVFileSelectorProps> = ({
                 </DropdownMenuItem>
               )}
             </DropdownMenuContent>
-          )}
-        </DropdownMenu>
         
         {/* Hidden file input for importing new lists */}
         <input
@@ -249,6 +227,7 @@ const CSVFileSelector: React.FC<CSVFileSelectorProps> = ({
           onChange={handleFileChange}
           className="hidden"
         />
+        </DropdownMenu>
       </>
     );
   }
@@ -262,7 +241,7 @@ const CSVFileSelector: React.FC<CSVFileSelectorProps> = ({
           <Button 
             variant="ghost" 
             size="icon" 
-            className="h-8 w-8 text-base hover:bg-transparent focus:bg-transparent active:bg-transparent transition-all duration-300 ease-out rounded-lg no-hover text-muted-foreground"
+            className="h-8 w-8 text-base focus:bg-transparent active:bg-transparent transition-all duration-300 ease-out rounded-lg no-hover csv-selector-button text-muted-foreground"
             disabled={loading}
             style={{ 
               WebkitTapHighlightColor: 'transparent',
@@ -284,10 +263,9 @@ const CSVFileSelector: React.FC<CSVFileSelectorProps> = ({
           </Button>
         </DropdownMenuTrigger>
         
-        {shouldRender && (
           <DropdownMenuContent 
             align="end" 
-            className={`w-64 bg-background/15 backdrop-blur-sm border border-border/15 rounded-xl shadow-2xl [&>*]:focus:bg-transparent [&>*]:focus:outline-none z-50 border-0 focus:border-0 focus:outline-none focus:ring-0 ${isAnimating ? 'animate-slide-down' : 'animate-slide-up'}`}
+          className="w-64 bg-background/15 backdrop-blur-sm border border-border/15 rounded-xl shadow-2xl [&>*]:focus:bg-transparent [&>*]:focus:outline-none z-50 border-0 focus:border-0 focus:outline-none focus:ring-0"
             sideOffset={8}
             collisionPadding={16}
             style={{ outline: 'none', border: 'none' }}
@@ -301,7 +279,7 @@ const CSVFileSelector: React.FC<CSVFileSelectorProps> = ({
                   handleImportNew();
                 }}
                 disabled={importLoading}
-                className="text-base px-3 py-3 cursor-pointer transition-colors duration-150 hover:bg-transparent focus:bg-transparent focus:outline-none touch-manipulation border-0 focus:border-0 focus:ring-0"
+              className="text-base px-3 py-3 cursor-pointer transition-colors duration-150 focus:bg-transparent focus:outline-none touch-manipulation border-0 focus:border-0 focus:ring-0"
                 style={{ outline: 'none', border: 'none' }}
               >
                 <div className="flex items-center w-full">
@@ -317,7 +295,7 @@ const CSVFileSelector: React.FC<CSVFileSelectorProps> = ({
               <DropdownMenuItem
                 key={file.id}
                 onClick={() => handleCSVSelect(file.id)}
-                className={`text-base px-3 py-3 cursor-pointer transition-colors duration-150 hover:bg-transparent focus:bg-transparent focus:outline-none touch-manipulation border-0 focus:border-0 focus:ring-0 ${
+              className={`text-base px-3 py-3 cursor-pointer transition-colors duration-150 focus:bg-transparent focus:outline-none touch-manipulation border-0 focus:border-0 focus:ring-0 ${
                   file.id === currentCSVId 
                     ? 'bg-accent/30 text-accent-foreground' 
                     : 'text-foreground'
@@ -339,7 +317,7 @@ const CSVFileSelector: React.FC<CSVFileSelectorProps> = ({
                   <div className="flex items-baseline">
                     <button
                       onClick={(e) => handleDeleteCSV(file.id, e)}
-                      className="p-1 rounded-full transition-colors duration-150 flex-shrink-0 focus:outline-none touch-manipulation min-w-[28px] min-h-[28px] flex items-center justify-center hover:bg-muted/30 border-0 focus:border-0 focus:ring-0"
+                    className="p-1 rounded-full transition-colors duration-150 flex-shrink-0 focus:outline-none touch-manipulation min-w-[28px] min-h-[28px] flex items-center justify-center border-0 focus:border-0 focus:ring-0"
                       title="Delete CSV file"
                       style={{ outline: 'none', border: 'none' }}
                     >
@@ -350,8 +328,6 @@ const CSVFileSelector: React.FC<CSVFileSelectorProps> = ({
               </DropdownMenuItem>
             ))}
           </DropdownMenuContent>
-        )}
-      </DropdownMenu>
       
       {/* Hidden file input for importing new lists - always present */}
       <input
@@ -361,6 +337,7 @@ const CSVFileSelector: React.FC<CSVFileSelectorProps> = ({
         onChange={handleFileChange}
         className="hidden"
       />
+      </DropdownMenu>
     </>
   );
 };

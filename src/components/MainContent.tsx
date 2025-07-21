@@ -29,6 +29,7 @@ interface MainContentProps {
   onNext: () => void;
   canGoPrevious: boolean;
   canGoNext: boolean;
+  onSwipeReset?: (resetSwipe: () => void) => void;
   isCountdownActive?: boolean;
   countdownTime?: number;
   getDelayDisplayType?: () => 'timer' | 'rocket' | '5s' | '10s';
@@ -63,6 +64,7 @@ const MainContent: React.FC<MainContentProps> = ({
   onNext,
   canGoPrevious,
   canGoNext,
+  onSwipeReset,
   isCountdownActive,
   countdownTime,
   getDelayDisplayType,
@@ -72,16 +74,30 @@ const MainContent: React.FC<MainContentProps> = ({
   onImportNew
 }) => {
   const [navigationDirection, setNavigationDirection] = useState<'forward' | 'backward'>('forward');
+  const [resetSwipe, setResetSwipe] = useState<(() => void) | null>(null);
 
-  // Create wrapped navigation functions that set direction
+  // Create wrapped navigation functions that set direction and close delete menu
   const handlePrevious = () => {
     setNavigationDirection('backward');
+    // Close delete menu if open
+    if (resetSwipe) {
+      resetSwipe();
+    }
     onPrevious();
   };
 
   const handleNext = () => {
     setNavigationDirection('forward');
+    // Close delete menu if open
+    if (resetSwipe) {
+      resetSwipe();
+    }
     onNext();
+  };
+
+  // Handle swipe reset callback
+  const handleSwipeReset = (resetFn: () => void) => {
+    setResetSwipe(() => resetFn);
   };
   return (
     <div className="flex-1 flex items-start justify-center pt-1 p-3 sm:p-4 min-h-0" style={{ minHeight: 'calc(100dvh - 120px)' }}>
@@ -120,6 +136,7 @@ const MainContent: React.FC<MainContentProps> = ({
             refreshTrigger={refreshTrigger}
             onImportNew={onImportNew}
             navigationDirection={navigationDirection}
+            onSwipeReset={handleSwipeReset}
           />
         </div>
 

@@ -11,18 +11,22 @@ export const useNavigationState = () => {
   useEffect(() => {
     const loadInitialState = async () => {
       try {
+        console.log('Loading initial navigation state...');
         const currentCSVId = await appStorage.getCurrentCSVId();
         let savedIndex = 0;
         
         if (currentCSVId) {
           // Try to get index from CSV-specific storage first
           savedIndex = await appStorage.getCSVCurrentIndex(currentCSVId);
+          console.log('Initial load - CSV-specific index:', savedIndex, 'for CSV ID:', currentCSVId);
         } else {
           // Fallback to global storage
           savedIndex = await appStorage.getCurrentLeadIndex();
+          console.log('Initial load - global index:', savedIndex);
         }
         
         if (savedIndex !== null && savedIndex >= 0) {
+          console.log('Setting initial current index to:', savedIndex);
           setCurrentIndex(savedIndex);
         }
       } catch (error) {
@@ -31,10 +35,13 @@ export const useNavigationState = () => {
       setIsLoaded(true);
     };
     
-    loadInitialState();
+    // Add a delay to ensure CSV ID is loaded first
+    const timer = setTimeout(loadInitialState, 200);
+    return () => clearTimeout(timer);
   }, []);
 
   const updateNavigation = useCallback((index: number) => {
+    console.log('Navigation: updating from', currentIndex, 'to', index);
     setHistoryIndex(prevHistory => {
       return currentIndex;
     });
@@ -90,22 +97,31 @@ export const useNavigationState = () => {
 
   const restoreFromLocalStorage = useCallback(async (totalLeads: number) => {
     try {
+      console.log('Starting index restoration with', totalLeads, 'total leads');
       const currentCSVId = await appStorage.getCurrentCSVId();
       let savedIndex = 0;
       
       if (currentCSVId) {
         // Try to get index from CSV-specific storage first
         savedIndex = await appStorage.getCSVCurrentIndex(currentCSVId);
+        console.log('Restoring CSV-specific index:', savedIndex, 'for CSV ID:', currentCSVId);
       } else {
         // Fallback to global storage
         savedIndex = await appStorage.getCurrentLeadIndex();
+        console.log('Restoring global index:', savedIndex);
       }
       
       if (savedIndex !== null && savedIndex >= 0 && savedIndex < totalLeads) {
+        console.log('Setting current index to:', savedIndex, 'from saved value (valid range)');
         setCurrentIndex(savedIndex);
+      } else {
+        console.log('Saved index invalid or out of bounds:', savedIndex, 'total leads:', totalLeads, '- resetting to 0');
+        setCurrentIndex(0);
       }
     } catch (error) {
       console.error('Error restoring from localStorage:', error);
+      // Reset to 0 on error
+      setCurrentIndex(0);
     }
   }, []);
 
