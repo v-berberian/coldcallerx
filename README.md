@@ -1,4 +1,4 @@
-![CodeRabbit Pull Request Reviews](https://img.shields.io/coderabbit/prs/github/v-berberian/coldcallerx?utm_source=oss&utm_medium=github&utm_campaign=v-berberian%2Fcoldcallerx&labelColor=171717&color=FF570A&link=https%3A%2F%2Fcoderabbit.ai&label=CodeRabbit+Reviews)
+
 
 # Welcome to your Lovable project
 
