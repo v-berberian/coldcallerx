@@ -119,7 +119,7 @@ export const useAutoCall = (
   }, []);
 
   const handleCountdownComplete = (lead: Lead) => {
-    // This function is no longer needed as the countdown automatically makes the call
+    // Invoked when a countdown finishes to place the call and clear auto-call state
     setIsCountdownActive(false);
     makeCall(lead, false);
     
