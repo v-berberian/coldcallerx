@@ -40,14 +40,21 @@ export const useLeadListOperations = () => {
   const deleteLeadList = async (leadListId: string): Promise<boolean> => {
     try {
       console.log('useLeadListOperations: Deleting lead list locally:', leadListId);
-      
+
       // If we deleted the current list, clear it
       if (currentLeadList?.id === leadListId) {
         setCurrentLeadList(null);
         setLeadsData([]);
         await appStorage.removeCSVLeadsData(leadListId);
         await appStorage.saveCurrentCSVId('');
+      } else {
+        // Ensure leads data is removed for non-active lists as well
+        await appStorage.removeCSVLeadsData(leadListId);
       }
+
+      // Remove the CSV file metadata so it no longer shows in the selector
+      await appStorage.removeCSVFile(leadListId);
+
       return true;
     } catch (error) {
       console.error('useLeadListOperations: Error deleting lead list:', error);
