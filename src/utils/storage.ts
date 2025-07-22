@@ -152,47 +152,39 @@ export class AppStorage {
 
   // Filter states
   async saveTimezoneFilter(filter: string): Promise<void> {
-    console.log('Storage: Saving timezone filter:', filter, 'to key:', STORAGE_KEYS.TIMEZONE_FILTER);
     await this.setItem(STORAGE_KEYS.TIMEZONE_FILTER, filter);
   }
 
   async getTimezoneFilter(): Promise<string> {
     const result = await this.getItem(STORAGE_KEYS.TIMEZONE_FILTER, 'ALL');
-    console.log('Storage: Retrieved timezone filter:', result, 'from key:', STORAGE_KEYS.TIMEZONE_FILTER);
     return result;
   }
 
   async saveCallFilter(filter: string): Promise<void> {
-    console.log('Storage: Saving call filter:', filter, 'to key:', STORAGE_KEYS.CALL_FILTER);
     await this.setItem(STORAGE_KEYS.CALL_FILTER, filter);
   }
 
   async getCallFilter(): Promise<string> {
     const result = await this.getItem(STORAGE_KEYS.CALL_FILTER, 'ALL');
-    console.log('Storage: Retrieved call filter:', result, 'from key:', STORAGE_KEYS.CALL_FILTER);
     return result;
   }
 
   // App modes
   async saveShuffleMode(enabled: boolean): Promise<void> {
-    console.log('Storage: Saving shuffle mode:', enabled, 'to key:', STORAGE_KEYS.SHUFFLE_MODE);
     await this.setItem(STORAGE_KEYS.SHUFFLE_MODE, enabled);
   }
 
   async getShuffleMode(): Promise<boolean> {
     const result = await this.getItem(STORAGE_KEYS.SHUFFLE_MODE, false);
-    console.log('Storage: Retrieved shuffle mode:', result, 'from key:', STORAGE_KEYS.SHUFFLE_MODE);
     return result;
   }
 
   async saveAutoCall(enabled: boolean): Promise<void> {
-    console.log('Storage: Saving auto call:', enabled, 'to key:', STORAGE_KEYS.AUTO_CALL);
     await this.setItem(STORAGE_KEYS.AUTO_CALL, enabled);
   }
 
   async getAutoCall(): Promise<boolean> {
     const result = await this.getItem(STORAGE_KEYS.AUTO_CALL, false);
-    console.log('Storage: Retrieved auto call:', result, 'from key:', STORAGE_KEYS.AUTO_CALL);
     return result;
   }
 
@@ -290,13 +282,11 @@ export class AppStorage {
   }
 
   async saveCSVCurrentIndex(csvId: string, index: number): Promise<void> {
-    console.log('Storage: Saving CSV current index:', index, 'for CSV ID:', csvId);
     await this.setItem(getCSVStorageKey(csvId, 'current-index'), index);
   }
 
   async getCSVCurrentIndex(csvId: string): Promise<number> {
     const result = await this.getItem(getCSVStorageKey(csvId, 'current-index'), 0);
-    console.log('Storage: Retrieved CSV current index:', result, 'for CSV ID:', csvId);
     return result;
   }
 

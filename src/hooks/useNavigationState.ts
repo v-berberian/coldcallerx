@@ -1,32 +1,31 @@
 import { useState, useCallback, useEffect } from 'react';
 import { appStorage } from '../utils/storage';
 
-export const useNavigationState = () => {
+export const useNavigationState = (refreshTrigger: number = 0) => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [historyIndex, setHistoryIndex] = useState(-1);
   const [navigationHistory, setNavigationHistory] = useState<number[]>([]);
   const [isLoaded, setIsLoaded] = useState(false);
+  const [currentCSVId, setCurrentCSVId] = useState<string | null>(null);
 
   // Load initial state from localStorage
   useEffect(() => {
     const loadInitialState = async () => {
       try {
-        console.log('Loading initial navigation state...');
-        const currentCSVId = await appStorage.getCurrentCSVId();
+        const csvId = await appStorage.getCurrentCSVId();
+        setCurrentCSVId(csvId);
+        
         let savedIndex = 0;
         
-        if (currentCSVId) {
+        if (csvId) {
           // Try to get index from CSV-specific storage first
-          savedIndex = await appStorage.getCSVCurrentIndex(currentCSVId);
-          console.log('Initial load - CSV-specific index:', savedIndex, 'for CSV ID:', currentCSVId);
+          savedIndex = await appStorage.getCSVCurrentIndex(csvId);
         } else {
           // Fallback to global storage
           savedIndex = await appStorage.getCurrentLeadIndex();
-          console.log('Initial load - global index:', savedIndex);
         }
         
         if (savedIndex !== null && savedIndex >= 0) {
-          console.log('Setting initial current index to:', savedIndex);
           setCurrentIndex(savedIndex);
         }
       } catch (error) {
@@ -40,8 +39,82 @@ export const useNavigationState = () => {
     return () => clearTimeout(timer);
   }, []);
 
+  // React to CSV ID changes and load the correct index for the new CSV
+  useEffect(() => {
+    const handleCSVChange = async () => {
+      try {
+        const csvId = await appStorage.getCurrentCSVId();
+        
+        // Only update if CSV ID has actually changed
+        if (csvId !== currentCSVId) {
+          console.log('🔄 CSV SWITCH: ID changed from', currentCSVId, 'to', csvId);
+          setCurrentCSVId(csvId);
+          
+          if (csvId) {
+            // Load the saved index for this specific CSV
+            const savedIndex = await appStorage.getCSVCurrentIndex(csvId);
+            console.log('📊 CSV SWITCH: Loading index', savedIndex, 'for CSV', csvId);
+            
+            if (savedIndex !== null && savedIndex >= 0) {
+              console.log('✅ CSV SWITCH: Setting index to', savedIndex, 'for CSV', csvId);
+              setCurrentIndex(savedIndex);
+            } else {
+              console.log('🔄 CSV SWITCH: No saved index, resetting to 0 for CSV', csvId);
+              setCurrentIndex(0);
+            }
+          } else {
+            // Fallback to global storage
+            const savedIndex = await appStorage.getCurrentLeadIndex();
+            setCurrentIndex(savedIndex || 0);
+          }
+        }
+      } catch (error) {
+        console.error('Error handling CSV change:', error);
+      }
+    };
+
+    // Only run this effect if we're already loaded (to avoid running on initial load)
+    if (isLoaded) {
+      handleCSVChange();
+    }
+  }, [isLoaded, currentCSVId]);
+
+  // React to refresh trigger changes (for CSV switching)
+  useEffect(() => {
+    const handleRefreshTrigger = async () => {
+      try {
+        console.log('🔄 REFRESH TRIGGER:', refreshTrigger);
+        const csvId = await appStorage.getCurrentCSVId();
+        
+        if (csvId) {
+          // Load the saved index for this specific CSV
+          const savedIndex = await appStorage.getCSVCurrentIndex(csvId);
+          console.log('📊 REFRESH: Loading index', savedIndex, 'for CSV', csvId);
+          
+          if (savedIndex !== null && savedIndex >= 0) {
+            console.log('✅ REFRESH: Setting index to', savedIndex, 'for CSV', csvId);
+            setCurrentIndex(savedIndex);
+          } else {
+            console.log('🔄 REFRESH: No saved index, resetting to 0 for CSV', csvId);
+            setCurrentIndex(0);
+          }
+        } else {
+          // Fallback to global storage
+          const savedIndex = await appStorage.getCurrentLeadIndex();
+          setCurrentIndex(savedIndex || 0);
+        }
+      } catch (error) {
+        console.error('Error handling refresh trigger:', error);
+      }
+    };
+
+    // Only run this effect if we're already loaded and refresh trigger is > 0
+    if (isLoaded && refreshTrigger > 0) {
+      handleRefreshTrigger();
+    }
+  }, [isLoaded, refreshTrigger]);
+
   const updateNavigation = useCallback((index: number) => {
-    console.log('Navigation: updating from', currentIndex, 'to', index);
     setHistoryIndex(prevHistory => {
       return currentIndex;
     });
@@ -97,25 +170,20 @@ export const useNavigationState = () => {
 
   const restoreFromLocalStorage = useCallback(async (totalLeads: number) => {
     try {
-      console.log('Starting index restoration with', totalLeads, 'total leads');
-      const currentCSVId = await appStorage.getCurrentCSVId();
+      const csvId = await appStorage.getCurrentCSVId();
       let savedIndex = 0;
       
-      if (currentCSVId) {
+      if (csvId) {
         // Try to get index from CSV-specific storage first
-        savedIndex = await appStorage.getCSVCurrentIndex(currentCSVId);
-        console.log('Restoring CSV-specific index:', savedIndex, 'for CSV ID:', currentCSVId);
+        savedIndex = await appStorage.getCSVCurrentIndex(csvId);
       } else {
         // Fallback to global storage
         savedIndex = await appStorage.getCurrentLeadIndex();
-        console.log('Restoring global index:', savedIndex);
       }
       
       if (savedIndex !== null && savedIndex >= 0 && savedIndex < totalLeads) {
-        console.log('Setting current index to:', savedIndex, 'from saved value (valid range)');
         setCurrentIndex(savedIndex);
       } else {
-        console.log('Saved index invalid or out of bounds:', savedIndex, 'total leads:', totalLeads, '- resetting to 0');
         setCurrentIndex(0);
       }
     } catch (error) {

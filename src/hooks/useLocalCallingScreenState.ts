@@ -18,7 +18,7 @@ export const useLocalCallingScreenState = ({ leads, onCallMade, refreshTrigger =
   const localStorageRestoredRef = useRef(false);
 
   // Use the new async hooks
-  const { currentIndex, updateNavigation, updateNavigationWithHistory, isLoaded: navLoaded, historyIndex, goToPrevious, goToPreviousFromHistory, resetNavigation, setCurrentIndex, restoreFromLocalStorage, syncFromCloudSession } = useNavigationState();
+  const { currentIndex, updateNavigation, updateNavigationWithHistory, isLoaded: navLoaded, historyIndex, goToPrevious, goToPreviousFromHistory, resetNavigation, setCurrentIndex, restoreFromLocalStorage, syncFromCloudSession } = useNavigationState(refreshTrigger);
   const { leadsData, setLeadsData, isLoaded: leadsLoaded } = useLeadsData(leads);
 
   // Wait for both to load
@@ -113,21 +113,13 @@ export const useLocalCallingScreenState = ({ leads, onCallMade, refreshTrigger =
     const saveCurrentIndex = async () => {
       try {
         const currentCSVId = await appStorage.getCurrentCSVId();
-        console.log('Saving current index:', currentIndex, 'for CSV ID:', currentCSVId);
-        
-        // Don't save index 0 on initial load to avoid overwriting valid saved index
-        if (currentIndex === 0) {
-          console.log('Skipping save of index 0 to avoid overwriting valid saved index');
-          return;
-        }
         
         if (currentCSVId) {
           await appStorage.saveCSVCurrentIndex(currentCSVId, currentIndex);
-          console.log('Successfully saved current index:', currentIndex);
+          console.log('💾 SAVED: Index', currentIndex, 'for CSV', currentCSVId);
         } else {
           // Fallback to global storage
           await appStorage.saveCurrentLeadIndex(currentIndex);
-          console.log('Saved to global storage:', currentIndex);
         }
       } catch (error) {
         console.error('Error saving current index:', error);
@@ -209,14 +201,11 @@ export const useLocalCallingScreenState = ({ leads, onCallMade, refreshTrigger =
         try {
           // Get the filtered leads to ensure we have the correct total count
           const baseLeads = getBaseLeads();
-          console.log('Restoring index with', baseLeads.length, 'filtered leads');
           
           if (baseLeads.length > 0) {
             // Only restore if we don't already have a valid index
             if (currentIndex === 0) {
               await restoreFromLocalStorage(baseLeads.length);
-            } else {
-              console.log('Skipping restoration - current index already set to:', currentIndex);
             }
           }
           localStorageRestoredRef.current = true;
@@ -251,15 +240,13 @@ export const useLocalCallingScreenState = ({ leads, onCallMade, refreshTrigger =
   const testCurrentIndexSave = useCallback(async () => {
     try {
       const currentCSVId = await appStorage.getCurrentCSVId();
-      console.log('Testing current index save - Current index:', currentIndex, 'CSV ID:', currentCSVId);
       
       if (currentCSVId) {
         await appStorage.saveCSVCurrentIndex(currentCSVId, currentIndex);
-        console.log('Test save successful - saved index:', currentIndex);
         
         // Test retrieval
         const retrievedIndex = await appStorage.getCSVCurrentIndex(currentCSVId);
-        console.log('Test retrieval - retrieved index:', retrievedIndex);
+        console.log('🧪 TEST: Saved', currentIndex, 'retrieved', retrievedIndex, 'for CSV', currentCSVId);
       }
     } catch (error) {
       console.error('Error in test current index save:', error);
@@ -276,9 +263,6 @@ export const useLocalCallingScreenState = ({ leads, onCallMade, refreshTrigger =
           // Only save if we have a valid index (not 0) and CSV ID
           if (currentCSVId && currentIndex > 0) {
             await appStorage.saveCSVCurrentIndex(currentCSVId, currentIndex);
-            console.log('Saved current index on app close:', currentIndex);
-          } else {
-            console.log('Skipping save on app close - invalid index or CSV ID. Index:', currentIndex, 'CSV ID:', currentCSVId);
           }
         } catch (error) {
           console.error('Error saving current index on app close:', error);

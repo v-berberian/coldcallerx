@@ -50,7 +50,7 @@ export const useCallingScreenNavigation = ({
     goToPrevious,
     resetNavigation,
     setCurrentIndex
-  } = useNavigationState();
+  } = useNavigationState(0);
 
   const {
     shouldAutoCall,

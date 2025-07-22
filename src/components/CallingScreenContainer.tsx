@@ -79,7 +79,8 @@ const CallingScreenContainer: React.FC<CallingScreenContainerProps> = memo(({
     handleSearchFocus,
     handleSearchBlur,
     closeAutocomplete,
-    getDelayDisplayType
+    getDelayDisplayType,
+    isLoaded
   } = useLocalCallingScreenState({ leads, onCallMade: undefined, refreshTrigger: externalRefreshTrigger });
 
   useSimplifiedCallingScreenEffects({
@@ -159,8 +160,8 @@ const CallingScreenContainer: React.FC<CallingScreenContainerProps> = memo(({
     setResetSwipe(() => resetFn);
   };
 
-  // Show loading until component is ready
-  if (!componentReady || !leadsInitialized) {
+  // Add: Wait for navigation state to be loaded
+  if (!componentReady || !leadsInitialized || !isLoaded) {
     return (
       <div className="h-[100dvh] flex items-center justify-center">
         <div className="text-center space-y-2">
