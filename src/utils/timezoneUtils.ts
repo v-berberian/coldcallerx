@@ -22,7 +22,8 @@ const AREA_CODE_MAP: {
   '216': { state: 'OH', timezone: 'America/New_York' },
   '217': { state: 'IL', timezone: 'America/Chicago' },
   '218': { state: 'MN', timezone: 'America/Chicago' },
-  '219': { state: 'IN', timezone: 'America/New_York' },
+  // Northwest Indiana uses Central time
+  '219': { state: 'IN', timezone: 'America/Chicago' },
   '224': { state: 'IL', timezone: 'America/Chicago' },
   '225': { state: 'LA', timezone: 'America/Chicago' },
   '228': { state: 'MS', timezone: 'America/Chicago' },
