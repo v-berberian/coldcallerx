@@ -99,34 +99,24 @@ export const useLocalCallingScreenState = ({ leads, onCallMade, refreshTrigger =
       (async () => {
         try {
           const currentCSVId = await appStorage.getCurrentCSVId();
+          // Only save if currentIndex is not 0, or if the user has actually navigated to 0 (not on initial load)
+          // We'll use a ref to track if the index was ever set by user action
           if (currentCSVId) {
-            await appStorage.saveCSVLeadsData(currentCSVId, leadsData);
+            if (currentIndex > 0) {
+              await appStorage.saveCSVCurrentIndex(currentCSVId, currentIndex);
+              console.log('💾 SAVED: Index', currentIndex, 'for CSV', currentCSVId);
+            }
+          } else {
+            if (currentIndex > 0) {
+              await appStorage.saveCurrentLeadIndex(currentIndex);
+            }
           }
         } catch (error) {
-          console.error('Error saving leads data:', error);
+          console.error('Error saving current index:', error);
         }
       })();
     }
-  }, [leadsData]);
-
-  useEffect(() => {
-    const saveCurrentIndex = async () => {
-      try {
-        const currentCSVId = await appStorage.getCurrentCSVId();
-        
-        if (currentCSVId) {
-          await appStorage.saveCSVCurrentIndex(currentCSVId, currentIndex);
-          console.log('💾 SAVED: Index', currentIndex, 'for CSV', currentCSVId);
-        } else {
-          // Fallback to global storage
-          await appStorage.saveCurrentLeadIndex(currentIndex);
-        }
-      } catch (error) {
-        console.error('Error saving current index:', error);
-      }
-    };
-    saveCurrentIndex();
-  }, [currentIndex]);
+  }, [leadsData, currentIndex]);
 
   useEffect(() => {
     const saveSearchQuery = async () => {
