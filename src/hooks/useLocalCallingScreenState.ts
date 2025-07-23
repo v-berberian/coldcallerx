@@ -18,11 +18,11 @@ export const useLocalCallingScreenState = ({ leads, onCallMade, refreshTrigger =
   const localStorageRestoredRef = useRef(false);
 
   // Use the new async hooks
-  const { currentIndex, updateNavigation, updateNavigationWithHistory, isLoaded: navLoaded, historyIndex, goToPrevious, goToPreviousFromHistory, resetNavigation, setCurrentIndex, restoreFromLocalStorage, syncFromCloudSession } = useNavigationState(refreshTrigger);
+  const { currentIndex, updateNavigation, updateNavigationWithHistory, isLoaded: navLoaded, isIndexReady, historyIndex, goToPrevious, goToPreviousFromHistory, resetNavigation, setCurrentIndex, restoreFromLocalStorage, syncFromCloudSession } = useNavigationState(refreshTrigger);
   const { leadsData, setLeadsData, isLoaded: leadsLoaded } = useLeadsData(leads);
 
   // Wait for both to load
-  const isLoaded = navLoaded && leadsLoaded;
+  const isLoaded = navLoaded && leadsLoaded && isIndexReady;
 
   // Initialize hooks - only pass leads to useLeadNavigation
   const {
@@ -95,12 +95,20 @@ export const useLocalCallingScreenState = ({ leads, onCallMade, refreshTrigger =
 
   // Save state to localStorage whenever it changes
   useEffect(() => {
-    if (leadsData.length > 0) {
+    if (leadsData.length > 0 && isIndexReady) {
       (async () => {
         try {
           const currentCSVId = await appStorage.getCurrentCSVId();
-          // Only save if currentIndex is not 0, or if the user has actually navigated to 0 (not on initial load)
-          // We'll use a ref to track if the index was ever set by user action
+
+          // Ensure we only save if the index is within the bounds of the current list
+          const baseLeads = getBaseLeads();
+          const listLength = baseLeads.length;
+
+          if (currentIndex < 0 || currentIndex >= listLength) {
+            // Index is out of bounds – skip saving to avoid corrupting stored value
+            return;
+          }
+          
           if (currentCSVId) {
             if (currentIndex > 0) {
               await appStorage.saveCSVCurrentIndex(currentCSVId, currentIndex);
@@ -116,7 +124,7 @@ export const useLocalCallingScreenState = ({ leads, onCallMade, refreshTrigger =
         }
       })();
     }
-  }, [leadsData, currentIndex]);
+  }, [leadsData, currentIndex, isIndexReady]);
 
   useEffect(() => {
     const saveSearchQuery = async () => {
@@ -201,8 +209,8 @@ export const useLocalCallingScreenState = ({ leads, onCallMade, refreshTrigger =
           localStorageRestoredRef.current = true;
         } catch (error) {
           console.error('Error in delayed restoration:', error);
-          localStorageRestoredRef.current = true;
-        }
+      localStorageRestoredRef.current = true;
+    }
       }, 500); // Increased delay to 500ms
       
       return () => clearTimeout(timer);

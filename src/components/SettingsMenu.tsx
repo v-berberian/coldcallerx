@@ -171,12 +171,12 @@ const SettingsMenu: React.FC<SettingsMenuProps> = ({ children }) => {
           />
         </Button>
       </PopoverTrigger>
-      <PopoverContent 
+        <PopoverContent 
         className="w-screen p-0 border-border/20 shadow-lg max-h-[95vh] overflow-y-auto animate-slide-down"
-        sideOffset={5}
-        align="center"
-        data-settings-menu="true"
-      >
+          sideOffset={5}
+          align="center"
+          data-settings-menu="true"
+        >
           <div className="p-4 space-y-4 pb-8">
             <div className="space-y-4">
               {/* Templates Section */}

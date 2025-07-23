@@ -6,6 +6,7 @@ export const useNavigationState = (refreshTrigger: number = 0) => {
   const [historyIndex, setHistoryIndex] = useState(-1);
   const [navigationHistory, setNavigationHistory] = useState<number[]>([]);
   const [isLoaded, setIsLoaded] = useState(false);
+  const [isIndexReady, setIsIndexReady] = useState(false);
   const [currentCSVId, setCurrentCSVId] = useState<string | null>(null);
 
   // Load initial state from localStorage
@@ -32,6 +33,7 @@ export const useNavigationState = (refreshTrigger: number = 0) => {
         console.error('Error loading initial navigation state:', error);
       }
       setIsLoaded(true);
+      setIsIndexReady(true);
     };
     
     // Add a delay to ensure CSV ID is loaded first
@@ -58,14 +60,17 @@ export const useNavigationState = (refreshTrigger: number = 0) => {
             if (savedIndex !== null && savedIndex >= 0) {
               console.log('✅ CSV SWITCH: Setting index to', savedIndex, 'for CSV', csvId);
               setCurrentIndex(savedIndex);
+              setIsIndexReady(true);
             } else {
               console.log('🔄 CSV SWITCH: No saved index, resetting to 0 for CSV', csvId);
               setCurrentIndex(0);
+              setIsIndexReady(true);
             }
           } else {
             // Fallback to global storage
             const savedIndex = await appStorage.getCurrentLeadIndex();
             setCurrentIndex(savedIndex || 0);
+            setIsIndexReady(true);
           }
         }
       } catch (error) {
@@ -94,14 +99,17 @@ export const useNavigationState = (refreshTrigger: number = 0) => {
           if (savedIndex !== null && savedIndex >= 0) {
             console.log('✅ REFRESH: Setting index to', savedIndex, 'for CSV', csvId);
             setCurrentIndex(savedIndex);
+            setIsIndexReady(true);
           } else {
             console.log('🔄 REFRESH: No saved index, resetting to 0 for CSV', csvId);
             setCurrentIndex(0);
+            setIsIndexReady(true);
           }
         } else {
           // Fallback to global storage
           const savedIndex = await appStorage.getCurrentLeadIndex();
           setCurrentIndex(savedIndex || 0);
+          setIsIndexReady(true);
         }
       } catch (error) {
         console.error('Error handling refresh trigger:', error);
@@ -110,6 +118,7 @@ export const useNavigationState = (refreshTrigger: number = 0) => {
 
     // Only run this effect if we're already loaded and refresh trigger is > 0
     if (isLoaded && refreshTrigger > 0) {
+      setIsIndexReady(false);
       handleRefreshTrigger();
     }
   }, [isLoaded, refreshTrigger]);
@@ -183,18 +192,22 @@ export const useNavigationState = (refreshTrigger: number = 0) => {
       
       if (savedIndex !== null && savedIndex >= 0 && savedIndex < totalLeads) {
         setCurrentIndex(savedIndex);
+        setIsIndexReady(true);
       } else {
         setCurrentIndex(0);
+        setIsIndexReady(true);
       }
     } catch (error) {
       console.error('Error restoring from localStorage:', error);
       // Reset to 0 on error
       setCurrentIndex(0);
+      setIsIndexReady(true);
     }
   }, []);
 
   const syncFromCloudSession = useCallback((index: number) => {
     setCurrentIndex(index);
+    setIsIndexReady(true);
   }, []);
 
   return {
@@ -209,6 +222,7 @@ export const useNavigationState = (refreshTrigger: number = 0) => {
     setCurrentIndex: setCurrentIndexDirectly,
     restoreFromLocalStorage,
     syncFromCloudSession,
-    isLoaded
+    isLoaded,
+    isIndexReady
   };
 }; 
