@@ -6,6 +6,7 @@ export const useLeadNavigationState = () => {
   const [shouldAutoCall, setShouldAutoCall] = useState(false);
   const [shownLeadsInShuffle, setShownLeadsInShuffle] = useState<Set<string>>(new Set());
   const [callMadeToCurrentLead, setCallMadeToCurrentLead] = useState(false);
+  const [callMadeLeadKey, setCallMadeLeadKey] = useState<string | null>(null);
   const [currentLeadForAutoCall, setCurrentLeadForAutoCall] = useState<Lead | null>(null);
 
   const resetShownLeads = () => {
@@ -14,6 +15,7 @@ export const useLeadNavigationState = () => {
 
   const resetCallState = () => {
     setCallMadeToCurrentLead(false);
+    setCallMadeLeadKey(null);
   };
 
   return {
@@ -23,6 +25,8 @@ export const useLeadNavigationState = () => {
     setShownLeadsInShuffle,
     callMadeToCurrentLead,
     setCallMadeToCurrentLead,
+    callMadeLeadKey,
+    setCallMadeLeadKey,
     currentLeadForAutoCall,
     setCurrentLeadForAutoCall,
     resetShownLeads,

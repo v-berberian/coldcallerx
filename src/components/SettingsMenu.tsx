@@ -315,53 +315,6 @@ const SettingsMenu: React.FC<SettingsMenuProps> = ({ children }) => {
                 </Collapsible.Content>
               </Collapsible.Root>
 
-              {/* Storage Section */}
-              <Collapsible.Root 
-                open={storageOpen} 
-                onOpenChange={handleStorageOpen}
-                className="space-y-2"
-              >
-                <Collapsible.Trigger asChild>
-                  <button className="w-full flex items-center justify-between p-3 rounded-lg border border-border/20 transition-colors">
-                    <div className="flex items-center gap-2">
-                      <Database className="h-4 w-4 text-muted-foreground" />
-                      <span className="text-sm font-medium">Storage</span>
-                    </div>
-                    <ChevronDown className={`h-4 w-4 text-muted-foreground transition-transform duration-75 ${storageOpen ? 'rotate-180' : ''}`} />
-                  </button>
-                </Collapsible.Trigger>
-                <Collapsible.Content 
-                  className="space-y-3 data-[state=open]:animate-template-down data-[state=closed]:animate-template-up overflow-hidden"
-                >
-                  <div className="space-y-3 p-3 pl-8">
-                    <div className="space-y-2">
-                      <p className="text-sm text-muted-foreground">
-                        Clear all stored data including CSV files, call history, and settings.
-                      </p>
-                      <Button 
-                        variant="destructive" 
-                        size="sm" 
-                        onClick={handleClearStorage}
-                        disabled={isClearingStorage}
-                        className="w-full"
-                      >
-                        {isClearingStorage ? (
-                          <>
-                            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                            Clearing...
-                          </>
-                        ) : (
-                          <>
-                            <Trash2 className="h-4 w-4 mr-2" />
-                            Clear All Data
-                          </>
-                        )}
-                      </Button>
-                    </div>
-                  </div>
-                </Collapsible.Content>
-              </Collapsible.Root>
-
               {/* Help Section */}
               <Collapsible.Root 
                 open={helpOpen} 

@@ -4,6 +4,7 @@ interface UseLeadNavigationEffectsProps {
   makeCall: (lead: Lead, markAsCalled?: boolean, onCallMade?: () => void, onTransitionDetected?: () => void) => void;
   markLeadAsCalledOnNavigation: (lead: Lead) => void;
   setCallMadeToCurrentLead: (called: boolean) => void;
+  setCallMadeLeadKey: (key: string | null) => void;
   executeAutoCall: (lead: Lead) => void;
   handleCountdownComplete: (lead: Lead) => void;
   resetAutoCall: () => void;
@@ -14,6 +15,7 @@ interface UseLeadNavigationEffectsProps {
 export const useLeadNavigationEffects = ({
   makeCall,
   setCallMadeToCurrentLead,
+  setCallMadeLeadKey,
   resetAutoCall,
   currentLeadForAutoCall,
   setCurrentLeadForAutoCall,
@@ -24,9 +26,14 @@ export const useLeadNavigationEffects = ({
   // Enhanced make call function that tracks call state but doesn't mark as called immediately
   const makeCallWrapper = (lead: Lead) => {
     // Pass a callback that will be called only when iOS transitions to Phone app
+    const leadKey = `${lead.name}-${lead.phone}`;
     const onTransitionDetected = () => {
-      setCallMadeToCurrentLead(true); // Only set this when iOS actually transitions
+      setCallMadeToCurrentLead(true);
+      setCallMadeLeadKey(leadKey);
     };
+
+    // Store key immediately in case callback late
+    setCallMadeLeadKey(leadKey);
     
     makeCall(lead, false, undefined, onTransitionDetected); // Don't mark as called immediately
   };

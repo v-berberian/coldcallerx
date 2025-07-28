@@ -192,11 +192,11 @@ const CSVFileSelector: React.FC<CSVFileSelectorProps> = ({
           </DropdownMenuTrigger>
           
             <DropdownMenuContent 
-              align="end" 
-            className="w-64 bg-background/15 backdrop-blur-sm border border-border/15 rounded-xl shadow-2xl [&>*]:focus:bg-transparent [&>*]:focus:outline-none z-50 border-0 focus:border-0 focus:outline-none focus:ring-0"
-              sideOffset={8}
+              align="start" 
+              className="w-[75vw] bg-background/15 backdrop-blur-sm border border-border/15 rounded-xl shadow-2xl [&>*]:focus:bg-transparent [&>*]:focus:outline-none z-50 border-0 focus:border-0 focus:outline-none focus:ring-0 animate-slide-down -ml-2"
+              sideOffset={5}
               collisionPadding={16}
-              style={{ outline: 'none', border: 'none' }}
+              style={{ outline: 'none', border: 'none', animation: 'slide-down 0.2s cubic-bezier(0.16, 1, 0.3, 1)' }}
             >
               {/* Import list option */}
               {onLeadsImported && (
@@ -264,11 +264,11 @@ const CSVFileSelector: React.FC<CSVFileSelectorProps> = ({
         </DropdownMenuTrigger>
         
           <DropdownMenuContent 
-            align="end" 
-          className="w-64 bg-background/15 backdrop-blur-sm border border-border/15 rounded-xl shadow-2xl [&>*]:focus:bg-transparent [&>*]:focus:outline-none z-50 border-0 focus:border-0 focus:outline-none focus:ring-0"
-            sideOffset={8}
+            align="start" 
+            className="w-[75vw] bg-background/15 backdrop-blur-sm border border-border/15 rounded-xl shadow-2xl [&>*]:focus:bg-transparent [&>*]:focus:outline-none z-50 border-0 focus:border-0 focus:outline-none focus:ring-0 animate-slide-down -ml-2"
+            sideOffset={5}
             collisionPadding={16}
-            style={{ outline: 'none', border: 'none' }}
+            style={{ outline: 'none', border: 'none', animation: 'slide-down 0.2s cubic-bezier(0.16, 1, 0.3, 1)' }}
           >
             {/* Import list option */}
             {onLeadsImported && (
@@ -305,7 +305,7 @@ const CSVFileSelector: React.FC<CSVFileSelectorProps> = ({
                 <div className="flex items-baseline justify-between w-full">
                   <div className="flex flex-col items-start flex-1 min-w-0 pr-2">
                     <div className="flex items-baseline">
-                      <span className="font-normal truncate text-base">{file.name}</span>
+                      <span className="font-normal truncate text-base block max-w-[200px]" title={file.name}>{file.name}</span>
                       {file.id === currentCSVId && (
                         <div className="w-2 h-2 bg-foreground rounded-full ml-2 flex-shrink-0"></div>
                       )}

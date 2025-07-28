@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react';
 import { Lead, TimezoneFilter, CallFilter } from '../types/lead';
 import { filterLeadsByTimezone } from '../utils/timezoneUtils';
+import { getPhoneDigits } from '../utils/phoneUtils';
 
 export const useFilterChangeEffects = (
   leadsData: Lead[],
@@ -15,6 +16,16 @@ export const useFilterChangeEffects = (
   resetNavigation: (index: number) => void,
   updateNavigationWithHistory: (index: number, addToHistory?: boolean) => void
 ) => {
+  // Store the last viewed lead object to reference across filter changes
+  const lastViewedLeadRef = useRef<Lead | null>(null);
+
+  // Update the ref whenever currentIndex changes or leadsData updates
+  useEffect(() => {
+    if (leadsData && leadsData.length > 0 && currentIndex >= 0 && currentIndex < leadsData.length) {
+      lastViewedLeadRef.current = leadsData[currentIndex];
+    }
+  }, [currentIndex, leadsData]);
+
   useEffect(() => {
     // Don't auto-navigate during auto-call operations to prevent jumping away from called leads
     if (isAutoCallInProgress) {
@@ -29,8 +40,8 @@ export const useFilterChangeEffects = (
     setFilterChanging(true);
       
     try {
-      // Get the current lead from the original unfiltered list to ensure we have the correct lead
-      const currentlyViewedLead = leadsData[currentIndex];
+      // Use the previously stored lead object to avoid index mismatches after filtering
+      const currentlyViewedLead = lastViewedLeadRef.current;
       
       let newFilteredLeads = filterLeadsByTimezone(leadsData, timezoneFilter);
       if (callFilter === 'UNCALLED') {
@@ -47,14 +58,15 @@ export const useFilterChangeEffects = (
       }
       
       if (currentlyViewedLead) {
-        const currentLeadMatchesNewFilter = newFilteredLeads.some(lead => 
-          lead.name === currentlyViewedLead.name && lead.phone === currentlyViewedLead.phone
-        );
+        const currentDigits = getPhoneDigits(currentlyViewedLead.phone);
+        const currentLeadMatchesNewFilter = newFilteredLeads.some(lead => {
+          return lead.name === currentlyViewedLead.name && getPhoneDigits(lead.phone) === currentDigits;
+        });
         
         if (currentLeadMatchesNewFilter) {
           // Current lead is still visible in new filter, stay on it
           const newIndexOfCurrentLead = newFilteredLeads.findIndex(lead => 
-            lead.name === currentlyViewedLead.name && lead.phone === currentlyViewedLead.phone
+            lead.name === currentlyViewedLead.name && getPhoneDigits(lead.phone) === currentDigits
           );
           updateNavigationWithHistory(newIndexOfCurrentLead, false);
           setTimeout(() => {
@@ -92,8 +104,9 @@ export const useFilterChangeEffects = (
           if (closestUncalledIndex !== -1) {
             // Find this lead in the new filtered list
             const targetLead = leadsData[closestUncalledIndex]; // Use leadsData directly
+            const targetDigits = getPhoneDigits(targetLead.phone);
             const newIndex = newFilteredLeads.findIndex(lead => 
-              lead.name === targetLead.name && lead.phone === targetLead.phone
+              lead.name === targetLead.name && getPhoneDigits(lead.phone) === targetDigits
             );
             if (newIndex !== -1) {
               updateNavigationWithHistory(newIndex, false); // Don't add to history since this is a filter change
@@ -109,7 +122,7 @@ export const useFilterChangeEffects = (
           // Switching to ALL filter - find the same lead in the full list
           // Since we're using the same timezone filter, the index should be the same
           const newIndex = newFilteredLeads.findIndex(lead => 
-            lead.name === currentlyViewedLead.name && lead.phone === currentlyViewedLead.phone
+            lead.name === currentlyViewedLead.name && getPhoneDigits(lead.phone) === currentDigits
           );
           if (newIndex !== -1) {
             updateNavigationWithHistory(newIndex, false); // Don't add to history since this is a filter change

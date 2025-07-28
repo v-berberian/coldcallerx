@@ -54,7 +54,9 @@ export const useLeadNavigation = ({
     currentLeadForAutoCall,
     setCurrentLeadForAutoCall,
     resetShownLeads,
-    resetCallState
+    resetCallState,
+    callMadeLeadKey,
+    setCallMadeLeadKey
   } = useLeadNavigationState();
 
   const {
@@ -135,6 +137,8 @@ export const useLeadNavigation = ({
     handlePrevious,
     selectLead,
     setCallMadeToCurrentLead,
+    callMadeLeadKey,
+    setCallMadeLeadKey,
     autoCall,
     setShouldAutoCall,
     goToPrevious,
@@ -147,6 +151,7 @@ export const useLeadNavigation = ({
     makeCall,
     markLeadAsCalledOnNavigation,
     setCallMadeToCurrentLead,
+    setCallMadeLeadKey,
     executeAutoCall,
     handleCountdownComplete,
     resetAutoCall,

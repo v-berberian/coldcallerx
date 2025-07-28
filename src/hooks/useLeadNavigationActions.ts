@@ -16,6 +16,8 @@ interface UseLeadNavigationActionsProps {
   handlePrevious: () => void;
   selectLead: (lead: Lead, baseLeads: Lead[], allLeads: Lead[]) => void;
   setCallMadeToCurrentLead: (called: boolean) => void;
+  callMadeLeadKey: string | null;
+  setCallMadeLeadKey: (key: string | null) => void;
   autoCall: boolean;
   setShouldAutoCall: (should: boolean) => void;
   goToPrevious: () => boolean;
@@ -39,6 +41,8 @@ export const useLeadNavigationActions = ({
   goToPreviousFromHistory,
   markLeadAsCalledOnNavigation,
   callMadeToCurrentLead,
+  callMadeLeadKey,
+  setCallMadeLeadKey,
   callDelay
 }: UseLeadNavigationActionsProps) => {
 
@@ -46,8 +50,9 @@ export const useLeadNavigationActions = ({
     // Get current lead before navigation
     const currentLead = baseLeads[currentIndex];
     
-    // Only mark current lead as called if a call was actually made
-    if (currentLead && callMadeToCurrentLead) {
+    const currentLeadKey = currentLead ? `${currentLead.name}-${currentLead.phone}` : null;
+
+    if (currentLead && callMadeLeadKey === currentLeadKey) {
       markLeadAsCalledOnNavigation(currentLead);
     }
     
@@ -56,18 +61,18 @@ export const useLeadNavigationActions = ({
     
     // Reset call state after navigation
     setCallMadeToCurrentLead(false);
+    setCallMadeLeadKey(null);
     
     // Set flag to trigger auto-call after navigation
     if (autoCall) {
-      // Add a small delay for rocket mode to allow the app to process the call end
+      // Rocket mode (callDelay === 0) → trigger instantly.
+      // Other modes → small delay so UI settles before countdown.
       if (callDelay === 0) {
-        // Rocket mode - add a small delay to allow call processing
+        setShouldAutoCall(true);
+      } else {
         setTimeout(() => {
           setShouldAutoCall(true);
-        }, 200); // 200ms delay for rocket mode
-      } else {
-        // Other modes - trigger immediately
-        setShouldAutoCall(true);
+        }, 200);
       }
     }
   };
@@ -83,8 +88,8 @@ export const useLeadNavigationActions = ({
     // Get current lead before navigation for potential call marking
     const currentLead = baseLeads[currentIndex];
     
-    // Only mark current lead as called if a call was actually made
-    if (currentLead && callMadeToCurrentLead) {
+    const currentLeadKey = currentLead ? `${currentLead.name}-${currentLead.phone}` : null;
+    if (currentLead && callMadeLeadKey === currentLeadKey) {
       markLeadAsCalledOnNavigation(currentLead);
     }
     
@@ -109,18 +114,16 @@ export const useLeadNavigationActions = ({
     
     // Reset call state after navigation
     setCallMadeToCurrentLead(false);
+    setCallMadeLeadKey(null);
     
     // Set flag to trigger auto-call after navigation (same as next button)
     if (autoCall) {
-      // Add a small delay for rocket mode to allow the app to process the call end
       if (callDelay === 0) {
-        // Rocket mode - add a small delay to allow call processing
+        setShouldAutoCall(true);
+      } else {
         setTimeout(() => {
           setShouldAutoCall(true);
-        }, 200); // 200ms delay for rocket mode
-      } else {
-        // Other modes - trigger immediately
-        setShouldAutoCall(true);
+        }, 200);
       }
     }
   };
@@ -129,8 +132,8 @@ export const useLeadNavigationActions = ({
     // Get current lead before selection for potential call marking
     const currentLead = baseLeads[currentIndex];
     
-    // Only mark previous lead as called if a call was actually made
-    if (currentLead && callMadeToCurrentLead) {
+    const prevLeadKey = currentLead ? `${currentLead.name}-${currentLead.phone}` : null;
+    if (currentLead && callMadeLeadKey === prevLeadKey) {
       markLeadAsCalledOnNavigation(currentLead);
     }
     
@@ -139,6 +142,7 @@ export const useLeadNavigationActions = ({
     
     // Reset call state after selection
     setCallMadeToCurrentLead(false);
+    setCallMadeLeadKey(null);
   };
 
   return {

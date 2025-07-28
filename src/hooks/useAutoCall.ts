@@ -51,7 +51,7 @@ export const useAutoCall = (
       makeCall(lead, false);
       setTimeout(() => {
         setIsAutoCallInProgress(false);
-      }, 500);
+      }, 200);
     } else {
       // Start countdown with specified delay
       console.log(`Starting countdown for ${actualDelay} seconds for`, lead.name);
@@ -81,7 +81,7 @@ export const useAutoCall = (
             setTimeout(() => {
               setIsAutoCallInProgress(false);
               setPendingLead(null);
-            }, 500);
+            }, 200);
             
             return 0;
           }
@@ -125,7 +125,7 @@ export const useAutoCall = (
     
     setTimeout(() => {
       setIsAutoCallInProgress(false);
-    }, 500);
+    }, 200);
   };
 
   return {

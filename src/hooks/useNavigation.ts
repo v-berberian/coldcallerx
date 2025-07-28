@@ -125,7 +125,7 @@ export const useNavigation = (
           // This might be a timezone filter issue or other filter issue
           
           // Use the index from allLeads as a fallback
-          leadIndex = allLeadsIndex;
+        leadIndex = allLeadsIndex;
         }
       } else {
         return;

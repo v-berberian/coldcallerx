@@ -206,7 +206,15 @@ export const useCsvImporter = ({ onLeadsImported }: UseCsvImporterProps) => {
             return;
           }
           
-          const leads = await parseCSV(text);
+          const MAX_LEADS_PER_LIST = 10000;
+          let leads = await parseCSV(text);
+
+          // Cap the number of leads to MAX_LEADS_PER_LIST
+          if (leads.length > MAX_LEADS_PER_LIST) {
+            const originalCount = leads.length;
+            leads = leads.slice(0, MAX_LEADS_PER_LIST);
+            toast.info(`List exceeded ${MAX_LEADS_PER_LIST.toLocaleString()} rows. Imported first ${MAX_LEADS_PER_LIST.toLocaleString()} leads; skipped ${(originalCount - MAX_LEADS_PER_LIST).toLocaleString()}.`);
+          }
           
           if (leads.length === 0) {
             toast.error('No valid leads found in the CSV file. Please check the file format.');
@@ -236,7 +244,7 @@ export const useCsvImporter = ({ onLeadsImported }: UseCsvImporterProps) => {
           }
           
           // If file is large (>10MB estimated), use chunking
-          const shouldUseChunking = leadsDataSize > 10 * 1024 * 1024 || leads.length > 10000;
+          const shouldUseChunking = leadsDataSize > 10 * 1024 * 1024; // chunking only if data very large
           
           if (shouldUseChunking) {
             console.log('Using chunked storage for large file');

@@ -263,7 +263,7 @@ const LeadCard: React.FC<LeadCardProps> = ({
                       }}
                       disabled={isDeleteMode}
                     >
-                      <p className="text-base sm:text-lg bg-gradient-to-r from-muted-foreground to-muted-foreground/95 bg-clip-text text-transparent dark:bg-none dark:text-muted-foreground">{selectedPhone}</p>
+                      <p className="text-base sm:text-lg font-mono tracking-wider bg-gradient-to-r from-muted-foreground to-muted-foreground/95 bg-clip-text text-transparent dark:bg-none dark:text-muted-foreground">{selectedPhone}</p>
                       <ChevronDown className="h-4 w-4 text-muted-foreground" />
                     </DropdownMenuTrigger>
                     <DropdownMenuContent 
@@ -280,7 +280,7 @@ const LeadCard: React.FC<LeadCardProps> = ({
                             className="w-full px-4 py-3 text-left border-b border-border/10 last:border-b-0 transition-colors duration-75 cursor-pointer relative"
                           >
                             <div className="flex justify-between items-center w-full">
-                              <span className={`text-foreground ${phoneData.isPrimary ? 'font-bold' : 'font-medium'}`}>
+                              <span className={`text-foreground font-mono tracking-wider ${phoneData.isPrimary ? 'font-bold' : 'font-medium'}`}> 
                                 {phoneData.phone}
                               </span>
                               {selectedPhone === phoneData.phone && !phoneData.isPrimary && (
@@ -293,7 +293,7 @@ const LeadCard: React.FC<LeadCardProps> = ({
                     </DropdownMenuContent>
                   </DropdownMenu>
                 ) : (
-                  <p className="text-base sm:text-lg bg-gradient-to-r from-muted-foreground to-muted-foreground/95 bg-clip-text text-transparent dark:bg-none dark:text-muted-foreground">{selectedPhone}</p>
+                  <p className="text-base sm:text-lg font-mono tracking-wider bg-gradient-to-r from-muted-foreground to-muted-foreground/95 bg-clip-text text-transparent dark:bg-none dark:text-muted-foreground">{selectedPhone}</p>
                 )}
               </div>
             </div>
@@ -324,8 +324,8 @@ const LeadCard: React.FC<LeadCardProps> = ({
         <div className="space-y-3 p-3 sm:p-5 pt-0">
           {/* Last called section above buttons */}
           {lead.lastCalled && (
-            <div className="flex items-center justify-center">
-              <div className="flex items-center">
+            <div className="flex items-center justify-center w-full">
+              <div className="flex items-center justify-center">
                 <p className="text-sm text-muted-foreground transition-opacity duration-300 ease-in-out opacity-100 whitespace-nowrap my-0 py-0">
                   Last called: {lead.lastCalled}
                 </p>
