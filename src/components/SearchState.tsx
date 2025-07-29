@@ -46,9 +46,9 @@ export const useSearchState = ({ leads, getBaseLeads, leadsData, timezoneFilter,
 
   // Pre-initialize search results with all leads for instant display
   const initialSearchResults = useMemo(() => {
-    // Use leadsData (all leads) instead of baseLeads (filtered leads) for search
-    return leadsData.slice(0, INITIAL_RESULTS);
-  }, [leadsData]);
+    // Use baseLeads (filtered leads) so search respects active filters
+    return baseLeads.slice(0, INITIAL_RESULTS);
+  }, [baseLeads]);
 
   // Ultra-optimized search function with incremental loading
   const performSearch = useCallback((query: string, leads: Lead[]) => {
@@ -83,12 +83,12 @@ export const useSearchState = ({ leads, getBaseLeads, leadsData, timezoneFilter,
   // Memoized search results - get all matching results
   const allSearchResults = useMemo(() => {
     if (!debouncedSearchQuery.trim()) {
-      // Use leadsData (all leads) instead of baseLeads (filtered leads) for search
-      return leadsData; // Show all leads when no search query
+      // Use baseLeads (filtered leads) so search respects active filters
+      return baseLeads; // Show filtered leads when no search query
     }
-    // Use leadsData (all leads) instead of baseLeads (filtered leads) for search
-    return performSearch(debouncedSearchQuery, leadsData);
-  }, [debouncedSearchQuery, leadsData, performSearch]);
+    // Use baseLeads (filtered leads) so search respects active filters
+    return performSearch(debouncedSearchQuery, baseLeads);
+  }, [debouncedSearchQuery, baseLeads, performSearch]);
 
   // Get only the loaded portion of results
   const visibleSearchResults = useMemo(() => {

@@ -64,10 +64,7 @@ export const useLeadCardSwipe = (onDeleteLead?: (lead: Lead) => void) => {
 
   const handleDeleteClick = useCallback((lead: Lead) => {
     if (onDeleteLead) {
-      setSwipeOffset(-400);
-      setTimeout(() => {
-        onDeleteLead(lead);
-      }, 300);
+      onDeleteLead(lead);
     }
   }, [onDeleteLead]);
 

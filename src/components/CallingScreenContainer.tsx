@@ -132,7 +132,7 @@ const CallingScreenContainer: React.FC<CallingScreenContainerProps> = memo(({
     leadsData,
     setSearchQuery,
     setShowAutocomplete,
-    updateLeadCallCount: resetCallCount,
+    updateLeadCallCount: updateLeadCallCount,
     resetCallCount: resetCallCount,
     resetAllCallCounts: resetAllCallCounts,
     onLeadsDataUpdate: handleLeadsDataUpdate,
@@ -160,6 +160,68 @@ const CallingScreenContainer: React.FC<CallingScreenContainerProps> = memo(({
     setResetSwipe(() => resetFn);
   };
 
+  // Handle lead deletion
+  const handleDeleteLead = async (lead: Lead) => {
+    if (!currentCSVId) {
+      console.error('No current CSV ID available for lead deletion');
+      return;
+    }
+
+    // Store the current lead info before deletion for navigation logic
+    const currentLeads = getBaseLeads();
+    const wasCurrentLead = currentLeads[currentIndex] && 
+      currentLeads[currentIndex].name === lead.name && 
+      currentLeads[currentIndex].phone === lead.phone;
+
+    try {
+      // Remove lead from CSV storage
+      const success = await appStorage.removeLeadFromCSV(currentCSVId, lead);
+      
+      if (success) {
+        // Get updated leads data from storage
+        const updatedLeads = await appStorage.getCSVLeadsData(currentCSVId);
+        
+        // Update local state
+        updateLeadsDataDirectly(updatedLeads);
+        
+        // Clear search and close autocomplete to refresh search results
+        clearSearch();
+        closeAutocomplete();
+        
+        // Force refresh of search state by temporarily clearing search results
+        setShowAutocomplete(false);
+        
+        // Check if this was the last lead in the CSV
+        if (updatedLeads.length === 0) {
+          // Remove the empty CSV file from storage
+          try {
+            await appStorage.removeAllCSVData(currentCSVId);
+          } catch (error) {
+            console.error('Error removing empty CSV file:', error);
+          }
+          
+          // No leads remain, trigger the all lists deleted callback
+          if (onAllListsDeleted) {
+            onAllListsDeleted();
+          }
+          return;
+        }
+        
+        // If we deleted the current lead, navigate to the next available lead
+        if (wasCurrentLead && updatedLeads.length > 0) {
+          // Add a small delay to ensure the UI has updated
+          setTimeout(() => {
+            handleNextWrapper();
+          }, 100);
+        }
+      } else {
+        console.error('Failed to remove lead from CSV');
+      }
+    } catch (error) {
+      console.error('Error deleting lead:', error);
+    }
+  };
+
   // Add: Wait for navigation state to be loaded
   if (!componentReady || !leadsInitialized || !isLoaded) {
     return (
@@ -176,6 +238,12 @@ const CallingScreenContainer: React.FC<CallingScreenContainerProps> = memo(({
   // Clamp currentIndex to valid range for filtered leads
   const safeCurrentIndex = Math.max(0, Math.min(currentIndex, currentLeads.length - 1));
   const currentLead = currentLeads[safeCurrentIndex];
+
+  // If no leads remain after deletion, trigger the all lists deleted callback
+  if (currentLeads.length === 0 && leadsData.length === 0 && onAllListsDeleted) {
+    onAllListsDeleted();
+    return null; // Return null to prevent rendering with undefined currentLead
+  }
 
   if (leadsData.length === 0) {
     return (
@@ -216,6 +284,18 @@ const CallingScreenContainer: React.FC<CallingScreenContainerProps> = memo(({
   }
 
   const totalLeadCount = currentLeads.length;
+
+  // Safety check: if currentLead is undefined, we shouldn't render the main content
+  if (!currentLead) {
+    return (
+      <div className="h-[100dvh] flex items-center justify-center">
+        <div className="text-center space-y-2">
+          <div className="w-6 h-6 border-2 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto"></div>
+          <p className="text-sm text-muted-foreground">Loading caller...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="h-[100dvh] flex flex-col overflow-hidden fixed inset-0">
@@ -284,6 +364,7 @@ const CallingScreenContainer: React.FC<CallingScreenContainerProps> = memo(({
             }
           }}
           onSwipeReset={handleSwipeReset}
+          onDeleteLead={handleDeleteLead}
         />
       </div>
     </div>

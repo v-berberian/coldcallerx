@@ -37,6 +37,7 @@ interface MainContentProps {
   noLeadsMessage?: string;
   refreshTrigger?: number;
   onImportNew?: () => void;
+  onDeleteLead?: (lead: Lead) => void;
 }
 
 const MainContent: React.FC<MainContentProps> = ({
@@ -71,7 +72,8 @@ const MainContent: React.FC<MainContentProps> = ({
   showAutocomplete = false,
   noLeadsMessage,
   refreshTrigger,
-  onImportNew
+  onImportNew,
+  onDeleteLead
 }) => {
   const [navigationDirection, setNavigationDirection] = useState<'forward' | 'backward'>('forward');
   const [resetSwipe, setResetSwipe] = useState<(() => void) | null>(null);
@@ -137,6 +139,7 @@ const MainContent: React.FC<MainContentProps> = ({
             onImportNew={onImportNew}
             navigationDirection={navigationDirection}
             onSwipeReset={handleSwipeReset}
+            onDeleteLead={onDeleteLead}
           />
         </div>
 

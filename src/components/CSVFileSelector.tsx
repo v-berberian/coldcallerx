@@ -41,10 +41,16 @@ const CSVFileSelector: React.FC<CSVFileSelectorProps> = ({
   // Use the CSV importer hook for handling file processing
   const { loading: importLoading, handleFileProcess } = useCsvImporter({ 
     onLeadsImported: (leads: Lead[], fileName: string, csvId: string) => {
+      console.log('🎉 CSV Import callback triggered:', fileName, 'with', leads.length, 'leads');
       // After successful import, reload the CSV files list
-      loadCSVFiles();
+      console.log('🔄 Reloading CSV files after import...');
+      // Add a small delay to ensure the file is saved before reloading
+      setTimeout(() => {
+        loadCSVFiles();
+      }, 100);
       // Call the parent's onLeadsImported if provided
       if (onLeadsImported) {
+        console.log('📤 Calling parent onLeadsImported...');
         onLeadsImported(leads, fileName, csvId);
       }
     }
@@ -84,25 +90,29 @@ const CSVFileSelector: React.FC<CSVFileSelectorProps> = ({
   const loadCSVFiles = useCallback(async () => {
     try {
       const files = await appStorage.getCSVFiles();
+      console.log('📁 Loading CSV files:', files.length, 'files found');
       
       const validFiles = [];
       
       for (const file of files) {
         try {
           const leadsData = await appStorage.getCSVLeadsData(file.id);
+          console.log(`📄 CSV ${file.name}: ${leadsData?.length || 0} leads`);
           if (leadsData && leadsData.length > 0) {
             validFiles.push({
               ...file,
               leadsCount: leadsData.length
             });
-          } else {
-            await handleDeleteCSV(file.id, {} as React.MouseEvent);
           }
+          // Note: We no longer automatically delete CSV files with no leads
+          // They might be temporarily empty or have import issues
         } catch (error) {
-          await handleDeleteCSV(file.id, {} as React.MouseEvent);
+          console.warn('Error loading leads for CSV:', file.id, error);
+          // Don't delete the CSV file on error - it might be a temporary issue
         }
       }
       
+      console.log('✅ Valid CSV files:', validFiles.length);
       setCsvFiles(validFiles);
     } catch (error) {
       console.error('Error loading CSV files:', error);

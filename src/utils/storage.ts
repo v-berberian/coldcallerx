@@ -450,6 +450,43 @@ export class AppStorage {
       console.error('Error removing chunked CSV data:', error);
     }
   }
+
+  // Remove a specific lead from CSV data
+  async removeLeadFromCSV(csvId: string, leadToRemove: Lead): Promise<boolean> {
+    try {
+      // Get current leads data
+      const currentLeads = await this.getCSVLeadsData(csvId);
+      
+      // Find and remove the specific lead
+      const updatedLeads = currentLeads.filter(lead => 
+        !(lead.name === leadToRemove.name && lead.phone === leadToRemove.phone)
+      );
+      
+      // Check if lead was actually found and removed
+      if (updatedLeads.length === currentLeads.length) {
+        console.warn('Lead not found for removal:', leadToRemove);
+        return false;
+      }
+      
+      // Save updated leads data
+      await this.saveCSVLeadsData(csvId, updatedLeads);
+      
+      // Update CSV file metadata to reflect the new lead count
+      const csvFiles = await this.getCSVFiles();
+      const updatedFiles = csvFiles.map(file => {
+        if (file.id === csvId) {
+          return { ...file, totalLeads: updatedLeads.length };
+        }
+        return file;
+      });
+      await this.saveCSVFiles(updatedFiles);
+      
+      return true;
+    } catch (error) {
+      console.error('Error removing lead from CSV:', error);
+      return false;
+    }
+  }
 }
 
 // Export singleton instance
