@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from '@/components/ui/dropdown-menu';
-import { X, Phone, Mail, ChevronDown, Check, MessageSquare, Upload, Settings } from 'lucide-react';
+import { X, Phone, Mail, ChevronDown, Check, MessageSquare, Upload, Settings, DollarSign } from 'lucide-react';
 import { formatPhoneNumber } from '../utils/phoneUtils';
 import { getStateFromAreaCode } from '../utils/timezoneUtils';
 import { Lead } from '@/types/lead';
@@ -161,6 +161,29 @@ const LeadCard: React.FC<LeadCardProps> = ({
   const selectedEmailTemplate = emailTemplates.find(t => t.id === selectedEmailTemplateId);
   const selectedTextTemplate = textTemplates.find(t => t.id === selectedTextTemplateId);
 
+  // Format revenue with commas
+  const formatRevenue = (revenue: string): string => {
+    // Check if revenue exists and is a string
+    if (!revenue || typeof revenue !== 'string') {
+      return '';
+    }
+    
+    // Remove any existing dollar sign and commas
+    const cleanValue = revenue.replace(/[$,]/g, '');
+    
+    // Check if it's a valid number
+    const numValue = parseFloat(cleanValue);
+    if (isNaN(numValue)) {
+      return revenue; // Return original if not a valid number
+    }
+    
+    // Format with commas
+    const formatted = numValue.toLocaleString();
+    
+    // Add dollar sign if not already present
+    return revenue.startsWith('$') ? `$${formatted}` : `$${formatted}`;
+  };
+
   return (
     <div className="relative">
       {/* Delete background indicator */}
@@ -246,6 +269,18 @@ const LeadCard: React.FC<LeadCardProps> = ({
                   {lead.company}
                 </p>
               </div>
+            )}
+            {lead.revenue && (
+              formatRevenue(lead.revenue) && (
+              <div className="flex items-center justify-center">
+                <div className="flex items-center gap-2">
+                  <DollarSign className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                  <p className="text-lg sm:text-xl font-semibold text-center break-words leading-relaxed bg-gradient-to-r from-muted-foreground to-muted-foreground/90 bg-clip-text text-transparent dark:bg-none dark:text-muted-foreground">
+                    {formatRevenue(lead.revenue)}
+                  </p>
+                </div>
+              </div>
+              )
             )}
           </div>
           {/* Group 2: Phone and Email */}

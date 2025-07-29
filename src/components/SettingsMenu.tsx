@@ -360,6 +360,7 @@ const SettingsMenu: React.FC<SettingsMenuProps> = ({ children }) => {
                             <div><span className="font-medium">C:</span> Phone (required, searchable)</div>
                             <div><span className="font-medium">D:</span> Additional Phones (optional, searchable)</div>
                             <div><span className="font-medium">E:</span> Email (optional)</div>
+                            <div><span className="font-medium">F:</span> Revenue (optional, displays as $amount)</div>
                           </div>
                         </div>
                         <div className="space-y-2">

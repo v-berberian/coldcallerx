@@ -82,11 +82,11 @@ export const parseCSV = async (text: string): Promise<Lead[]> => {
     
     for (const columns of batch) {
       if (columns.length > 0 && columns.some(c => c.trim() !== '')) {
-        while (columns.length < 5) {
+        while (columns.length < 6) {
           columns.push('');
         }
         
-        const [company, name, phone, additionalPhones, email] = columns;
+        const [company, name, phone, additionalPhones, email, revenue] = columns;
         
         if (name && name.trim() && phone && phone.trim()) {
           const cleanedEmail = cleanEmailValue(email);
@@ -115,7 +115,8 @@ export const parseCSV = async (text: string): Promise<Lead[]> => {
             phone: formatPhoneNumber(phone.trim()),
             company: cleanCsvValue(company),
             email: cleanedEmail,
-            additionalPhones: cleanCsvValue(processedAdditionalPhones)
+            additionalPhones: cleanCsvValue(processedAdditionalPhones),
+            revenue: cleanCsvValue(revenue)
           };
           
           leads.push(lead);
