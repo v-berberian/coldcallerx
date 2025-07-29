@@ -101,10 +101,21 @@ const SearchBar = forwardRef<SearchBarRef, SearchBarProps>(({
   }, [isFocused, isFullscreen, onCloseAutocomplete]);
 
   const handleFocus = () => {
-    setIsFocused(true);
-    // Only trigger focus if we're not already showing autocomplete (prevents reset)
-    if (!isFullscreen) {
-      onSearchFocus();
+    // iOS-specific: Add small delay to ensure proper event handling
+    if (/iPhone|iPad|iPod/i.test(navigator.userAgent)) {
+      setTimeout(() => {
+        setIsFocused(true);
+        // Only trigger focus if we're not already showing autocomplete (prevents reset)
+        if (!isFullscreen) {
+          onSearchFocus();
+        }
+      }, 10);
+    } else {
+      setIsFocused(true);
+      // Only trigger focus if we're not already showing autocomplete (prevents reset)
+      if (!isFullscreen) {
+        onSearchFocus();
+      }
     }
   };
 
@@ -188,6 +199,17 @@ const SearchBar = forwardRef<SearchBarRef, SearchBarProps>(({
     }
   };
 
+  // iOS-specific touch handling for better responsiveness
+  const handleTouchStart = (e: React.TouchEvent) => {
+    if (/iPhone|iPad|iPod/i.test(navigator.userAgent)) {
+      // Ensure the input becomes focused on touch start for iOS
+      if (inputRef.current && !isFocused) {
+        e.preventDefault();
+        inputRef.current.focus();
+      }
+    }
+  };
+
   return (
     <div className="relative search-area w-full" onTouchStart={(e) => e.stopPropagation()} onTouchEnd={(e) => e.stopPropagation()}>
       <input 
@@ -198,6 +220,7 @@ const SearchBar = forwardRef<SearchBarRef, SearchBarProps>(({
         onFocus={handleFocus} 
         onBlur={handleBlur} 
         onClick={handleInputClick}
+        onTouchStart={handleTouchStart}
         enterKeyHint="done"
         className={`w-full py-2 bg-card text-card-foreground rounded-xl border border-border placeholder:text-center placeholder:text-muted-foreground text-center focus:border-primary/50 focus:bg-card shadow-sm ${!hasStartedTyping && isFocused ? 'caret-transparent' : ''}`}
         ref={inputRef}

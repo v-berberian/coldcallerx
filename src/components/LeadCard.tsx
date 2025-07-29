@@ -593,8 +593,8 @@ const LeadCard: React.FC<LeadCardProps> = ({
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel className="rounded-lg">Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={confirmDelete} className="bg-red-600 hover:bg-red-700 text-white rounded-lg">
+            <AlertDialogCancel className="rounded-lg h-12 min-h-12">Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmDelete} className="bg-red-600 hover:bg-red-700 text-white rounded-lg h-12 min-h-12">
               Delete
             </AlertDialogAction>
           </AlertDialogFooter>

@@ -121,6 +121,17 @@ export const useSearchState = ({ leads, getBaseLeads, leadsData, timezoneFilter,
     }
   }, [initialSearchResults, searchResults.length, debouncedSearchQuery]);
 
+  // iOS-specific: Aggressively initialize search results when baseLeads change
+  useEffect(() => {
+    if (/iPhone|iPad|iPod/i.test(navigator.userAgent)) {
+      // On iOS, ensure we always have search results ready
+      if (baseLeads.length > 0 && searchResults.length === 0 && !debouncedSearchQuery.trim()) {
+        const initialResults = baseLeads.slice(0, INITIAL_RESULTS);
+        setSearchResults(initialResults);
+      }
+    }
+  }, [baseLeads, searchResults.length, debouncedSearchQuery]);
+
   const clearSearch = useCallback(() => {
     setSearchQuery('');
     // Don't close autocomplete - just clear the search query
@@ -129,13 +140,23 @@ export const useSearchState = ({ leads, getBaseLeads, leadsData, timezoneFilter,
   }, []);
 
   const handleSearchFocus = useCallback(() => {
+    // Force initialization of search results for iOS - ensure we have data ready
+    const currentBaseLeads = getBaseLeads();
+    
     // Immediately show autocomplete with pre-loaded results
     setShowAutocomplete(true);
+    
     // Ensure we have results to show immediately
-    if (searchResults.length === 0 && initialSearchResults.length > 0) {
-      setSearchResults(initialSearchResults);
+    if (searchResults.length === 0) {
+      if (initialSearchResults.length > 0) {
+        setSearchResults(initialSearchResults);
+      } else if (currentBaseLeads.length > 0) {
+        // Fallback: use current base leads if initial results aren't ready
+        const fallbackResults = currentBaseLeads.slice(0, INITIAL_RESULTS);
+        setSearchResults(fallbackResults);
+      }
     }
-  }, [searchResults.length, initialSearchResults]);
+  }, [searchResults.length, initialSearchResults, getBaseLeads]);
 
   const handleSearchBlur = useCallback(() => {
     // Don't close autocomplete on blur - let the user control when to close it
