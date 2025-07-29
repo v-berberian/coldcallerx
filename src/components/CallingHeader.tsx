@@ -96,8 +96,11 @@ const CallingHeader: React.FC<CallingHeaderProps> = ({
         </div>
         
         <div className="absolute left-1/2 transform -translate-x-1/2 flex items-center space-x-2 sm:space-x-3 min-w-0">
-          <h1 className="text-xl sm:text-2xl font-bold truncate dark:text-white text-black bg-gradient-to-r from-[#6EC6F1] to-[#6EC6F1]/90 bg-clip-text text-transparent dark:bg-none dark:text-white">
-            ColdCall X
+          <h1 className="text-xl sm:text-2xl font-bold truncate flex items-center">
+            <span className="bg-gradient-to-r from-[#1DB5E8] to-[#1DB5E8]/90 bg-clip-text text-transparent dark:bg-gradient-to-r dark:from-[#1DB5E8] dark:to-[#1DB5E8]/90 dark:bg-clip-text dark:text-transparent">
+              Cold Call 
+            </span>
+            <span className="bg-gradient-to-r from-[#1DB5E8] to-[#1DB5E8]/90 bg-clip-text text-transparent dark:bg-gradient-to-r dark:from-[#1DB5E8] dark:to-[#1DB5E8]/90 dark:bg-clip-text dark:text-transparent ml-1">X</span>
           </h1>
         </div>
         
