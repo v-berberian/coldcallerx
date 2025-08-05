@@ -47,44 +47,27 @@ export class AppStorage {
   private async setItem(key: string, value: unknown): Promise<void> {
     try {
       const stringValue = JSON.stringify(value);
+      
+      // Check data size and compress if needed
       const dataSize = new Blob([stringValue]).size;
       const maxSize = 1024 * 1024; // 1MB limit
-
-      // Special handling for large CSV lead arrays
-      if (
-        Array.isArray(value) &&
-        key.startsWith('coldcaller-csv-') &&
-        key.endsWith('-leads') &&
-        dataSize > maxSize
-      ) {
-        const match = key.match(/^coldcaller-csv-(.*?)-leads$/);
-
-        if (match) {
-          const csvId = match[1];
-          const CHUNK_SIZE = 100;
-          const totalChunks = Math.ceil((value as Lead[]).length / CHUNK_SIZE);
-
-          // Save in manageable chunks
-          for (let i = 0; i < totalChunks; i++) {
-            const chunk = (value as Lead[]).slice(i * CHUNK_SIZE, (i + 1) * CHUNK_SIZE);
-            const chunkKey = `coldcaller-csv-${csvId}-chunk-${i}`;
-            await this.setItem(chunkKey, chunk);
+      
+      if (dataSize > maxSize) {
+        console.warn(`Data size (${dataSize} bytes) exceeds limit for key: ${key}. Truncating...`);
+        // For large data, store only essential information
+        if (key.includes('leads-data')) {
+          // For leads data, store only the first 100 leads to stay under limit
+          const truncatedValue = Array.isArray(value) ? value.slice(0, 100) : value;
+          const truncatedString = JSON.stringify(truncatedValue);
+          if (this.useCapacitorStorage) {
+            await Preferences.set({ key, value: truncatedString });
+          } else {
+            localStorage.setItem(key, truncatedString);
           }
-
-          // Save metadata about the chunked storage
-          await this.setItem(getCSVStorageKey(csvId, 'metadata'), {
-            isChunked: true,
-            chunksCount: totalChunks,
-            totalLeads: (value as Lead[]).length,
-            chunkSize: CHUNK_SIZE,
-          });
-
-          // Remove the original oversized key if it exists
-          await this.removeItem(key);
           return;
         }
       }
-
+      
       if (this.useCapacitorStorage) {
         await Preferences.set({ key, value: stringValue });
       } else {
@@ -270,8 +253,6 @@ export class AppStorage {
 
   // CSV-specific storage methods
   async saveCSVLeadsData(csvId: string, leads: Lead[]): Promise<void> {
-    // Remove any existing chunked data to prevent stale chunks
-    await this.removeChunkedCSVData(csvId);
     await this.setItem(getCSVStorageKey(csvId, 'leads'), leads);
   }
 
@@ -343,7 +324,6 @@ export class AppStorage {
       // Remove CSV-specific storage keys
       await this.removeItem(getCSVStorageKey(csvId, 'leads'));
       await this.removeItem(getCSVStorageKey(csvId, 'current-index'));
-      await this.removeChunkedCSVData(csvId);
     } catch (error) {
       console.error('Error removing CSV leads data:', error);
     }
