@@ -364,12 +364,27 @@ const SettingsMenu: React.FC<SettingsMenuProps> = ({ children }) => {
                         </div>
                         <div className="space-y-2">
                           <p className="text-sm font-medium text-foreground">Tips:</p>
-                          <div className="text-xs text-muted-foreground space-y-1">
-                            <div>• Phone numbers should include area code</div>
-                            <div>• Additional phones can be separated by spaces or commas</div>
-                            <div>• Email addresses should be valid format</div>
-                            <div>• First row can be headers (will be skipped)</div>
-                            <div>• Use the search bar to find leads by name, company, or phone</div>
+                          <div className="space-y-2">
+                            <div className="flex items-start gap-3 p-2 rounded-lg bg-gradient-to-r from-blue-50/50 to-indigo-50/50 dark:from-blue-950/30 dark:to-indigo-950/30 border border-blue-100/50 dark:border-blue-900/30 transition-all duration-200 hover:from-blue-50/70 hover:to-indigo-50/70 dark:hover:from-blue-950/40 dark:hover:to-indigo-950/40">
+                              <div className="flex-shrink-0 w-2 h-2 rounded-full bg-gradient-to-r from-blue-400 to-indigo-500 mt-1.5 shadow-sm"></div>
+                              <div className="text-xs text-muted-foreground leading-relaxed">Phone numbers should include area code</div>
+                            </div>
+                            <div className="flex items-start gap-3 p-2 rounded-lg bg-gradient-to-r from-emerald-50/50 to-teal-50/50 dark:from-emerald-950/30 dark:to-teal-950/30 border border-emerald-100/50 dark:border-emerald-900/30 transition-all duration-200 hover:from-emerald-50/70 hover:to-teal-50/70 dark:hover:from-emerald-950/40 dark:hover:to-teal-950/40">
+                              <div className="flex-shrink-0 w-2 h-2 rounded-full bg-gradient-to-r from-emerald-400 to-teal-500 mt-1.5 shadow-sm"></div>
+                              <div className="text-xs text-muted-foreground leading-relaxed">Additional phones can be separated by spaces or commas</div>
+                            </div>
+                            <div className="flex items-start gap-3 p-2 rounded-lg bg-gradient-to-r from-purple-50/50 to-pink-50/50 dark:from-purple-950/30 dark:to-pink-950/30 border border-purple-100/50 dark:border-purple-900/30 transition-all duration-200 hover:from-purple-50/70 hover:to-pink-50/70 dark:hover:from-purple-950/40 dark:hover:to-pink-950/40">
+                              <div className="flex-shrink-0 w-2 h-2 rounded-full bg-gradient-to-r from-purple-400 to-pink-500 mt-1.5 shadow-sm"></div>
+                              <div className="text-xs text-muted-foreground leading-relaxed">Email addresses should be valid format</div>
+                            </div>
+                            <div className="flex items-start gap-3 p-2 rounded-lg bg-gradient-to-r from-amber-50/50 to-orange-50/50 dark:from-amber-950/30 dark:to-orange-950/30 border border-amber-100/50 dark:border-amber-900/30 transition-all duration-200 hover:from-amber-50/70 hover:to-orange-50/70 dark:hover:from-amber-950/40 dark:hover:to-orange-950/40">
+                              <div className="flex-shrink-0 w-2 h-2 rounded-full bg-gradient-to-r from-amber-400 to-orange-500 mt-1.5 shadow-sm"></div>
+                              <div className="text-xs text-muted-foreground leading-relaxed">First row can be headers (will be skipped)</div>
+                            </div>
+                            <div className="flex items-start gap-3 p-2 rounded-lg bg-gradient-to-r from-cyan-50/50 to-blue-50/50 dark:from-cyan-950/30 dark:to-blue-950/30 border border-cyan-100/50 dark:border-cyan-900/30 transition-all duration-200 hover:from-cyan-50/70 hover:to-blue-50/70 dark:hover:from-cyan-950/40 dark:hover:to-blue-950/40">
+                              <div className="flex-shrink-0 w-2 h-2 rounded-full bg-gradient-to-r from-cyan-400 to-blue-500 mt-1.5 shadow-sm"></div>
+                              <div className="text-xs text-muted-foreground leading-relaxed">Use the search bar to find leads by name, company, or phone</div>
+                            </div>
                           </div>
                         </div>
                       </div>
