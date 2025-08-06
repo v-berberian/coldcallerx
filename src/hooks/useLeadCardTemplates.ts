@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useAppVisibility } from "../hooks/useAppVisibility";
+import { StorageManager } from '@/utils/storageManager';
 
 interface EmailTemplate {
   id: string;
