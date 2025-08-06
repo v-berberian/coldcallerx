@@ -197,17 +197,28 @@ export const useCsvImporter = ({ onLeadsImported }: UseCsvImporterProps) => {
     setLoading(true);
 
     try {
+      console.log('🔄 Starting file processing:', file.name, 'Size:', fileSizeMB.toFixed(2), 'MB');
+      
       const reader = new FileReader();
+      
       reader.onload = async (e) => {
         try {
+          console.log('📖 File read successfully, parsing content...');
           const text = e.target?.result as string;
           if (!text) {
+            console.error('❌ File is empty or could not be read');
             toast.error('File is empty or could not be read.');
+            setLoading(false);
             return;
           }
           
+          console.log('📊 File content length:', text.length, 'characters');
+          console.log('📄 First 200 characters:', text.substring(0, 200));
+          
           const MAX_LEADS_PER_LIST = 10000;
           let leads = await parseCSV(text);
+          
+          console.log('✅ CSV parsed successfully, leads found:', leads.length);
 
           // Cap the number of leads to MAX_LEADS_PER_LIST
           if (leads.length > MAX_LEADS_PER_LIST) {
@@ -217,28 +228,34 @@ export const useCsvImporter = ({ onLeadsImported }: UseCsvImporterProps) => {
           }
           
           if (leads.length === 0) {
+            console.error('❌ No valid leads found in CSV');
             toast.error('No valid leads found in the CSV file. Please check the file format.');
+            setLoading(false);
             return;
           }
           
           const fileName = file.name.replace('.csv', '');
           const csvId = generateCSVId(fileName);
           
+          console.log('🆔 Generated CSV ID:', csvId);
+          
           // Check if we have enough storage space
           const leadsDataSize = JSON.stringify(leads).length;
           const { totalSize } = analyzeLocalStorageUsage();
           const estimatedNewUsage = totalSize + leadsDataSize;
           
-          console.log(`File: ${file.name}, Size: ${(file.size / 1024 / 1024).toFixed(2)}MB`);
-          console.log(`File content length: ${text.length} characters`);
-          console.log(`First 500 characters: ${text.substring(0, 500)}`);
-          console.log(`Parsed ${leads.length} leads`);
-          console.log(`Current localStorage usage: ${(totalSize / 1024 / 1024).toFixed(2)}MB`);
-          console.log(`Estimated new usage: ${(estimatedNewUsage / 1024 / 1024).toFixed(2)}MB`);
-          console.log(`Max capacity: 50.00MB`);
+          console.log(`📊 Storage analysis:`);
+          console.log(`   File: ${file.name}, Size: ${(file.size / 1024 / 1024).toFixed(2)}MB`);
+          console.log(`   File content length: ${text.length} characters`);
+          console.log(`   Parsed ${leads.length} leads`);
+          console.log(`   Leads data size: ${(leadsDataSize / 1024 / 1024).toFixed(2)}MB`);
+          console.log(`   Current localStorage usage: ${(totalSize / 1024 / 1024).toFixed(2)}MB`);
+          console.log(`   Estimated new usage: ${(estimatedNewUsage / 1024 / 1024).toFixed(2)}MB`);
+          console.log(`   Max capacity: 50.00MB`);
           
           // Check storage capacity and warn user if insufficient
           if (!checkStorageAndWarn(leadsDataSize, totalSize)) {
+            console.log('❌ Storage check failed');
             setLoading(false);
             return;
           }
@@ -246,11 +263,14 @@ export const useCsvImporter = ({ onLeadsImported }: UseCsvImporterProps) => {
           // If file is large (>10MB estimated), use chunking
           const shouldUseChunking = leadsDataSize > 10 * 1024 * 1024; // chunking only if data very large
           
+          console.log('💾 Saving leads data...');
+          
           if (shouldUseChunking) {
-            console.log('Using chunked storage for large file');
+            console.log('📦 Using chunked storage for large file');
             const success = await saveLeadsInChunks(csvId, leads);
             
             if (!success) {
+              console.error('❌ Failed to save large file with chunking');
               toast.error('Failed to save large file. Please try clearing some data or use a smaller file.');
               setLoading(false);
               return;
@@ -258,16 +278,19 @@ export const useCsvImporter = ({ onLeadsImported }: UseCsvImporterProps) => {
           } else {
             // Try normal storage first
             try {
+              console.log('💾 Saving to normal storage...');
               await appStorage.saveCSVLeadsData(csvId, leads);
+              console.log('✅ Successfully saved to normal storage');
             } catch (storageError) {
-              console.error('Error saving to storage:', storageError);
+              console.error('❌ Error saving to storage:', storageError);
               
               if (storageError instanceof Error && storageError.name === 'QuotaExceededError') {
                 // Try chunking as fallback
-                console.log('Storage quota exceeded, trying chunked storage');
+                console.log('🔄 Storage quota exceeded, trying chunked storage');
                 const success = await saveLeadsInChunks(csvId, leads);
                 
                 if (!success) {
+                  console.error('❌ Failed to save with chunking fallback');
                   toast.error('Storage is full. Please delete some existing lists or try a smaller file.');
                   setLoading(false);
                   return;
@@ -279,6 +302,7 @@ export const useCsvImporter = ({ onLeadsImported }: UseCsvImporterProps) => {
           }
           
           try {
+            console.log('📝 Saving file metadata...');
             // Save file metadata
             const existingFiles = await appStorage.getCSVFiles();
             const newFileInfo = {
@@ -302,29 +326,46 @@ export const useCsvImporter = ({ onLeadsImported }: UseCsvImporterProps) => {
             await appStorage.saveCSVFiles(existingFiles);
             await appStorage.saveCurrentCSVId(csvId);
             
+            console.log('✅ File metadata saved successfully');
+            
             onLeadsImported(leads, fileName, csvId);
             toast.success(`${leads.length} leads imported successfully!`, {
               duration: 1000
             });
+            
+            console.log('🎉 Import completed successfully!');
           } catch (metadataError) {
-            console.error('Error saving file metadata:', metadataError);
+            console.error('❌ Error saving file metadata:', metadataError);
             toast.error('File imported but metadata could not be saved.');
           }
         } catch (parseError) {
-          console.error('Error parsing CSV:', parseError);
+          console.error('❌ Error parsing CSV:', parseError);
+          console.error('Parse error details:', {
+            name: parseError.name,
+            message: parseError.message,
+            stack: parseError.stack
+          });
           toast.error('Failed to parse CSV file. Please check the file content and format.');
         } finally {
           setLoading(false);
         }
       };
+      
       reader.onerror = (error) => {
-        console.error('FileReader error:', error);
+        console.error('❌ FileReader error:', error);
         toast.error('Error reading file');
         setLoading(false);
       };
+      
+      console.log('📖 Starting file read...');
       reader.readAsText(file);
     } catch (error) {
-      console.error('Error in handleFileProcess:', error);
+      console.error('❌ Error in handleFileProcess:', error);
+      console.error('Process error details:', {
+        name: error instanceof Error ? error.name : 'Unknown',
+        message: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : 'No stack trace'
+      });
       toast.error('Error processing file');
       setLoading(false);
     }
