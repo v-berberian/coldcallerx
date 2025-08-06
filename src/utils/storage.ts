@@ -46,14 +46,17 @@ export class AppStorage {
   // Generic storage methods with Capacitor fallback
   private async setItem(key: string, value: unknown): Promise<void> {
     try {
+      console.log(`💾 Saving to storage: ${key}`);
       const stringValue = JSON.stringify(value);
       
       // Check data size and compress if needed
       const dataSize = new Blob([stringValue]).size;
       const maxSize = 1024 * 1024; // 1MB limit
       
+      console.log(`📊 Data size for ${key}: ${(dataSize / 1024 / 1024).toFixed(2)}MB`);
+      
       if (dataSize > maxSize) {
-        console.warn(`Data size (${dataSize} bytes) exceeds limit for key: ${key}. Truncating...`);
+        console.warn(`⚠️ Data size (${dataSize} bytes) exceeds limit for key: ${key}. Truncating...`);
         // For large data, store only essential information
         if (key.includes('leads-data')) {
           // For leads data, store only the first 100 leads to stay under limit
@@ -64,49 +67,60 @@ export class AppStorage {
           } else {
             localStorage.setItem(key, truncatedString);
           }
+          console.log(`✅ Truncated data saved for ${key}`);
           return;
         }
       }
       
       if (this.useCapacitorStorage) {
         await Preferences.set({ key, value: stringValue });
+        console.log(`✅ Data saved to Capacitor storage: ${key}`);
       } else {
         localStorage.setItem(key, stringValue);
+        console.log(`✅ Data saved to localStorage: ${key}`);
       }
     } catch (error) {
+      console.error(`❌ Error saving to storage for key ${key}:`, error);
       // Fallback to localStorage if Capacitor fails
       if (this.useCapacitorStorage) {
         try {
+          console.log(`🔄 Falling back to localStorage for ${key}`);
           localStorage.setItem(key, JSON.stringify(value));
+          console.log(`✅ Fallback save successful for ${key}`);
         } catch (fallbackError) {
-          console.error('Failed to save to localStorage:', fallbackError);
+          console.error(`❌ Failed to save to localStorage fallback for ${key}:`, fallbackError);
+          throw fallbackError;
         }
+      } else {
+        throw error;
       }
     }
   }
 
   private async getItem<T>(key: string, defaultValue: T): Promise<T> {
     try {
+      console.log(`📖 Reading from storage: ${key}`);
       let item: string | null = null;
       
       if (this.useCapacitorStorage) {
         const result = await Preferences.get({ key });
         item = result.value;
+        console.log(`📖 Read from Capacitor storage: ${key}`);
       } else {
         item = localStorage.getItem(key);
+        console.log(`📖 Read from localStorage: ${key}`);
       }
       
-      return item ? JSON.parse(item) : defaultValue;
+      const parsed = item ? JSON.parse(item) : defaultValue;
+      console.log(`✅ Successfully read ${key}`);
+      return parsed;
     } catch (error) {
-      // Fallback to localStorage if Capacitor fails
-      if (this.useCapacitorStorage) {
-        try {
-          const fallbackItem = localStorage.getItem(key);
-          return fallbackItem ? JSON.parse(fallbackItem) : defaultValue;
-        } catch (fallbackError) {
-          console.error('Failed to read from localStorage:', fallbackError);
-        }
-      }
+      console.error(`❌ Error reading from storage for key ${key}:`, error);
+      console.error('Read error details:', {
+        name: error instanceof Error ? error.name : 'Unknown',
+        message: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : 'No stack trace'
+      });
       return defaultValue;
     }
   }
