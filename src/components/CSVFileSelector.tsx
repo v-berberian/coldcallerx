@@ -315,14 +315,16 @@ const CSVFileSelector: React.FC<CSVFileSelectorProps> = ({
                 <div className="flex items-baseline justify-between w-full">
                   <div className="flex flex-col items-start flex-1 min-w-0 pr-2">
                     <div className="flex items-baseline">
-                      <span className="font-normal truncate text-base block max-w-[200px]" title={file.name}>{file.name}</span>
                       {file.id === currentCSVId && (
-                        <div className="w-2 h-2 bg-foreground rounded-full ml-2 flex-shrink-0"></div>
+                        <div className="w-2 h-2 bg-foreground rounded-full mr-2 flex-shrink-0"></div>
                       )}
+                      <span className="font-normal truncate text-base block max-w-[200px]" title={file.name}>{file.name}</span>
                     </div>
-                    <span className="text-sm text-muted-foreground mt-0.5">
-                      {file.totalLeads} leads
-                    </span>
+                    <div className="flex items-baseline mt-0.5">
+                      <span className="text-sm text-muted-foreground">
+                        {file.totalLeads} leads
+                      </span>
+                    </div>
                   </div>
                   <div className="flex items-baseline">
                     <button
