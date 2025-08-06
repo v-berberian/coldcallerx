@@ -37,6 +37,7 @@ export const useCsvImporter = ({ onLeadsImported }: UseCsvImporterProps) => {
       
       return { usage, totalSize };
     } catch (error) {
+      console.error('Error analyzing localStorage usage:', error);
       return { usage: {}, totalSize: 0 };
     }
   };
@@ -182,32 +183,51 @@ export const useCsvImporter = ({ onLeadsImported }: UseCsvImporterProps) => {
   };
 
   const handleFileProcess = async (file: File) => {
+    // Validate file type
     if (file.type !== 'text/csv' && !file.name.endsWith('.csv')) {
       toast.error('Please select a valid CSV file');
       return;
     }
 
-    // Check file size for large files
+    // Check file size
     const fileSizeMB = file.size / (1024 * 1024);
     
     if (fileSizeMB > 50) {
       toast.info('Large file detected. Processing may take a moment...');
     }
 
+    if (fileSizeMB > 100) {
+      toast.error('File is too large. Please use a file smaller than 100MB.');
+      return;
+    }
+
     setLoading(true);
 
     try {
       const reader = new FileReader();
+      
       reader.onload = async (e) => {
         try {
           const text = e.target?.result as string;
           if (!text) {
             toast.error('File is empty or could not be read.');
+            setLoading(false);
             return;
           }
           
+          console.log(`Processing file: ${file.name}, Size: ${(file.size / 1024 / 1024).toFixed(2)}MB`);
+          
           const MAX_LEADS_PER_LIST = 10000;
-          let leads = await parseCSV(text);
+          let leads: Lead[] = [];
+          
+          try {
+            leads = await parseCSV(text);
+          } catch (parseError) {
+            console.error('CSV parsing error:', parseError);
+            toast.error(`Failed to parse CSV file: ${parseError instanceof Error ? parseError.message : 'Unknown parsing error'}`);
+            setLoading(false);
+            return;
+          }
 
           // Cap the number of leads to MAX_LEADS_PER_LIST
           if (leads.length > MAX_LEADS_PER_LIST) {
@@ -217,7 +237,8 @@ export const useCsvImporter = ({ onLeadsImported }: UseCsvImporterProps) => {
           }
           
           if (leads.length === 0) {
-            toast.error('No valid leads found in the CSV file. Please check the file format.');
+            toast.error('No valid leads found in the CSV file. Please check the file format and ensure it has at least name and phone columns.');
+            setLoading(false);
             return;
           }
           
@@ -231,7 +252,6 @@ export const useCsvImporter = ({ onLeadsImported }: UseCsvImporterProps) => {
           
           console.log(`File: ${file.name}, Size: ${(file.size / 1024 / 1024).toFixed(2)}MB`);
           console.log(`File content length: ${text.length} characters`);
-          console.log(`First 500 characters: ${text.substring(0, 500)}`);
           console.log(`Parsed ${leads.length} leads`);
           console.log(`Current localStorage usage: ${(totalSize / 1024 / 1024).toFixed(2)}MB`);
           console.log(`Estimated new usage: ${(estimatedNewUsage / 1024 / 1024).toFixed(2)}MB`);
@@ -310,22 +330,24 @@ export const useCsvImporter = ({ onLeadsImported }: UseCsvImporterProps) => {
             console.error('Error saving file metadata:', metadataError);
             toast.error('File imported but metadata could not be saved.');
           }
-        } catch (parseError) {
-          console.error('Error parsing CSV:', parseError);
-          toast.error('Failed to parse CSV file. Please check the file content and format.');
+        } catch (error) {
+          console.error('Error in file processing:', error);
+          toast.error(`Error processing file: ${error instanceof Error ? error.message : 'Unknown error'}`);
         } finally {
           setLoading(false);
         }
       };
+      
       reader.onerror = (error) => {
         console.error('FileReader error:', error);
-        toast.error('Error reading file');
+        toast.error('Error reading file. Please try again.');
         setLoading(false);
       };
+      
       reader.readAsText(file);
     } catch (error) {
       console.error('Error in handleFileProcess:', error);
-      toast.error('Error processing file');
+      toast.error(`Error processing file: ${error instanceof Error ? error.message : 'Unknown error'}`);
       setLoading(false);
     }
   };
