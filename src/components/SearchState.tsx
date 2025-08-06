@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
-import { useAppVisibility } from "../hooks/useAppVisibility";
-import { Lead } from "../types/lead";
+import { Lead } from '../types/lead';
+
 interface UseSearchStateProps {
   leads: Lead[];
   getBaseLeads: () => Lead[];
@@ -11,15 +11,9 @@ interface UseSearchStateProps {
 
 // Debounce hook for search optimization
 const useDebounce = (value: string, delay: number) => {
-  const isAppVisible = useAppVisibility();
   const [debouncedValue, setDebouncedValue] = useState(value);
 
   useEffect(() => {
-    // Only set debounce timer if app is visible (energy optimization)
-    if (!isAppVisible) {
-      return;
-    }
-    
     const handler = setTimeout(() => {
       setDebouncedValue(value);
     }, delay);
@@ -27,7 +21,7 @@ const useDebounce = (value: string, delay: number) => {
     return () => {
       clearTimeout(handler);
     };
-  }, [value, delay, isAppVisible]);
+  }, [value, delay]);
 
   return debouncedValue;
 };

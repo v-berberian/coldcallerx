@@ -1,4 +1,3 @@
-import { useAppVisibility } from "../hooks/useAppVisibility";
 import { useState, useEffect, useRef } from 'react';
 import { Lead } from '../types/lead';
 
@@ -17,7 +16,7 @@ export const useAutoCall = (
   const [pendingLead, setPendingLead] = useState<Lead | null>(null);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
-  const isAppVisible = useAppVisibility();  const executeAutoCall = (lead: Lead) => {
+  const executeAutoCall = (lead: Lead) => {
     if (!lead) {
       console.warn('executeAutoCall called with null/undefined lead');
       return;
@@ -117,43 +116,6 @@ export const useAutoCall = (
         clearInterval(intervalRef.current);
       }
     };
-
-  // Energy optimization: Pause timer when app is backgrounded
-  useEffect(() => {
-    if (!isCountdownActive || !intervalRef.current) return;
-    
-    if (!isAppVisible) {
-      // App is backgrounded, pause the timer
-      if (intervalRef.current) {
-        clearInterval(intervalRef.current);
-        intervalRef.current = null;
-      }
-    } else {
-      // App is visible and we have an active countdown, restore the timer
-      if (!intervalRef.current && isCountdownActive && countdownTime > 0) {
-        intervalRef.current = setInterval(() => {
-          setCountdownTime((prev) => {
-            if (prev <= 1) {
-              if (intervalRef.current) {
-                clearInterval(intervalRef.current);
-                intervalRef.current = null;
-              }
-              setIsCountdownActive(false);
-              if (pendingLead) {
-                makeCall(pendingLead, false);
-              }
-              setTimeout(() => {
-                setIsAutoCallInProgress(false);
-                setPendingLead(null);
-              }, 200);
-              return 0;
-            }
-            return prev - 1;
-          });
-        }, 1000);
-      }
-    }
-  }, [isAppVisible, isCountdownActive, countdownTime, pendingLead, makeCall]);
   }, []);
 
   const handleCountdownComplete = (lead: Lead) => {

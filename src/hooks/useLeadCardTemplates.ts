@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react';
-import { useAppVisibility } from "../hooks/useAppVisibility";
 import { StorageManager } from '@/utils/storageManager';
 
 interface EmailTemplate {
@@ -21,7 +20,7 @@ export const useLeadCardTemplates = () => {
   const [selectedEmailTemplateId, setSelectedEmailTemplateId] = useState<string>('');
   const [selectedTextTemplateId, setSelectedTextTemplateId] = useState<string>('');
 
-  const isAppVisible = useAppVisibility();  // Load templates and selections from localStorage
+  // Load templates and selections from localStorage
   useEffect(() => {
     // Load templates from SettingsMenu format
     const emailSubject = StorageManager.getEmailSubject();
@@ -114,45 +113,15 @@ export const useLeadCardTemplates = () => {
     // Listen for storage events (when localStorage changes in other tabs/windows)
     window.addEventListener('storage', handleStorageChange);
     
-    
     // Also check for changes periodically (for same-tab updates)
-    // Energy optimization: Only poll when app is visible
-    let interval: NodeJS.Timeout | null = null;
-    
-    const startPolling = () => {
-      if (interval) clearInterval(interval);
-      interval = setInterval(handleStorageChange, 2000);
-    };
-    
-    const stopPolling = () => {
-      if (interval) {
-        clearInterval(interval);
-        interval = null;
-      }
-    };
-    
-    // Start polling if app is visible
-    if (isAppVisible) {
-      startPolling();
-    }
-    
-    // Handle visibility changes
-    const handleVisibilityChange = () => {
-      if (document.hidden) {
-        stopPolling();
-      } else {
-        startPolling();
-      }
-    };
-    
-    document.addEventListener("visibilitychange", handleVisibilityChange);
+    const interval = setInterval(handleStorageChange, 100);
 
     return () => {
-      window.removeEventListener("storage", handleStorageChange);
-      document.removeEventListener("visibilitychange", handleVisibilityChange);
-      stopPolling();
+      window.removeEventListener('storage', handleStorageChange);
+      clearInterval(interval);
     };
-  }, [isAppVisible]);
+  }, []);
+
   return {
     emailTemplates,
     textTemplates,
