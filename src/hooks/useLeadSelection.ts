@@ -55,7 +55,17 @@ export const useLeadSelection = () => {
     } else {
       // All leads have been shown, pick any random lead (cycle complete)
       console.log('All leads have been shown, cycling complete - picking any random lead');
-      const randomIndex = Math.floor(Math.random() * baseLeads.length);
+      if (baseLeads.length === 1) {
+        return {
+          index: currentIndex,
+          lead: baseLeads[currentIndex]
+        };
+      }
+      let randomIndex = Math.floor(Math.random() * baseLeads.length);
+      // Avoid reselecting the current lead if possible
+      if (randomIndex === currentIndex && baseLeads.length > 1) {
+        randomIndex = (randomIndex + 1) % baseLeads.length;
+      }
       return {
         index: randomIndex,
         lead: baseLeads[randomIndex]
