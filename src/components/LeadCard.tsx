@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react'
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from '@/components/ui/dropdown-menu';
-import { X, Phone, Mail, ChevronDown, Check, MessageSquare, Upload, Settings, Edit3, Trash } from 'lucide-react';
+import { X, Phone, Mail, ChevronDown, Check, MessageSquare, Upload, Settings, Edit3, Trash, MessageCircle } from 'lucide-react';
 import {
   AlertDialog,
   AlertDialogContent,
@@ -365,11 +365,24 @@ const LeadCard: React.FC<LeadCardProps> = ({
           }}
         >
       <CardContent className="flex-1 flex flex-col overflow-hidden">
-        {/* Top row with lead count and file name */}
-        <div className="flex items-center justify-center p-3 sm:p-5 pb-0">
+        {/* Top row with comment icon, lead count and file name */}
+        <div className="flex items-center justify-between p-3 sm:p-5 pb-0">
+          <div className="flex items-center">
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                setIsCardFlipped(true);
+              }}
+              className="p-1.5 rounded-full hover:bg-muted/50 transition-colors"
+              disabled={isDeleteMode || isSwiping}
+            >
+              <MessageCircle className="h-4 w-4 text-muted-foreground" />
+            </button>
+          </div>
           <p className="text-sm text-muted-foreground opacity-40">
             {currentIndex + 1}/{totalCount}
           </p>
+          <div className="w-7" /> {/* Spacer to center the count */}
         </div>
 
         {/* Lead info - Main content area */}

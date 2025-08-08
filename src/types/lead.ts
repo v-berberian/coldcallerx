@@ -6,6 +6,7 @@ export interface Lead {
   lastCalled?: string;
   additionalPhones?: string;
   notes?: string;
+  callCount?: number;
 }
 
 export type TimezoneFilter = 'ALL' | 'EST_CST';

@@ -44,7 +44,19 @@ export const useSimplifiedCallingScreenState = ({ leads }: UseSimplifiedCallingS
     resetLeadsData,
     restoreFromLocalStorage,
     getDelayDisplayType
-  } = useLeadNavigation(leads);
+  } = useLeadNavigation({ 
+    initialLeads: leads, 
+    currentIndex: 0, 
+    historyIndex: 0,
+    updateNavigation: () => {},
+    updateNavigationWithHistory: () => {},
+    goToPrevious: () => false,
+    goToPreviousFromHistory: () => false,
+    resetNavigation: () => {},
+    setCurrentIndex: () => {},
+    restoreFromLocalStorage: async () => {},
+    syncFromCloudSession: () => {}
+  });
 
   const {
     searchQuery,
