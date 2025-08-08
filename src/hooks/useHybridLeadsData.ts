@@ -34,26 +34,28 @@ export const useHybridLeadsData = (initialLeads: Lead[]) => {
   const markLeadAsCalledWrapper = async (lead: Lead) => {
     try {
       // Update hybrid storage (both local and server)
-      await updateLeadCallCount(lead);
+      const success = await updateLeadCallCount(lead);
       
-      // Update local component state
-      const now = new Date();
-      const dateString = now.toLocaleDateString();
-      const timeString = now.toLocaleTimeString('en-US', {
-        hour: 'numeric',
-        minute: '2-digit',
-        hour12: true
-      });
-      const lastCalledString = `${dateString} at ${timeString}`;
+      if (success) {
+        // Update local component state
+        const now = new Date();
+        const dateString = now.toLocaleDateString();
+        const timeString = now.toLocaleTimeString('en-US', {
+          hour: 'numeric',
+          minute: '2-digit',
+          hour12: true
+        });
+        const lastCalledString = `${dateString} at ${timeString}`;
 
-      const updatedLeads = leadsData.map(l => 
-        l.name === lead.name && l.phone === lead.phone ? {
-          ...l,
-          lastCalled: lastCalledString
-        } : l
-      );
-      
-      setLeadsData(updatedLeads);
+        const updatedLeads = leadsData.map(l => 
+          l.name === lead.name && l.phone === lead.phone ? {
+            ...l,
+            lastCalled: lastCalledString
+          } : l
+        );
+        
+        setLeadsData(updatedLeads);
+      }
     } catch (error) {
       console.error('Error in markLeadAsCalledWrapper:', error);
     }
@@ -61,14 +63,16 @@ export const useHybridLeadsData = (initialLeads: Lead[]) => {
 
   const resetCallCountWrapper = async (lead: Lead) => {
     try {
-      await resetCallCount(lead);
+      const success = await resetCallCount(lead);
       
-      const updatedLeads = leadsData.map(l => 
-        l.name === lead.name && l.phone === lead.phone 
-          ? { ...l, lastCalled: undefined }
-          : l
-      );
-      setLeadsData(updatedLeads);
+      if (success) {
+        const updatedLeads = leadsData.map(l => 
+          l.name === lead.name && l.phone === lead.phone 
+            ? { ...l, lastCalled: undefined }
+            : l
+        );
+        setLeadsData(updatedLeads);
+      }
     } catch (error) {
       console.error('Error in resetCallCountWrapper:', error);
     }
@@ -76,13 +80,15 @@ export const useHybridLeadsData = (initialLeads: Lead[]) => {
 
   const resetAllCallCountsWrapper = async () => {
     try {
-      await resetAllCallCounts();
+      const success = await resetAllCallCounts();
       
-      const updatedLeads = leadsData.map(l => ({
-        ...l,
-        lastCalled: undefined
-      }));
-      setLeadsData(updatedLeads);
+      if (success) {
+        const updatedLeads = leadsData.map(l => ({
+          ...l,
+          lastCalled: undefined
+        }));
+        setLeadsData(updatedLeads);
+      }
     } catch (error) {
       console.error('Error in resetAllCallCountsWrapper:', error);
     }

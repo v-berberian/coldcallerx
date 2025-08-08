@@ -8,7 +8,6 @@ interface UseCallingScreenStateProps {
   leads: Lead[];
 }
 
-
 export const useCallingScreenState = ({ leads }: UseCallingScreenStateProps) => {
   const [componentReady, setComponentReady] = useState(false);
   const [leadsInitialized, setLeadsInitialized] = useState(false);
@@ -42,19 +41,7 @@ export const useCallingScreenState = ({ leads }: UseCallingScreenStateProps) => 
     toggleCallDelay,
     resetCallDelay,
     resetLeadsData
-  } = useLeadNavigation({ 
-    initialLeads: leads, 
-    currentIndex: 0, 
-    historyIndex: 0,
-    updateNavigation: () => {},
-    updateNavigationWithHistory: () => {},
-    goToPrevious: () => false,
-    goToPreviousFromHistory: () => false,
-    resetNavigation: () => {},
-    setCurrentIndex: () => {},
-    restoreFromLocalStorage: async () => {},
-    syncFromCloudSession: () => {}
-  });
+  } = useLeadNavigation(leads);
 
   const {
     searchQuery,
