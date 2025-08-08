@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react'
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from '@/components/ui/dropdown-menu';
-import { X, Phone, Mail, ChevronDown, Check, MessageSquare, Upload, Settings, Edit3, Trash } from 'lucide-react';
+import { X, Phone, Mail, ChevronDown, Check, MessageSquare, Upload, Settings, Edit3, Trash, Send } from 'lucide-react';
 import {
   AlertDialog,
   AlertDialogContent,
@@ -855,17 +855,18 @@ const LeadCard: React.FC<LeadCardProps> = ({
                     if (el) el.focus();
                   }}
                   onClick={addComment}
-                  className="h-11 px-4"
+                  className="h-11 w-11 p-0 rounded-full"
                   tabIndex={-1}
+                  aria-label="Send comment"
                 >
-                  Add
+                  <Send className="h-5 w-5" />
                 </Button>
               </motion.div>
               <AnimatePresence>
                 {addFxVisible && (
                   <motion.span
                     key="add-ripple"
-                    className="absolute inset-0 rounded-md bg-green-500/15 pointer-events-none"
+                    className="absolute inset-0 rounded-full bg-green-500/15 pointer-events-none"
                     initial={{ opacity: 0.35, scale: 0.92 }}
                     animate={{ opacity: 0, scale: 1.22 }}
                     exit={{ opacity: 0 }}
