@@ -248,7 +248,7 @@ const LeadCard: React.FC<LeadCardProps> = ({
   // If we have a noLeadsMessage, show the empty state
   if (noLeadsMessage) {
     return (
-      <Card className="shadow-2xl border-border/50 rounded-3xl bg-card min-h-[400px] max-h-[500px] sm:min-h-[420px] sm:max-h-[550px] flex flex-col mb-8">
+      <Card className="shadow-2xl border border-border/60 dark:border-border/70 ring-1 ring-border/40 dark:ring-border/60 rounded-3xl bg-card min-h-[400px] max-h-[500px] sm:min-h-[420px] sm:max-h-[550px] flex flex-col mb-8">
         <CardContent className="p-6 space-y-6 flex-1 flex flex-col justify-center">
           <div className="text-center">
             <h2 className="text-2xl font-bold text-foreground">{noLeadsMessage}</h2>
@@ -360,7 +360,7 @@ const LeadCard: React.FC<LeadCardProps> = ({
         }}
       >
         <Card 
-          className="shadow-2xl border-border/30 rounded-3xl bg-background min-h-[400px] max-h-[500px] sm:min-h-[420px] sm:max-h-[550px] flex flex-col mb-4 overflow-hidden relative" 
+          className="shadow-2xl border border-border/50 dark:border-border/60 ring-1 ring-border/40 dark:ring-border/60 rounded-3xl bg-card min-h-[400px] max-h-[500px] sm:min-h-[420px] sm:max-h-[550px] flex flex-col mb-4 overflow-hidden relative" 
           onClick={(e) => handleCardClick(e)}
           onTouchStart={(e) => handleCardClick(e)}
           style={{
@@ -723,7 +723,7 @@ const LeadCard: React.FC<LeadCardProps> = ({
 
     {/* Back side of the card - Trello-style comments */}
     <Card 
-      className="shadow-2xl border-border/30 rounded-3xl bg-background min-h-[400px] max-h-[500px] sm:min-h-[420px] sm:max-h-[550px] flex flex-col mb-4 overflow-hidden absolute inset-0" 
+      className="shadow-2xl border border-border/50 dark:border-border/60 ring-1 ring-border/40 dark:ring-border/60 rounded-3xl bg-card min-h-[400px] max-h-[500px] sm:min-h-[420px] sm:max-h-[550px] flex flex-col mb-4 overflow-hidden absolute inset-0" 
       style={{
         transformStyle: "preserve-3d",
         backfaceVisibility: "hidden",
