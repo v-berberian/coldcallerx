@@ -222,10 +222,10 @@ const SearchBar = forwardRef<SearchBarRef, SearchBarProps>(({
         onClick={handleInputClick}
         onTouchStart={handleTouchStart}
         enterKeyHint="done"
-        className={`w-full py-2 bg-card text-card-foreground rounded-xl border border-border placeholder:text-center placeholder:text-muted-foreground text-center focus:border-primary/50 focus:bg-card shadow-sm ${!hasStartedTyping && isFocused ? 'caret-transparent' : ''}`}
+        className={`w-full py-2 bg-card text-card-foreground rounded-xl border border-border placeholder:text-center placeholder:text-muted-foreground text-center focus:border-primary/50 focus:bg-card shadow-sm ${!hasStartedTyping ? 'caret-transparent' : ''}`}
         ref={inputRef}
         style={{
-          caretColor: (!hasStartedTyping && isFocused) ? 'transparent' : 'auto',
+          caretColor: (!hasStartedTyping) ? 'transparent' : 'auto',
           paddingLeft: '2.5rem',
           paddingRight: searchQuery ? '2.5rem' : '1rem'
         }}
