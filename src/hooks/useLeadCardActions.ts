@@ -37,15 +37,15 @@ export const useLeadCardActions = (lead: Lead) => {
       // Parse name into first and last name
       const { firstName, lastName } = parseName(lead.name);
       
-      // Replace placeholders in template
+      // Replace placeholders in template (single-brace)
       const subject = template.subject
-        .replace(/{{\s*first_name\s*}}/gi, firstName)
-        .replace(/{{\s*last_name\s*}}/gi, lastName)
-        .replace(/{{\s*company\s*}}/gi, lead.company || '');
+        .replace(/\{\s*first_name\s*\}/gi, firstName)
+        .replace(/\{\s*last_name\s*\}/gi, lastName)
+        .replace(/\{\s*company\s*\}/gi, lead.company || '');
       const body = template.body
-        .replace(/{{\s*first_name\s*}}/gi, firstName)
-        .replace(/{{\s*last_name\s*}}/gi, lastName)
-        .replace(/{{\s*company\s*}}/gi, lead.company || '');
+        .replace(/\{\s*first_name\s*\}/gi, firstName)
+        .replace(/\{\s*last_name\s*\}/gi, lastName)
+        .replace(/\{\s*company\s*\}/gi, lead.company || '');
         
       return `mailto:${emailValue}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
     }
@@ -62,9 +62,9 @@ export const useLeadCardActions = (lead: Lead) => {
       const { firstName, lastName } = parseName(lead.name);
       
       const message = template.message
-        .replace(/{{\s*first_name\s*}}/gi, firstName)
-        .replace(/{{\s*last_name\s*}}/gi, lastName)
-        .replace(/{{\s*company\s*}}/gi, lead.company || '');
+        .replace(/\{\s*first_name\s*\}/gi, firstName)
+        .replace(/\{\s*last_name\s*\}/gi, lastName)
+        .replace(/\{\s*company\s*\}/gi, lead.company || '');
         
       return `sms:${cleanPhone}?body=${encodeURIComponent(message)}`;
     }
