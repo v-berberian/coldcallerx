@@ -144,7 +144,7 @@ const MainContent: React.FC<MainContentProps> = ({
         </div>
 
         {/* Navigation Controls */}
-        <div className="pt-3 sm:pt-4">
+        <div>
           <NavigationControls
             onPrevious={handlePrevious}
             onNext={handleNext}
