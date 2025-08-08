@@ -16,6 +16,7 @@ import {
 import { formatPhoneNumber } from '../utils/phoneUtils';
 import { getStateFromAreaCode } from '../utils/timezoneUtils';
 import { Lead } from '@/types/lead';
+import { appStorage } from '@/utils/storage';
 import { AnimatePresence, LayoutGroup, motion } from 'framer-motion';
 import { useLeadCardTemplates, EmailTemplate, TextTemplate } from '@/hooks/useLeadCardTemplates';
 import { useLeadCardSwipe } from '@/hooks/useLeadCardSwipe';
@@ -95,6 +96,7 @@ const LeadCard: React.FC<LeadCardProps> = ({
   // --- Simple local comments (per lead), Trello-style ---
   type LeadComment = { id: string; text: string; createdAt: string };
   const leadKey = useMemo(() => `${lead.name}__${lead.phone}`, [lead.name, lead.phone]);
+  const [csvId, setCsvId] = useState<string | null>(null);
   const [comments, setComments] = useState<LeadComment[]>([]);
   const [draft, setDraft] = useState('');
   const commentInputRef = useRef<HTMLTextAreaElement | null>(null);
@@ -102,23 +104,39 @@ const LeadCard: React.FC<LeadCardProps> = ({
   const [editingText, setEditingText] = useState('');
   const [addFxVisible, setAddFxVisible] = useState(false);
 
-  const loadComments = useCallback(() => {
+  const loadComments = useCallback(async () => {
     try {
-      const raw = localStorage.getItem(`comments:${leadKey}`);
-      setComments(raw ? JSON.parse(raw) : []);
+      const current = await appStorage.getCurrentCSVId();
+      setCsvId(current);
+      if (!current) {
+        // fallback to legacy localStorage per-lead
+        const legacy = localStorage.getItem(`comments:${leadKey}`);
+        setComments(legacy ? JSON.parse(legacy) : []);
+        return;
+      }
+      const map = await appStorage.getCSVComments(current);
+      setComments(map[leadKey] || []);
     } catch {
       setComments([]);
     }
   }, [leadKey]);
 
-  const saveComments = useCallback((next: LeadComment[]) => {
+  const saveComments = useCallback(async (next: LeadComment[]) => {
     setComments(next);
     try {
-      localStorage.setItem(`comments:${leadKey}`, JSON.stringify(next));
+      const current = csvId || (await appStorage.getCurrentCSVId());
+      if (current) {
+        const map = await appStorage.getCSVComments(current);
+        map[leadKey] = next;
+        await appStorage.saveCSVComments(current, map);
+      } else {
+        // legacy fallback
+        localStorage.setItem(`comments:${leadKey}`, JSON.stringify(next));
+      }
     } catch {
       // ignore storage errors
     }
-  }, [leadKey]);
+  }, [leadKey, csvId]);
 
   useEffect(() => {
     loadComments();

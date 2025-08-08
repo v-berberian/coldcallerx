@@ -361,6 +361,20 @@ export class AppStorage {
     }
   }
 
+  // CSV-scoped comments map: { [leadKey: string]: Array<{id,text,createdAt,updatedAt?}> }
+  async saveCSVComments(
+    csvId: string,
+    commentsByLead: Record<string, Array<{ id: string; text: string; createdAt: string; updatedAt?: string }>>
+  ): Promise<void> {
+    await this.setItem(getCSVStorageKey(csvId, 'comments'), commentsByLead);
+  }
+
+  async getCSVComments(
+    csvId: string
+  ): Promise<Record<string, Array<{ id: string; text: string; createdAt: string; updatedAt?: string }>>> {
+    return await this.getItem(getCSVStorageKey(csvId, 'comments'), {});
+  }
+
   async saveCSVCurrentIndex(csvId: string, index: number): Promise<void> {
     await this.setItem(getCSVStorageKey(csvId, 'current-index'), index);
   }
