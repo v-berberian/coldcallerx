@@ -376,7 +376,7 @@ const LeadCard: React.FC<LeadCardProps> = ({
               className="p-1.5 rounded-full hover:bg-muted/50 transition-colors"
               disabled={isDeleteMode || isSwiping}
             >
-              <MessageCircle className="h-4 w-4 text-muted-foreground" />
+              <MessageSquare className="h-4 w-4 text-muted-foreground" />
             </button>
           </div>
           <p className="text-sm text-muted-foreground opacity-40">
