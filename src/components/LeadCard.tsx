@@ -233,6 +233,11 @@ const LeadCard: React.FC<LeadCardProps> = ({
     measureCardHeight();
   }, [lead, currentIndex, totalCount, measureCardHeight]);
 
+  // Reset card to front on navigation (previous/next)
+  useEffect(() => {
+    setIsCardFlipped(false);
+  }, [currentIndex]);
+
   // Pass resetSwipe function up to parent
   useEffect(() => {
     if (onSwipeReset) {
