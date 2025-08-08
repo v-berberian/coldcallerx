@@ -81,11 +81,19 @@ const NavigationControls: React.FC<NavigationControlsProps> = ({
   }, []);
 
   const paddingBottomValue = isKeyboardOpen
-    ? 'calc(env(safe-area-inset-bottom) + 0.25rem)'
+    ? 'calc(env(safe-area-inset-bottom) + 0px)'
     : 'max(2rem, calc(env(safe-area-inset-bottom) + 1rem))';
 
+  const wrapperStyle = React.useMemo<React.CSSProperties>(() => ({
+    position: isKeyboardOpen ? 'fixed' : 'sticky',
+    left: 0,
+    right: 0,
+    bottom: 0,
+    paddingBottom: paddingBottomValue,
+  }), [isKeyboardOpen, paddingBottomValue]);
+
   return (
-    <div className="flex gap-3 sm:gap-4 w-full pb-8 sm:pb-6" style={{ paddingBottom: paddingBottomValue }}>
+    <div className="sticky bottom-0 z-20 flex gap-3 sm:gap-4 w-full pb-8 sm:pb-6 px-3 sm:px-4" style={wrapperStyle}>
       <Button 
         variant="outline" 
         onClick={handlePrevious} 
