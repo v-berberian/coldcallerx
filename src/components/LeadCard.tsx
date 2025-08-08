@@ -373,7 +373,7 @@ const LeadCard: React.FC<LeadCardProps> = ({
                 e.stopPropagation();
                 setIsCardFlipped(true);
               }}
-              className="p-1.5 rounded-full hover:bg-muted/50 transition-colors"
+              className="p-1.5 rounded-full"
               disabled={isDeleteMode || isSwiping}
             >
               <MessageSquare className="h-4 w-4 text-muted-foreground" />
