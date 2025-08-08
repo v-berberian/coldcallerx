@@ -54,16 +54,16 @@ export const useNavigation = (
     let nextIndex: number;
     
     if (shuffleMode) {
-      const result = getNextLeadInShuffle(baseLeads, currentIndex, callFilter, shownLeadsInShuffle);
-      nextIndex = result.index;
-      
-      // Add the current lead to shown leads in shuffle
+      // Add the current lead to shown leads in shuffle BEFORE picking the next one
       if (currentLead) {
         const leadKey = `${currentLead.name}-${currentLead.phone}`;
         const newShownLeads = new Set(shownLeadsInShuffle);
         newShownLeads.add(leadKey);
         setShownLeadsInShuffle(newShownLeads);
       }
+
+      const result = getNextLeadInShuffle(baseLeads, currentIndex, callFilter, shownLeadsInShuffle);
+      nextIndex = result.index;
       
       // Use history-aware navigation for shuffle mode
       updateNavigationWithHistory(nextIndex, true);
