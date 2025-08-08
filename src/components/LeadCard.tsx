@@ -855,11 +855,11 @@ const LeadCard: React.FC<LeadCardProps> = ({
                     if (el) el.focus();
                   }}
                   onClick={addComment}
-                  className="h-11 w-11 p-0 rounded-full"
+                  className="h-11 w-11 p-0 rounded-full flex items-center justify-center"
                   tabIndex={-1}
                   aria-label="Send comment"
                 >
-                  <Send className="h-5 w-5" />
+                  <Send className="h-5 w-5 block" />
                 </Button>
               </motion.div>
               <AnimatePresence>
