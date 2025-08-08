@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react'
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from '@/components/ui/dropdown-menu';
-import { X, Phone, Mail, ChevronDown, Check, MessageSquare, Upload, Settings } from 'lucide-react';
+import { X, Phone, Mail, ChevronDown, Check, MessageSquare, Upload, Settings, Edit3, Trash } from 'lucide-react';
 import {
   AlertDialog,
   AlertDialogContent,
@@ -16,7 +16,7 @@ import {
 import { formatPhoneNumber } from '../utils/phoneUtils';
 import { getStateFromAreaCode } from '../utils/timezoneUtils';
 import { Lead } from '@/types/lead';
-import { AnimatePresence, motion } from 'framer-motion';
+import { AnimatePresence, LayoutGroup, motion } from 'framer-motion';
 import { useLeadCardTemplates, EmailTemplate, TextTemplate } from '@/hooks/useLeadCardTemplates';
 import { useLeadCardSwipe } from '@/hooks/useLeadCardSwipe';
 import { useLeadCardActions } from '@/hooks/useLeadCardActions';
@@ -64,6 +64,9 @@ const LeadCard: React.FC<LeadCardProps> = ({
     setSelectedTextTemplateId
   } = useLeadCardTemplates();
 
+  const [isCardFlipped, setIsCardFlipped] = useState(false);
+  const handleFlip = useCallback(() => setIsCardFlipped((prev) => !prev), []);
+  const [isPhoneMenuOpen, setIsPhoneMenuOpen] = useState(false);
   const {
     isSwiping,
     swipeOffset,
@@ -76,8 +79,105 @@ const LeadCard: React.FC<LeadCardProps> = ({
     handleTouchEnd,
     handleDeleteClick,
     handleCardClick,
-    resetSwipe
-  } = useLeadCardSwipe(onDeleteLead);
+    resetSwipe,
+    gestureType
+  } = useLeadCardSwipe(onDeleteLead, handleFlip, isCardFlipped);
+
+  // Clear any delete state when flipping to avoid lingering clickable areas
+  useEffect(() => {
+    resetSwipe();
+    // Close any open menus (e.g., additional numbers) when flipping
+    if (isCardFlipped) {
+      setIsPhoneMenuOpen(false);
+    }
+  }, [isCardFlipped, resetSwipe]);
+
+  // --- Simple local comments (per lead), Trello-style ---
+  type LeadComment = { id: string; text: string; createdAt: string };
+  const leadKey = useMemo(() => `${lead.name}__${lead.phone}`, [lead.name, lead.phone]);
+  const [comments, setComments] = useState<LeadComment[]>([]);
+  const [draft, setDraft] = useState('');
+  const commentInputRef = useRef<HTMLTextAreaElement | null>(null);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editingText, setEditingText] = useState('');
+  const [addFxVisible, setAddFxVisible] = useState(false);
+
+  const loadComments = useCallback(() => {
+    try {
+      const raw = localStorage.getItem(`comments:${leadKey}`);
+      setComments(raw ? JSON.parse(raw) : []);
+    } catch {
+      setComments([]);
+    }
+  }, [leadKey]);
+
+  const saveComments = useCallback((next: LeadComment[]) => {
+    setComments(next);
+    try {
+      localStorage.setItem(`comments:${leadKey}`, JSON.stringify(next));
+    } catch {
+      // ignore storage errors
+    }
+  }, [leadKey]);
+
+  useEffect(() => {
+    loadComments();
+  }, [loadComments]);
+
+  const addComment = useCallback(() => {
+    const text = draft.trim();
+    if (!text) return;
+    const newComment: LeadComment = {
+      id: `${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
+      text,
+      createdAt: new Date().toISOString(),
+    };
+    const next = [...comments, newComment];
+    saveComments(next);
+    setDraft('');
+    // Trigger a brief success animation on the Add button
+    setAddFxVisible(true);
+    setTimeout(() => setAddFxVisible(false), 450);
+    // Keep keyboard open by restoring focus to the textarea
+    setTimeout(() => {
+      const el = commentInputRef.current;
+      if (el) {
+        el.focus();
+        const len = el.value.length;
+        try {
+          el.setSelectionRange(len, len);
+        } catch {
+          // ignore selection errors
+        }
+      }
+    }, 0);
+  }, [draft, comments, saveComments]);
+
+  const deleteComment = useCallback((id: string) => {
+    const next = comments.filter(c => c.id !== id);
+    saveComments(next);
+  }, [comments, saveComments]);
+
+  const startEdit = useCallback((id: string) => {
+    const c = comments.find(c => c.id === id);
+    if (!c) return;
+    setEditingId(id);
+    setEditingText(c.text);
+  }, [comments]);
+
+  const cancelEdit = useCallback(() => {
+    setEditingId(null);
+    setEditingText('');
+  }, []);
+
+  const saveEdit = useCallback(() => {
+    if (!editingId) return;
+    const text = editingText.trim();
+    if (!text) { cancelEdit(); return; }
+    const next = comments.map(c => c.id === editingId ? { ...c, text } : c);
+    saveComments(next);
+    cancelEdit();
+  }, [editingId, editingText, comments, saveComments, cancelEdit]);
 
   const {
     selectedPhone,
@@ -194,10 +294,11 @@ const LeadCard: React.FC<LeadCardProps> = ({
     <div className="relative">
       {/* Delete background indicator */}
       <div 
-        className="absolute bg-red-500 rounded-3xl flex items-center justify-center pointer-events-auto"
-        onClick={() => setDeleteDialogOpen(true)}
+        className="absolute bg-red-500 rounded-3xl flex items-center justify-center"
+        onClick={() => { if (!isCardFlipped && isDeleteMode) setDeleteDialogOpen(true); }}
         style={{ 
-          opacity: isDeleteMode ? 1 : 0,
+          opacity: !isCardFlipped && isDeleteMode ? 1 : 0,
+          pointerEvents: !isCardFlipped && isDeleteMode ? 'auto' : 'none',
           height: cardHeight > 0 ? `${cardHeight}px` : 'auto',
           width: '50%',
           top: 0,
@@ -212,22 +313,37 @@ const LeadCard: React.FC<LeadCardProps> = ({
       <motion.div
         ref={cardRef}
         className="relative"
-        style={{
-          transform: `translateX(${swipeOffset}px)`,
-          transition: isSwiping 
-            ? 'none' 
-            : 'transform 0.25s cubic-bezier(0.4, 0, 0.2, 1)'
-        }}
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}
+        animate={{ 
+          // Keep rotation strictly tied to flip state to avoid overlap during swipe
+          rotateY: isCardFlipped ? 180 : 0,
+          // Only translate during delete gestures; otherwise, keep centered
+          translateX: gestureType === 'delete' ? swipeOffset : 0
+        }}
+        transition={{ 
+          duration: 0.6, 
+          ease: [0.25, 0.46, 0.45, 0.94],
+          type: "spring",
+          stiffness: 200,
+          damping: 20
+        }}
+        style={{
+          transformStyle: "preserve-3d",
+          perspective: "1000px",
+          // Prefer vertical scrolling when the card is flipped
+          touchAction: isCardFlipped ? 'pan-y' : undefined
+        }}
       >
         <Card 
           className="shadow-2xl border-border/30 rounded-3xl bg-background min-h-[400px] max-h-[500px] sm:min-h-[420px] sm:max-h-[550px] flex flex-col mb-4 overflow-hidden relative" 
-          onClick={handleCardClick}
-          onTouchStart={handleCardClick}
+          onClick={(e) => handleCardClick(e)}
+          onTouchStart={(e) => handleCardClick(e)}
           style={{
-            pointerEvents: 'auto'
+            pointerEvents: 'auto',
+            transformStyle: "preserve-3d",
+            backfaceVisibility: "hidden"
           }}
         >
       <CardContent className="flex-1 flex flex-col overflow-hidden">
@@ -285,13 +401,13 @@ const LeadCard: React.FC<LeadCardProps> = ({
                 <div className="flex items-center gap-2">
                   <Phone className="h-4 w-4 text-muted-foreground flex-shrink-0" />
                 {hasAdditionalPhones ? (
-                  <DropdownMenu>
+                  <DropdownMenu open={isPhoneMenuOpen} onOpenChange={setIsPhoneMenuOpen}>
                     <DropdownMenuTrigger 
                       className="flex items-center gap-1 cursor-pointer transition-colors"
                       style={{
-                        pointerEvents: isDeleteMode ? 'none' : 'auto'
+                        pointerEvents: (isDeleteMode || isCardFlipped || isSwiping) ? 'none' : 'auto'
                       }}
-                      disabled={isDeleteMode}
+                      disabled={isDeleteMode || isCardFlipped || isSwiping}
                     >
                       <p className="text-base sm:text-lg font-mono tracking-wider bg-gradient-to-r from-muted-foreground to-muted-foreground/95 bg-clip-text text-transparent dark:bg-none dark:text-muted-foreground">{selectedPhone}</p>
                       <ChevronDown className="h-4 w-4 text-muted-foreground" />
@@ -576,6 +692,164 @@ const LeadCard: React.FC<LeadCardProps> = ({
                   <Phone className="h-[32px] w-[32px] sm:h-[40px] sm:w-[40px] drop-shadow-md mx-auto" style={{ filter: 'drop-shadow(0 1px 2px rgba(0, 0, 0, 0.15))' }} />
                 </div>
               )}
+            </div>
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+
+    {/* Back side of the card - Trello-style comments */}
+    <Card 
+      className="shadow-2xl border-border/30 rounded-3xl bg-background min-h-[400px] max-h-[500px] sm:min-h-[420px] sm:max-h-[550px] flex flex-col mb-4 overflow-hidden absolute inset-0" 
+      style={{
+        transformStyle: "preserve-3d",
+        backfaceVisibility: "hidden",
+        transform: "rotateY(180deg)"
+      }}
+    >
+      <CardContent className="flex-1 flex flex-col p-0 overflow-hidden">
+        <div className="flex items-center justify-between p-3 sm:p-5 pb-2">
+          <div className="flex items-center gap-1">
+            <button
+              onClick={handleFlip}
+              className="p-1 rounded-full"
+            >
+              <MessageSquare className="h-4 w-4 text-muted-foreground/60" />
+            </button>
+            <span className="text-sm text-muted-foreground opacity-60">Comments</span>
+          </div>
+          <div className="w-5 h-5" />
+        </div>
+
+        <div className="flex-1 min-h-0 overflow-y-auto px-4 pb-4 space-y-3" data-comments-scroll="true">
+          {comments.length === 0 && (
+            <p className="text-sm text-muted-foreground/60 mt-2">No comments yet.</p>
+          )}
+          <LayoutGroup id={`lead-comments-${leadKey}`}>
+            <AnimatePresence initial={false}>
+              {comments.map(c => (
+                <motion.div
+                  key={c.id}
+                  layout
+                  initial={{ opacity: 0, y: 8, scale: 0.98 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, y: -8, scale: 0.98 }}
+                  transition={{ type: 'spring', stiffness: 520, damping: 30, mass: 0.45, layout: { type: 'spring', stiffness: 520, damping: 30, mass: 0.45 } }}
+                  className="border border-border/20 rounded-lg p-3"
+                  style={{ willChange: 'transform' }}
+                >
+                  <AnimatePresence mode="wait" initial={false}>
+                    {editingId === c.id ? (
+                      <motion.div
+                        key="edit"
+                        layout
+                        initial={{ opacity: 0, y: 6 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -6 }}
+                        transition={{ type: 'spring', stiffness: 520, damping: 28, mass: 0.45, layout: { type: 'spring', stiffness: 520, damping: 28, mass: 0.45 } }}
+                        className="flex items-center gap-3"
+                      >
+                        <textarea
+                          value={editingText}
+                          onChange={(e) => setEditingText(e.target.value)}
+                          className="flex-1 rounded-md border border-border/30 bg-background px-3 text-sm focus:outline-none min-h-[44px] py-2"
+                          rows={2}
+                        />
+                        <div className="flex items-center gap-2 self-center">
+                          <Button size="sm" onClick={saveEdit}>Save</Button>
+                          <Button size="sm" variant="secondary" onClick={cancelEdit}>Cancel</Button>
+                        </div>
+                      </motion.div>
+                    ) : (
+                      <motion.div
+                        key="view"
+                        layout
+                        initial={{ opacity: 0, y: -6 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: 6 }}
+                        transition={{ type: 'spring', stiffness: 520, damping: 28, mass: 0.45, layout: { type: 'spring', stiffness: 520, damping: 28, mass: 0.45 } }}
+                        className="flex items-center justify-between gap-4"
+                      >
+                        <div className="text-left w-full">
+                          <p className="text-sm whitespace-pre-wrap text-left">{c.text}</p>
+                          <p className="text-[11px] text-muted-foreground mt-1">
+                            {new Date(c.createdAt).toLocaleString()}
+                          </p>
+                        </div>
+                        <div className="flex items-center gap-2 self-center">
+                        <motion.button
+                          whileTap={{ scale: 0.92 }}
+                            aria-label="Edit comment"
+                            className="rounded-md p-2 active:bg-muted/80"
+                            onClick={() => startEdit(c.id)}
+                          >
+                            <Edit3 className="h-4 w-4 text-muted-foreground" />
+                        </motion.button>
+                        <motion.button
+                          whileTap={{ scale: 0.92 }}
+                            aria-label="Delete comment"
+                            className="rounded-md p-2 active:bg-muted/80"
+                            onClick={() => deleteComment(c.id)}
+                          >
+                          <Trash className="h-4 w-4 text-red-600" />
+                        </motion.button>
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </motion.div>
+              ))}
+            </AnimatePresence>
+          </LayoutGroup>
+        </div>
+
+        <div className="p-4 border-t border-border/20 bg-background/80 backdrop-blur">
+          <div className="flex items-center gap-2">
+            <textarea
+              value={draft}
+              onChange={(e) => setDraft(e.target.value)}
+              ref={commentInputRef}
+              className="flex-1 rounded-md border border-border/30 bg-background px-3 text-sm focus:outline-none h-11 resize-none py-2 text-left placeholder:text-left"
+              rows={1}
+              placeholder="Add a comment..."
+            />
+            <div className="relative shrink-0">
+              <motion.div
+                whileTap={{ scale: 0.92 }}
+                animate={addFxVisible ? { scale: [1, 1.12, 1] } : {}}
+                transition={{ duration: 0.2, ease: [0.2, 0.7, 0.4, 1] }}
+              >
+                <Button
+                  type="button"
+                  onMouseDown={(e) => {
+                    e.preventDefault();
+                    const el = commentInputRef.current;
+                    if (el) el.focus();
+                  }}
+                  onTouchStart={(e) => {
+                    e.preventDefault();
+                    const el = commentInputRef.current;
+                    if (el) el.focus();
+                  }}
+                  onClick={addComment}
+                  className="h-11 px-4"
+                  tabIndex={-1}
+                >
+                  Add
+                </Button>
+              </motion.div>
+              <AnimatePresence>
+                {addFxVisible && (
+                  <motion.span
+                    key="add-ripple"
+                    className="absolute inset-0 rounded-md bg-green-500/15 pointer-events-none"
+                    initial={{ opacity: 0.35, scale: 0.92 }}
+                    animate={{ opacity: 0, scale: 1.22 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: 0.2, ease: [0.2, 0.7, 0.4, 1] }}
+                  />
+                )}
+              </AnimatePresence>
             </div>
           </div>
         </div>
