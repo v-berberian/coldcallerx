@@ -39,15 +39,10 @@ export const useLeadCardActions = (lead: Lead) => {
       
       // Replace placeholders in template
       const subject = template.subject
-        .replace(/{name}/g, lead.name)
-        .replace(/{company}/g, lead.company || '')
         .replace(/{{\s*first_name\s*}}/gi, firstName)
         .replace(/{{\s*last_name\s*}}/gi, lastName)
         .replace(/{{\s*company\s*}}/gi, lead.company || '');
       const body = template.body
-        .replace(/{name}/g, lead.name)
-        .replace(/{company}/g, lead.company || '')
-        .replace(/{phone}/g, selectedPhone)
         .replace(/{{\s*first_name\s*}}/gi, firstName)
         .replace(/{{\s*last_name\s*}}/gi, lastName)
         .replace(/{{\s*company\s*}}/gi, lead.company || '');
@@ -67,8 +62,6 @@ export const useLeadCardActions = (lead: Lead) => {
       const { firstName, lastName } = parseName(lead.name);
       
       const message = template.message
-        .replace(/{name}/g, lead.name)
-        .replace(/{company}/g, lead.company || '')
         .replace(/{{\s*first_name\s*}}/gi, firstName)
         .replace(/{{\s*last_name\s*}}/gi, lastName)
         .replace(/{{\s*company\s*}}/gi, lead.company || '');
