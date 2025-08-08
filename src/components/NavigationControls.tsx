@@ -93,7 +93,7 @@ const NavigationControls: React.FC<NavigationControlsProps> = ({
   }), [isKeyboardOpen, paddingBottomValue]);
 
   return (
-    <div className={`sticky bottom-0 z-20 flex gap-3 sm:gap-4 w-full pb-8 sm:pb-6 px-3 sm:px-4 ${isKeyboardOpen ? '' : 'mt-3 sm:mt-4'}`} style={wrapperStyle}>
+    <div className="sticky bottom-0 z-20 flex gap-3 sm:gap-4 w-full pb-8 sm:pb-6 px-3 sm:px-4" style={wrapperStyle}>
       <Button 
         variant="outline" 
         onClick={handlePrevious} 
