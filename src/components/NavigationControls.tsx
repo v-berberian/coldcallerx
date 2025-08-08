@@ -23,8 +23,69 @@ const NavigationControls: React.FC<NavigationControlsProps> = ({
     onNext();
   };
 
+  // Detect when the software keyboard is likely open to reduce bottom spacing
+  const [isKeyboardOpen, setIsKeyboardOpen] = React.useState(false);
+
+  React.useEffect(() => {
+    const isEditableElement = (el: Element | null) => {
+      if (!el) return false;
+      const tag = el.tagName.toLowerCase();
+      if (tag === 'input' || tag === 'textarea') return true;
+      if ((el as HTMLElement).isContentEditable) return true;
+      return false;
+    };
+
+    const handleFocusIn = (e: FocusEvent) => {
+      const target = e.target as Element | null;
+      if (isEditableElement(target)) {
+        setIsKeyboardOpen(true);
+      }
+    };
+
+    const handleFocusOut = () => {
+      // Delay to allow focus to move to another input if applicable
+      setTimeout(() => {
+        const active = document.activeElement as Element | null;
+        setIsKeyboardOpen(isEditableElement(active));
+      }, 50);
+    };
+
+    // Optional: visual viewport heuristic (helps on iOS/Android browsers)
+    let detachViewport: (() => void) | null = null;
+    const attachViewportListener = () => {
+      const vv = (window as any).visualViewport as VisualViewport | undefined;
+      if (!vv) return;
+      const baseline = window.innerHeight;
+      const onResize = () => {
+        try {
+          const heightDelta = baseline - vv.height;
+          // Consider keyboard open if viewport shrinks significantly
+          setIsKeyboardOpen(prev => prev || heightDelta > 140);
+        } catch {
+          // noop
+        }
+      };
+      vv.addEventListener('resize', onResize);
+      detachViewport = () => vv.removeEventListener('resize', onResize);
+    };
+
+    document.addEventListener('focusin', handleFocusIn);
+    document.addEventListener('focusout', handleFocusOut);
+    attachViewportListener();
+
+    return () => {
+      document.removeEventListener('focusin', handleFocusIn);
+      document.removeEventListener('focusout', handleFocusOut);
+      if (detachViewport) detachViewport();
+    };
+  }, []);
+
+  const paddingBottomValue = isKeyboardOpen
+    ? 'calc(env(safe-area-inset-bottom) + 0.25rem)'
+    : 'max(2rem, calc(env(safe-area-inset-bottom) + 1rem))';
+
   return (
-    <div className="flex gap-3 sm:gap-4 w-full pb-8 sm:pb-6" style={{ paddingBottom: 'max(2rem, calc(env(safe-area-inset-bottom) + 1rem))' }}>
+    <div className="flex gap-3 sm:gap-4 w-full pb-8 sm:pb-6" style={{ paddingBottom: paddingBottomValue }}>
       <Button 
         variant="outline" 
         onClick={handlePrevious} 
