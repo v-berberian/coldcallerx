@@ -51,7 +51,7 @@ const AREA_CODE_MAP: {
   '304': { state: 'WV', timezone: 'America/New_York' },
   '305': { state: 'FL', timezone: 'America/New_York' },
   '307': { state: 'WY', timezone: 'America/Denver' },
-  '308': { state: 'NE', timezone: 'America/Denver' },
+  '308': { state: 'NE', timezone: 'America/Chicago' },
   '309': { state: 'IL', timezone: 'America/Chicago' },
   '310': { state: 'CA', timezone: 'America/Los_Angeles' },
   '312': { state: 'IL', timezone: 'America/Chicago' },
