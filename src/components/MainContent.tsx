@@ -78,19 +78,6 @@ const MainContent: React.FC<MainContentProps> = ({
   const [navigationDirection, setNavigationDirection] = useState<'forward' | 'backward'>('forward');
   const [resetSwipe, setResetSwipe] = useState<(() => void) | null>(null);
 
-  // Animate only when the displayed lead actually changes (navigation), not on filter toggles
-  const prevLeadKeyRef = useRef<string | null>(null);
-  const [animateContent, setAnimateContent] = useState(false);
-  useEffect(() => {
-    const key = currentLead ? `${currentLead.name}-${currentLead.phone}` : '';
-    if (prevLeadKeyRef.current !== null && prevLeadKeyRef.current !== key) {
-      setAnimateContent(true);
-      const t = setTimeout(() => setAnimateContent(false), 250);
-      return () => clearTimeout(t);
-    }
-    prevLeadKeyRef.current = key;
-  }, [currentLead?.name, currentLead?.phone]);
-
   // Create wrapped navigation functions that set direction and close delete menu
   const handlePrevious = () => {
     setNavigationDirection('backward');
@@ -137,7 +124,7 @@ const MainContent: React.FC<MainContentProps> = ({
         />
 
         {/* Current Lead Card or No Leads Message */}
-        <div className={`${animateContent ? 'animate-content-change-fast' : ''} flex-1 flex flex-col`}>
+        <div className="animate-content-change-fast flex-1 flex flex-col">
           <LeadCard
             lead={currentLead}
             currentIndex={currentIndex}
