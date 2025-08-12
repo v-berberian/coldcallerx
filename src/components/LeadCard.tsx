@@ -370,11 +370,20 @@ const LeadCard: React.FC<LeadCardProps> = ({
           }}
         >
       <CardContent className="flex-1 flex flex-col overflow-hidden">
-        {/* Top row with lead count and file name */}
-        <div className="flex items-center justify-center p-3 sm:p-5 pb-0">
+        {/* Top row with comments icon and lead count */}
+        <div className="flex items-center justify-between p-3 sm:p-5 pb-0">
+          <button
+            onClick={handleFlip}
+            className="p-1 rounded-full"
+            title="Comments"
+            style={{ pointerEvents: (isDeleteMode || isSwiping) ? 'none' : 'auto' }}
+          >
+            <MessageSquare className="h-4 w-4 text-muted-foreground/60" />
+          </button>
           <p className="text-sm text-muted-foreground opacity-40">
             {currentIndex + 1}/{totalCount}
           </p>
+          <div className="w-5 h-5" />
         </div>
 
         {/* Lead info - Main content area */}
