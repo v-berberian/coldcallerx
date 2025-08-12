@@ -119,17 +119,24 @@ export const useFilterChangeEffects = (
             updateNavigationWithHistory(0, false);
           }
         } else {
-          // Switching to ALL filter - find the same lead in the full list
-          // Since we're using the same timezone filter, the index should be the same
-          const newIndex = newFilteredLeads.findIndex(lead => 
-            lead.name === currentlyViewedLead.name && getPhoneDigits(lead.phone) === currentDigits
-          );
-          if (newIndex !== -1) {
-            updateNavigationWithHistory(newIndex, false); // Don't add to history since this is a filter change
-          } else {
-            // Fallback to first lead
-            updateNavigationWithHistory(0, false);
+          // Current lead isn't visible after timezone change. Pick nearest neighbor in new filtered list.
+          // Map new filtered leads back to their indices in the original leadsData order
+          const indexMap = new Map<string, number>();
+          leadsData.forEach((l, idx) => {
+            indexMap.set(`${l.name}-${getPhoneDigits(l.phone)}`, idx);
+          });
+          const candidates = newFilteredLeads
+            .map((l, i) => ({ filteredIndex: i, originalIndex: indexMap.get(`${l.name}-${getPhoneDigits(l.phone)}`) ?? Infinity }))
+            .filter(c => Number.isFinite(c.originalIndex as number));
+          // Find the candidate with minimal distance to previous currentIndex
+          let best = candidates[0];
+          for (let i = 1; i < candidates.length; i++) {
+            if (Math.abs((candidates[i].originalIndex as number) - currentIndex) < Math.abs((best.originalIndex as number) - currentIndex)) {
+              best = candidates[i];
+            }
           }
+          const targetIndex = best ? best.filteredIndex : 0;
+          updateNavigationWithHistory(targetIndex, false);
         }
       } else if (newFilteredLeads.length > 0) {
         updateNavigationWithHistory(0, false);
@@ -145,6 +152,10 @@ export const useFilterChangeEffects = (
   }, [timezoneFilter, callFilter]); // Remove leadsData dependency to prevent navigation when leads are called
 
   useEffect(() => {
+    // Avoid clamping while filters are actively changing to prevent jumps
+    if (isFilterChanging) {
+      return;
+    }
     const baseLeads = getBaseLeads();
     // Only reset if current index is truly out of bounds and we have leads
     if (baseLeads && baseLeads.length > 0 && currentIndex >= baseLeads.length) {
@@ -154,6 +165,6 @@ export const useFilterChangeEffects = (
         resetNavigation(closestIndex);
       }
     }
-  }, [timezoneFilter, callFilter, currentIndex, getBaseLeads, resetNavigation]);
+  }, [timezoneFilter, callFilter, currentIndex, getBaseLeads, resetNavigation, isFilterChanging]);
 };
 

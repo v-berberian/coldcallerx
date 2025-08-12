@@ -11,6 +11,7 @@ import { useLeadNavigationActions } from './useLeadNavigationActions';
 import { useLeadNavigationEffects } from './useLeadNavigationEffects';
 import { useLeadNavigationWrappers } from './useLeadNavigationWrappers';
 import { useLeadNavigationReset } from './useLeadNavigationReset';
+import { useNavigationState } from './useNavigationState';
 
 interface UseLeadNavigationProps {
   initialLeads: Lead[];
@@ -29,7 +30,7 @@ interface UseLeadNavigationProps {
   syncFromCloudSession: (index: number) => void;
 }
 
-export const useLeadNavigation = ({ 
+const useLeadNavigationImpl = ({ 
   initialLeads, 
   onCallMade,
   refreshTrigger = 0,
@@ -233,3 +234,39 @@ export const useLeadNavigation = ({
     countdownTime
   };
 };
+
+// Backward-compatible wrapper: allow calling with just an array of leads
+export function useLeadNavigation(arg: any): any {
+  if (Array.isArray(arg)) {
+    const {
+      currentIndex,
+      historyIndex,
+      updateNavigation,
+      updateNavigationWithHistory,
+      goToPrevious,
+      goToPreviousFromHistory,
+      resetNavigation,
+      setCurrentIndex,
+      restoreFromLocalStorage,
+      syncFromCloudSession
+    } = useNavigationState();
+
+    return useLeadNavigationImpl({
+      initialLeads: arg,
+      onCallMade: undefined,
+      refreshTrigger: 0,
+      currentIndex,
+      historyIndex,
+      updateNavigation,
+      updateNavigationWithHistory,
+      goToPrevious,
+      goToPreviousFromHistory,
+      resetNavigation,
+      setCurrentIndex,
+      restoreFromLocalStorage,
+      syncFromCloudSession
+    });
+  }
+
+  return useLeadNavigationImpl(arg);
+}
