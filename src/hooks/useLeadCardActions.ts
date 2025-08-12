@@ -2,6 +2,7 @@ import { useState, useCallback } from 'react';
 import { formatPhoneNumber } from '@/utils/phoneUtils';
 import { Lead } from '@/types/lead';
 import { EmailTemplate, TextTemplate } from './useLeadCardTemplates';
+import { interpolateTemplate, parseLeadName } from '@/utils/templateUtils';
 
 export const useLeadCardActions = (lead: Lead) => {
   const [selectedPhone, setSelectedPhone] = useState(formatPhoneNumber(lead.phone));
@@ -17,60 +18,44 @@ export const useLeadCardActions = (lead: Lead) => {
     setSelectedPhone(phone);
   }, []);
 
-  // Helper function to parse name into first and last name
-  const parseName = useCallback((name: string) => {
-    const nameParts = name.trim().split(' ');
-    return {
-      firstName: nameParts[0] || '',
-      lastName: nameParts.slice(1).join(' ') || ''
-    };
-  }, []);
-
   // Create mailto link with template
   const createMailtoLink = useCallback((template?: EmailTemplate) => {
     const emailValue = lead.email?.trim() ?? '';
     const hasValidEmail = emailValue && emailValue.includes('@');
-    
     if (!hasValidEmail) return '';
-    
+
     if (template) {
-      // Parse name into first and last name
-      const { firstName, lastName } = parseName(lead.name);
-      
-      // Replace placeholders in template (single-brace)
-      const subject = template.subject
-        .replace(/\{\s*first_name\s*\}/gi, firstName)
-        .replace(/\{\s*last_name\s*\}/gi, lastName)
-        .replace(/\{\s*company\s*\}/gi, lead.company || '');
-      const body = template.body
-        .replace(/\{\s*first_name\s*\}/gi, firstName)
-        .replace(/\{\s*last_name\s*\}/gi, lastName)
-        .replace(/\{\s*company\s*\}/gi, lead.company || '');
-        
+      const subject = interpolateTemplate(template.subject, {
+        name: lead.name,
+        company: lead.company || '',
+        selectedPhone,
+      });
+      const body = interpolateTemplate(template.body, {
+        name: lead.name,
+        company: lead.company || '',
+        selectedPhone,
+      });
       return `mailto:${emailValue}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
     }
-    
+
     return `mailto:${emailValue}`;
-  }, [lead, selectedPhone, parseName]);
+  }, [lead, selectedPhone]);
 
   // Create SMS link with template
   const createSmsLink = useCallback((template?: TextTemplate) => {
     const cleanPhone = selectedPhone.replace(/\D/g, '');
-    
+
     if (template) {
-      // Parse name into first and last name
-      const { firstName, lastName } = parseName(lead.name);
-      
-      const message = template.message
-        .replace(/\{\s*first_name\s*\}/gi, firstName)
-        .replace(/\{\s*last_name\s*\}/gi, lastName)
-        .replace(/\{\s*company\s*\}/gi, lead.company || '');
-        
+      const message = interpolateTemplate(template.message, {
+        name: lead.name,
+        company: lead.company || '',
+        selectedPhone,
+      });
       return `sms:${cleanPhone}?body=${encodeURIComponent(message)}`;
     }
-    
+
     return `sms:${cleanPhone}`;
-  }, [lead, selectedPhone, parseName]);
+  }, [lead, selectedPhone]);
 
   const handleEmailClick = useCallback((template?: EmailTemplate) => {
     const mailtoLink = createMailtoLink(template);
