@@ -68,7 +68,10 @@ export const useFilterChangeEffects = (
           const newIndexOfCurrentLead = newFilteredLeads.findIndex(lead => 
             lead.name === currentlyViewedLead.name && getPhoneDigits(lead.phone) === currentDigits
           );
-          updateNavigationWithHistory(newIndexOfCurrentLead, false);
+          // Only navigate if index actually changes
+          if (newIndexOfCurrentLead !== currentIndex) {
+            updateNavigationWithHistory(newIndexOfCurrentLead, false);
+          }
           setTimeout(() => {
             setFilterChanging(false);
           }, 100);
