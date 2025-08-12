@@ -59,6 +59,15 @@ const SearchAutocomplete: React.FC<SearchAutocompleteProps> = ({
 
   const { createTouchHandlers } = useSearchTouchHandling(onLeadSelect, onCloseAutocomplete);
 
+  // Map leads by a combined key for O(1) index lookups
+  const leadIndexMap = useMemo(() => {
+    const map = new Map<string, number>();
+    leadsData.forEach((lead, index) => {
+      map.set(`${lead.name}${lead.phone}`, index);
+    });
+    return map;
+  }, [leadsData]);
+
   // Render individual lead item for virtualized list
   const renderLeadItem = useCallback(({ index, style }: { index: number; style: React.CSSProperties }) => {
     const dataSource = getDataSource();
@@ -120,13 +129,13 @@ const SearchAutocomplete: React.FC<SearchAutocompleteProps> = ({
               <p className="text-sm text-muted-foreground break-all">{lead.phone}</p>
             </div>
             <div className="flex-shrink-0 text-xs text-muted-foreground">
-              {leadsData.findIndex(l => l.name === lead.name && l.phone === lead.phone) + 1}/{leadsData.length}
+              {(leadIndexMap.get(`${lead.name}${lead.phone}`) ?? -1) + 1}/{leadsData.length}
             </div>
           </div>
         </button>
       </div>
     );
-  }, [isFullscreen, allSearchResults, searchResults, onLeadSelect, onCloseAutocomplete, leadsData, totalResultsCount]);
+  }, [isFullscreen, allSearchResults, searchResults, onLeadSelect, onCloseAutocomplete, leadIndexMap, leadsData.length, totalResultsCount]);
 
 
 
@@ -457,12 +466,14 @@ const SearchAutocomplete: React.FC<SearchAutocompleteProps> = ({
           const handleTouchEnd = (e: React.TouchEvent) => {
             e.preventDefault();
             e.stopPropagation();
-            
+
             // Only trigger lead selection if no movement occurred (it was a tap, not a scroll)
             if (!hasMoved) {
               handleLeadClick();
             }
           };
+
+          const indexInLeadsData = leadIndexMap.get(`${lead.name}${lead.phone}`) ?? -1;
 
           return (
             <button
@@ -483,7 +494,7 @@ const SearchAutocomplete: React.FC<SearchAutocompleteProps> = ({
                   <p className="text-sm text-muted-foreground break-all">{lead.phone}</p>
                 </div>
                 <div className="flex-shrink-0 text-xs text-muted-foreground">
-                  {leadsData.findIndex(l => l.name === lead.name && l.phone === lead.phone) + 1}/{leadsData.length}
+                  {indexInLeadsData + 1}/{leadsData.length}
                 </div>
               </div>
             </button>
