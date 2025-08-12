@@ -93,7 +93,7 @@ const AREA_CODE_MAP: {
   '415': { state: 'CA', timezone: 'America/Los_Angeles' },
   '417': { state: 'MO', timezone: 'America/Chicago' },
   '419': { state: 'OH', timezone: 'America/New_York' },
-  '423': { state: 'TN', timezone: 'America/Chicago' },
+  '423': { state: 'TN', timezone: 'America/New_York' },
   '424': { state: 'CA', timezone: 'America/Los_Angeles' },
   '425': { state: 'WA', timezone: 'America/Los_Angeles' },
   '430': { state: 'TX', timezone: 'America/Chicago' },
