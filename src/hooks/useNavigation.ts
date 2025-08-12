@@ -60,8 +60,17 @@ export const useNavigation = (
         const newShownLeads = new Set(shownLeadsInShuffle);
         newShownLeads.add(leadKey);
         setShownLeadsInShuffle(newShownLeads);
+        
+        // Use the updated set when selecting the next lead to avoid reselecting the same card
+        const result = getNextLeadInShuffle(baseLeads, currentIndex, callFilter, newShownLeads);
+        nextIndex = result.index;
+        
+        // Use history-aware navigation for shuffle mode
+        updateNavigationWithHistory(nextIndex, true);
+        return;
       }
 
+      // Fallback if no current lead
       const result = getNextLeadInShuffle(baseLeads, currentIndex, callFilter, shownLeadsInShuffle);
       nextIndex = result.index;
       
