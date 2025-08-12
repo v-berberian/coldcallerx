@@ -50,33 +50,29 @@ export const useSearchState = ({ leads, getBaseLeads, leadsData, timezoneFilter,
     return getBaseLeads();
   }, [getBaseLeads]);
 
-  // Pre-initialize search results with all leads for instant display
-  const initialSearchResults = useMemo(() => {
-    // Use baseLeads (filtered leads) so search respects active filters
-    return baseLeads.slice(0, INITIAL_RESULTS);
-  }, [baseLeads]);
-
-  // Ultra-optimized search function with incremental loading
+  // Ultra-optimized search function with incremental loading and deduplication
   const performSearch = useCallback((query: string, leads: Lead[]) => {
-    if (!query.trim()) {
-      return leads; // Show all leads when no search query
-    }
-
-    const searchTerm = query.toLowerCase();
+    const searchTerm = query.trim().toLowerCase();
     const results: Lead[] = [];
     const length = leads.length;
+    const seen = new Set<string>();
 
     // Use for loop for better performance - no limit here, we'll limit in the UI
     for (let i = 0; i < length; i++) {
       const lead = leads[i];
+      const key = `${lead.name}-${lead.phone}`;
+      if (seen.has(key)) continue;
+      seen.add(key);
+
       const name = lead.name.toLowerCase();
       const phone = lead.phone.toLowerCase();
       const company = lead.company?.toLowerCase() || '';
       const additionalPhones = lead.additionalPhones?.toLowerCase() || '';
-      
-      // Search across name, phone, company, and additional phones
-      if (name.includes(searchTerm) || 
-          phone.includes(searchTerm) || 
+
+      // When no search term, include all unique leads
+      if (!searchTerm ||
+          name.includes(searchTerm) ||
+          phone.includes(searchTerm) ||
           company.includes(searchTerm) ||
           additionalPhones.includes(searchTerm)) {
         results.push(lead);
@@ -86,13 +82,16 @@ export const useSearchState = ({ leads, getBaseLeads, leadsData, timezoneFilter,
     return results;
   }, []);
 
-  // Memoized search results - get all matching results
-  const allSearchResults = useMemo(() => {
-    if (!debouncedSearchQuery.trim()) {
-      // Use baseLeads (filtered leads) so search respects active filters
-      return baseLeads; // Show filtered leads when no search query
-    }
+  // Pre-initialize search results with all leads for instant display
+  const initialSearchResults = useMemo(() => {
     // Use baseLeads (filtered leads) so search respects active filters
+    // Run through performSearch with an empty query to also deduplicate
+    return performSearch('', baseLeads).slice(0, INITIAL_RESULTS);
+  }, [baseLeads, performSearch]);
+
+  // Memoized search results - get all matching results (deduplicated)
+  const allSearchResults = useMemo(() => {
+    // Always run through performSearch to ensure deduplication
     return performSearch(debouncedSearchQuery, baseLeads);
   }, [debouncedSearchQuery, baseLeads, performSearch]);
 
@@ -132,11 +131,11 @@ export const useSearchState = ({ leads, getBaseLeads, leadsData, timezoneFilter,
     if (/iPhone|iPad|iPod/i.test(navigator.userAgent)) {
       // On iOS, ensure we always have search results ready
       if (baseLeads.length > 0 && searchResults.length === 0 && !debouncedSearchQuery.trim()) {
-        const initialResults = baseLeads.slice(0, INITIAL_RESULTS);
+        const initialResults = performSearch('', baseLeads).slice(0, INITIAL_RESULTS);
         setSearchResults(initialResults);
       }
     }
-  }, [baseLeads, searchResults.length, debouncedSearchQuery]);
+  }, [baseLeads, searchResults.length, debouncedSearchQuery, performSearch]);
 
   const clearSearch = useCallback(() => {
     setSearchQuery('');
