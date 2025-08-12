@@ -275,6 +275,8 @@ const SearchAutocomplete: React.FC<SearchAutocompleteProps> = ({
   }
 
   const animationClass = isAnimating ? 'animate-slide-down' : 'animate-slide-up';
+  // Use a shared item count so the InfiniteLoader and List stay in sync
+  const sharedItemCount = isFullscreen ? totalResultsCount : searchResults.length;
 
   // If we have loadMoreResults function, use infinite loader (including for empty results)
   if (loadMoreResults) {
@@ -311,7 +313,7 @@ const SearchAutocomplete: React.FC<SearchAutocompleteProps> = ({
           ) : (
             <InfiniteLoader
               isItemLoaded={isItemLoaded}
-              itemCount={totalResultsCount}
+              itemCount={sharedItemCount}
               loadMoreItems={handleLoadMoreItems}
               threshold={5} // Load more when 5 items away from the end
             >
@@ -319,7 +321,7 @@ const SearchAutocomplete: React.FC<SearchAutocompleteProps> = ({
                 <List
                   ref={ref}
                   height={fullscreenHeight}
-                  itemCount={totalResultsCount} // Use totalResultsCount instead of searchResults.length
+                  itemCount={sharedItemCount}
                   itemSize={itemHeight}
                   width="100%"
                   onItemsRendered={onItemsRendered}
@@ -364,7 +366,7 @@ const SearchAutocomplete: React.FC<SearchAutocompleteProps> = ({
           ) : (
             <InfiniteLoader
               isItemLoaded={isItemLoaded}
-              itemCount={totalResultsCount}
+              itemCount={sharedItemCount}
               loadMoreItems={handleLoadMoreItems}
               threshold={5} // Load more when 5 items away from the end
             >
@@ -372,7 +374,7 @@ const SearchAutocomplete: React.FC<SearchAutocompleteProps> = ({
                 <List
                   ref={ref}
                   height={dynamicHeight}
-                  itemCount={searchResults.length}
+                  itemCount={sharedItemCount}
                   itemSize={itemHeight}
                   width="100%"
                   onItemsRendered={onItemsRendered}
