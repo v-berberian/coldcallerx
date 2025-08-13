@@ -118,6 +118,16 @@ const NavigationControls: React.FC<NavigationControlsProps> = ({
     }
   };
 
+  const handleNextClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+    // If long press opened the menu, suppress the click
+    if (longPressTriggeredRef.current) {
+      e.preventDefault();
+      e.stopPropagation();
+      return;
+    }
+    handleNext();
+  };
+
   const goNextTimes = (times: number) => {
     for (let i = 0; i < times; i += 1) {
       onNext();
@@ -145,11 +155,23 @@ const NavigationControls: React.FC<NavigationControlsProps> = ({
             disabled={!canGoNext} 
             className="flex-1 h-16 sm:h-20 rounded-[2rem] shadow-lg active:scale-95 active:shadow-md active:shadow-black/20 transition-all duration-100 outline-none bg-background/20 backdrop-blur-xl border-white/20 text-foreground disabled:opacity-50 disabled:backdrop-blur-sm touch-manipulation no-select text-base sm:text-lg" 
             style={{ WebkitTapHighlightColor: 'transparent', WebkitUserSelect: 'none', userSelect: 'none' }} 
+            // Pointer events (modern browsers)
             onPointerDown={startNextLongPress}
             onPointerUp={endNextPress}
             onPointerLeave={cancelNextLongPress}
             onPointerCancel={cancelNextLongPress}
+            // Touch fallback (iOS Safari quirks)
+            onTouchStart={startNextLongPress}
+            onTouchEnd={endNextPress}
+            onTouchCancel={cancelNextLongPress}
+            // Mouse fallback (desktop)
+            onMouseDown={startNextLongPress}
+            onMouseUp={endNextPress}
+            onMouseLeave={cancelNextLongPress}
+            // Right-click opens menu immediately
             onContextMenu={(e) => { e.preventDefault(); setNextMenuOpen(true); }}
+            // Click fallback if no long-press happened
+            onClick={handleNextClick}
           >
             <span className="truncate">Next</span>
             <ArrowRight className="h-5 w-5 sm:h-6 sm:w-6 ml-2" />
