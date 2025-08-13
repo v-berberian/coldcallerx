@@ -23,9 +23,7 @@ export const useLeadCardActions = (lead: Lead) => {
   // If no country code is present, assume +1 (US/Canada)
   const toWhatsAppE164 = useCallback((digits: string) => {
     if (!digits) return digits;
-    // Already has country code 1 (11 digits) or other non-US codes (>11)
-    if (digits.length >= 11) return digits;
-    // 10-digit NANP number → prefix 1
+    if (digits.length >= 11) return digits; // assume already includes country code
     if (digits.length === 10) return `1${digits}`;
     return digits;
   }, []);
@@ -69,14 +67,14 @@ export const useLeadCardActions = (lead: Lead) => {
     const cleanPhone = selectedPhone.replace(/\D/g, '');
     if (communicationMode === 'whatsapp') {
       const waDigits = toWhatsAppE164(cleanPhone);
-      const base = `https://wa.me/${waDigits}`;
+      const base = `whatsapp://send?phone=${waDigits}`;
       if (template) {
         const message = interpolateTemplate(template.message, {
           name: lead.name,
           company: lead.company || '',
           selectedPhone,
         });
-        return `${base}?text=${encodeURIComponent(message)}`;
+        return `${base}&text=${encodeURIComponent(message)}`;
       }
       return base;
     } else {
@@ -108,8 +106,8 @@ export const useLeadCardActions = (lead: Lead) => {
     const cleanPhone = selectedPhone.replace(/\D/g, '');
     if (communicationMode === 'whatsapp') {
       const waDigits = toWhatsAppE164(cleanPhone);
-      // Open WhatsApp chat; user can initiate call from there
-      window.location.href = `https://wa.me/${waDigits}`;
+      // Attempt WhatsApp voice call deep link
+      window.location.href = `whatsapp://call?number=${waDigits}`;
     } else {
       window.location.href = `tel:${cleanPhone}`;
     }
