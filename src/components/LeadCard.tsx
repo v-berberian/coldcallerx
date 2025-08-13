@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react'
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from '@/components/ui/dropdown-menu';
-import { X, Phone, Mail, ChevronDown, Check, MessageSquare, MessagesSquare, Upload, Settings, Edit3, Trash, Send, Text, Ellipsis } from 'lucide-react';
+import { X, Phone, Mail, ChevronDown, Check, MessageSquare, MessagesSquare, Upload, Settings, Edit3, Trash, Send, Text, Ellipsis, Snowflake, Sun, Flame } from 'lucide-react';
 import {
   AlertDialog,
   AlertDialogContent,
@@ -104,6 +104,7 @@ const LeadCard: React.FC<LeadCardProps> = ({
   const [editingText, setEditingText] = useState('');
   const [addFxVisible, setAddFxVisible] = useState(false);
   const [selectedCommentId, setSelectedCommentId] = useState<string | null>(null);
+  const [leadTag, setLeadTagState] = useState<'cold' | 'warm' | 'hot' | null>(null);
 
   const loadComments = useCallback(async () => {
     try {
@@ -139,9 +140,43 @@ const LeadCard: React.FC<LeadCardProps> = ({
     }
   }, [leadKey, csvId]);
 
+  const loadLeadTag = useCallback(async () => {
+    try {
+      const current = await appStorage.getCurrentCSVId();
+      setCsvId(current);
+      if (!current) {
+        // legacy fallback
+        const legacy = localStorage.getItem(`tag:${leadKey}`);
+        setLeadTagState(legacy ? (legacy as 'cold' | 'warm' | 'hot') : null);
+        return;
+      }
+      const map = await appStorage.getCSVLeadTags(current);
+      setLeadTagState(map[leadKey] ?? null);
+    } catch {
+      setLeadTagState(null);
+    }
+  }, [leadKey]);
+
+  const saveLeadTag = useCallback(async (next: 'cold' | 'warm' | 'hot') => {
+    setLeadTagState(next);
+    try {
+      const current = csvId || (await appStorage.getCurrentCSVId());
+      if (current) {
+        const map = await appStorage.getCSVLeadTags(current);
+        map[leadKey] = next;
+        await appStorage.saveCSVLeadTags(current, map);
+      } else {
+        localStorage.setItem(`tag:${leadKey}`, next);
+      }
+    } catch {
+      // ignore storage errors
+    }
+  }, [leadKey, csvId]);
+
   useEffect(() => {
     loadComments();
-  }, [loadComments]);
+    loadLeadTag();
+  }, [loadComments, loadLeadTag]);
 
   const addComment = useCallback(() => {
     const text = draft.trim();
@@ -445,6 +480,35 @@ const LeadCard: React.FC<LeadCardProps> = ({
                 </p>
               </div>
             )}
+            {/* Lead priority segmented control */}
+            <div className="flex items-center justify-center mt-1">
+              <div className="inline-flex items-center rounded-full border border-border/30 bg-background/60 backdrop-blur px-1 py-1">
+                <button
+                  type="button"
+                  onClick={() => saveLeadTag('cold')}
+                  className={`px-3 py-1.5 rounded-full flex items-center gap-1 text-xs ${leadTag === 'cold' ? 'bg-gradient-to-br from-blue-400/20 to-blue-600/20 text-blue-600 dark:text-blue-400 ring-1 ring-blue-500/30' : 'text-muted-foreground'}`}
+                >
+                  <Snowflake className="h-3.5 w-3.5" />
+                  <span>Cold</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => saveLeadTag('warm')}
+                  className={`px-3 py-1.5 rounded-full flex items-center gap-1 text-xs ${leadTag === 'warm' ? 'bg-gradient-to-br from-amber-400/20 to-amber-600/20 text-amber-600 dark:text-amber-400 ring-1 ring-amber-500/30' : 'text-muted-foreground'}`}
+                >
+                  <Sun className="h-3.5 w-3.5" />
+                  <span>Warm</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => saveLeadTag('hot')}
+                  className={`px-3 py-1.5 rounded-full flex items-center gap-1 text-xs ${leadTag === 'hot' ? 'bg-gradient-to-br from-rose-400/20 to-rose-600/20 text-rose-600 dark:text-rose-400 ring-1 ring-rose-500/30' : 'text-muted-foreground'}`}
+                >
+                  <Flame className="h-3.5 w-3.5" />
+                  <span>Hot</span>
+                </button>
+              </div>
+            </div>
           </div>
           {/* Group 2: Phone and Email */}
             <div className="space-y-2">

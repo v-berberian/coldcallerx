@@ -375,6 +375,20 @@ export class AppStorage {
     return await this.getItem(getCSVStorageKey(csvId, 'comments'), {});
   }
 
+  // CSV-scoped lead tags map: { [leadKey: string]: 'cold' | 'warm' | 'hot' }
+  async saveCSVLeadTags(
+    csvId: string,
+    tagsByLead: Record<string, 'cold' | 'warm' | 'hot'>
+  ): Promise<void> {
+    await this.setItem(getCSVStorageKey(csvId, 'lead-tags'), tagsByLead);
+  }
+
+  async getCSVLeadTags(
+    csvId: string
+  ): Promise<Record<string, 'cold' | 'warm' | 'hot'>> {
+    return await this.getItem(getCSVStorageKey(csvId, 'lead-tags'), {} as Record<string, 'cold' | 'warm' | 'hot'>);
+  }
+
   async saveCSVCurrentIndex(csvId: string, index: number): Promise<void> {
     await this.setItem(getCSVStorageKey(csvId, 'current-index'), index);
   }
