@@ -173,6 +173,26 @@ const LeadCard: React.FC<LeadCardProps> = ({
     }
   }, [leadKey, csvId]);
 
+  const toggleLeadTag = useCallback(async (tag: 'cold' | 'warm' | 'hot') => {
+    if (leadTag === tag) {
+      setLeadTagState(null);
+      try {
+        const current = csvId || (await appStorage.getCurrentCSVId());
+        if (current) {
+          const map = await appStorage.getCSVLeadTags(current);
+          try { delete map[leadKey]; } catch (err) { console.warn('Failed to delete lead tag from map', err); }
+          await appStorage.saveCSVLeadTags(current, map);
+        } else {
+          try { localStorage.removeItem(`tag:${leadKey}`); } catch (err) { console.warn('Failed to remove lead tag from localStorage', err); }
+        }
+      } catch {
+        // ignore storage errors
+      }
+    } else {
+      await saveLeadTag(tag);
+    }
+  }, [leadTag, csvId, leadKey, saveLeadTag]);
+
   useEffect(() => {
     loadComments();
     loadLeadTag();
@@ -485,7 +505,7 @@ const LeadCard: React.FC<LeadCardProps> = ({
               <div className="inline-flex items-center rounded-full border border-border/30 bg-background/60 backdrop-blur px-1 py-1">
                 <button
                   type="button"
-                  onClick={() => saveLeadTag('cold')}
+                  onClick={() => toggleLeadTag('cold')}
                   className={`px-3 py-1.5 rounded-full flex items-center gap-1 text-xs ${leadTag === 'cold' ? 'bg-gradient-to-br from-blue-400/20 to-blue-600/20 text-blue-600 dark:text-blue-400 ring-1 ring-blue-500/30' : 'text-muted-foreground'}`}
                 >
                   <Snowflake className="h-3.5 w-3.5" />
@@ -493,7 +513,7 @@ const LeadCard: React.FC<LeadCardProps> = ({
                 </button>
                 <button
                   type="button"
-                  onClick={() => saveLeadTag('warm')}
+                  onClick={() => toggleLeadTag('warm')}
                   className={`px-3 py-1.5 rounded-full flex items-center gap-1 text-xs ${leadTag === 'warm' ? 'bg-gradient-to-br from-amber-400/20 to-amber-600/20 text-amber-600 dark:text-amber-400 ring-1 ring-amber-500/30' : 'text-muted-foreground'}`}
                 >
                   <Sun className="h-3.5 w-3.5" />
@@ -501,7 +521,7 @@ const LeadCard: React.FC<LeadCardProps> = ({
                 </button>
                 <button
                   type="button"
-                  onClick={() => saveLeadTag('hot')}
+                  onClick={() => toggleLeadTag('hot')}
                   className={`px-3 py-1.5 rounded-full flex items-center gap-1 text-xs ${leadTag === 'hot' ? 'bg-gradient-to-br from-rose-400/20 to-rose-600/20 text-rose-600 dark:text-rose-400 ring-1 ring-rose-500/30' : 'text-muted-foreground'}`}
                 >
                   <Flame className="h-3.5 w-3.5" />
