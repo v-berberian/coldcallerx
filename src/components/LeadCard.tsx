@@ -157,7 +157,7 @@ const LeadCard: React.FC<LeadCardProps> = ({
     }
   }, [leadKey]);
 
-  const saveLeadTag = useCallback(async (next: 'cold' | 'warm' | 'hot') => {
+  const saveLeadTag = useCallback(async (next: 'cold' | 'warm' | 'hot' | null) => {
     setLeadTagState(next);
     try {
       const current = csvId || (await appStorage.getCurrentCSVId());
@@ -166,7 +166,8 @@ const LeadCard: React.FC<LeadCardProps> = ({
         map[leadKey] = next;
         await appStorage.saveCSVLeadTags(current, map);
       } else {
-        localStorage.setItem(`tag:${leadKey}`, next);
+        // legacy: store empty string for null
+        localStorage.setItem(`tag:${leadKey}`, next ?? '');
       }
     } catch {
       // ignore storage errors
@@ -175,23 +176,11 @@ const LeadCard: React.FC<LeadCardProps> = ({
 
   const toggleLeadTag = useCallback(async (tag: 'cold' | 'warm' | 'hot') => {
     if (leadTag === tag) {
-      setLeadTagState(null);
-      try {
-        const current = csvId || (await appStorage.getCurrentCSVId());
-        if (current) {
-          const map = await appStorage.getCSVLeadTags(current);
-          try { delete map[leadKey]; } catch (err) { console.warn('Failed to delete lead tag from map', err); }
-          await appStorage.saveCSVLeadTags(current, map);
-        } else {
-          try { localStorage.removeItem(`tag:${leadKey}`); } catch (err) { console.warn('Failed to remove lead tag from localStorage', err); }
-        }
-      } catch {
-        // ignore storage errors
-      }
+      await saveLeadTag(null);
     } else {
       await saveLeadTag(tag);
     }
-  }, [leadTag, csvId, leadKey, saveLeadTag]);
+  }, [leadTag, saveLeadTag]);
 
   useEffect(() => {
     loadComments();
