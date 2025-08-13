@@ -302,7 +302,7 @@ const LeadCard: React.FC<LeadCardProps> = ({
   // If we have a noLeadsMessage, show the empty state
   if (noLeadsMessage) {
     return (
-      <Card className="shadow-2xl border border-border/60 dark:border-border/70 ring-1 ring-border/40 dark:ring-border/60 rounded-3xl bg-card min-h-[400px] max-h-[500px] sm:min-h-[420px] sm:max-h-[550px] flex flex-col mb-8">
+      <Card className="shadow-2xl border border-border/60 dark:border-border/70 ring-1 ring-border/40 dark:ring-border/60 rounded-3xl bg-card h-[640px] sm:h-[720px] flex flex-col mb-8">
         <CardContent className="p-6 space-y-6 flex-1 flex flex-col justify-center">
           <div className="text-center">
             <h2 className="text-2xl font-bold text-foreground">{noLeadsMessage}</h2>
