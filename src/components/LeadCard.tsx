@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react'
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from '@/components/ui/dropdown-menu';
-import { X, Phone, Mail, ChevronDown, Check, MessageSquare, Upload, Settings, Edit3, Trash, Send } from 'lucide-react';
+import { X, Phone, Mail, ChevronDown, Check, MessageSquare, MessagesSquare, Upload, Settings, Edit3, Trash, Send, Text, Ellipsis } from 'lucide-react';
 import {
   AlertDialog,
   AlertDialogContent,
@@ -370,20 +370,35 @@ const LeadCard: React.FC<LeadCardProps> = ({
           }}
         >
       <CardContent className="flex-1 flex flex-col overflow-hidden">
-        {/* Top row with comments icon and lead count */}
-        <div className="flex items-center justify-between p-3 sm:p-5 pb-0">
-          <button
-            onClick={handleFlip}
-            className="p-1 rounded-full"
-            title="Comments"
-            style={{ pointerEvents: (isDeleteMode || isSwiping) ? 'none' : 'auto' }}
-          >
-            <MessageSquare className="h-4 w-4 text-muted-foreground/60" />
-          </button>
-          <p className="text-sm text-muted-foreground opacity-40">
+        {/* Top row with edit icon (left) and lead count (center) */}
+        <div className="flex items-center p-3 sm:p-5 pb-2 relative">
+          <div className="absolute left-0 flex items-center gap-0">
+            <button
+              onClick={handleFlip}
+              className="p-1 rounded-full"
+              title="Comments"
+              style={{ 
+                pointerEvents: (isDeleteMode || isSwiping) ? 'none' : 'auto',
+                marginLeft: '-12px'
+              }}
+            >
+              <Text className="h-4 w-4 text-muted-foreground/60" />
+            </button>
+            {comments.length > 0 && (
+              <button
+                onClick={handleFlip}
+                className="text-xs bg-muted-foreground/20 text-muted-foreground/80 px-1.5 py-0.5 rounded-full min-w-[16px] text-center hover:bg-muted-foreground/30 transition-colors"
+                style={{ 
+                  pointerEvents: (isDeleteMode || isSwiping) ? 'none' : 'auto'
+                }}
+              >
+                {comments.length}
+              </button>
+            )}
+          </div>
+          <p className="text-sm text-muted-foreground opacity-40 text-center flex-1">
             {currentIndex + 1}/{totalCount}
           </p>
-          <div className="w-5 h-5" />
         </div>
 
         {/* Lead info - Main content area */}
@@ -610,7 +625,7 @@ const LeadCard: React.FC<LeadCardProps> = ({
                   `;
                 }}
               >
-                <MessageSquare className="h-[32px] w-[32px] sm:h-[40px] sm:w-[40px] drop-shadow-md mx-auto" style={{ filter: 'drop-shadow(0 1px 2px rgba(0, 0, 0, 0.15))' }} />
+                <MessagesSquare className="h-[32px] w-[32px] sm:h-[40px] sm:w-[40px] drop-shadow-md mx-auto" style={{ filter: 'drop-shadow(0 1px 2px rgba(0, 0, 0, 0.15))' }} />
               </Button>
               ) : (
                 <div 
@@ -620,7 +635,7 @@ const LeadCard: React.FC<LeadCardProps> = ({
                     touchAction: 'none'
                   }}
                 >
-                  <MessageSquare className="h-[32px] w-[32px] sm:h-[40px] sm:w-[40px] drop-shadow-md mx-auto" style={{ filter: 'drop-shadow(0 1px 2px rgba(0, 0, 0, 0.15))' }} />
+                  <MessagesSquare className="h-[32px] w-[32px] sm:h-[40px] sm:w-[40px] drop-shadow-md mx-auto" style={{ filter: 'drop-shadow(0 1px 2px rgba(0, 0, 0, 0.15))' }} />
                 </div>
               )}
             </div>
@@ -741,16 +756,13 @@ const LeadCard: React.FC<LeadCardProps> = ({
     >
       <CardContent className="flex-1 flex flex-col p-0 overflow-hidden">
         <div className="flex items-center justify-between p-3 sm:p-5 pb-2">
-          <div className="flex items-center gap-1">
-            <button
-              onClick={handleFlip}
-              className="p-1 rounded-full"
-            >
-              <MessageSquare className="h-4 w-4 text-muted-foreground/60" />
-            </button>
-            <span className="text-sm text-muted-foreground opacity-60">Comments</span>
-          </div>
-          <div className="w-5 h-5" />
+          <button
+            onClick={handleFlip}
+            className="text-sm text-muted-foreground opacity-60 hover:opacity-80 transition-opacity cursor-pointer"
+          >
+            Comments
+          </button>
+          <Ellipsis className="h-4 w-4 text-muted-foreground/60" />
         </div>
 
         <div className="flex-1 min-h-0 overflow-y-auto px-4 pb-4 space-y-3" data-comments-scroll="true">
