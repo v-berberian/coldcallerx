@@ -106,8 +106,8 @@ export const useLeadCardActions = (lead: Lead) => {
     const cleanPhone = selectedPhone.replace(/\D/g, '');
     if (communicationMode === 'whatsapp') {
       const waDigits = toWhatsAppE164(cleanPhone);
-      // Attempt WhatsApp voice call deep link
-      window.location.href = `whatsapp://call?number=${waDigits}`;
+      // Open WhatsApp chat (reliable). User can tap the call button inside WhatsApp.
+      window.location.href = `whatsapp://send?phone=${waDigits}`;
     } else {
       window.location.href = `tel:${cleanPhone}`;
     }
