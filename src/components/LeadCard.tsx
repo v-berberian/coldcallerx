@@ -445,6 +445,17 @@ const LeadCard: React.FC<LeadCardProps> = ({
               </button>
             )}
           </div>
+          <button
+            className="p-1 rounded-full absolute right-0"
+            title="More"
+            style={{ 
+              pointerEvents: (isDeleteMode || isSwiping) ? 'none' : 'auto',
+              marginRight: '-12px'
+            }}
+            aria-label="More options"
+          >
+            <Ellipsis className="h-4 w-4 text-muted-foreground/60" />
+          </button>
           <p className="text-sm text-muted-foreground opacity-40 text-center flex-1">
             {currentIndex + 1}/{totalCount}
           </p>
