@@ -104,6 +104,9 @@ const LeadCard: React.FC<LeadCardProps> = ({
   const [editingText, setEditingText] = useState('');
   const [addFxVisible, setAddFxVisible] = useState(false);
   const [selectedCommentId, setSelectedCommentId] = useState<string | null>(null);
+  const [isTextMenuOpen, setIsTextMenuOpen] = useState(false);
+  const longPressTimerRef = useRef<number | null>(null);
+  const longPressActiveRef = useRef(false);
 
   const loadComments = useCallback(async () => {
     try {
@@ -201,6 +204,31 @@ const LeadCard: React.FC<LeadCardProps> = ({
   const handleCommentSelect = useCallback((commentId: string) => {
     setSelectedCommentId(prev => prev === commentId ? null : commentId);
   }, []);
+
+  const clearTextLongPress = useCallback(() => {
+    if (longPressTimerRef.current !== null) {
+      window.clearTimeout(longPressTimerRef.current);
+      longPressTimerRef.current = null;
+    }
+  }, []);
+
+  const handleTextPressStart = useCallback(() => {
+    if (isDeleteMode || isSwiping) return;
+    clearTextLongPress();
+    longPressActiveRef.current = false;
+    longPressTimerRef.current = window.setTimeout(() => {
+      longPressActiveRef.current = true;
+      setIsTextMenuOpen(true);
+    }, 450) as unknown as number;
+  }, [clearTextLongPress, isDeleteMode, isSwiping]);
+
+  const handleTextPressEnd = useCallback(() => {
+    const wasLong = longPressActiveRef.current;
+    clearTextLongPress();
+    if (!wasLong) {
+      handleFlip();
+    }
+  }, [clearTextLongPress, handleFlip]);
 
   const {
     selectedPhone,
@@ -378,21 +406,45 @@ const LeadCard: React.FC<LeadCardProps> = ({
         {/* Top row with edit icon (left) and lead count (center) */}
         <div className="flex items-center p-3 sm:p-5 pb-2 relative">
           <div className="absolute left-0 flex items-center gap-0">
-            <button
-              onClick={handleFlip}
-              className="p-1 rounded-full"
-              title="Comments"
-              style={{ 
-                pointerEvents: (isDeleteMode || isSwiping) ? 'none' : 'auto',
-                marginLeft: '-12px'
-              }}
-            >
-              <Text className="h-4 w-4 text-muted-foreground/60" />
-            </button>
+            <DropdownMenu open={isTextMenuOpen} onOpenChange={setIsTextMenuOpen}>
+              <DropdownMenuTrigger asChild>
+                <button
+                  onClick={undefined}
+                  onMouseDown={handleTextPressStart}
+                  onMouseUp={handleTextPressEnd}
+                  onMouseLeave={clearTextLongPress}
+                  onTouchStart={handleTextPressStart}
+                  onTouchEnd={handleTextPressEnd}
+                  className="p-1 rounded-full"
+                  title="Comments"
+                  style={{ 
+                    pointerEvents: (isDeleteMode || isSwiping) ? 'none' : 'auto',
+                    marginLeft: '-12px'
+                  }}
+                >
+                  <Text className="h-4 w-4 text-muted-foreground/60" />
+                </button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent side="bottom" align="start" sideOffset={6} className="z-50 w-auto rounded-xl shadow-lg overflow-hidden bg-background/60 backdrop-blur-sm border border-border/15">
+                <DropdownMenuItem onClick={() => setIsTextMenuOpen(false)} className="px-3 py-2">
+                  New comment
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setIsTextMenuOpen(false)} className="px-3 py-2">
+                  Copy all
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setIsTextMenuOpen(false)} className="px-3 py-2">
+                  Collapse all
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
             {comments.length > 0 && (
               <button
-                onClick={handleFlip}
-                className="text-xs bg-muted-foreground/20 text-muted-foreground/80 px-1.5 py-0.5 rounded-full min-w-[16px] text-center hover:bg-muted-foreground/30 transition-colors"
+                onMouseDown={handleTextPressStart}
+                onMouseUp={handleTextPressEnd}
+                onMouseLeave={clearTextLongPress}
+                onTouchStart={handleTextPressStart}
+                onTouchEnd={handleTextPressEnd}
+                className="text-xs bg-muted-foreground/20 text-muted-foreground/80 px-1.5 py-0.5 rounded-full min-w-[16px] text-center"
                 style={{ 
                   pointerEvents: (isDeleteMode || isSwiping) ? 'none' : 'auto'
                 }}
