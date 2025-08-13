@@ -251,7 +251,10 @@ const LeadCard: React.FC<LeadCardProps> = ({
     updateSelectedPhone,
     handlePhoneSelect,
     handleEmailClick,
-    handleTextClick
+    handleTextClick,
+    handleCallClick,
+    communicationMode,
+    setCommunicationMode
   } = useLeadCardActions(lead);
 
   // Delete confirmation dialog state and handler (always execute)
@@ -445,17 +448,51 @@ const LeadCard: React.FC<LeadCardProps> = ({
               </button>
             )}
           </div>
-          <button
-            className="p-1 rounded-full absolute right-0"
-            title="More"
-            style={{ 
-              pointerEvents: (isDeleteMode || isSwiping) ? 'none' : 'auto',
-              marginRight: '-12px'
-            }}
-            aria-label="More options"
-          >
-            <Ellipsis className="h-4 w-4 text-muted-foreground/60" />
-          </button>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button
+                className="p-1 rounded-full absolute right-0"
+                title="More"
+                style={{ 
+                  pointerEvents: (isDeleteMode || isSwiping) ? 'none' : 'auto',
+                  marginRight: '-12px'
+                }}
+                aria-label="More options"
+              >
+                <Ellipsis className="h-4 w-4 text-muted-foreground/60" />
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent side="bottom" align="end" sideOffset={6} className="rounded-xl bg-background/80 backdrop-blur border border-border/20 p-1 min-w-[180px]">
+              <DropdownMenuItem onClick={async () => {
+                if (setCommunicationMode) {
+                  setCommunicationMode('native');
+                }
+                try {
+                  const settings = await appStorage.getAppSettings();
+                  await appStorage.saveAppSettings({ ...settings, communicationMode: 'native' });
+                } catch (err) {
+                  console.warn('Failed to persist communication mode (native)', err);
+                }
+              }} className="flex items-center justify-between">
+                <span>Native (SMS/Call)</span>
+                {communicationMode === 'native' && <Check className="h-4 w-4" />}
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={async () => {
+                if (setCommunicationMode) {
+                  setCommunicationMode('whatsapp');
+                }
+                try {
+                  const settings = await appStorage.getAppSettings();
+                  await appStorage.saveAppSettings({ ...settings, communicationMode: 'whatsapp' });
+                } catch (err) {
+                  console.warn('Failed to persist communication mode (whatsapp)', err);
+                }
+              }} className="flex items-center justify-between">
+                <span>WhatsApp</span>
+                {communicationMode === 'whatsapp' && <Check className="h-4 w-4" />}
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
           <p className="text-sm text-muted-foreground opacity-40 text-center flex-1">
             {currentIndex + 1}/{totalCount}
           </p>
@@ -732,7 +769,7 @@ const LeadCard: React.FC<LeadCardProps> = ({
               {!isDeleteMode ? (
               <Button 
                   onClick={e => {
-                    handleCall();
+                    handleCallClick();
                   }}
                 size="lg" 
                 className="w-24 h-24 sm:w-32 sm:h-32 rounded-full bg-gradient-to-br from-green-400 to-green-600 active:from-green-600 active:to-green-800 text-white transition-all duration-300 flex items-center justify-center p-0 relative overflow-hidden neomorphic-button focus:outline-none"

@@ -24,6 +24,7 @@ export interface AppSettings {
   theme?: 'light' | 'dark' | 'system';
   autoCallDelay?: number;
   timezone?: string;
+  communicationMode?: 'native' | 'whatsapp';
 }
 
 // Storage utility class
