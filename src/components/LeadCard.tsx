@@ -103,6 +103,7 @@ const LeadCard: React.FC<LeadCardProps> = ({
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editingText, setEditingText] = useState('');
   const [addFxVisible, setAddFxVisible] = useState(false);
+  const [selectedCommentId, setSelectedCommentId] = useState<string | null>(null);
 
   const loadComments = useCallback(async () => {
     try {
@@ -196,6 +197,10 @@ const LeadCard: React.FC<LeadCardProps> = ({
     saveComments(next);
     cancelEdit();
   }, [editingId, editingText, comments, saveComments, cancelEdit]);
+
+  const handleCommentSelect = useCallback((commentId: string) => {
+    setSelectedCommentId(prev => prev === commentId ? null : commentId);
+  }, []);
 
   const {
     selectedPhone,
@@ -755,14 +760,13 @@ const LeadCard: React.FC<LeadCardProps> = ({
       }}
     >
       <CardContent className="flex-1 flex flex-col p-0 overflow-hidden">
-        <div className="flex items-center justify-between p-3 sm:p-5 pb-2">
+        <div className="flex items-center justify-center p-3 sm:p-5 pb-2">
           <button
             onClick={handleFlip}
-            className="text-sm text-muted-foreground opacity-60 hover:opacity-80 transition-opacity cursor-pointer"
+            className="text-sm text-muted-foreground opacity-60 cursor-pointer"
           >
             Comments
           </button>
-          <Ellipsis className="h-4 w-4 text-muted-foreground/60" />
         </div>
 
         <div className="flex-1 min-h-0 overflow-y-auto px-4 pb-4 space-y-3" data-comments-scroll="true">
@@ -779,8 +783,9 @@ const LeadCard: React.FC<LeadCardProps> = ({
                   animate={{ opacity: 1, y: 0, scale: 1 }}
                   exit={{ opacity: 0, y: -8, scale: 0.98 }}
                   transition={{ type: 'spring', stiffness: 520, damping: 30, mass: 0.45, layout: { type: 'spring', stiffness: 520, damping: 30, mass: 0.45 } }}
-                  className="border border-border/20 rounded-lg p-3"
+                  className={`border border-border/20 rounded-lg p-3 cursor-pointer transition-colors ${selectedCommentId === c.id ? 'bg-muted/20' : ''}`}
                   style={{ willChange: 'transform' }}
+                  onClick={() => handleCommentSelect(c.id)}
                 >
                   <AnimatePresence mode="wait" initial={false}>
                     {editingId === c.id ? (
@@ -796,7 +801,7 @@ const LeadCard: React.FC<LeadCardProps> = ({
                         <textarea
                           value={editingText}
                           onChange={(e) => setEditingText(e.target.value)}
-                          className="flex-1 rounded-md border border-border/30 bg-background px-3 text-sm focus:outline-none min-h-[44px] py-2"
+                          className="flex-1 rounded-md border border-border/30 bg-background px-3 text-sm focus:outline-none min-h-[44px] py-2 resize-none"
                           rows={2}
                         />
                         <div className="flex items-center gap-2 self-center">
@@ -820,24 +825,40 @@ const LeadCard: React.FC<LeadCardProps> = ({
                             {new Date(c.createdAt).toLocaleString()}
                           </p>
                         </div>
-                        <div className="flex items-center gap-2 self-center">
-                        <motion.button
-                          whileTap={{ scale: 0.92 }}
-                            aria-label="Edit comment"
-                            className="rounded-md p-2 active:bg-muted/80"
-                            onClick={() => startEdit(c.id)}
-                          >
-                            <Edit3 className="h-4 w-4 text-muted-foreground" />
-                        </motion.button>
-                        <motion.button
-                          whileTap={{ scale: 0.92 }}
-                            aria-label="Delete comment"
-                            className="rounded-md p-2 active:bg-muted/80"
-                            onClick={() => deleteComment(c.id)}
-                          >
-                          <Trash className="h-4 w-4 text-red-600" />
-                        </motion.button>
-                        </div>
+                        <AnimatePresence>
+                          {selectedCommentId === c.id && (
+                            <motion.div 
+                              className="flex items-center gap-2 self-center"
+                              initial={{ opacity: 0, scale: 0.8 }}
+                              animate={{ opacity: 1, scale: 1 }}
+                              exit={{ opacity: 0, scale: 0.8 }}
+                              transition={{ duration: 0.02, ease: "easeOut" }}
+                            >
+                              <motion.button
+                                whileTap={{ scale: 0.92 }}
+                                aria-label="Edit comment"
+                                className="rounded-md p-2 active:bg-muted/80"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  startEdit(c.id);
+                                }}
+                              >
+                                <Edit3 className="h-4 w-4 text-muted-foreground" />
+                              </motion.button>
+                              <motion.button
+                                whileTap={{ scale: 0.92 }}
+                                aria-label="Delete comment"
+                                className="rounded-md p-2 active:bg-muted/80"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  deleteComment(c.id);
+                                }}
+                              >
+                                <Trash className="h-4 w-4 text-red-600" />
+                              </motion.button>
+                            </motion.div>
+                          )}
+                        </AnimatePresence>
                       </motion.div>
                     )}
                   </AnimatePresence>

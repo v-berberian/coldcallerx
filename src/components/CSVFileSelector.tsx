@@ -307,7 +307,7 @@ const CSVFileSelector: React.FC<CSVFileSelectorProps> = ({
                 onClick={() => handleCSVSelect(file.id)}
               className={`text-base px-3 py-3 cursor-pointer transition-colors duration-150 focus:bg-transparent focus:outline-none touch-manipulation border-0 focus:border-0 focus:ring-0 ${
                   file.id === currentCSVId 
-                    ? 'bg-accent/30 text-accent-foreground' 
+                    ? 'bg-blue-500/20 border-l-2 border-blue-500' 
                     : 'text-foreground'
                 }`}
                 style={{ outline: 'none', border: 'none' }}
@@ -316,9 +316,6 @@ const CSVFileSelector: React.FC<CSVFileSelectorProps> = ({
                   <div className="flex flex-col items-start flex-1 min-w-0 pr-2">
                     <div className="flex items-baseline">
                       <span className="font-normal truncate text-base block max-w-[200px]" title={file.name}>{file.name}</span>
-                      {file.id === currentCSVId && (
-                        <div className="w-2 h-2 bg-foreground rounded-full ml-2 flex-shrink-0"></div>
-                      )}
                     </div>
                     <span className="text-sm text-muted-foreground mt-0.5">
                       {file.totalLeads} leads
