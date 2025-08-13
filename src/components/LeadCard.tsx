@@ -21,6 +21,8 @@ import { AnimatePresence, LayoutGroup, motion } from 'framer-motion';
 import { useLeadCardTemplates, EmailTemplate, TextTemplate } from '@/hooks/useLeadCardTemplates';
 import { useLeadCardSwipe } from '@/hooks/useLeadCardSwipe';
 import { useLeadCardActions } from '@/hooks/useLeadCardActions';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faWhatsapp } from '@fortawesome/free-brands-svg-icons';
 
 interface LeadCardProps {
   lead: Lead;
@@ -864,7 +866,7 @@ const LeadCard: React.FC<LeadCardProps> = ({
                 }}
               >
                 {communicationMode === 'whatsapp' ? (
-                  <MessageCircle className="h-[32px] w-[32px] sm:h-[40px] sm:w-[40px] drop-shadow-md mx-auto" style={{ filter: 'drop-shadow(0 1px 2px rgba(0, 0, 0, 0.15))' }} />
+                  <FontAwesomeIcon icon={faWhatsapp} className="h-[32px] w-[32px] sm:h-[40px] sm:w-[40px] mx-auto" style={{ filter: 'drop-shadow(0 1px 2px rgba(0, 0, 0, 0.15))' }} />
                 ) : (
                   <Phone className="h-[32px] w-[32px] sm:h-[40px] sm:w-[40px] drop-shadow-md mx-auto" style={{ filter: 'drop-shadow(0 1px 2px rgba(0, 0, 0, 0.15))' }} />
                 )}
@@ -878,7 +880,7 @@ const LeadCard: React.FC<LeadCardProps> = ({
                   }}
                 >
                   {communicationMode === 'whatsapp' ? (
-                    <MessageCircle className="h-[32px] w-[32px] sm:h-[40px] sm:w-[40px] drop-shadow-md mx-auto" style={{ filter: 'drop-shadow(0 1px 2px rgba(0, 0, 0, 0.15))' }} />
+                    <FontAwesomeIcon icon={faWhatsapp} className="h-[32px] w-[32px] sm:h-[40px] sm:w-[40px] mx-auto" style={{ filter: 'drop-shadow(0 1px 2px rgba(0, 0, 0, 0.15))' }} />
                   ) : (
                     <Phone className="h-[32px] w-[32px] sm:h-[40px] sm:w-[40px] drop-shadow-md mx-auto" style={{ filter: 'drop-shadow(0 1px 2px rgba(0, 0, 0, 0.15))' }} />
                   )}
