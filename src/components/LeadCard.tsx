@@ -462,8 +462,14 @@ const LeadCard: React.FC<LeadCardProps> = ({
                 <Ellipsis className="h-4 w-4 text-muted-foreground/60" />
               </button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent side="bottom" align="end" sideOffset={6} className="rounded-xl bg-background/80 backdrop-blur border border-border/20 p-1 min-w-[180px]">
-              <DropdownMenuItem onClick={async () => {
+            <DropdownMenuContent 
+              side="bottom" 
+              align="end" 
+              sideOffset={6} 
+              className="z-50 w-auto min-w-[180px] rounded-xl shadow-lg overflow-hidden bg-background/60 backdrop-blur-sm border border-border/15 p-0 [&>*]:focus:bg-transparent [&>*]:focus:outline-none"
+            >
+              <DropdownMenuItem 
+                onClick={async () => {
                 if (setCommunicationMode) {
                   setCommunicationMode('native');
                 }
@@ -473,11 +479,14 @@ const LeadCard: React.FC<LeadCardProps> = ({
                 } catch (err) {
                   console.warn('Failed to persist communication mode (native)', err);
                 }
-              }} className="flex items-center justify-between">
-                <span>Native (SMS/Call)</span>
+              }} 
+                className="w-full px-4 py-3 text-left transition-colors duration-75 cursor-pointer flex items-center justify-between"
+              >
+                <span className="text-sm">Native (SMS/Call)</span>
                 {communicationMode === 'native' && <Check className="h-4 w-4" />}
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={async () => {
+              <DropdownMenuItem 
+                onClick={async () => {
                 if (setCommunicationMode) {
                   setCommunicationMode('whatsapp');
                 }
@@ -487,8 +496,10 @@ const LeadCard: React.FC<LeadCardProps> = ({
                 } catch (err) {
                   console.warn('Failed to persist communication mode (whatsapp)', err);
                 }
-              }} className="flex items-center justify-between">
-                <span>WhatsApp</span>
+              }} 
+                className="w-full px-4 py-3 text-left transition-colors duration-75 cursor-pointer flex items-center justify-between"
+              >
+                <span className="text-sm">WhatsApp</span>
                 {communicationMode === 'whatsapp' && <Check className="h-4 w-4" />}
               </DropdownMenuItem>
             </DropdownMenuContent>
