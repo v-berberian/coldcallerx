@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react'
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from '@/components/ui/dropdown-menu';
-import { X, Phone, Mail, ChevronDown, Check, MessageSquare, MessagesSquare, Upload, Settings, Edit3, Trash, Send, Text, Ellipsis, Snowflake, Sun, Flame } from 'lucide-react';
+import { X, Phone, Mail, ChevronDown, Check, MessageSquare, MessagesSquare, Upload, Settings, Edit3, Trash, Send, Text, Ellipsis, Snowflake, Sun, Flame, MessageCircle } from 'lucide-react';
 import {
   AlertDialog,
   AlertDialogContent,
@@ -852,7 +852,11 @@ const LeadCard: React.FC<LeadCardProps> = ({
                   `;
                 }}
               >
-                <Phone className="h-[32px] w-[32px] sm:h-[40px] sm:w-[40px] drop-shadow-md mx-auto" style={{ filter: 'drop-shadow(0 1px 2px rgba(0, 0, 0, 0.15))' }} />
+                {communicationMode === 'whatsapp' ? (
+                  <MessageCircle className="h-[32px] w-[32px] sm:h-[40px] sm:w-[40px] drop-shadow-md mx-auto" style={{ filter: 'drop-shadow(0 1px 2px rgba(0, 0, 0, 0.15))' }} />
+                ) : (
+                  <Phone className="h-[32px] w-[32px] sm:h-[40px] sm:w-[40px] drop-shadow-md mx-auto" style={{ filter: 'drop-shadow(0 1px 2px rgba(0, 0, 0, 0.15))' }} />
+                )}
               </Button>
               ) : (
                 <div 
@@ -862,7 +866,11 @@ const LeadCard: React.FC<LeadCardProps> = ({
                     touchAction: 'none'
                   }}
                 >
-                  <Phone className="h-[32px] w-[32px] sm:h-[40px] sm:w-[40px] drop-shadow-md mx-auto" style={{ filter: 'drop-shadow(0 1px 2px rgba(0, 0, 0, 0.15))' }} />
+                  {communicationMode === 'whatsapp' ? (
+                    <MessageCircle className="h-[32px] w-[32px] sm:h-[40px] sm:w-[40px] drop-shadow-md mx-auto" style={{ filter: 'drop-shadow(0 1px 2px rgba(0, 0, 0, 0.15))' }} />
+                  ) : (
+                    <Phone className="h-[32px] w-[32px] sm:h-[40px] sm:w-[40px] drop-shadow-md mx-auto" style={{ filter: 'drop-shadow(0 1px 2px rgba(0, 0, 0, 0.15))' }} />
+                  )}
                 </div>
               )}
             </div>
