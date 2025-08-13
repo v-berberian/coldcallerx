@@ -414,7 +414,7 @@ const LeadCard: React.FC<LeadCardProps> = ({
         }}
       >
         <Card 
-          className="shadow-2xl border border-border/50 dark:border-border/60 ring-1 ring-border/40 dark:ring-border/60 rounded-3xl bg-card min-h-[400px] max-h-[500px] sm:min-h-[420px] sm:max-h-[550px] flex flex-col mb-4 overflow-hidden relative" 
+          className="shadow-2xl border border-border/50 dark:border-border/60 ring-1 ring-border/40 dark:ring-border/60 rounded-3xl bg-card min-h-[460px] max-h-[600px] sm:min-h-[500px] sm:max-h-[660px] flex flex-col mb-4 overflow-hidden relative" 
           onClick={(e) => handleCardClick(e)}
           onTouchStart={(e) => handleCardClick(e)}
           style={{
@@ -894,7 +894,7 @@ const LeadCard: React.FC<LeadCardProps> = ({
 
     {/* Back side of the card - Trello-style comments */}
     <Card 
-      className="shadow-2xl border border-border/50 dark:border-border/60 ring-1 ring-border/40 dark:ring-border/60 rounded-3xl bg-card min-h-[400px] max-h-[500px] sm:min-h-[420px] sm:max-h-[550px] flex flex-col mb-4 overflow-hidden absolute inset-0" 
+      className="shadow-2xl border border-border/50 dark:border-border/60 ring-1 ring-border/40 dark:ring-border/60 rounded-3xl bg-card min-h-[460px] max-h-[600px] sm:min-h-[500px] sm:max-h-[660px] flex flex-col mb-4 overflow-hidden absolute inset-0" 
       style={{
         transformStyle: "preserve-3d",
         backfaceVisibility: "hidden",
