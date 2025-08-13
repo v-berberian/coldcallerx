@@ -302,7 +302,7 @@ const LeadCard: React.FC<LeadCardProps> = ({
   // If we have a noLeadsMessage, show the empty state
   if (noLeadsMessage) {
     return (
-      <Card className="shadow-2xl border border-border/60 dark:border-border/70 ring-1 ring-border/40 dark:ring-border/60 rounded-3xl bg-card h-[640px] sm:h-[720px] flex flex-col mb-8">
+      <Card className="shadow-2xl border border-border/60 dark:border-border/70 ring-1 ring-border/40 dark:ring-border/60 rounded-3xl bg-card min-h-[400px] max-h-[500px] sm:min-h-[420px] sm:max-h-[550px] flex flex-col mb-8">
         <CardContent className="p-6 space-y-6 flex-1 flex flex-col justify-center">
           <div className="text-center">
             <h2 className="text-2xl font-bold text-foreground">{noLeadsMessage}</h2>
@@ -414,7 +414,7 @@ const LeadCard: React.FC<LeadCardProps> = ({
         }}
       >
         <Card 
-          className="shadow-2xl border border-border/50 dark:border-border/60 ring-1 ring-border/40 dark:ring-border/60 rounded-3xl bg-card h-[640px] sm:h-[720px] flex flex-col mb-4 overflow-hidden relative" 
+          className="shadow-2xl border border-border/50 dark:border-border/60 ring-1 ring-border/40 dark:ring-border/60 rounded-3xl bg-card min-h-[460px] max-h-[600px] sm:min-h-[500px] sm:max-h-[660px] flex flex-col mb-4 overflow-hidden relative" 
           onClick={(e) => handleCardClick(e)}
           onTouchStart={(e) => handleCardClick(e)}
           style={{
@@ -424,17 +424,14 @@ const LeadCard: React.FC<LeadCardProps> = ({
           }}
         >
       <CardContent className="flex-1 flex flex-col overflow-hidden">
-        {/* Top row with edit icon (left) and lead count (center) */}
-        <div className="flex items-center p-3 sm:p-5 pb-2 relative">
-          <div className="absolute left-0 flex items-center gap-0">
+        {/* Top row with left cluster, centered count, right menu */}
+        <div className="flex items-center justify-between p-3 sm:p-5 pb-2">
+          <div className="flex items-center gap-1">
             <button
               onClick={handleFlip}
               className="p-1 rounded-full"
               title="Comments"
-              style={{ 
-                pointerEvents: (isDeleteMode || isSwiping) ? 'none' : 'auto',
-                marginLeft: '-12px'
-              }}
+              style={{ pointerEvents: (isDeleteMode || isSwiping) ? 'none' : 'auto' }}
             >
               <Text className="h-4 w-4 text-muted-foreground/60" />
             </button>
@@ -442,23 +439,21 @@ const LeadCard: React.FC<LeadCardProps> = ({
               <button
                 onClick={handleFlip}
                 className="text-xs bg-muted-foreground/20 text-muted-foreground/80 px-1.5 py-0.5 rounded-full min-w-[16px] text-center hover:bg-muted-foreground/30 transition-colors"
-                style={{ 
-                  pointerEvents: (isDeleteMode || isSwiping) ? 'none' : 'auto'
-                }}
+                style={{ pointerEvents: (isDeleteMode || isSwiping) ? 'none' : 'auto' }}
               >
                 {comments.length}
               </button>
             )}
           </div>
+          <p className="text-sm text-muted-foreground opacity-40 text-center flex-1">
+            {currentIndex + 1}/{totalCount}
+          </p>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <button
-                className="p-1 rounded-full absolute right-0"
+                className="p-1 rounded-full"
                 title="More"
-                style={{ 
-                  pointerEvents: (isDeleteMode || isSwiping) ? 'none' : 'auto',
-                  marginRight: '-12px'
-                }}
+                style={{ pointerEvents: (isDeleteMode || isSwiping) ? 'none' : 'auto' }}
                 aria-label="More options"
               >
                 <Ellipsis className="h-4 w-4 text-muted-foreground/60" />
@@ -472,16 +467,12 @@ const LeadCard: React.FC<LeadCardProps> = ({
             >
               <DropdownMenuItem 
                 onClick={async () => {
-                if (setCommunicationMode) {
-                  setCommunicationMode('native');
-                }
-                try {
-                  const settings = await appStorage.getAppSettings();
-                  await appStorage.saveAppSettings({ ...settings, communicationMode: 'native' });
-                } catch (err) {
-                  console.warn('Failed to persist communication mode (native)', err);
-                }
-              }} 
+                  if (setCommunicationMode) setCommunicationMode('native');
+                  try {
+                    const settings = await appStorage.getAppSettings();
+                    await appStorage.saveAppSettings({ ...settings, communicationMode: 'native' });
+                  } catch (err) { console.warn('Failed to persist communication mode (native)', err); }
+                }} 
                 className="w-full px-4 py-3 text-left transition-colors duration-75 cursor-pointer flex items-center justify-between"
               >
                 <span className="text-sm">Native (SMS/Call)</span>
@@ -489,16 +480,12 @@ const LeadCard: React.FC<LeadCardProps> = ({
               </DropdownMenuItem>
               <DropdownMenuItem 
                 onClick={async () => {
-                if (setCommunicationMode) {
-                  setCommunicationMode('whatsapp');
-                }
-                try {
-                  const settings = await appStorage.getAppSettings();
-                  await appStorage.saveAppSettings({ ...settings, communicationMode: 'whatsapp' });
-                } catch (err) {
-                  console.warn('Failed to persist communication mode (whatsapp)', err);
-                }
-              }} 
+                  if (setCommunicationMode) setCommunicationMode('whatsapp');
+                  try {
+                    const settings = await appStorage.getAppSettings();
+                    await appStorage.saveAppSettings({ ...settings, communicationMode: 'whatsapp' });
+                  } catch (err) { console.warn('Failed to persist communication mode (whatsapp)', err); }
+                }} 
                 className="w-full px-4 py-3 text-left transition-colors duration-75 cursor-pointer flex items-center justify-between"
               >
                 <span className="text-sm">WhatsApp</span>
@@ -506,9 +493,6 @@ const LeadCard: React.FC<LeadCardProps> = ({
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
-          <p className="text-sm text-muted-foreground opacity-40 text-center flex-1">
-            {currentIndex + 1}/{totalCount}
-          </p>
         </div>
 
         {/* Lead info - Main content area */}
@@ -894,7 +878,7 @@ const LeadCard: React.FC<LeadCardProps> = ({
 
     {/* Back side of the card - Trello-style comments */}
     <Card 
-      className="shadow-2xl border border-border/50 dark:border-border/60 ring-1 ring-border/40 dark:ring-border/60 rounded-3xl bg-card h-[640px] sm:h-[720px] flex flex-col mb-4 overflow-hidden absolute inset-0" 
+      className="shadow-2xl border border-border/50 dark:border-border/60 ring-1 ring-border/40 dark:ring-border/60 rounded-3xl bg-card min-h-[460px] max-h-[600px] sm:min-h-[500px] sm:max-h-[660px] flex flex-col mb-4 overflow-hidden absolute inset-0" 
       style={{
         transformStyle: "preserve-3d",
         backfaceVisibility: "hidden",
