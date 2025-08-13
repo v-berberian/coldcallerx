@@ -56,37 +56,6 @@ const CSVFileSelector: React.FC<CSVFileSelectorProps> = ({
     }
   });
 
-  useEffect(() => {
-    loadCSVFiles();
-  }, [refreshTrigger]);
-
-  useEffect(() => {
-    if (currentCSVId && csvFiles.length > 0) {
-      const file = csvFiles.find(f => f.id === currentCSVId);
-      setCurrentFile(file || null);
-    } else if (!currentCSVId && csvFiles.length > 0) {
-      setCurrentFile(csvFiles[0]);
-    }
-  }, [currentCSVId, csvFiles]);
-
-  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (file) {
-      handleFileProcess(file);
-    }
-    // Reset the input value so the same file can be selected again
-    if (event.target) {
-      event.target.value = '';
-    }
-  };
-
-  const handleImportNew = () => {
-    // Add a small delay to ensure the dropdown state is set
-    setTimeout(() => {
-      fileInputRef.current?.click();
-    }, 10);
-  };
-
   const loadCSVFiles = useCallback(async () => {
     try {
       const files = await appStorage.getCSVFiles();
@@ -118,6 +87,37 @@ const CSVFileSelector: React.FC<CSVFileSelectorProps> = ({
       console.error('Error loading CSV files:', error);
     }
   }, []);
+
+  useEffect(() => {
+    loadCSVFiles();
+  }, [refreshTrigger, loadCSVFiles]);
+
+  useEffect(() => {
+    if (currentCSVId && csvFiles.length > 0) {
+      const file = csvFiles.find(f => f.id === currentCSVId);
+      setCurrentFile(file || null);
+    } else if (!currentCSVId && csvFiles.length > 0) {
+      setCurrentFile(csvFiles[0]);
+    }
+  }, [currentCSVId, csvFiles]);
+
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      handleFileProcess(file);
+    }
+    // Reset the input value so the same file can be selected again
+    if (event.target) {
+      event.target.value = '';
+    }
+  };
+
+  const handleImportNew = () => {
+    // Add a small delay to ensure the dropdown state is set
+    setTimeout(() => {
+      fileInputRef.current?.click();
+    }, 10);
+  };
 
   const handleCSVSelect = async (csvId: string) => {
     setLoading(true);
@@ -203,7 +203,7 @@ const CSVFileSelector: React.FC<CSVFileSelectorProps> = ({
           
             <DropdownMenuContent 
               align="start" 
-              className="w-[75vw] bg-background/15 backdrop-blur-sm border border-border/15 rounded-xl shadow-2xl [&>*]:focus:bg-transparent [&>*]:focus:outline-none z-50 border-0 focus:border-0 focus:outline-none focus:ring-0 animate-slide-down -ml-2"
+              className="w-[75vw] bg-background/15 backdrop-blur-sm border border-border/15 rounded-xl shadow-2xl [&>*]:focus:bg-transparent [&>*]:focus:outline-none z-50 focus:outline-none focus:ring-0 animate-slide-down -ml-2"
               sideOffset={5}
               collisionPadding={16}
               style={{ outline: 'none', border: 'none', animation: 'slide-down 0.2s cubic-bezier(0.16, 1, 0.3, 1)' }}
@@ -275,7 +275,7 @@ const CSVFileSelector: React.FC<CSVFileSelectorProps> = ({
         
           <DropdownMenuContent 
             align="start" 
-            className="w-[75vw] bg-background/15 backdrop-blur-sm border border-border/15 rounded-xl shadow-2xl [&>*]:focus:bg-transparent [&>*]:focus:outline-none z-50 border-0 focus:border-0 focus:outline-none focus:ring-0 animate-slide-down -ml-2"
+            className="w-[75vw] bg-background/15 backdrop-blur-sm border border-border/15 rounded-xl shadow-2xl [&>*]:focus:bg-transparent [&>*]:focus:outline-none z-50 focus:outline-none focus:ring-0 animate-slide-down -ml-2"
             sideOffset={5}
             collisionPadding={16}
             style={{ outline: 'none', border: 'none', animation: 'slide-down 0.2s cubic-bezier(0.16, 1, 0.3, 1)' }}
@@ -317,7 +317,7 @@ const CSVFileSelector: React.FC<CSVFileSelectorProps> = ({
                     <div className="flex items-baseline">
                       <span className="font-normal truncate text-base block max-w-[200px]" title={file.name}>{file.name}</span>
                       {file.id === currentCSVId && (
-                        <div className="w-2 h-2 bg-foreground rounded-full ml-2 flex-shrink-0"></div>
+                        <span className="ml-2 flex-shrink-0"><svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span>
                       )}
                     </div>
                     <span className="text-sm text-muted-foreground mt-0.5">

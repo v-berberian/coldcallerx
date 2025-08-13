@@ -613,8 +613,8 @@ const LeadCard: React.FC<LeadCardProps> = ({
                               <span className={`text-foreground font-mono tracking-wider ${phoneData.isPrimary ? 'font-bold' : 'font-medium'}`}> 
                                 {phoneData.phone}
                               </span>
-                              {selectedPhone === phoneData.phone && !phoneData.isPrimary && (
-                                  <div className="w-2 h-2 bg-foreground rounded-full ml-2 flex-shrink-0 self-center"></div>
+                              {selectedPhone === phoneData.phone && (
+                                <Check className="h-4 w-4 text-foreground ml-2 flex-shrink-0 self-center" />
                               )}
                             </div>
                           </DropdownMenuItem>
