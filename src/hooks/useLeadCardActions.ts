@@ -20,6 +20,16 @@ export const useLeadCardActions = (lead: Lead) => {
     })();
   }, []);
 
+  // If no country code is present, assume +1 (US/Canada)
+  const toWhatsAppE164 = useCallback((digits: string) => {
+    if (!digits) return digits;
+    // Already has country code 1 (11 digits) or other non-US codes (>11)
+    if (digits.length >= 11) return digits;
+    // 10-digit NANP number → prefix 1
+    if (digits.length === 10) return `1${digits}`;
+    return digits;
+  }, []);
+
   // Reset selectedPhone to primary phone when lead changes
   const updateSelectedPhone = useCallback(() => {
     const primaryPhone = formatPhoneNumber(lead.phone);
@@ -54,11 +64,12 @@ export const useLeadCardActions = (lead: Lead) => {
     return `mailto:${emailValue}`;
   }, [lead, selectedPhone]);
 
-  // Create SMS link with template
+  // Create SMS/WhatsApp link with template
   const createSmsLink = useCallback((template?: TextTemplate) => {
     const cleanPhone = selectedPhone.replace(/\D/g, '');
     if (communicationMode === 'whatsapp') {
-      const base = `https://wa.me/${cleanPhone}`;
+      const waDigits = toWhatsAppE164(cleanPhone);
+      const base = `https://wa.me/${waDigits}`;
       if (template) {
         const message = interpolateTemplate(template.message, {
           name: lead.name,
@@ -79,7 +90,7 @@ export const useLeadCardActions = (lead: Lead) => {
       }
       return `sms:${cleanPhone}`;
     }
-  }, [lead, selectedPhone, communicationMode]);
+  }, [lead, selectedPhone, communicationMode, toWhatsAppE164]);
 
   const handleEmailClick = useCallback((template?: EmailTemplate) => {
     const mailtoLink = createMailtoLink(template);
@@ -96,13 +107,13 @@ export const useLeadCardActions = (lead: Lead) => {
   const handleCallClick = useCallback(() => {
     const cleanPhone = selectedPhone.replace(/\D/g, '');
     if (communicationMode === 'whatsapp') {
-      // WhatsApp voice call deep link (may depend on platform support)
-      // Fallback: open chat; user taps call inside WhatsApp
-      window.location.href = `https://wa.me/${cleanPhone}`;
+      const waDigits = toWhatsAppE164(cleanPhone);
+      // Open WhatsApp chat; user can initiate call from there
+      window.location.href = `https://wa.me/${waDigits}`;
     } else {
       window.location.href = `tel:${cleanPhone}`;
     }
-  }, [selectedPhone, communicationMode]);
+  }, [selectedPhone, communicationMode, toWhatsAppE164]);
 
   return {
     selectedPhone,
