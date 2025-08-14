@@ -112,7 +112,7 @@ const MainContent: React.FC<MainContentProps> = ({
 
   // Adjust height to visualViewport when commenting to keep card aligned above keyboard (iOS)
   useEffect(() => {
-    const vv: any = (window as any).visualViewport;
+    const vv = (window as Window & { visualViewport?: VisualViewport }).visualViewport;
     let detach: (() => void) | null = null;
 
     const update = () => {
@@ -155,8 +155,8 @@ const MainContent: React.FC<MainContentProps> = ({
   }, [isCommenting]);
 
   return (
-    <div className={`flex-1 flex items-start justify-center min-h-0 transition-all duration-300 ${isCommenting ? 'pt-0 p-2 h-full overflow-hidden' : 'pt-1 p-3 sm:p-4'}`} style={{ minHeight: isCommenting ? undefined : 'calc(100dvh - 120px)', height: isCommenting ? (viewportHeight ? `${viewportHeight}px` : '100vh') : undefined }}>
-      <div className="w-full space-y-1 flex flex-col min-h-full">
+    <div className={`flex-1 flex justify-center min-h-0 transition-all duration-300 ${isCommenting ? 'items-end pb-4 pt-0 p-2 h-full overflow-hidden' : 'items-start pt-1 p-3 sm:p-4'}`} style={{ minHeight: isCommenting ? undefined : 'calc(100dvh - 120px)', height: isCommenting ? (viewportHeight ? `${viewportHeight}px` : '100vh') : undefined }}>
+      <div className={`w-full flex flex-col ${isCommenting ? 'h-auto justify-end' : 'space-y-1 min-h-full'}`}>
         {/* Filter Buttons */}
         <div className={`transition-all duration-300 ease-out ${isCommenting ? 'opacity-0 scale-95 -translate-y-2 pointer-events-none' : ''}`}>
           <FilterButtons
@@ -179,7 +179,7 @@ const MainContent: React.FC<MainContentProps> = ({
         </div>
 
         {/* Current Lead Card or No Leads Message */}
-        <div className="animate-content-change-fast flex-1 flex flex-col">
+        <div className={`animate-content-change-fast flex flex-col ${isCommenting ? '' : 'flex-1'}`}>
           <LeadCard
             lead={currentLead}
             currentIndex={currentIndex}
