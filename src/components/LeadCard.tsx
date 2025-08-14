@@ -13,7 +13,7 @@ import {
   AlertDialogCancel,
   AlertDialogAction,
 } from '@/components/ui/alert-dialog';
-import { formatPhoneNumber } from '../utils/phoneUtils';
+import { formatPhoneNumber, getPhoneDigits } from '../utils/phoneUtils';
 import { getStateFromAreaCode } from '../utils/timezoneUtils';
 import { Lead } from '@/types/lead';
 import { appStorage } from '@/utils/storage';
@@ -107,11 +107,6 @@ const LeadCard: React.FC<LeadCardProps> = ({
   const [addFxVisible, setAddFxVisible] = useState(false);
   const [selectedCommentId, setSelectedCommentId] = useState<string | null>(null);
   const [leadTag, setLeadTagState] = useState<'cold' | 'warm' | 'hot' | null>(null);
-  
-  // Post-call outcome sheet state
-  const [showOutcomeSheet, setShowOutcomeSheet] = useState(false);
-  const outcomeHideTimerRef = useRef<number | null>(null);
-  const callInitiatedRef = useRef<{ key: string; time: number } | null>(null);
   
   // Subtle neon backlight color based on lead tag
   const glowColor = useMemo(() => {
@@ -209,36 +204,6 @@ const LeadCard: React.FC<LeadCardProps> = ({
     loadComments();
     loadLeadTag();
   }, [loadComments, loadLeadTag]);
-
-  // Listen for app visibility returning from native dialer to show outcome sheet
-  useEffect(() => {
-    const handleVisibility = () => {
-      if (!document.hidden) {
-        const info = callInitiatedRef.current;
-        if (info && Date.now() - info.time < 30000) {
-          setShowOutcomeSheet(true);
-          if (outcomeHideTimerRef.current) {
-            window.clearTimeout(outcomeHideTimerRef.current);
-          }
-          outcomeHideTimerRef.current = window.setTimeout(() => {
-            setShowOutcomeSheet(false);
-          }, 3000);
-        }
-      }
-    };
-    document.addEventListener('visibilitychange', handleVisibility);
-    return () => {
-      document.removeEventListener('visibilitychange', handleVisibility);
-      if (outcomeHideTimerRef.current) {
-        window.clearTimeout(outcomeHideTimerRef.current);
-      }
-    };
-  }, []);
-
-  // Hide outcome sheet on lead change
-  useEffect(() => {
-    setShowOutcomeSheet(false);
-  }, [currentIndex]);
 
   const addComment = useCallback(() => {
     const text = draft.trim();
@@ -384,7 +349,7 @@ const LeadCard: React.FC<LeadCardProps> = ({
     // Use a more comprehensive regex to find all phone patterns
     // This handles: (123) 456-7890, 123) 456-7890, 123-456-7890, 123.456.7890, 123 456 7890
     const phonePattern = /\(?(\d{3})\)?[\s\-.]?(\d{3})[\s\-.]?(\d{4})/g;
-    const foundPhones = [];
+    const foundPhones = [] as string[];
     let match;
     
     while ((match = phonePattern.exec(normalizedString)) !== null) {
@@ -394,7 +359,19 @@ const LeadCard: React.FC<LeadCardProps> = ({
       foundPhones.push(formattedPhone);
     }
 
-    return foundPhones;
+    // Deduplicate by normalized digits and exclude the primary phone
+    const primaryDigits = getPhoneDigits(lead.phone);
+    const seen = new Set<string>();
+    const uniquePhones: string[] = [];
+    for (const phone of foundPhones) {
+      const d = getPhoneDigits(phone);
+      if (d === primaryDigits) continue; // exclude primary
+      if (seen.has(d)) continue; // skip duplicates
+      seen.add(d);
+      uniquePhones.push(formatPhoneNumber(d));
+    }
+
+    return uniquePhones;
   })() : [];
 
   const hasAdditionalPhones = additionalPhones.length > 0;
@@ -410,8 +387,6 @@ const LeadCard: React.FC<LeadCardProps> = ({
 
   // Modified onCall to use selected phone
   const handleCall = () => {
-    // Mark that a call was initiated, so on returning we can show the outcome sheet
-    callInitiatedRef.current = { key: leadKey, time: Date.now() };
     onCall(selectedPhone);
   };
 
@@ -788,150 +763,6 @@ const LeadCard: React.FC<LeadCardProps> = ({
 
         {/* Group 3: Last Called and Action Buttons */}
         <div className="space-y-3 px-0 sm:px-0 pb-3 sm:pb-5 pt-0">
-          {/* Post-call outcome sheet */}
-          <AnimatePresence>
-            {showOutcomeSheet && (
-              <motion.div
-                initial={{ opacity: 0, y: 8 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -8 }}
-                transition={{ duration: 0.18, ease: [0.25, 0.46, 0.45, 0.94] }}
-                className="w-full flex items-center justify-center"
-              >
-                <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-background/70 backdrop-blur border border-border/30 shadow-sm">
-                  <button
-                    type="button"
-                    className="px-3 py-1.5 rounded-full text-xs ring-1 ring-blue-500/30 text-blue-600 dark:text-blue-400 bg-blue-500/10"
-                    onClick={async () => {
-                      // No answer → Cold
-                      await saveLeadTag('cold');
-                      const note = `Outcome: No answer`;
-                      const newComment = { id: `${Date.now()}_${Math.random().toString(36).slice(2, 8)}`, text: note, createdAt: new Date().toISOString() };
-                      await saveComments([...comments, newComment]);
-                      // Update lastCalled immediately in storage
-                      try {
-                        const now = new Date();
-                        const dateString = now.toLocaleDateString();
-                        const timeString = now.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
-                        const lastCalledString = `${dateString} at ${timeString}`;
-                        const current = await appStorage.getCurrentCSVId();
-                        if (current) {
-                          const list = await appStorage.getCSVLeadsData(current);
-                          const updated = list.map(l => l.name === lead.name && l.phone === lead.phone ? { ...l, lastCalled: lastCalledString } : l);
-                          await appStorage.saveCSVLeadsData(current, updated);
-                        } else {
-                          const list = await appStorage.getLeadsData();
-                          const updated = list.map(l => l.name === lead.name && l.phone === lead.phone ? { ...l, lastCalled: lastCalledString } : l);
-                          await appStorage.saveLeadsData(updated);
-                        }
-                      } catch (error) {
-                        console.error('Failed to persist outcome (No answer)', error);
-                      }
-                      setShowOutcomeSheet(false);
-                    }}
-                  >
-                    No answer
-                  </button>
-                  <button
-                    type="button"
-                    className="px-3 py-1.5 rounded-full text-xs ring-1 ring-blue-500/30 text-blue-600 dark:text-blue-400 bg-blue-500/10"
-                    onClick={async () => {
-                      // Voicemail → Cold
-                      await saveLeadTag('cold');
-                      const note = `Outcome: Voicemail`;
-                      const newComment = { id: `${Date.now()}_${Math.random().toString(36).slice(2, 8)}`, text: note, createdAt: new Date().toISOString() };
-                      await saveComments([...comments, newComment]);
-                      try {
-                        const now = new Date();
-                        const dateString = now.toLocaleDateString();
-                        const timeString = now.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
-                        const lastCalledString = `${dateString} at ${timeString}`;
-                        const current = await appStorage.getCurrentCSVId();
-                        if (current) {
-                          const list = await appStorage.getCSVLeadsData(current);
-                          const updated = list.map(l => l.name === lead.name && l.phone === lead.phone ? { ...l, lastCalled: lastCalledString } : l);
-                          await appStorage.saveCSVLeadsData(current, updated);
-                        } else {
-                          const list = await appStorage.getLeadsData();
-                          const updated = list.map(l => l.name === lead.name && l.phone === lead.phone ? { ...l, lastCalled: lastCalledString } : l);
-                          await appStorage.saveLeadsData(updated);
-                        }
-                      } catch (error) {
-                        console.error('Failed to persist outcome (Voicemail)', error);
-                      }
-                      setShowOutcomeSheet(false);
-                    }}
-                  >
-                    Voicemail
-                  </button>
-                  <button
-                    type="button"
-                    className="px-3 py-1.5 rounded-full text-xs ring-1 ring-amber-500/30 text-amber-600 dark:text-amber-400 bg-amber-500/10"
-                    onClick={async () => {
-                      // Call back → Warm
-                      await saveLeadTag('warm');
-                      const note = `Outcome: Call back requested`;
-                      const newComment = { id: `${Date.now()}_${Math.random().toString(36).slice(2, 8)}`, text: note, createdAt: new Date().toISOString() };
-                      await saveComments([...comments, newComment]);
-                      try {
-                        const now = new Date();
-                        const dateString = now.toLocaleDateString();
-                        const timeString = now.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
-                        const lastCalledString = `${dateString} at ${timeString}`;
-                        const current = await appStorage.getCurrentCSVId();
-                        if (current) {
-                          const list = await appStorage.getCSVLeadsData(current);
-                          const updated = list.map(l => l.name === lead.name && l.phone === lead.phone ? { ...l, lastCalled: lastCalledString } : l);
-                          await appStorage.saveCSVLeadsData(current, updated);
-                        } else {
-                          const list = await appStorage.getLeadsData();
-                          const updated = list.map(l => l.name === lead.name && l.phone === lead.phone ? { ...l, lastCalled: lastCalledString } : l);
-                          await appStorage.saveLeadsData(updated);
-                        }
-                      } catch (error) {
-                        console.error('Failed to persist outcome (Call back)', error);
-                      }
-                      setShowOutcomeSheet(false);
-                    }}
-                  >
-                    Call back
-                  </button>
-                  <button
-                    type="button"
-                    className="px-3 py-1.5 rounded-full text-xs ring-1 ring-rose-500/30 text-rose-600 dark:text-rose-400 bg-rose-500/10"
-                    onClick={async () => {
-                      // Connected → Hot
-                      await saveLeadTag('hot');
-                      const note = `Outcome: Connected`;
-                      const newComment = { id: `${Date.now()}_${Math.random().toString(36).slice(2, 8)}`, text: note, createdAt: new Date().toISOString() };
-                      await saveComments([...comments, newComment]);
-                      try {
-                        const now = new Date();
-                        const dateString = now.toLocaleDateString();
-                        const timeString = now.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
-                        const lastCalledString = `${dateString} at ${timeString}`;
-                        const current = await appStorage.getCurrentCSVId();
-                        if (current) {
-                          const list = await appStorage.getCSVLeadsData(current);
-                          const updated = list.map(l => l.name === lead.name && l.phone === lead.phone ? { ...l, lastCalled: lastCalledString } : l);
-                          await appStorage.saveCSVLeadsData(current, updated);
-                        } else {
-                          const list = await appStorage.getLeadsData();
-                          const updated = list.map(l => l.name === lead.name && l.phone === lead.phone ? { ...l, lastCalled: lastCalledString } : l);
-                          await appStorage.saveLeadsData(updated);
-                        }
-                      } catch (error) {
-                        console.error('Failed to persist outcome (Connected)', error);
-                      }
-                      setShowOutcomeSheet(false);
-                    }}
-                  >
-                    Connected
-                  </button>
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
           {/* Last called section above buttons */}
           {lead.lastCalled && (
             <div className="flex items-center justify-center w-full px-3 sm:px-5 mt-1">
