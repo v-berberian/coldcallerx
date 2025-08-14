@@ -112,6 +112,37 @@ const LeadCard: React.FC<LeadCardProps> = ({
   const [isAddCommentModalOpen, setIsAddCommentModalOpen] = useState(false);
   const [modalDraft, setModalDraft] = useState('');
   const modalInputRef = useRef<HTMLTextAreaElement | null>(null);
+  // Track keyboard (visual viewport) inset to lift modal above iOS keyboard
+  const [keyboardInset, setKeyboardInset] = useState(0);
+
+  useEffect(() => {
+    if (!isAddCommentModalOpen) {
+      setKeyboardInset(0);
+      return;
+    }
+    const vv = (window as Window & { visualViewport?: VisualViewport }).visualViewport;
+    if (!vv) return;
+
+    const update = () => {
+      try {
+        const layoutViewportHeight = window.innerHeight;
+        const vvHeight = vv.height;
+        const vvOffsetTop = (vv as unknown as { offsetTop?: number }).offsetTop ?? 0;
+        const bottomOverlay = Math.max(0, layoutViewportHeight - (vvHeight + vvOffsetTop));
+        setKeyboardInset(bottomOverlay);
+      } catch {
+        // no-op
+      }
+    };
+
+    vv.addEventListener('resize', update);
+    vv.addEventListener('scroll', update);
+    update();
+    return () => {
+      vv.removeEventListener('resize', update);
+      vv.removeEventListener('scroll', update);
+    };
+  }, [isAddCommentModalOpen]);
   
   // Subtle neon backlight color based on lead tag
   const glowColor = useMemo(() => {
@@ -1229,6 +1260,9 @@ const LeadCard: React.FC<LeadCardProps> = ({
             onClick={closeAddCommentModal}
             style={{
               touchAction: 'none',
+              // Lift content above the keyboard on iOS
+              paddingBottom: `calc(${keyboardInset}px + env(safe-area-inset-bottom) + 12px)`,
+              alignItems: keyboardInset > 0 ? 'flex-end' as const : 'center' as const,
             }}
           >
             <motion.div
@@ -1240,6 +1274,8 @@ const LeadCard: React.FC<LeadCardProps> = ({
               onClick={(e) => e.stopPropagation()}
               style={{
                 touchAction: 'auto',
+                // Reduce max height further when keyboard is visible
+                maxHeight: keyboardInset > 0 ? `calc(80vh - ${keyboardInset}px)` : undefined,
               }}
             >
               {/* Modal Header */}
