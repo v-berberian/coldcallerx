@@ -457,17 +457,15 @@ const LeadCard: React.FC<LeadCardProps> = ({
             zIndex: 1
           }}
         />
-        {/* Gradient shimmer border keyed to temperature tag */}
-        <motion.div
+        {/* Gradient border keyed to temperature tag (static, no spin) */}
+        <div
           className="absolute inset-0 rounded-3xl pointer-events-none"
           style={{
             background: `conic-gradient(from 0deg, transparent 0%, ${glowColor} 12%, transparent 24%, transparent 56%, ${glowColor} 68%, transparent 80%)`,
             mixBlendMode: 'overlay',
-            opacity: 0.18,
+            opacity: glowActive ? 0.2 : 0,
             zIndex: 2
           }}
-          animate={glowActive ? { rotate: 360, opacity: 0.22 } : { rotate: 0, opacity: 0 }}
-          transition={glowActive ? { duration: 16, ease: 'linear', repeat: Infinity } : { duration: 0.25 }}
         />
         {/* Subtle glass overlay */}
         <div
