@@ -1168,7 +1168,7 @@ const LeadCard: React.FC<LeadCardProps> = ({
                   e.currentTarget.style.scrollMarginBottom = `calc(${bottomOverlay}px + env(safe-area-inset-bottom) + 12px)`;
                   // Ensure the textarea is positioned above the accessory bar
                   setTimeout(() => {
-                    e.currentTarget.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+                  e.currentTarget.scrollIntoView({ block: 'center', behavior: 'smooth' });
                   }, 50);
                 } catch {
                   /* ignore */
