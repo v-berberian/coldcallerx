@@ -112,7 +112,7 @@ const MainContent: React.FC<MainContentProps> = ({
   };
 
   return (
-    <div className={`flex-1 flex items-start justify-center min-h-0 transition-all duration-300 ${isCommenting ? 'p-1' : 'p-3 sm:p-4'}`} style={{ minHeight: 'calc(100dvh - 120px)' }}>
+    <div className={`flex-1 flex items-start justify-center min-h-0 transition-all duration-300 ${isCommenting ? 'pt-0 p-2' : 'pt-1 p-3 sm:p-4'}`} style={{ minHeight: 'calc(100dvh - 120px)' }}>
       <div className="w-full space-y-1 flex flex-col min-h-full">
         {/* Filter Buttons */}
         <div className={`transition-all duration-300 ease-out ${isCommenting ? 'opacity-0 scale-95 -translate-y-2 pointer-events-none' : ''}`}>
