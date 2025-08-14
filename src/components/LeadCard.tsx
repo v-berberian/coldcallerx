@@ -108,6 +108,11 @@ const LeadCard: React.FC<LeadCardProps> = ({
   const [selectedCommentId, setSelectedCommentId] = useState<string | null>(null);
   const [leadTag, setLeadTagState] = useState<'cold' | 'warm' | 'hot' | null>(null);
   
+  // Modal state for adding comments
+  const [isAddCommentModalOpen, setIsAddCommentModalOpen] = useState(false);
+  const [modalDraft, setModalDraft] = useState('');
+  const modalInputRef = useRef<HTMLTextAreaElement | null>(null);
+  
   // Subtle neon backlight color based on lead tag
   const glowColor = useMemo(() => {
     switch (leadTag) {
@@ -204,6 +209,37 @@ const LeadCard: React.FC<LeadCardProps> = ({
     loadComments();
     loadLeadTag();
   }, [loadComments, loadLeadTag]);
+
+  // Modal comment functions
+  const openAddCommentModal = useCallback(() => {
+    setIsAddCommentModalOpen(true);
+    setModalDraft('');
+    // Focus the modal input after it renders
+    setTimeout(() => {
+      modalInputRef.current?.focus();
+    }, 100);
+  }, []);
+
+  const closeAddCommentModal = useCallback(() => {
+    setIsAddCommentModalOpen(false);
+    setModalDraft('');
+  }, []);
+
+  const addCommentFromModal = useCallback(() => {
+    const text = modalDraft.trim();
+    if (!text) return;
+    const newComment: LeadComment = {
+      id: `${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
+      text,
+      createdAt: new Date().toISOString(),
+    };
+    const next = [...comments, newComment];
+    saveComments(next);
+    closeAddCommentModal();
+    // Trigger a brief success animation
+    setAddFxVisible(true);
+    setTimeout(() => setAddFxVisible(false), 450);
+  }, [modalDraft, comments, saveComments, closeAddCommentModal]);
 
   const addComment = useCallback(() => {
     const text = draft.trim();
@@ -1123,9 +1159,11 @@ const LeadCard: React.FC<LeadCardProps> = ({
               value={draft}
               onChange={(e) => setDraft(e.target.value)}
               ref={commentInputRef}
-              className="flex-1 rounded-md border border-border/30 bg-background px-3 text-sm focus:outline-none h-11 resize-none py-2 text-left placeholder:text-left"
+              onFocus={openAddCommentModal}
+              className="flex-1 rounded-md border border-border/30 bg-background px-3 text-sm focus:outline-none h-11 resize-none py-2 text-left placeholder:text-left cursor-pointer"
               rows={1}
-              placeholder="Add a comment..."
+              placeholder="Tap to add a comment..."
+              readOnly
             />
             <div className="relative shrink-0">
               <motion.div
@@ -1135,20 +1173,9 @@ const LeadCard: React.FC<LeadCardProps> = ({
               >
                 <Button
                   type="button"
-                  onMouseDown={(e) => {
-                    e.preventDefault();
-                    const el = commentInputRef.current;
-                    if (el) el.focus();
-                  }}
-                  onTouchStart={(e) => {
-                    e.preventDefault();
-                    const el = commentInputRef.current;
-                    if (el) el.focus();
-                  }}
-                  onClick={addComment}
+                  onClick={openAddCommentModal}
                   className="h-11 w-11 p-0 rounded-full flex items-center justify-center"
-                  tabIndex={-1}
-                  aria-label="Send comment"
+                  aria-label="Add comment"
                 >
                   <Send className="h-5 w-5 block" />
                 </Button>
@@ -1189,6 +1216,88 @@ const LeadCard: React.FC<LeadCardProps> = ({
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Add Comment Modal */}
+      <AnimatePresence>
+        {isAddCommentModalOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4"
+            onClick={closeAddCommentModal}
+            style={{
+              touchAction: 'none',
+            }}
+          >
+            <motion.div
+              initial={{ scale: 0.95, opacity: 0, y: 20 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.95, opacity: 0, y: 20 }}
+              transition={{ type: "spring", duration: 0.3 }}
+              className="w-full max-w-lg bg-card rounded-3xl border border-border/50 shadow-2xl max-h-[80vh] flex flex-col overflow-hidden"
+              onClick={(e) => e.stopPropagation()}
+              style={{
+                touchAction: 'auto',
+              }}
+            >
+              {/* Modal Header */}
+              <div className="flex items-center justify-between px-6 py-4 border-b border-border/20">
+                <h3 className="text-lg font-semibold">Add Comment</h3>
+                <button
+                  onClick={closeAddCommentModal}
+                  className="p-2 rounded-full hover:bg-muted/50 transition-colors"
+                >
+                  <X className="h-5 w-5" />
+                </button>
+              </div>
+
+              {/* Modal Content */}
+              <div className="flex-1 p-6">
+                <div className="space-y-4">
+                  <div>
+                    <label className="text-sm font-medium text-muted-foreground mb-2 block">
+                      Comment for {lead.name}
+                    </label>
+                    <textarea
+                      value={modalDraft}
+                      onChange={(e) => setModalDraft(e.target.value)}
+                      ref={modalInputRef}
+                      className="w-full rounded-md border border-border/30 bg-background px-3 py-3 text-sm focus:outline-none min-h-[120px] resize-none"
+                      rows={5}
+                      placeholder="Type your comment here..."
+                      style={{
+                        fontSize: '16px', // Prevent iOS zoom
+                      }}
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Modal Footer */}
+              <div className="p-6 border-t border-border/20 bg-background/50">
+                <div className="flex items-center gap-3 justify-end">
+                  <Button
+                    variant="outline"
+                    onClick={closeAddCommentModal}
+                    className="rounded-lg"
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    onClick={addCommentFromModal}
+                    disabled={!modalDraft.trim()}
+                    className="rounded-lg"
+                  >
+                    Add Comment
+                  </Button>
+                </div>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
     </div>
   );

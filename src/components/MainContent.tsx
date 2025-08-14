@@ -201,7 +201,7 @@ const MainContent: React.FC<MainContentProps> = ({
         </div>
 
         {/* Navigation Controls */}
-        <div className={`pt-3 sm:pt-4 transition-all duration-300 ease-out ${isCommenting ? 'opacity-0 scale-95 translate-y-2 pointer-events-none' : ''}`}>
+        <div className="pt-3 sm:pt-4 transition-all duration-300 ease-out">
           <NavigationControls
             onPrevious={handlePrevious}
             onNext={handleNext}
