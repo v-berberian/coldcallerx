@@ -1330,14 +1330,14 @@ const LeadCard: React.FC<LeadCardProps> = ({
                   <Button
                     variant="outline"
                     onClick={closeAddCommentModal}
-                    className="rounded-lg"
+                    className="rounded-lg bg-gradient-to-br from-gray-50 to-gray-100 hover:from-gray-100 hover:to-gray-200 text-gray-700 border-gray-200 shadow-[inset_0_1px_0_rgba(255,255,255,0.8),inset_0_-1px_0_rgba(0,0,0,0.1),0_2px_4px_-1px_rgba(0,0,0,0.1)] hover:shadow-[inset_0_1px_0_rgba(255,255,255,0.8),inset_0_-1px_0_rgba(0,0,0,0.1),0_4px_6px_-1px_rgba(0,0,0,0.15)] active:shadow-[inset_0_2px_4px_rgba(0,0,0,0.15),inset_0_-1px_0_rgba(255,255,255,0.6),0_1px_2px_-1px_rgba(0,0,0,0.1)] transition-all duration-200 active:scale-95"
                   >
                     Cancel
                   </Button>
                   <Button
                     onClick={addCommentFromModal}
                     disabled={!modalDraft.trim()}
-                    className="rounded-lg"
+                    className="rounded-lg bg-gradient-to-br from-violet-400 via-violet-500 to-violet-600 hover:from-violet-500 hover:via-violet-600 hover:to-violet-700 text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.2),inset_0_-1px_0_rgba(0,0,0,0.1),0_4px_6px_-1px_rgba(139,92,246,0.3),0_2px_4px_-1px_rgba(139,92,246,0.2)] hover:shadow-[inset_0_1px_0_rgba(255,255,255,0.2),inset_0_-1px_0_rgba(0,0,0,0.1),0_6px_12px_-1px_rgba(139,92,246,0.4),0_4px_6px_-1px_rgba(139,92,246,0.3)] active:shadow-[inset_0_2px_4px_rgba(0,0,0,0.2),inset_0_-1px_0_rgba(255,255,255,0.1),0_2px_4px_-1px_rgba(139,92,246,0.2)] disabled:shadow-[inset_0_1px_0_rgba(255,255,255,0.1),inset_0_-1px_0_rgba(0,0,0,0.05),0_2px_4px_-1px_rgba(0,0,0,0.1)] transition-all duration-200 active:scale-95 disabled:scale-100"
                   >
                     Add Comment
                   </Button>
