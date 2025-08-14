@@ -182,7 +182,7 @@ const MainContent: React.FC<MainContentProps> = ({
   const commentingStyle = isCommenting ? {
     height: '100vh',
     overflow: 'hidden',
-    paddingBottom: `${Math.max(0, keyboardHeight + 18)}px`,
+    paddingBottom: `calc(${keyboardHeight}px + env(safe-area-inset-bottom) + 12px)`,
     transition: 'padding-bottom 0.18s ease-out',
     // iOS specific: lock viewport to prevent rubber-band scrolling
     position: isIOS.current ? 'fixed' as const : undefined,

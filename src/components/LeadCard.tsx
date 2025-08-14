@@ -1154,7 +1154,26 @@ const LeadCard: React.FC<LeadCardProps> = ({
               value={draft}
               onChange={(e) => setDraft(e.target.value)}
               ref={commentInputRef}
-              onFocus={() => onCommentingChange?.(true)}
+              onFocus={(e) => {
+                onCommentingChange?.(true);
+                try {
+                  const vv = (window as Window & { visualViewport?: VisualViewport }).visualViewport;
+                  let bottomOverlay = 0;
+                  if (vv) {
+                    const layoutViewportHeight = window.innerHeight;
+                    const vvHeight = vv.height;
+                    const vvOffsetTop = (vv as unknown as { offsetTop?: number }).offsetTop ?? 0;
+                    bottomOverlay = Math.max(0, layoutViewportHeight - (vvHeight + vvOffsetTop));
+                  }
+                  e.currentTarget.style.scrollMarginBottom = `calc(${bottomOverlay}px + env(safe-area-inset-bottom) + 12px)`;
+                  // Ensure the textarea is positioned above the accessory bar
+                  setTimeout(() => {
+                    e.currentTarget.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+                  }, 50);
+                } catch {
+                  /* ignore */
+                }
+              }}
               onBlur={() => onCommentingChange?.(false)}
               className="flex-1 rounded-md border border-border/30 bg-background px-3 text-sm focus:outline-none h-11 resize-none py-2 text-left placeholder:text-left"
               rows={1}
