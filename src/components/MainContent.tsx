@@ -181,6 +181,7 @@ const MainContent: React.FC<MainContentProps> = ({
   // Keep container full-height and use bottom padding to lift content above the keyboard
   const commentingStyle = isCommenting ? {
     height: '100vh',
+    maxHeight: '100vh',
     overflow: 'hidden',
     paddingBottom: `${Math.max(0, keyboardHeight + 18)}px`,
     transition: 'padding-bottom 0.18s ease-out',
@@ -190,16 +191,17 @@ const MainContent: React.FC<MainContentProps> = ({
     left: isIOS.current ? 0 : undefined,
     right: isIOS.current ? 0 : undefined,
     bottom: isIOS.current ? 0 : undefined,
+    width: isIOS.current ? '100vw' : undefined,
     touchAction: isIOS.current ? 'none' as const : undefined,
     overscrollBehavior: isIOS.current ? 'contain' as const : undefined,
-    WebkitOverflowScrolling: isIOS.current ? ('auto' as unknown as string) : undefined,
+    WebkitOverflowScrolling: isIOS.current ? 'touch' as unknown as string : undefined,
   } : {
     minHeight: 'calc(100dvh - 120px)'
   };
 
   return (
-    <div className={`flex-1 flex justify-center min-h-0 transition-all duration-300 ${isCommenting ? 'items-end pt-0 px-2' : 'items-start pt-1 p-3 sm:p-4'}`} style={commentingStyle}>
-      <div className={`w-full flex flex-col ${isCommenting ? 'h-auto justify-end' : 'space-y-1 min-h-full'}`}>
+    <div className={`flex-1 flex justify-center min-h-0 transition-all duration-300 ${isCommenting ? 'items-start p-0 m-0' : 'items-start pt-1 p-3 sm:p-4'}`} style={commentingStyle}>
+      <div className={`w-full flex flex-col ${isCommenting ? 'h-full justify-center p-0 m-0' : 'space-y-1 min-h-full'}`}>
         {/* Filter Buttons */}
         <div className={`${isCommenting ? 'hidden' : 'transition-all duration-300 ease-out'}`}>
           <FilterButtons
@@ -222,7 +224,7 @@ const MainContent: React.FC<MainContentProps> = ({
         </div>
 
         {/* Current Lead Card or No Leads Message */}
-        <div className={`animate-content-change-fast flex flex-col ${isCommenting ? '' : 'flex-1'}`}>
+        <div className={`animate-content-change-fast flex flex-col ${isCommenting ? 'p-0 m-0' : 'flex-1'}`}>
           <LeadCard
             lead={currentLead}
             currentIndex={currentIndex}
