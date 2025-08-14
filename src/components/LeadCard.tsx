@@ -861,7 +861,11 @@ const LeadCard: React.FC<LeadCardProps> = ({
                   `;
                 }}
               >
-                <MessagesSquare className="h-[32px] w-[32px] sm:h-[40px] sm:w-[40px] drop-shadow-md mx-auto" style={{ filter: 'drop-shadow(0 1px 2px rgba(0, 0, 0, 0.15))' }} />
+                {communicationMode === 'whatsapp' ? (
+                  <FontAwesomeIcon icon={faWhatsapp} className="h-[32px] w-[32px] sm:h-[40px] sm:w-[40px] mx-auto" style={{ filter: 'drop-shadow(0 1px 2px rgba(0, 0, 0, 0.15))' }} />
+                ) : (
+                  <MessagesSquare className="h-[32px] w-[32px] sm:h-[40px] sm:w-[40px] drop-shadow-md mx-auto" style={{ filter: 'drop-shadow(0 1px 2px rgba(0, 0, 0, 0.15))' }} />
+                )}
               </Button>
               ) : (
                 <div 
@@ -871,7 +875,11 @@ const LeadCard: React.FC<LeadCardProps> = ({
                     touchAction: 'none'
                   }}
                 >
-                  <MessagesSquare className="h-[32px] w-[32px] sm:h-[40px] sm:w-[40px] drop-shadow-md mx-auto" style={{ filter: 'drop-shadow(0 1px 2px rgba(0, 0, 0, 0.15))' }} />
+                  {communicationMode === 'whatsapp' ? (
+                    <FontAwesomeIcon icon={faWhatsapp} className="h-[32px] w-[32px] sm:h-[40px] sm:w-[40px] mx-auto" style={{ filter: 'drop-shadow(0 1px 2px rgba(0, 0, 0, 0.15))' }} />
+                  ) : (
+                    <MessagesSquare className="h-[32px] w-[32px] sm:h-[40px] sm:w-[40px] drop-shadow-md mx-auto" style={{ filter: 'drop-shadow(0 1px 2px rgba(0, 0, 0, 0.15))' }} />
+                  )}
                 </div>
               )}
             </div>
@@ -879,11 +887,7 @@ const LeadCard: React.FC<LeadCardProps> = ({
               {!isDeleteMode ? (
               <Button 
                   onClick={e => {
-                    if (communicationMode === 'whatsapp') {
-                      handleCallClick();
-                    } else {
-                      handleCall();
-                    }
+                    handleCall();
                   }}
                 size="lg" 
                 className="w-24 h-24 sm:w-32 sm:h-32 rounded-full bg-gradient-to-br from-green-400 to-green-600 active:from-green-600 active:to-green-800 text-white transition-all duration-300 flex items-center justify-center p-0 relative overflow-hidden neomorphic-button focus:outline-none"
@@ -966,11 +970,7 @@ const LeadCard: React.FC<LeadCardProps> = ({
                   `;
                 }}
               >
-                {communicationMode === 'whatsapp' ? (
-                  <FontAwesomeIcon icon={faWhatsapp} className="h-[32px] w-[32px] sm:h-[40px] sm:w-[40px] mx-auto" style={{ filter: 'drop-shadow(0 1px 2px rgba(0, 0, 0, 0.15))' }} />
-                ) : (
-                  <Phone className="h-[32px] w-[32px] sm:h-[40px] sm:w-[40px] drop-shadow-md mx-auto" style={{ filter: 'drop-shadow(0 1px 2px rgba(0, 0, 0, 0.15))' }} />
-                )}
+                <Phone className="h-[32px] w-[32px] sm:h-[40px] sm:w-[40px] drop-shadow-md mx-auto" style={{ filter: 'drop-shadow(0 1px 2px rgba(0, 0, 0, 0.15))' }} />
               </Button>
               ) : (
                 <div 
@@ -980,11 +980,7 @@ const LeadCard: React.FC<LeadCardProps> = ({
                     touchAction: 'none'
                   }}
                 >
-                  {communicationMode === 'whatsapp' ? (
-                    <FontAwesomeIcon icon={faWhatsapp} className="h-[32px] w-[32px] sm:h-[40px] sm:w-[40px] mx-auto" style={{ filter: 'drop-shadow(0 1px 2px rgba(0, 0, 0, 0.15))' }} />
-                  ) : (
-                    <Phone className="h-[32px] w-[32px] sm:h-[40px] sm:w-[40px] drop-shadow-md mx-auto" style={{ filter: 'drop-shadow(0 1px 2px rgba(0, 0, 0, 0.15))' }} />
-                  )}
+                  <Phone className="h-[32px] w-[32px] sm:h-[40px] sm:w-[40px] drop-shadow-md mx-auto" style={{ filter: 'drop-shadow(0 1px 2px rgba(0, 0, 0, 0.15))' }} />
                 </div>
               )}
             </div>
