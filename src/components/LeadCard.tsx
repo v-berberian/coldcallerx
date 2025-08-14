@@ -121,11 +121,11 @@ const LeadCard: React.FC<LeadCardProps> = ({
   const glowColor = useMemo(() => {
     switch (leadTag) {
       case 'cold':
-        return 'rgba(59, 130, 246, 0.38)'; // blue-500, slightly stronger
+        return 'rgba(59, 130, 246, 0.48)'; // blue-500, more intense
       case 'warm':
-        return 'rgba(245, 158, 11, 0.38)'; // amber-500, slightly stronger
+        return 'rgba(245, 158, 11, 0.48)'; // amber-500, more intense
       case 'hot':
-        return 'rgba(244, 63, 94, 0.38)'; // rose-500, slightly stronger
+        return 'rgba(244, 63, 94, 0.48)'; // rose-500, more intense
       default:
         return 'rgba(0,0,0,0)';
     }
@@ -508,7 +508,7 @@ const LeadCard: React.FC<LeadCardProps> = ({
           style={{
             background: `conic-gradient(from 0deg, transparent 0%, ${glowColor} 12%, transparent 24%, transparent 56%, ${glowColor} 68%, transparent 80%)`,
             mixBlendMode: 'overlay',
-            opacity: glowActive ? 0.2 : 0,
+            opacity: glowActive ? 0.28 : 0,
             zIndex: 2
           }}
         />
