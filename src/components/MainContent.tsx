@@ -80,11 +80,11 @@ const MainContent: React.FC<MainContentProps> = ({
   const [navigationDirection, setNavigationDirection] = useState<'forward' | 'backward'>('forward');
   const [resetSwipe, setResetSwipe] = useState<(() => void) | null>(null);
   const [isCommenting, setIsCommenting] = useState(false);
+  const [viewportHeight, setViewportHeight] = useState<number | null>(null);
 
   // Create wrapped navigation functions that set direction and close delete menu
   const handlePrevious = () => {
     setNavigationDirection('backward');
-    // Close delete menu if open
     if (resetSwipe) {
       resetSwipe();
     }
@@ -93,7 +93,6 @@ const MainContent: React.FC<MainContentProps> = ({
 
   const handleNext = () => {
     setNavigationDirection('forward');
-    // Close delete menu if open
     if (resetSwipe) {
       resetSwipe();
     }
@@ -111,8 +110,52 @@ const MainContent: React.FC<MainContentProps> = ({
     onCommentingChange?.(commenting);
   };
 
+  // Adjust height to visualViewport when commenting to keep card aligned above keyboard (iOS)
+  useEffect(() => {
+    const vv: any = (window as any).visualViewport;
+    let detach: (() => void) | null = null;
+
+    const update = () => {
+      try {
+        if (vv) {
+          setViewportHeight(vv.height);
+        } else {
+          setViewportHeight(null);
+        }
+      } catch {
+        setViewportHeight(null);
+      }
+    };
+
+    if (isCommenting) {
+      // Prevent background scroll
+      const originalOverflow = document.body.style.overflow;
+      document.body.style.overflow = 'hidden';
+
+      if (vv) {
+        vv.addEventListener('resize', update);
+        vv.addEventListener('scroll', update);
+        update();
+        detach = () => {
+          vv.removeEventListener('resize', update);
+          vv.removeEventListener('scroll', update);
+        };
+      } else {
+        // Fallback update
+        update();
+      }
+
+      return () => {
+        document.body.style.overflow = originalOverflow;
+        if (detach) detach();
+      };
+    } else {
+      setViewportHeight(null);
+    }
+  }, [isCommenting]);
+
   return (
-    <div className={`flex-1 flex items-start justify-center min-h-0 transition-all duration-300 ${isCommenting ? 'pt-0 p-2 h-full overflow-hidden' : 'pt-1 p-3 sm:p-4'}`} style={{ minHeight: isCommenting ? '100vh' : 'calc(100dvh - 120px)' }}>
+    <div className={`flex-1 flex items-start justify-center min-h-0 transition-all duration-300 ${isCommenting ? 'pt-0 p-2 h-full overflow-hidden' : 'pt-1 p-3 sm:p-4'}`} style={{ minHeight: isCommenting ? undefined : 'calc(100dvh - 120px)', height: isCommenting ? (viewportHeight ? `${viewportHeight}px` : '100vh') : undefined }}>
       <div className="w-full space-y-1 flex flex-col min-h-full">
         {/* Filter Buttons */}
         <div className={`transition-all duration-300 ease-out ${isCommenting ? 'opacity-0 scale-95 -translate-y-2 pointer-events-none' : ''}`}>
@@ -153,6 +196,7 @@ const MainContent: React.FC<MainContentProps> = ({
             onSwipeReset={handleSwipeReset}
             onDeleteLead={onDeleteLead}
             onCommentingChange={handleCommentingChange}
+            isCommenting={isCommenting}
           />
         </div>
 

@@ -40,6 +40,7 @@ interface LeadCardProps {
   navigationDirection?: 'forward' | 'backward';
   onSwipeReset?: (resetSwipe: () => void) => void;
   onCommentingChange?: (commenting: boolean) => void;
+  isCommenting?: boolean;
 }
 
 const LeadCard: React.FC<LeadCardProps> = ({
