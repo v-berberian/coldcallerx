@@ -107,6 +107,11 @@ const LeadCard: React.FC<LeadCardProps> = ({
   const [addFxVisible, setAddFxVisible] = useState(false);
   const [selectedCommentId, setSelectedCommentId] = useState<string | null>(null);
   const [leadTag, setLeadTagState] = useState<'cold' | 'warm' | 'hot' | null>(null);
+  // Dynamic font sizing to prevent card height jumps
+  const nameRef = useRef<HTMLHeadingElement | null>(null);
+  const companyRef = useRef<HTMLParagraphElement | null>(null);
+  const [nameFontSizePx, setNameFontSizePx] = useState<number | null>(null);
+  const [companyFontSizePx, setCompanyFontSizePx] = useState<number | null>(null);
   
   // Subtle neon backlight color based on lead tag
   const glowColor = useMemo(() => {
@@ -204,6 +209,64 @@ const LeadCard: React.FC<LeadCardProps> = ({
     loadComments();
     loadLeadTag();
   }, [loadComments, loadLeadTag]);
+
+  // Fit the name text to one line by shrinking font size down to a minimum
+  useEffect(() => {
+    const el = nameRef.current;
+    if (!el || !lead.name) return;
+    const fit = () => {
+      const base = window.matchMedia('(min-width: 640px)').matches ? 30 : 24; // sm:text-3xl ~30px, base: ~24px
+      const min = 16;
+      let size = base;
+      el.style.whiteSpace = 'nowrap';
+      el.style.overflow = 'hidden';
+      el.style.textOverflow = 'ellipsis';
+      el.style.fontSize = size + 'px';
+      let safety = 28;
+      while (el.scrollWidth > el.clientWidth && size > min && safety-- > 0) {
+        size -= 0.5;
+        el.style.fontSize = size + 'px';
+      }
+      setNameFontSizePx(size);
+    };
+    fit();
+    const ro = new ResizeObserver(() => fit());
+    ro.observe(el);
+    window.addEventListener('resize', fit);
+    return () => {
+      ro.disconnect();
+      window.removeEventListener('resize', fit);
+    };
+  }, [lead.name]);
+
+  // Fit the company text to one line by shrinking font size down to a minimum
+  useEffect(() => {
+    const el = companyRef.current;
+    if (!el || !lead.company) return;
+    const fit = () => {
+      const base = window.matchMedia('(min-width: 640px)').matches ? 18 : 16; // sm:text-lg ~18px, base ~16px
+      const min = 12;
+      let size = base;
+      el.style.whiteSpace = 'nowrap';
+      el.style.overflow = 'hidden';
+      el.style.textOverflow = 'ellipsis';
+      el.style.fontSize = size + 'px';
+      let safety = 24;
+      while (el.scrollWidth > el.clientWidth && size > min && safety-- > 0) {
+        size -= 0.5;
+        el.style.fontSize = size + 'px';
+      }
+      setCompanyFontSizePx(size);
+    };
+    fit();
+    const ro = new ResizeObserver(() => fit());
+    ro.observe(el);
+    window.addEventListener('resize', fit);
+    return () => {
+      ro.disconnect();
+      window.removeEventListener('resize', fit);
+    };
+  }, [lead.company]);
 
   const addComment = useCallback(() => {
     const text = draft.trim();
@@ -478,7 +541,7 @@ const LeadCard: React.FC<LeadCardProps> = ({
           }}
         />
         <Card 
-          className="shadow-2xl border border-border/50 dark:border-border/60 ring-1 ring-border/40 dark:ring-border/60 rounded-3xl bg-card min-h-[420px] max-h-[520px] sm:min-h-[440px] sm:max-h-[580px] flex flex-col mb-4 overflow-hidden relative" 
+          className="shadow-2xl border border-border/50 dark:border-border/60 ring-1 ring-border/40 dark:ring-border/60 rounded-3xl bg-card h-[520px] sm:h-[580px] flex flex-col mb-4 overflow-hidden relative" 
           onClick={(e) => handleCardClick(e)}
           onTouchStart={(e) => handleCardClick(e)}
           style={{
@@ -586,14 +649,22 @@ const LeadCard: React.FC<LeadCardProps> = ({
           </p>
           {/* Group 1: Name and Company */}
             <div className="space-y-1">
-            <div className="flex items-center justify-center px-2">
-              <h2 className="text-2xl sm:text-3xl font-bold text-center break-words leading-tight bg-gradient-to-r from-foreground to-foreground/95 bg-clip-text text-transparent dark:bg-none dark:text-foreground">
+            <div className="flex items-center justify-center px-2 w-full">
+              <h2
+                ref={nameRef}
+                className="font-bold text-center leading-tight bg-gradient-to-r from-foreground to-foreground/95 bg-clip-text text-transparent dark:bg-none dark:text-foreground truncate"
+                style={{ fontSize: nameFontSizePx ? `${nameFontSizePx}px` : undefined, maxWidth: '92%' }}
+              >
                 {lead.name}
               </h2>
             </div>
             {lead.company && (
-              <div className="flex items-center justify-center px-2">
-                <p className="text-base sm:text-lg font-medium text-center break-words leading-relaxed bg-gradient-to-r from-muted-foreground to-muted-foreground/90 bg-clip-text text-transparent dark:bg-none dark:text-muted-foreground">
+              <div className="flex items-center justify-center px-2 w-full">
+                <p
+                  ref={companyRef}
+                  className="font-medium text-center leading-relaxed bg-gradient-to-r from-muted-foreground to-muted-foreground/90 bg-clip-text text-transparent dark:bg-none dark:text-muted-foreground truncate"
+                  style={{ fontSize: companyFontSizePx ? `${companyFontSizePx}px` : undefined, maxWidth: '92%' }}
+                >
                   {lead.company}
                 </p>
               </div>
