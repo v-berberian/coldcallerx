@@ -39,8 +39,6 @@ interface LeadCardProps {
   onImportNew?: () => void;
   navigationDirection?: 'forward' | 'backward';
   onSwipeReset?: (resetSwipe: () => void) => void;
-  onCommentFocusChange?: (focused: boolean) => void;
-  onFlipChange?: (flipped: boolean) => void;
 }
 
 const LeadCard: React.FC<LeadCardProps> = ({
@@ -57,9 +55,7 @@ const LeadCard: React.FC<LeadCardProps> = ({
   refreshTrigger,
   onImportNew,
   navigationDirection = 'forward',
-  onSwipeReset,
-  onCommentFocusChange,
-  onFlipChange
+  onSwipeReset
 }) => {
   // Use the extracted hooks
   const {
@@ -97,10 +93,7 @@ const LeadCard: React.FC<LeadCardProps> = ({
     if (isCardFlipped) {
       setIsPhoneMenuOpen(false);
     }
-    if (onFlipChange) {
-      onFlipChange(isCardFlipped);
-    }
-  }, [isCardFlipped, resetSwipe, onFlipChange]);
+  }, [isCardFlipped, resetSwipe]);
 
   // --- Simple local comments (per lead), Trello-style ---
   type LeadComment = { id: string; text: string; createdAt: string };
@@ -114,18 +107,16 @@ const LeadCard: React.FC<LeadCardProps> = ({
   const [addFxVisible, setAddFxVisible] = useState(false);
   const [selectedCommentId, setSelectedCommentId] = useState<string | null>(null);
   const [leadTag, setLeadTagState] = useState<'cold' | 'warm' | 'hot' | null>(null);
-  const companyRef = useRef<HTMLParagraphElement | null>(null);
-  const [companyFontSizePx, setCompanyFontSizePx] = useState<number | null>(null);
   
   // Subtle neon backlight color based on lead tag
   const glowColor = useMemo(() => {
     switch (leadTag) {
       case 'cold':
-        return 'rgba(59, 130, 246, 0.48)'; // blue-500, more intense
+        return 'rgba(59, 130, 246, 0.38)'; // blue-500, slightly stronger
       case 'warm':
-        return 'rgba(245, 158, 11, 0.48)'; // amber-500, more intense
+        return 'rgba(245, 158, 11, 0.38)'; // amber-500, slightly stronger
       case 'hot':
-        return 'rgba(244, 63, 94, 0.48)'; // rose-500, more intense
+        return 'rgba(244, 63, 94, 0.38)'; // rose-500, slightly stronger
       default:
         return 'rgba(0,0,0,0)';
     }
@@ -213,42 +204,6 @@ const LeadCard: React.FC<LeadCardProps> = ({
     loadComments();
     loadLeadTag();
   }, [loadComments, loadLeadTag]);
-
-  // Fit company name to a single line without changing card height
-  useEffect(() => {
-    const el = companyRef.current;
-    if (!el || !lead.company) return;
-
-    const fit = () => {
-      // Start from base size (sm: text-lg ~ 18px, base: text-base ~ 16px)
-      const base = window.matchMedia('(min-width: 640px)').matches ? 18 : 16;
-      const min = 12;
-      let size = base;
-
-      el.style.whiteSpace = 'nowrap';
-      el.style.overflow = 'hidden';
-      el.style.textOverflow = 'ellipsis';
-
-      // Set to base first, then shrink until it fits
-      el.style.fontSize = size + 'px';
-      let safety = 24;
-      while (el.scrollWidth > el.clientWidth && size > min && safety-- > 0) {
-        size -= 0.5;
-        el.style.fontSize = size + 'px';
-      }
-      setCompanyFontSizePx(size);
-    };
-
-    // Run once and on resize
-    fit();
-    const ro = new ResizeObserver(() => fit());
-    ro.observe(el);
-    window.addEventListener('resize', fit);
-    return () => {
-      ro.disconnect();
-      window.removeEventListener('resize', fit);
-    };
-  }, [lead.company]);
 
   const addComment = useCallback(() => {
     const text = draft.trim();
@@ -508,7 +463,7 @@ const LeadCard: React.FC<LeadCardProps> = ({
           style={{
             background: `conic-gradient(from 0deg, transparent 0%, ${glowColor} 12%, transparent 24%, transparent 56%, ${glowColor} 68%, transparent 80%)`,
             mixBlendMode: 'overlay',
-            opacity: glowActive ? 0.28 : 0,
+            opacity: glowActive ? 0.2 : 0,
             zIndex: 2
           }}
         />
@@ -637,12 +592,8 @@ const LeadCard: React.FC<LeadCardProps> = ({
               </h2>
             </div>
             {lead.company && (
-              <div className="flex items-center justify-center px-2 w-full">
-                <p
-                  ref={companyRef}
-                  className="font-medium text-center leading-relaxed bg-gradient-to-r from-muted-foreground to-muted-foreground/90 bg-clip-text text-transparent dark:bg-none dark:text-muted-foreground truncate"
-                  style={{ fontSize: companyFontSizePx ? `${companyFontSizePx}px` : undefined, maxWidth: '92%' }}
-                >
+              <div className="flex items-center justify-center px-2">
+                <p className="text-base sm:text-lg font-medium text-center break-words leading-relaxed bg-gradient-to-r from-muted-foreground to-muted-foreground/90 bg-clip-text text-transparent dark:bg-none dark:text-muted-foreground">
                   {lead.company}
                 </p>
               </div>
@@ -1166,7 +1117,7 @@ const LeadCard: React.FC<LeadCardProps> = ({
           </LayoutGroup>
         </div>
 
-            <div className="p-4 border-t border-border/20 bg-background/80 backdrop-blur">
+        <div className="p-4 border-t border-border/20 bg-background/80 backdrop-blur">
           <div className="flex items-center gap-2">
             <textarea
               value={draft}
@@ -1175,8 +1126,6 @@ const LeadCard: React.FC<LeadCardProps> = ({
               className="flex-1 rounded-md border border-border/30 bg-background px-3 text-sm focus:outline-none h-11 resize-none py-2 text-left placeholder:text-left"
               rows={1}
               placeholder="Add a comment..."
-                  onFocus={() => onCommentFocusChange && onCommentFocusChange(true)}
-                  onBlur={() => onCommentFocusChange && onCommentFocusChange(false)}
             />
             <div className="relative shrink-0">
               <motion.div
