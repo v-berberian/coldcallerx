@@ -1137,7 +1137,7 @@ const LeadCard: React.FC<LeadCardProps> = ({
           initial={false}
           animate={{ boxShadow: isComposerFocused ? '0 -6px 24px rgba(0,0,0,0.12)' : '0 0 0 rgba(0,0,0,0)' }}
           transition={{ duration: 0.2, ease: [0.25, 0.46, 0.45, 0.94] }}
-          style={{ padding: '0.75rem 1rem calc(0.75rem + env(safe-area-inset-bottom))' }}
+          style={{ padding: '0.75rem 1rem calc(0.75rem + env(safe-area-inset-bottom))', position: isKeyboardOpen ? 'fixed' as const : 'sticky', bottom: 0, left: 0, right: 0, zIndex: 50 }}
         >
           <div className="flex items-end gap-2">
             <textarea

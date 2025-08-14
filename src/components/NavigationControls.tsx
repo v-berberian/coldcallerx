@@ -1,4 +1,5 @@
 import React from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, ArrowRight } from 'lucide-react';
 
@@ -53,7 +54,7 @@ const NavigationControls: React.FC<NavigationControlsProps> = ({
     // Optional: visual viewport heuristic (helps on iOS/Android browsers)
     let detachViewport: (() => void) | null = null;
     const attachViewportListener = () => {
-      const vv = (window as any).visualViewport as VisualViewport | undefined;
+      const vv = (window as unknown as Window & { visualViewport?: VisualViewport }).visualViewport;
       if (!vv) return;
       const baseline = window.innerHeight;
       const onResize = () => {
@@ -85,8 +86,16 @@ const NavigationControls: React.FC<NavigationControlsProps> = ({
     : 'max(2rem, calc(env(safe-area-inset-bottom) + 1rem))';
 
   return (
-    <div className="flex gap-3 sm:gap-4 w-full pb-8 sm:pb-6" style={{ paddingBottom: paddingBottomValue }}>
-      <Button 
+    <AnimatePresence initial={false}>
+      <motion.div
+        className="w-full"
+        style={{ paddingBottom: paddingBottomValue, overflow: 'hidden' }}
+        initial={false}
+        animate={isKeyboardOpen ? { opacity: 0, y: 12, maxHeight: 0, pointerEvents: 'none' } : { opacity: 1, y: 0, maxHeight: 400, pointerEvents: 'auto' }}
+        transition={{ duration: 0.18, ease: [0.25, 0.46, 0.45, 0.94] }}
+      >
+        <div className="flex gap-3 sm:gap-4 w-full">
+          <Button 
         variant="outline" 
         onClick={handlePrevious} 
         disabled={!canGoPrevious} 
@@ -111,7 +120,9 @@ const NavigationControls: React.FC<NavigationControlsProps> = ({
         <span className="truncate">Next</span>
         <ArrowRight className="h-5 w-5 sm:h-6 sm:w-6 ml-2" />
       </Button>
-    </div>
+        </div>
+      </motion.div>
+    </AnimatePresence>
   );
 };
 
