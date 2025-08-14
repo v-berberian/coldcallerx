@@ -69,6 +69,8 @@ const LeadCard: React.FC<LeadCardProps> = ({
 
   const [isCardFlipped, setIsCardFlipped] = useState(false);
   const handleFlip = useCallback(() => setIsCardFlipped((prev) => !prev), []);
+  const handleCommentFocus = useCallback(() => setIsCommenting(true), []);
+  const handleCommentBlur = useCallback(() => setIsCommenting(false), []);
   const [isPhoneMenuOpen, setIsPhoneMenuOpen] = useState(false);
   const {
     isSwiping,
@@ -107,10 +109,7 @@ const LeadCard: React.FC<LeadCardProps> = ({
   const [addFxVisible, setAddFxVisible] = useState(false);
   const [selectedCommentId, setSelectedCommentId] = useState<string | null>(null);
   const [leadTag, setLeadTagState] = useState<'cold' | 'warm' | 'hot' | null>(null);
-  const [isComposerFocused, setIsComposerFocused] = useState(false);
-  const [isKeyboardOpen, setIsKeyboardOpen] = useState(false);
-  const commentsScrollRef = useRef<HTMLDivElement | null>(null);
-  const [keyboardHeight, setKeyboardHeight] = useState(0);
+  const [isCommenting, setIsCommenting] = useState(false);
   
   // Subtle neon backlight color based on lead tag
   const glowColor = useMemo(() => {
@@ -208,29 +207,6 @@ const LeadCard: React.FC<LeadCardProps> = ({
     loadComments();
     loadLeadTag();
   }, [loadComments, loadLeadTag]);
-
-  // Detect soft keyboard using VisualViewport (mobile browsers)
-  useEffect(() => {
-    const vv = (window as unknown as Window & { visualViewport?: VisualViewport }).visualViewport;
-    if (!vv) return;
-    const baseline = window.innerHeight;
-    const onResize = () => {
-      try {
-        const delta = baseline - vv.height;
-        if (delta > 140) {
-          setIsKeyboardOpen(true);
-          setKeyboardHeight(delta);
-        } else {
-          setIsKeyboardOpen(false);
-          setKeyboardHeight(0);
-        }
-      } catch {
-        // no-op
-      }
-    };
-    vv.addEventListener('resize', onResize);
-    return () => vv.removeEventListener('resize', onResize);
-  }, []);
 
   const addComment = useCallback(() => {
     const text = draft.trim();
@@ -342,6 +318,13 @@ const LeadCard: React.FC<LeadCardProps> = ({
     }
   }, [onSwipeReset, resetSwipe]);
 
+  // Exit commenting mode when card flips back to front
+  useEffect(() => {
+    if (!isCardFlipped) {
+      setIsCommenting(false);
+    }
+  }, [isCardFlipped]);
+
   // If we have a noLeadsMessage, show the empty state
   if (noLeadsMessage) {
     return (
@@ -411,7 +394,7 @@ const LeadCard: React.FC<LeadCardProps> = ({
 
   
   return (
-    <div className="relative">
+    <div className="relative" data-commenting={isCommenting}>
       {/* Delete background indicator */}
       <div 
         className="absolute bg-red-500 rounded-3xl flex items-center justify-center"
@@ -501,8 +484,7 @@ const LeadCard: React.FC<LeadCardProps> = ({
           style={{
             pointerEvents: 'auto',
             transformStyle: "preserve-3d",
-            backfaceVisibility: "hidden",
-            marginBottom: isKeyboardOpen ? 0 : undefined
+            backfaceVisibility: "hidden"
           }}
         >
       <CardContent className="flex-1 flex flex-col overflow-hidden pt-2">
@@ -1023,8 +1005,7 @@ const LeadCard: React.FC<LeadCardProps> = ({
       style={{
         transformStyle: "preserve-3d",
         backfaceVisibility: "hidden",
-        transform: "rotateY(180deg)",
-        marginBottom: isKeyboardOpen ? 0 : undefined
+        transform: "rotateY(180deg)"
       }}
     >
       <CardContent className="flex-1 flex flex-col p-0 overflow-hidden">
@@ -1037,12 +1018,7 @@ const LeadCard: React.FC<LeadCardProps> = ({
           </button>
         </div>
 
-        <div
-          ref={commentsScrollRef}
-          className="flex-1 min-h-0 overflow-y-auto px-4 space-y-3"
-          style={{ paddingBottom: isKeyboardOpen ? '0.5rem' : isComposerFocused ? '6.5rem' : '5rem' }}
-          data-comments-scroll="true"
-        >
+        <div className="flex-1 min-h-0 overflow-y-auto px-4 pb-4 space-y-3" data-comments-scroll="true">
           {comments.length === 0 && (
             <p className="text-sm text-muted-foreground/60 mt-2">No comments yet.</p>
           )}
@@ -1141,31 +1117,17 @@ const LeadCard: React.FC<LeadCardProps> = ({
           </LayoutGroup>
         </div>
 
-        <motion.div
-          className="sticky bottom-0 inset-x-0 z-10 border-t border-border/20 bg-background/80 backdrop-blur"
-          initial={false}
-          animate={{ boxShadow: isComposerFocused ? '0 -6px 24px rgba(0,0,0,0.12)' : '0 0 0 rgba(0,0,0,0)' }}
-          transition={{ duration: 0.2, ease: [0.25, 0.46, 0.45, 0.94] }}
-          style={{ 
-            padding: '0.75rem 1rem calc(0.75rem + env(safe-area-inset-bottom))', 
-            position: isKeyboardOpen ? 'fixed' as const : 'sticky', 
-            bottom: isKeyboardOpen ? keyboardHeight : 0, 
-            left: 0, 
-            right: 0, 
-            zIndex: 50,
-            transform: isKeyboardOpen ? 'translateY(-100%)' : 'none'
-          }}
-        >
-          <div className="flex items-end gap-2">
+        <div className="p-4 border-t border-border/20 bg-background/80 backdrop-blur">
+          <div className="flex items-center gap-2">
             <textarea
               value={draft}
               onChange={(e) => setDraft(e.target.value)}
               ref={commentInputRef}
-              className="flex-1 rounded-md border border-border/30 bg-background px-3 text-sm focus:outline-none resize-none py-2 text-left placeholder:text-left transition-all duration-150"
-              rows={isComposerFocused ? 2 : 1}
-              onFocus={() => setIsComposerFocused(true)}
-              onBlur={() => setIsComposerFocused(false)}
+              className="flex-1 rounded-md border border-border/30 bg-background px-3 text-sm focus:outline-none h-11 resize-none py-2 text-left placeholder:text-left"
+              rows={1}
               placeholder="Add a comment..."
+              onFocus={handleCommentFocus}
+              onBlur={handleCommentBlur}
             />
             <div className="relative shrink-0">
               <motion.div
@@ -1207,7 +1169,7 @@ const LeadCard: React.FC<LeadCardProps> = ({
               </AnimatePresence>
             </div>
           </div>
-        </motion.div>
+        </div>
       </CardContent>
     </Card>
       </motion.div>
