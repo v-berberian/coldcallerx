@@ -529,7 +529,7 @@ const LeadCard: React.FC<LeadCardProps> = ({
                 }} 
                 className="w-full px-4 py-3 text-left transition-colors duration-75 cursor-pointer flex items-center justify-between"
               >
-                <span className="text-sm">Native (SMS/Call)</span>
+                <span className="text-sm">Native</span>
                 {communicationMode === 'native' && <Check className="h-4 w-4" />}
               </DropdownMenuItem>
               <DropdownMenuItem 
