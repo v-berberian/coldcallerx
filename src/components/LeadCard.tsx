@@ -494,7 +494,8 @@ const LeadCard: React.FC<LeadCardProps> = ({
           style={{
             pointerEvents: 'auto',
             transformStyle: "preserve-3d",
-            backfaceVisibility: "hidden"
+            backfaceVisibility: "hidden",
+            marginBottom: isKeyboardOpen ? 0 : undefined
           }}
         >
       <CardContent className="flex-1 flex flex-col overflow-hidden pt-2">
@@ -1015,7 +1016,8 @@ const LeadCard: React.FC<LeadCardProps> = ({
       style={{
         transformStyle: "preserve-3d",
         backfaceVisibility: "hidden",
-        transform: "rotateY(180deg)"
+        transform: "rotateY(180deg)",
+        marginBottom: isKeyboardOpen ? 0 : undefined
       }}
     >
       <CardContent className="flex-1 flex flex-col p-0 overflow-hidden">

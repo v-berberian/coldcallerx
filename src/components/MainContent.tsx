@@ -102,7 +102,7 @@ const MainContent: React.FC<MainContentProps> = ({
     setResetSwipe(() => resetFn);
   };
   return (
-    <div className="flex-1 flex items-start justify-center pt-1 p-3 sm:p-4 min-h-0" style={{ minHeight: 'calc(100dvh - 120px)' }}>
+    <div className="flex-1 flex items-start justify-center pt-1 p-3 sm:p-4 min-h-0" style={{ minHeight: '100dvh' }}>
       <div className="w-full space-y-1 flex flex-col min-h-full">
         {/* Filter Buttons */}
         <FilterButtons
