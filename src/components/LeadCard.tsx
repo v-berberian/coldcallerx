@@ -425,7 +425,7 @@ const LeadCard: React.FC<LeadCardProps> = ({
         >
       <CardContent className="flex-1 flex flex-col overflow-hidden">
         {/* Top row with left cluster, centered count, right menu */}
-        <div className="flex items-center justify-between p-3 sm:p-5 pb-2">
+        <div className="flex items-center justify-between p-2 sm:p-3 pb-1">
           <div className="flex items-center gap-1">
             <button
               onClick={handleFlip}
@@ -886,7 +886,7 @@ const LeadCard: React.FC<LeadCardProps> = ({
       }}
     >
       <CardContent className="flex-1 flex flex-col p-0 overflow-hidden">
-        <div className="flex items-center justify-center p-3 sm:p-5 pb-2">
+        <div className="flex items-center justify-center p-2 sm:p-3 pb-1">
           <button
             onClick={handleFlip}
             className="text-sm text-muted-foreground opacity-60 cursor-pointer"
