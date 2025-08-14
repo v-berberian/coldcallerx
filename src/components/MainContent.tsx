@@ -77,6 +77,7 @@ const MainContent: React.FC<MainContentProps> = ({
 }) => {
   const [navigationDirection, setNavigationDirection] = useState<'forward' | 'backward'>('forward');
   const [resetSwipe, setResetSwipe] = useState<(() => void) | null>(null);
+  const [isCommenting, setIsCommenting] = useState(false);
 
   // Create wrapped navigation functions that set direction and close delete menu
   const handlePrevious = () => {
@@ -101,11 +102,17 @@ const MainContent: React.FC<MainContentProps> = ({
   const handleSwipeReset = (resetFn: () => void) => {
     setResetSwipe(() => resetFn);
   };
+
+  // Handle commenting state from LeadCard
+  const handleCommentingChange = (commenting: boolean) => {
+    setIsCommenting(commenting);
+  };
+
   return (
     <div className="flex-1 flex items-start justify-center pt-1 p-3 sm:p-4 min-h-0" style={{ minHeight: 'calc(100dvh - 120px)' }}>
       <div className="w-full space-y-1 flex flex-col min-h-full">
         {/* Filter Buttons */}
-        <div className="transition-all duration-300 ease-out [.data-commenting=true_&]:opacity-0 [.data-commenting=true_&]:scale-95 [.data-commenting=true_&]:-translate-y-2 [.data-commenting=true_&]:pointer-events-none">
+        <div className={`transition-all duration-300 ease-out ${isCommenting ? 'opacity-0 scale-95 -translate-y-2 pointer-events-none' : ''}`}>
           <FilterButtons
             timezoneFilter={timezoneFilter}
             callFilter={callFilter}
@@ -142,11 +149,12 @@ const MainContent: React.FC<MainContentProps> = ({
             navigationDirection={navigationDirection}
             onSwipeReset={handleSwipeReset}
             onDeleteLead={onDeleteLead}
+            onCommentingChange={handleCommentingChange}
           />
         </div>
 
         {/* Navigation Controls */}
-        <div className="pt-3 sm:pt-4 transition-all duration-300 ease-out [.data-commenting=true_&]:opacity-0 [.data-commenting=true_&]:scale-95 [.data-commenting=true_&]:translate-y-2 [.data-commenting=true_&]:pointer-events-none">
+        <div className={`pt-3 sm:pt-4 transition-all duration-300 ease-out ${isCommenting ? 'opacity-0 scale-95 translate-y-2 pointer-events-none' : ''}`}>
           <NavigationControls
             onPrevious={handlePrevious}
             onNext={handleNext}

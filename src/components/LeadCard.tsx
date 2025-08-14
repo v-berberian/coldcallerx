@@ -39,6 +39,7 @@ interface LeadCardProps {
   onImportNew?: () => void;
   navigationDirection?: 'forward' | 'backward';
   onSwipeReset?: (resetSwipe: () => void) => void;
+  onCommentingChange?: (commenting: boolean) => void;
 }
 
 const LeadCard: React.FC<LeadCardProps> = ({
@@ -55,7 +56,8 @@ const LeadCard: React.FC<LeadCardProps> = ({
   refreshTrigger,
   onImportNew,
   navigationDirection = 'forward',
-  onSwipeReset
+  onSwipeReset,
+  onCommentingChange
 }) => {
   // Use the extracted hooks
   const {
@@ -69,8 +71,15 @@ const LeadCard: React.FC<LeadCardProps> = ({
 
   const [isCardFlipped, setIsCardFlipped] = useState(false);
   const handleFlip = useCallback(() => setIsCardFlipped((prev) => !prev), []);
-  const handleCommentFocus = useCallback(() => setIsCommenting(true), []);
-  const handleCommentBlur = useCallback(() => setIsCommenting(false), []);
+  const handleCommentFocus = useCallback(() => {
+    setIsCommenting(true);
+    onCommentingChange?.(true);
+  }, [onCommentingChange]);
+  
+  const handleCommentBlur = useCallback(() => {
+    setIsCommenting(false);
+    onCommentingChange?.(false);
+  }, [onCommentingChange]);
   const [isPhoneMenuOpen, setIsPhoneMenuOpen] = useState(false);
   const {
     isSwiping,
@@ -322,8 +331,9 @@ const LeadCard: React.FC<LeadCardProps> = ({
   useEffect(() => {
     if (!isCardFlipped) {
       setIsCommenting(false);
+      onCommentingChange?.(false);
     }
-  }, [isCardFlipped]);
+  }, [isCardFlipped, onCommentingChange]);
 
   // If we have a noLeadsMessage, show the empty state
   if (noLeadsMessage) {
@@ -394,7 +404,7 @@ const LeadCard: React.FC<LeadCardProps> = ({
 
   
   return (
-    <div className="relative" data-commenting={isCommenting}>
+    <div className="relative">
       {/* Delete background indicator */}
       <div 
         className="absolute bg-red-500 rounded-3xl flex items-center justify-center"
