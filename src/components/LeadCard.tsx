@@ -1069,7 +1069,7 @@ const LeadCard: React.FC<LeadCardProps> = ({
           </button>
         </div>
 
-        <div className="flex-1 min-h-0 overflow-y-auto px-4 pb-4 space-y-3" data-comments-scroll="true">
+        <div className="flex-1 min-h-0 overflow-y-auto px-4 pb-4 space-y-3 scrollbar-thin scrollbar-thumb-border/20 scrollbar-track-transparent" data-comments-scroll="true">
           {comments.length === 0 && (
             <p className="text-sm text-muted-foreground/60 mt-2">No comments yet.</p>
           )}
@@ -1184,7 +1184,7 @@ const LeadCard: React.FC<LeadCardProps> = ({
             >
               <Button
                 onClick={openAddCommentModal}
-                className="h-9 px-4 rounded-lg bg-gradient-to-br from-violet-400 via-violet-500 to-violet-600 hover:from-violet-500 hover:via-violet-600 hover:to-violet-700 text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.2),inset_0_-1px_0_rgba(0,0,0,0.1),0_4px_6px_-1px_rgba(139,92,246,0.3),0_2px_4px_-1px_rgba(139,92,246,0.2)] hover:shadow-[inset_0_1px_0_rgba(255,255,255,0.2),inset_0_-1px_0_rgba(0,0,0,0.1),0_6px_12px_-1px_rgba(139,92,246,0.4),0_4px_6px_-1px_rgba(139,92,246,0.3)] active:shadow-[inset_0_2px_4px_rgba(0,0,0,0.2),inset_0_-1px_0_rgba(255,255,255,0.1),0_2px_4px_-1px_rgba(139,92,246,0.2)] transition-all duration-200 active:scale-95"
+                className="h-12 px-6 rounded-lg bg-gradient-to-br from-violet-400 via-violet-500 to-violet-600 hover:from-violet-500 hover:via-violet-600 hover:to-violet-700 text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.2),inset_0_-1px_0_rgba(0,0,0,0.1),0_4px_6px_-1px_rgba(139,92,246,0.3),0_2px_4px_-1px_rgba(139,92,246,0.2)] hover:shadow-[inset_0_1px_0_rgba(255,255,255,0.2),inset_0_-1px_0_rgba(0,0,0,0.1),0_6px_12px_-1px_rgba(139,92,246,0.4),0_4px_6px_-1px_rgba(139,92,246,0.3)] active:shadow-[inset_0_2px_4px_rgba(0,0,0,0.2),inset_0_-1px_0_rgba(255,255,255,0.1),0_2px_4px_-1px_rgba(139,92,246,0.2)] transition-all duration-200 active:scale-95"
                 size="sm"
               >
                 Add Comment
