@@ -1268,14 +1268,8 @@ const LeadCard: React.FC<LeadCardProps> = ({
               }}
             >
               {/* Modal Header */}
-              <div className="flex items-center justify-between px-6 py-4 border-b border-border/20">
-                <h3 className="text-lg font-semibold">Add Comment</h3>
-                <button
-                  onClick={closeAddCommentModal}
-                  className="p-2 rounded-full hover:bg-muted/50 transition-colors"
-                >
-                  <X className="h-5 w-5" />
-                </button>
+              <div className="px-6 py-4 border-b border-border/20">
+                <h3 className="text-lg font-semibold text-center">Add Comment</h3>
               </div>
 
               {/* Modal Content */}
@@ -1311,8 +1305,8 @@ const LeadCard: React.FC<LeadCardProps> = ({
                         }
                       }}
                       onBlur={() => setIsModalInputFocused(false)}
-                      className="w-full rounded-md border border-border/30 bg-background px-3 py-3 text-sm focus:outline-none min-h-[120px] resize-none"
-                      rows={5}
+                      className="w-full rounded-lg border border-border/30 bg-background px-4 py-4 text-base focus:outline-none min-h-[160px] resize-none"
+                      rows={6}
                       placeholder="Type your comment here..."
                       style={{
                         fontSize: '16px', // Prevent iOS zoom
@@ -1326,18 +1320,18 @@ const LeadCard: React.FC<LeadCardProps> = ({
 
               {/* Modal Footer */}
               <div className="p-6 border-t border-border/20 bg-background/50">
-                <div className="flex items-center gap-3 justify-end">
+                <div className="flex items-center gap-4 justify-end">
                   <Button
                     variant="outline"
                     onClick={closeAddCommentModal}
-                    className="rounded-lg shadow-[inset_0_1px_0_rgba(255,255,255,0.8),inset_0_-1px_0_rgba(0,0,0,0.1),0_2px_4px_-1px_rgba(0,0,0,0.1)] hover:shadow-[inset_0_1px_0_rgba(255,255,255,0.8),inset_0_-1px_0_rgba(0,0,0,0.1),0_4px_6px_-1px_rgba(0,0,0,0.15)] active:shadow-[inset_0_2px_4px_rgba(0,0,0,0.15),inset_0_-1px_0_rgba(255,255,255,0.6),0_1px_2px_-1px_rgba(0,0,0,0.1)] transition-all duration-200 active:scale-95"
+                    className="h-12 px-6 rounded-lg shadow-[inset_0_1px_0_rgba(255,255,255,0.8),inset_0_-1px_0_rgba(0,0,0,0.1),0_2px_4px_-1px_rgba(0,0,0,0.1)] hover:shadow-[inset_0_1px_0_rgba(255,255,255,0.8),inset_0_-1px_0_rgba(0,0,0,0.1),0_4px_6px_-1px_rgba(0,0,0,0.15)] active:shadow-[inset_0_2px_4px_rgba(0,0,0,0.15),inset_0_-1px_0_rgba(255,255,255,0.6),0_1px_2px_-1px_rgba(0,0,0,0.1)] transition-all duration-200 active:scale-95"
                   >
                     Cancel
                   </Button>
                   <Button
                     onClick={addCommentFromModal}
                     disabled={!modalDraft.trim()}
-                    className="rounded-lg shadow-[inset_0_1px_0_rgba(255,255,255,0.2),inset_0_-1px_0_rgba(0,0,0,0.1),0_4px_6px_-1px_rgba(0,0,0,0.2),0_2px_4px_-1px_rgba(0,0,0,0.1)] hover:shadow-[inset_0_1px_0_rgba(255,255,255,0.2),inset_0_-1px_0_rgba(0,0,0,0.1),0_6px_12px_-1px_rgba(0,0,0,0.25),0_4px_6px_-1px_rgba(0,0,0,0.15)] active:shadow-[inset_0_2px_4px_rgba(0,0,0,0.2),inset_0_-1px_0_rgba(255,255,255,0.1),0_2px_4px_-1px_rgba(0,0,0,0.1)] disabled:shadow-[inset_0_1px_0_rgba(255,255,255,0.1),inset_0_-1px_0_rgba(0,0,0,0.05),0_2px_4px_-1px_rgba(0,0,0,0.1)] transition-all duration-200 active:scale-95 disabled:scale-100"
+                    className="h-12 px-6 rounded-lg shadow-[inset_0_1px_0_rgba(255,255,255,0.2),inset_0_-1px_0_rgba(0,0,0,0.1),0_4px_6px_-1px_rgba(0,0,0,0.2),0_2px_4px_-1px_rgba(0,0,0,0.1)] hover:shadow-[inset_0_1px_0_rgba(255,255,255,0.2),inset_0_-1px_0_rgba(0,0,0,0.1),0_6px_12px_-1px_rgba(0,0,0,0.25),0_4px_6px_-1px_rgba(0,0,0,0.15)] active:shadow-[inset_0_2px_4px_rgba(0,0,0,0.2),inset_0_-1px_0_rgba(255,255,255,0.1),0_2px_4px_-1px_rgba(0,0,0,0.1)] disabled:shadow-[inset_0_1px_0_rgba(255,255,255,0.1),inset_0_-1px_0_rgba(0,0,0,0.05),0_2px_4px_-1px_rgba(0,0,0,0.1)] transition-all duration-200 active:scale-95 disabled:scale-100"
                   >
                     Add
                   </Button>
