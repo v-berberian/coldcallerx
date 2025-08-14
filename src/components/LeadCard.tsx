@@ -693,8 +693,8 @@ const LeadCard: React.FC<LeadCardProps> = ({
           )}
           
           {/* Action Buttons - Call and Text */}
-          <div className="flex w-full gap-3 sm:gap-4">
-            <div className="flex-1 flex justify-center">
+          <div className="flex w-full gap-2">
+            <div className="flex-1 flex justify-center -translate-x-1 sm:-translate-x-2">
               {!isDeleteMode ? (
               <Button 
                   onClick={e => {
@@ -795,7 +795,7 @@ const LeadCard: React.FC<LeadCardProps> = ({
                 </div>
               )}
             </div>
-            <div className="flex-1 flex justify-center">
+            <div className="flex-1 flex justify-center translate-x-1 sm:translate-x-2">
               {!isDeleteMode ? (
               <Button 
                   onClick={e => {
