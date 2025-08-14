@@ -77,6 +77,24 @@ const MainContent: React.FC<MainContentProps> = ({
 }) => {
   const [navigationDirection, setNavigationDirection] = useState<'forward' | 'backward'>('forward');
   const [resetSwipe, setResetSwipe] = useState<(() => void) | null>(null);
+  const [isKeyboardOpen, setIsKeyboardOpen] = useState(false);
+
+  // Detect on-screen keyboard using VisualViewport
+  useEffect(() => {
+    const vv = (window as unknown as Window & { visualViewport?: VisualViewport }).visualViewport;
+    if (!vv) return;
+    const baseline = window.innerHeight;
+    const onResize = () => {
+      try {
+        const delta = baseline - vv.height;
+        setIsKeyboardOpen(delta > 140);
+      } catch {
+        // no-op
+      }
+    };
+    vv.addEventListener('resize', onResize);
+    return () => vv.removeEventListener('resize', onResize);
+  }, []);
 
   // Create wrapped navigation functions that set direction and close delete menu
   const handlePrevious = () => {
@@ -102,7 +120,10 @@ const MainContent: React.FC<MainContentProps> = ({
     setResetSwipe(() => resetFn);
   };
   return (
-    <div className="flex-1 flex items-start justify-center pt-1 p-3 sm:p-4 min-h-0" style={{ minHeight: '100dvh' }}>
+    <div
+      className="flex-1 flex items-start justify-center pt-1 px-3 sm:px-4 min-h-0"
+      style={{ minHeight: '100svh', paddingBottom: isKeyboardOpen ? 0 : undefined }}
+    >
       <div className="w-full space-y-1 flex flex-col min-h-full">
         {/* Filter Buttons */}
         <FilterButtons
@@ -144,7 +165,7 @@ const MainContent: React.FC<MainContentProps> = ({
         </div>
 
         {/* Navigation Controls */}
-        <div className="pt-3 sm:pt-4">
+        <div className={isKeyboardOpen ? 'pt-0' : 'pt-3 sm:pt-4'}>
           <NavigationControls
             onPrevious={handlePrevious}
             onNext={handleNext}

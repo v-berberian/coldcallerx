@@ -1033,7 +1033,7 @@ const LeadCard: React.FC<LeadCardProps> = ({
         <div
           ref={commentsScrollRef}
           className="flex-1 min-h-0 overflow-y-auto px-4 space-y-3"
-          style={{ paddingBottom: isComposerFocused ? '6.5rem' : '5rem' }}
+          style={{ paddingBottom: isKeyboardOpen ? '3.75rem' : isComposerFocused ? '6.5rem' : '5rem' }}
           data-comments-scroll="true"
         >
           {comments.length === 0 && (
@@ -1135,11 +1135,11 @@ const LeadCard: React.FC<LeadCardProps> = ({
         </div>
 
         <motion.div
-          className="sticky bottom-0 inset-x-0 z-10 border-t border-border/20 bg-background/80 backdrop-blur"
+          className="sticky bottom-0 inset-x-0 z-50 border-t border-border/20 bg-background/80 backdrop-blur"
           initial={false}
           animate={{ boxShadow: isComposerFocused ? '0 -6px 24px rgba(0,0,0,0.12)' : '0 0 0 rgba(0,0,0,0)' }}
           transition={{ duration: 0.2, ease: [0.25, 0.46, 0.45, 0.94] }}
-          style={{ padding: '0.75rem 1rem calc(0.75rem + env(safe-area-inset-bottom))', position: isKeyboardOpen ? 'fixed' as const : 'sticky', bottom: 0, left: 0, right: 0, zIndex: 50 }}
+          style={{ padding: '0.5rem 0.75rem calc(0.5rem + env(safe-area-inset-bottom))', position: isKeyboardOpen ? 'fixed' as const : 'sticky', bottom: 0, left: 0, right: 0 }}
         >
           <div className="flex items-end gap-2">
             <textarea
