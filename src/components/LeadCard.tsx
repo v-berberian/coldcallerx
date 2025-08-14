@@ -112,11 +112,11 @@ const LeadCard: React.FC<LeadCardProps> = ({
   const glowColor = useMemo(() => {
     switch (leadTag) {
       case 'cold':
-        return 'rgba(59, 130, 246, 0.28)'; // blue-500, subtler alpha
+        return 'rgba(59, 130, 246, 0.38)'; // blue-500, slightly stronger
       case 'warm':
-        return 'rgba(245, 158, 11, 0.28)'; // amber-500, subtler alpha
+        return 'rgba(245, 158, 11, 0.38)'; // amber-500, slightly stronger
       case 'hot':
-        return 'rgba(244, 63, 94, 0.28)'; // rose-500, subtler alpha
+        return 'rgba(244, 63, 94, 0.38)'; // rose-500, slightly stronger
       default:
         return 'rgba(0,0,0,0)';
     }
@@ -434,14 +434,14 @@ const LeadCard: React.FC<LeadCardProps> = ({
           className="absolute inset-0 rounded-3xl pointer-events-none"
           initial={false}
           animate={glowActive 
-            ? { opacity: [0.25, 0.38, 0.25], scale: [1.0, 1.003, 1.0] } 
+            ? { opacity: [0.4, 0.65, 0.4], scale: [1.0, 1.004, 1.0] } 
             : { opacity: 0, scale: 1 }}
           transition={glowActive 
             ? { duration: 3.0, ease: 'easeInOut', repeat: Infinity, repeatType: 'mirror' } 
             : { duration: 0.25, ease: [0.22, 0.61, 0.36, 1] }}
           style={{
-            // Softer outer glow
-            boxShadow: `0 0 0 1px ${glowColor}, 0 0 10px ${glowColor}, 0 0 22px ${glowColor}`,
+            // Slightly stronger outer glow
+            boxShadow: `0 0 0 2px ${glowColor}, 0 0 14px ${glowColor}, 0 0 30px ${glowColor}`,
             zIndex: 1
           }}
         />
