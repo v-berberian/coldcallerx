@@ -252,10 +252,12 @@ const LeadCard: React.FC<LeadCardProps> = ({
     });
     setIsAddCommentModalOpen(true);
     setModalDraft('');
-    // Focus the modal input after animation
+    // Focus the modal input immediately to bring up keyboard
     setTimeout(() => {
       modalInputRef.current?.focus();
-    }, 300);
+      // Force keyboard to appear on mobile
+      modalInputRef.current?.click();
+    }, 100);
   }, []);
 
   const closeAddCommentModal = useCallback(() => {
