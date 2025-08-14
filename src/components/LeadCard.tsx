@@ -102,6 +102,7 @@ const LeadCard: React.FC<LeadCardProps> = ({
   const [comments, setComments] = useState<LeadComment[]>([]);
   const [draft, setDraft] = useState('');
   const commentInputRef = useRef<HTMLTextAreaElement | null>(null);
+  const commentsScrollRef = useRef<HTMLDivElement | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editingText, setEditingText] = useState('');
   const [addFxVisible, setAddFxVisible] = useState(false);
@@ -231,6 +232,11 @@ const LeadCard: React.FC<LeadCardProps> = ({
           // ignore selection errors
         }
       }
+      // Scroll comments to bottom to reveal the newly added item
+      const sc = commentsScrollRef.current;
+      if (sc) {
+        sc.scrollTo({ top: sc.scrollHeight, behavior: 'smooth' });
+      }
     }, 0);
   }, [draft, comments, saveComments]);
 
@@ -259,6 +265,21 @@ const LeadCard: React.FC<LeadCardProps> = ({
     saveComments(next);
     cancelEdit();
   }, [editingId, editingText, comments, saveComments, cancelEdit]);
+
+  // Auto-resize the comment textarea for mobile-friendly composing
+  const resizeCommentInput = useCallback(() => {
+    const el = commentInputRef.current;
+    if (!el) return;
+    const maxHeight = 140; // px
+    el.style.height = 'auto';
+    const desired = Math.min(el.scrollHeight, maxHeight);
+    el.style.height = `${desired}px`;
+    el.style.overflowY = el.scrollHeight > maxHeight ? 'auto' as const : 'hidden' as const;
+  }, []);
+
+  useEffect(() => {
+    resizeCommentInput();
+  }, [draft, resizeCommentInput, isCardFlipped]);
 
   const handleCommentSelect = useCallback((commentId: string) => {
     setSelectedCommentId(prev => prev === commentId ? null : commentId);
@@ -1001,7 +1022,7 @@ const LeadCard: React.FC<LeadCardProps> = ({
 
     {/* Back side of the card - Trello-style comments */}
     <Card 
-      className="shadow-2xl border border-border/50 dark:border-border/60 ring-1 ring-border/40 dark:ring-border/60 rounded-3xl bg-card min-h-[420px] max-h-[520px] sm:min-h-[440px] sm:max-h-[580px] flex flex-col mb-4 overflow-hidden absolute inset-0" 
+      className="shadow-2xl border border-border/50 dark:border-border/60 ring-1 ring-border/40 dark:ring-border/60 rounded-3xl bg-card min-h-[420px] max-h-[520px] sm:min-h-[440px] sm:max-h-[580px] flex flex-col mb-24 overflow-hidden absolute inset-0" 
       style={{
         transformStyle: "preserve-3d",
         backfaceVisibility: "hidden",
@@ -1018,7 +1039,7 @@ const LeadCard: React.FC<LeadCardProps> = ({
           </button>
         </div>
 
-        <div className="flex-1 min-h-0 overflow-y-auto px-4 pb-4 space-y-3" data-comments-scroll="true">
+        <div ref={commentsScrollRef} className="flex-1 min-h-0 overflow-y-auto px-4 pb-24 space-y-3" data-comments-scroll="true">
           {comments.length === 0 && (
             <p className="text-sm text-muted-foreground/60 mt-2">No comments yet.</p>
           )}
@@ -1116,55 +1137,63 @@ const LeadCard: React.FC<LeadCardProps> = ({
             </AnimatePresence>
           </LayoutGroup>
         </div>
-
-        <div className="p-4 border-t border-border/20 bg-background/80 backdrop-blur">
-          <div className="flex items-center gap-2">
-            <textarea
-              value={draft}
-              onChange={(e) => setDraft(e.target.value)}
-              ref={commentInputRef}
-              className="flex-1 rounded-md border border-border/30 bg-background px-3 text-sm focus:outline-none h-11 resize-none py-2 text-left placeholder:text-left"
-              rows={1}
-              placeholder="Add a comment..."
-            />
-            <div className="relative shrink-0">
-              <motion.div
-                whileTap={{ scale: 0.92 }}
-                animate={addFxVisible ? { scale: [1, 1.12, 1] } : {}}
-                transition={{ duration: 0.2, ease: [0.2, 0.7, 0.4, 1] }}
-              >
-                <Button
-                  type="button"
-                  onMouseDown={(e) => {
-                    e.preventDefault();
-                    const el = commentInputRef.current;
-                    if (el) el.focus();
-                  }}
-                  onTouchStart={(e) => {
-                    e.preventDefault();
-                    const el = commentInputRef.current;
-                    if (el) el.focus();
-                  }}
-                  onClick={addComment}
-                  className="h-11 w-11 p-0 rounded-full flex items-center justify-center"
-                  tabIndex={-1}
-                  aria-label="Send comment"
-                >
-                  <Send className="h-5 w-5 block" />
-                </Button>
-              </motion.div>
-              <AnimatePresence>
-                {addFxVisible && (
-                  <motion.span
-                    key="add-ripple"
-                    className="absolute inset-0 rounded-full bg-green-500/15 pointer-events-none"
-                    initial={{ opacity: 0.35, scale: 0.92 }}
-                    animate={{ opacity: 0, scale: 1.22 }}
-                    exit={{ opacity: 0 }}
+        {/* Mobile-optimized sticky composer */}
+        <div className="fixed left-0 right-0 bottom-0 z-40">
+          <div className="pointer-events-none relative">
+            <div
+              className="absolute inset-x-0 bottom-0 pointer-events-auto border-t border-border/20 bg-background/80 backdrop-blur supports-[backdrop-filter]:bg-background/60"
+              style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
+            >
+              <div className="px-4 py-3 flex items-end gap-2">
+                <textarea
+                  value={draft}
+                  onChange={(e) => setDraft(e.target.value)}
+                  ref={commentInputRef}
+                  className="flex-1 rounded-2xl border border-border/30 bg-muted/40 px-3 text-sm focus:outline-none min-h-[44px] max-h-[140px] py-2 resize-none leading-5 placeholder:text-muted-foreground/60 shadow-inner"
+                  rows={1}
+                  placeholder="Add a comment…"
+                  onInput={resizeCommentInput}
+                />
+                <div className="relative shrink-0">
+                  <motion.div
+                    whileTap={{ scale: 0.92 }}
+                    animate={addFxVisible ? { scale: [1, 1.12, 1] } : {}}
                     transition={{ duration: 0.2, ease: [0.2, 0.7, 0.4, 1] }}
-                  />
-                )}
-              </AnimatePresence>
+                  >
+                    <Button
+                      type="button"
+                      onMouseDown={(e) => {
+                        e.preventDefault();
+                        const el = commentInputRef.current;
+                        if (el) el.focus();
+                      }}
+                      onTouchStart={(e) => {
+                        e.preventDefault();
+                        const el = commentInputRef.current;
+                        if (el) el.focus();
+                      }}
+                      onClick={addComment}
+                      className="h-11 w-11 p-0 rounded-full flex items-center justify-center"
+                      tabIndex={-1}
+                      aria-label="Send comment"
+                    >
+                      <Send className="h-5 w-5 block" />
+                    </Button>
+                  </motion.div>
+                  <AnimatePresence>
+                    {addFxVisible && (
+                      <motion.span
+                        key="add-ripple"
+                        className="absolute inset-0 rounded-full bg-green-500/15 pointer-events-none"
+                        initial={{ opacity: 0.35, scale: 0.92 }}
+                        animate={{ opacity: 0, scale: 1.22 }}
+                        exit={{ opacity: 0 }}
+                        transition={{ duration: 0.2, ease: [0.2, 0.7, 0.4, 1] }}
+                      />
+                    )}
+                  </AnimatePresence>
+                </div>
+              </div>
             </div>
           </div>
         </div>
