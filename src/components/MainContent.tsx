@@ -119,16 +119,16 @@ const MainContent: React.FC<MainContentProps> = ({
     const update = () => {
       try {
         if (vv) {
-          // On iOS, visualViewport.height shrinks when keyboard appears
-          // But the container stays the same height - we need to calculate the offset
-          const windowHeight = window.innerHeight;
-          const visibleHeight = vv.height;
-          const calculatedKeyboardHeight = Math.max(0, windowHeight - visibleHeight);
-          
-          // Don't change viewport height - keep container full size
-          // Just track keyboard height for positioning
-          setViewportHeight(windowHeight);
-          setKeyboardHeight(calculatedKeyboardHeight);
+          // On iOS, the effective bottom overlay (keyboard + accessory bar) can be computed as:
+          // layoutViewportHeight - (visualViewport.height + visualViewport.offsetTop)
+          const layoutViewportHeight = window.innerHeight;
+          const vvHeight = vv.height;
+          const vvOffsetTop = (vv as unknown as { offsetTop?: number }).offsetTop ?? 0;
+          const bottomOverlay = Math.max(0, layoutViewportHeight - (vvHeight + vvOffsetTop));
+
+          // Keep container at full layout height; use overlay to raise content
+          setViewportHeight(layoutViewportHeight);
+          setKeyboardHeight(bottomOverlay);
         } else {
           // Fallback for non-supporting browsers
           setViewportHeight(window.innerHeight);
