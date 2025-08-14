@@ -1259,33 +1259,41 @@ const LeadCard: React.FC<LeadCardProps> = ({
                 bounce: 0.2,
                 ease: [0.25, 0.46, 0.45, 0.94]
               }}
-              className="w-full max-w-lg bg-card rounded-3xl border border-border/50 shadow-2xl max-h-[80vh] flex flex-col overflow-hidden"
+              className="w-full max-w-md bg-gradient-to-br from-background via-background to-background/95 rounded-[2rem] border border-border/20 shadow-[0_25px_50px_-12px_rgba(0,0,0,0.25),0_0_0_1px_rgba(255,255,255,0.05)] backdrop-blur-xl max-h-[85vh] flex flex-col overflow-hidden relative"
               onClick={(e) => e.stopPropagation()}
               style={{
                 touchAction: 'auto',
-                // Reduce max height further when keyboard is visible
-                maxHeight: keyboardInset > 0 ? `calc(80vh - ${keyboardInset}px)` : undefined,
+                maxHeight: keyboardInset > 0 ? `calc(85vh - ${keyboardInset}px)` : undefined,
               }}
             >
+              {/* Subtle gradient overlay */}
+              <div className="absolute inset-0 bg-gradient-to-br from-transparent via-transparent to-white/[0.02] pointer-events-none" />
+              
               {/* Modal Header */}
-              <div className="px-6 py-4 border-b border-border/20">
-                <h3 className="text-lg font-semibold text-center">Add Comment</h3>
+              <div className="relative px-8 py-6 border-b border-border/10">
+                <div className="flex items-center justify-center">
+                  <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-violet-500/10 to-violet-600/10 flex items-center justify-center mb-4">
+                    <MessageSquare className="h-6 w-6 text-violet-500" />
+                  </div>
+                </div>
+                <h3 className="text-xl font-bold text-center bg-gradient-to-r from-foreground to-foreground/80 bg-clip-text text-transparent">
+                  Add Comment
+                </h3>
+                <p className="text-sm text-muted-foreground/70 text-center mt-1">
+                  Share your thoughts about {lead.name}
+                </p>
               </div>
 
               {/* Modal Content */}
-              <div className="flex-1 p-6">
-                <div className="space-y-4">
-                  <div>
-                    <label className="text-sm font-medium text-muted-foreground mb-2 block">
-                      Comment for {lead.name}
-                    </label>
+              <div className="flex-1 px-8 py-6">
+                <div className="space-y-6">
+                  <div className="relative">
                     <textarea
                       value={modalDraft}
                       onChange={(e) => setModalDraft(e.target.value)}
                       ref={modalInputRef}
                       onFocus={() => {
                         setIsModalInputFocused(true);
-                        // Try to eagerly compute inset right after focus
                         const vv = (window as Window & { visualViewport?: VisualViewport }).visualViewport;
                         if (vv) {
                           const compute = () => {
@@ -1305,35 +1313,37 @@ const LeadCard: React.FC<LeadCardProps> = ({
                         }
                       }}
                       onBlur={() => setIsModalInputFocused(false)}
-                      className="w-full rounded-lg border border-border/30 bg-background px-4 py-4 text-base focus:outline-none min-h-[160px] resize-none"
+                      className="w-full rounded-2xl border border-border/20 bg-background/50 backdrop-blur-sm px-6 py-5 text-base focus:outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-500/30 min-h-[180px] resize-none transition-all duration-200"
                       rows={6}
                       placeholder="Type your comment here..."
                       style={{
-                        fontSize: '16px', // Prevent iOS zoom
-                        // Help keep the caret zone clear above the keyboard
+                        fontSize: '16px',
                         scrollMarginBottom: `calc(${keyboardInset}px + env(safe-area-inset-bottom) + 16px)`,
                       }}
                     />
+                    <div className="absolute bottom-3 right-3 text-xs text-muted-foreground/50">
+                      {modalDraft.length}/500
+                    </div>
                   </div>
                 </div>
               </div>
 
               {/* Modal Footer */}
-              <div className="p-6 border-t border-border/20 bg-background/50">
-                <div className="flex items-center gap-4 justify-end">
+              <div className="relative px-8 py-6 border-t border-border/10 bg-gradient-to-t from-background/80 to-background/40 backdrop-blur-sm">
+                <div className="flex items-center gap-3 justify-end">
                   <Button
                     variant="outline"
                     onClick={closeAddCommentModal}
-                    className="h-12 px-6 rounded-lg shadow-[inset_0_1px_0_rgba(255,255,255,0.8),inset_0_-1px_0_rgba(0,0,0,0.1),0_2px_4px_-1px_rgba(0,0,0,0.1)] hover:shadow-[inset_0_1px_0_rgba(255,255,255,0.8),inset_0_-1px_0_rgba(0,0,0,0.1),0_4px_6px_-1px_rgba(0,0,0,0.15)] active:shadow-[inset_0_2px_4px_rgba(0,0,0,0.15),inset_0_-1px_0_rgba(255,255,255,0.6),0_1px_2px_-1px_rgba(0,0,0,0.1)] transition-all duration-200 active:scale-95"
+                    className="h-11 px-5 rounded-xl bg-background/50 border-border/20 text-muted-foreground hover:text-foreground hover:bg-background/80 transition-all duration-200"
                   >
                     Cancel
                   </Button>
                   <Button
                     onClick={addCommentFromModal}
                     disabled={!modalDraft.trim()}
-                    className="h-12 px-6 rounded-lg shadow-[inset_0_1px_0_rgba(255,255,255,0.2),inset_0_-1px_0_rgba(0,0,0,0.1),0_4px_6px_-1px_rgba(0,0,0,0.2),0_2px_4px_-1px_rgba(0,0,0,0.1)] hover:shadow-[inset_0_1px_0_rgba(255,255,255,0.2),inset_0_-1px_0_rgba(0,0,0,0.1),0_6px_12px_-1px_rgba(0,0,0,0.25),0_4px_6px_-1px_rgba(0,0,0,0.15)] active:shadow-[inset_0_2px_4px_rgba(0,0,0,0.2),inset_0_-1px_0_rgba(255,255,255,0.1),0_2px_4px_-1px_rgba(0,0,0,0.1)] disabled:shadow-[inset_0_1px_0_rgba(255,255,255,0.1),inset_0_-1px_0_rgba(0,0,0,0.05),0_2px_4px_-1px_rgba(0,0,0,0.1)] transition-all duration-200 active:scale-95 disabled:scale-100"
+                    className="h-11 px-6 rounded-xl bg-gradient-to-r from-violet-500 to-violet-600 hover:from-violet-600 hover:to-violet-700 text-white shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
                   >
-                    Add
+                    Add Comment
                   </Button>
                 </div>
               </div>
