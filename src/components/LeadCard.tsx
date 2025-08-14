@@ -673,7 +673,7 @@ const LeadCard: React.FC<LeadCardProps> = ({
         <div className="space-y-3 p-3 sm:p-5 pt-0">
           {/* Last called section above buttons */}
           {lead.lastCalled && (
-            <div className="flex items-center justify-center w-full">
+            <div className="flex items-center justify-center w-full px-3 sm:px-5 mt-1">
               <div className="flex items-center justify-center gap-2 mx-auto">
                 <p className="text-sm text-muted-foreground transition-opacity duration-300 ease-in-out opacity-100 whitespace-nowrap my-0 py-0 text-center">
                   Last called: {lead.lastCalled}
