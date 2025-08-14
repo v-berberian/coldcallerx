@@ -82,6 +82,15 @@ const MainContent: React.FC<MainContentProps> = ({
   const [isCommenting, setIsCommenting] = useState(false);
   const [viewportHeight, setViewportHeight] = useState<number | null>(null);
   const [keyboardHeight, setKeyboardHeight] = useState<number>(0);
+  const isIOS = useRef<boolean>(false);
+
+  useEffect(() => {
+    try {
+      isIOS.current = /iPhone|iPad|iPod/i.test(navigator.userAgent);
+    } catch {
+      isIOS.current = false;
+    }
+  }, []);
 
   // Create wrapped navigation functions that set direction and close delete menu
   const handlePrevious = () => {
@@ -173,8 +182,17 @@ const MainContent: React.FC<MainContentProps> = ({
   const commentingStyle = isCommenting ? {
     height: '100vh',
     overflow: 'hidden',
-    paddingBottom: `${Math.max(0, keyboardHeight + 12)}px`,
-    transition: 'padding-bottom 0.2s ease-out',
+    paddingBottom: `${Math.max(0, keyboardHeight + 18)}px`,
+    transition: 'padding-bottom 0.18s ease-out',
+    // iOS specific: lock viewport to prevent rubber-band scrolling
+    position: isIOS.current ? 'fixed' as const : undefined,
+    top: isIOS.current ? 0 : undefined,
+    left: isIOS.current ? 0 : undefined,
+    right: isIOS.current ? 0 : undefined,
+    bottom: isIOS.current ? 0 : undefined,
+    touchAction: isIOS.current ? 'none' as const : undefined,
+    overscrollBehavior: isIOS.current ? 'contain' as const : undefined,
+    WebkitOverflowScrolling: isIOS.current ? ('auto' as unknown as string) : undefined,
   } : {
     minHeight: 'calc(100dvh - 120px)'
   };
