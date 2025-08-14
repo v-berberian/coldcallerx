@@ -155,7 +155,7 @@ const MainContent: React.FC<MainContentProps> = ({
   }, [isCommenting]);
 
   return (
-    <div className={`flex-1 flex items-start justify-center min-h-0 transition-all duration-300 ${isCommenting ? 'pt-0 p-2 h-full overflow-hidden' : 'pt-1 p-3 sm:p-4'}`} style={{ minHeight: isCommenting ? undefined : 'calc(100dvh - 120px)', height: isCommenting ? (viewportHeight ? `${viewportHeight}px` : '100vh') : undefined }}>
+    <div className={`flex-1 flex items-start justify-center min-h-0 transition-all duration-300 ${isCommenting ? 'pt-2 p-2 h-full overflow-hidden' : 'pt-1 p-3 sm:p-4'}`} style={{ minHeight: isCommenting ? undefined : 'calc(100dvh - 120px)', height: isCommenting ? (viewportHeight ? `${Math.max(viewportHeight - 60, 400)}px` : '100vh') : undefined }}>
       <div className="w-full space-y-1 flex flex-col min-h-full">
         {/* Filter Buttons */}
         <div className={`transition-all duration-300 ease-out ${isCommenting ? 'opacity-0 scale-95 -translate-y-2 pointer-events-none' : ''}`}>
@@ -179,7 +179,7 @@ const MainContent: React.FC<MainContentProps> = ({
         </div>
 
         {/* Current Lead Card or No Leads Message */}
-        <div className="animate-content-change-fast flex-1 flex flex-col">
+        <div className={`animate-content-change-fast flex-1 flex flex-col ${isCommenting ? 'justify-start' : ''}`}>
           <LeadCard
             lead={currentLead}
             currentIndex={currentIndex}

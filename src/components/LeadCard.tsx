@@ -39,6 +39,8 @@ interface LeadCardProps {
   onImportNew?: () => void;
   navigationDirection?: 'forward' | 'backward';
   onSwipeReset?: (resetSwipe: () => void) => void;
+  onCommentingChange?: (commenting: boolean) => void;
+  isCommenting?: boolean;
 }
 
 const LeadCard: React.FC<LeadCardProps> = ({
@@ -55,7 +57,9 @@ const LeadCard: React.FC<LeadCardProps> = ({
   refreshTrigger,
   onImportNew,
   navigationDirection = 'forward',
-  onSwipeReset
+  onSwipeReset,
+  onCommentingChange,
+  isCommenting
 }) => {
   // Use the extracted hooks
   const {
@@ -68,7 +72,12 @@ const LeadCard: React.FC<LeadCardProps> = ({
   } = useLeadCardTemplates();
 
   const [isCardFlipped, setIsCardFlipped] = useState(false);
-  const handleFlip = useCallback(() => setIsCardFlipped((prev) => !prev), []);
+  const handleFlip = useCallback(() => {
+    const newFlipped = !isCardFlipped;
+    setIsCardFlipped(newFlipped);
+    // Notify parent about commenting state change
+    onCommentingChange?.(newFlipped);
+  }, [isCardFlipped, onCommentingChange]);
   const [isPhoneMenuOpen, setIsPhoneMenuOpen] = useState(false);
   const {
     isSwiping,
@@ -1117,7 +1126,7 @@ const LeadCard: React.FC<LeadCardProps> = ({
           </LayoutGroup>
         </div>
 
-        <div className="p-4 border-t border-border/20 bg-background/80 backdrop-blur">
+        <div className="p-4 border-t border-border/20 bg-background/80 backdrop-blur" style={{ paddingBottom: 'max(1rem, env(safe-area-inset-bottom))' }}>
           <div className="flex items-center gap-2">
             <textarea
               value={draft}
@@ -1126,6 +1135,15 @@ const LeadCard: React.FC<LeadCardProps> = ({
               className="flex-1 rounded-md border border-border/30 bg-background px-3 text-sm focus:outline-none h-11 resize-none py-2 text-left placeholder:text-left"
               rows={1}
               placeholder="Add a comment..."
+              onFocus={() => {
+                // Slight delay to ensure keyboard is showing
+                setTimeout(() => {
+                  const element = commentInputRef.current;
+                  if (element) {
+                    element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                  }
+                }, 300);
+              }}
             />
             <div className="relative shrink-0">
               <motion.div
