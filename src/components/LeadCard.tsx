@@ -670,7 +670,7 @@ const LeadCard: React.FC<LeadCardProps> = ({
         </div>
 
         {/* Group 3: Last Called and Action Buttons */}
-        <div className="space-y-3 p-3 sm:p-5 pt-0">
+        <div className="space-y-3 px-0 sm:px-0 pb-3 sm:pb-5 pt-0">
           {/* Last called section above buttons */}
           {lead.lastCalled && (
             <div className="flex items-center justify-center w-full px-3 sm:px-5 mt-1">
@@ -693,8 +693,8 @@ const LeadCard: React.FC<LeadCardProps> = ({
           )}
           
           {/* Action Buttons - Call and Text */}
-          <div className="flex w-full gap-2">
-            <div className="flex-1 flex justify-center -translate-x-1 sm:-translate-x-2">
+          <div className="flex w-full gap-6 sm:gap-10">
+            <div className="flex-1 flex justify-center">
               {!isDeleteMode ? (
               <Button 
                   onClick={e => {
@@ -795,7 +795,7 @@ const LeadCard: React.FC<LeadCardProps> = ({
                 </div>
               )}
             </div>
-            <div className="flex-1 flex justify-center translate-x-1 sm:translate-x-2">
+            <div className="flex-1 flex justify-center">
               {!isDeleteMode ? (
               <Button 
                   onClick={e => {
