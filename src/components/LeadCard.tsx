@@ -1185,7 +1185,6 @@ const LeadCard: React.FC<LeadCardProps> = ({
                 className="h-9 px-4 rounded-lg bg-primary/10 hover:bg-primary/20 text-primary border border-primary/20"
                 size="sm"
               >
-                <MessageSquare className="h-4 w-4 mr-2" />
                 Add Comment
               </Button>
             </motion.div>
