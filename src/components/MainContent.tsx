@@ -169,21 +169,21 @@ const MainContent: React.FC<MainContentProps> = ({
   }, [isCommenting]);
 
   // Calculate positioning to place card 12px above keyboard on iOS
+  // Keep container full-height and use bottom padding to lift content above the keyboard
   const commentingStyle = isCommenting ? {
     height: '100vh',
     overflow: 'hidden',
-    // Push content up by keyboard height + 12px gap
-    transform: keyboardHeight > 0 ? `translateY(-${keyboardHeight + 12}px)` : 'translateY(0)',
-    transition: 'transform 0.3s ease-out',
+    paddingBottom: `${Math.max(0, keyboardHeight + 12)}px`,
+    transition: 'padding-bottom 0.2s ease-out',
   } : {
     minHeight: 'calc(100dvh - 120px)'
   };
 
   return (
     <div className={`flex-1 flex justify-center min-h-0 transition-all duration-300 ${isCommenting ? 'items-end pt-0 px-2' : 'items-start pt-1 p-3 sm:p-4'}`} style={commentingStyle}>
-      <div className={`w-full flex flex-col ${isCommenting ? 'h-auto justify-end pb-4' : 'space-y-1 min-h-full'}`}>
+      <div className={`w-full flex flex-col ${isCommenting ? 'h-auto justify-end' : 'space-y-1 min-h-full'}`}>
         {/* Filter Buttons */}
-        <div className={`transition-all duration-300 ease-out ${isCommenting ? 'opacity-0 scale-95 -translate-y-2 pointer-events-none' : ''}`}>
+        <div className={`${isCommenting ? 'hidden' : 'transition-all duration-300 ease-out'}`}>
           <FilterButtons
             timezoneFilter={timezoneFilter}
             callFilter={callFilter}
@@ -226,7 +226,7 @@ const MainContent: React.FC<MainContentProps> = ({
         </div>
 
         {/* Navigation Controls */}
-        <div className={`transition-all duration-300 ease-out ${isCommenting ? 'opacity-0 scale-95 translate-y-2 pointer-events-none pt-0' : 'pt-3 sm:pt-4'}`}>
+        <div className={`${isCommenting ? 'hidden' : 'transition-all duration-300 ease-out pt-3 sm:pt-4'}`}>
           <NavigationControls
             onPrevious={handlePrevious}
             onNext={handleNext}
