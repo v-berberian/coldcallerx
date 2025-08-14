@@ -83,6 +83,7 @@ const MainContent: React.FC<MainContentProps> = ({
   const [viewportHeight, setViewportHeight] = useState<number | null>(null);
   const [keyboardHeight, setKeyboardHeight] = useState<number>(0);
   const isIOS = useRef<boolean>(false);
+  const vvUpdateTimer = useRef<number | null>(null);
 
   useEffect(() => {
     try {
@@ -149,18 +150,25 @@ const MainContent: React.FC<MainContentProps> = ({
       }
     };
 
+    const scheduleUpdate = () => {
+      if (vvUpdateTimer.current) {
+        clearTimeout(vvUpdateTimer.current);
+      }
+      vvUpdateTimer.current = window.setTimeout(update, 50);
+    };
+
     if (isCommenting) {
       // Prevent background scroll when commenting
       const originalOverflow = document.body.style.overflow;
       document.body.style.overflow = 'hidden';
 
       if (vv) {
-        vv.addEventListener('resize', update);
-        vv.addEventListener('scroll', update);
+        vv.addEventListener('resize', scheduleUpdate);
+        vv.addEventListener('scroll', scheduleUpdate);
         update();
         detach = () => {
-          vv.removeEventListener('resize', update);
-          vv.removeEventListener('scroll', update);
+          vv.removeEventListener('resize', scheduleUpdate);
+          vv.removeEventListener('scroll', scheduleUpdate);
         };
       } else {
         // Fallback update
@@ -170,6 +178,10 @@ const MainContent: React.FC<MainContentProps> = ({
       return () => {
         document.body.style.overflow = originalOverflow;
         if (detach) detach();
+        if (vvUpdateTimer.current) {
+          clearTimeout(vvUpdateTimer.current);
+          vvUpdateTimer.current = null;
+        }
       };
     } else {
       setViewportHeight(null);
@@ -183,7 +195,10 @@ const MainContent: React.FC<MainContentProps> = ({
     height: '100vh',
     maxHeight: '100vh',
     overflow: 'hidden',
-    paddingBottom: `${Math.max(0, keyboardHeight + 18)}px`,
+    // Use safe area inset to ensure full clearance above iOS home indicator
+    paddingBottom: keyboardHeight > 0
+      ? `calc(${Math.max(0, keyboardHeight)}px + env(safe-area-inset-bottom) + 12px)`
+      : undefined,
     transition: 'padding-bottom 0.18s ease-out',
     // iOS specific: lock viewport to prevent rubber-band scrolling
     position: isIOS.current ? 'fixed' as const : undefined,
