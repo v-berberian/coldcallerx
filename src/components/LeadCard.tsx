@@ -457,7 +457,7 @@ const LeadCard: React.FC<LeadCardProps> = ({
         >
       <CardContent className="flex-1 flex flex-col overflow-hidden pt-2">
         {/* Top row with left cluster, centered count, right menu */}
-        <div className="flex items-center justify-between px-3 sm:px-5 py-2 sm:py-3 pb-1">
+        <div className="flex items-center justify-between px-0 sm:px-1 py-2 sm:py-3 pb-1">
           <div className="flex items-center gap-1">
             <button
               onClick={handleFlip}
@@ -693,8 +693,8 @@ const LeadCard: React.FC<LeadCardProps> = ({
           )}
           
           {/* Action Buttons - Call and Text */}
-          <div className="flex w-full gap-3">
-            <div className="flex-1 flex justify-center" style={{ marginLeft: '-1.5rem' }}>
+          <div className="flex w-full gap-4 px-3 sm:px-5">
+            <div className="flex-1 flex justify-center">
               {!isDeleteMode ? (
               <Button 
                   onClick={e => {
@@ -795,7 +795,7 @@ const LeadCard: React.FC<LeadCardProps> = ({
                 </div>
               )}
             </div>
-            <div className="flex-1 flex justify-center" style={{ marginRight: '-1.5rem' }}>
+            <div className="flex-1 flex justify-center">
               {!isDeleteMode ? (
               <Button 
                   onClick={e => {
@@ -923,7 +923,7 @@ const LeadCard: React.FC<LeadCardProps> = ({
       }}
     >
       <CardContent className="flex-1 flex flex-col p-0 overflow-hidden">
-        <div className="flex items-center justify-center px-3 sm:px-5 py-2 sm:py-3 pb-1">
+        <div className="flex items-center justify-center px-0 sm:px-1 py-2 sm:py-3 pb-1">
           <button
             onClick={handleFlip}
             className="text-sm text-muted-foreground opacity-60 cursor-pointer"
