@@ -445,6 +445,28 @@ const LeadCard: React.FC<LeadCardProps> = ({
             zIndex: 1
           }}
         />
+        {/* Gradient shimmer border keyed to temperature tag */}
+        <motion.div
+          className="absolute inset-0 rounded-3xl pointer-events-none"
+          style={{
+            background: `conic-gradient(from 0deg, transparent 0%, ${glowColor} 12%, transparent 24%, transparent 56%, ${glowColor} 68%, transparent 80%)`,
+            mixBlendMode: 'overlay',
+            opacity: 0.18,
+            zIndex: 2
+          }}
+          animate={glowActive ? { rotate: 360, opacity: 0.22 } : { rotate: 0, opacity: 0 }}
+          transition={glowActive ? { duration: 16, ease: 'linear', repeat: Infinity } : { duration: 0.25 }}
+        />
+        {/* Subtle glass overlay */}
+        <div
+          className="absolute inset-0 rounded-3xl pointer-events-none"
+          style={{
+            backdropFilter: 'blur(4px)',
+            WebkitBackdropFilter: 'blur(4px)',
+            background: 'linear-gradient(135deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02))',
+            zIndex: 0
+          }}
+        />
         <Card 
           className="shadow-2xl border border-border/50 dark:border-border/60 ring-1 ring-border/40 dark:ring-border/60 rounded-3xl bg-card min-h-[420px] max-h-[520px] sm:min-h-[440px] sm:max-h-[580px] flex flex-col mb-4 overflow-hidden relative" 
           onClick={(e) => handleCardClick(e)}
@@ -570,30 +592,88 @@ const LeadCard: React.FC<LeadCardProps> = ({
             <div className="flex items-center justify-center mt-1">
               <div className="inline-flex items-center rounded-full border border-border/30 bg-background/60 backdrop-blur px-1.5 py-1.5"
                    style={{ WebkitTapHighlightColor: 'transparent' }}>
-                <button
+                <motion.button
                   type="button"
                   onClick={() => toggleLeadTag('cold')}
-                  className={`px-3 py-1.5 rounded-full flex items-center gap-1 text-xs ${leadTag === 'cold' ? 'bg-gradient-to-br from-blue-400/20 to-blue-600/20 text-blue-600 dark:text-blue-400 ring-1 ring-blue-500/30' : 'text-muted-foreground'}`}
+                  className={`px-3 py-1.5 rounded-full flex items-center gap-1 text-xs relative overflow-hidden ${leadTag === 'cold' ? 'text-blue-600 dark:text-blue-400 ring-1 ring-blue-500/30' : 'text-muted-foreground'}`}
+                  whileTap={{ scale: 0.96 }}
+                  animate={leadTag === 'cold' ? { backgroundColor: 'rgba(59,130,246,0.14)' } : { backgroundColor: 'rgba(0,0,0,0)' }}
+                  transition={{ duration: 0.18 }}
                 >
-                  <Snowflake className="h-3.5 w-3.5" />
+                  <motion.span
+                    initial={false}
+                    animate={{ rotate: leadTag === 'cold' ? 0 : 0, scale: leadTag === 'cold' ? 1.08 : 1 }}
+                    transition={{ type: 'spring', stiffness: 420, damping: 26 }}
+                  >
+                    <Snowflake className="h-3.5 w-3.5" />
+                  </motion.span>
                   <span>Cold</span>
-                </button>
-                <button
+                  {/* Glow ripple */}
+                  {leadTag === 'cold' && (
+                    <motion.span
+                      key="cold-ripple"
+                      className="absolute inset-0 rounded-full"
+                      initial={{ opacity: 0.35, scale: 0.9 }}
+                      animate={{ opacity: 0, scale: 1.25 }}
+                      transition={{ duration: 0.35, ease: [0.4, 0.2, 0.2, 1] }}
+                      style={{ background: 'radial-gradient(circle, rgba(59,130,246,0.25) 0%, rgba(59,130,246,0) 60%)' }}
+                    />
+                  )}
+                </motion.button>
+                <motion.button
                   type="button"
                   onClick={() => toggleLeadTag('warm')}
-                  className={`px-3 py-1.5 rounded-full flex items-center gap-1 text-xs ${leadTag === 'warm' ? 'bg-gradient-to-br from-amber-400/20 to-amber-600/20 text-amber-600 dark:text-amber-400 ring-1 ring-amber-500/30' : 'text-muted-foreground'}`}
+                  className={`px-3 py-1.5 rounded-full flex items-center gap-1 text-xs relative overflow-hidden ${leadTag === 'warm' ? 'text-amber-600 dark:text-amber-400 ring-1 ring-amber-500/30' : 'text-muted-foreground'}`}
+                  whileTap={{ scale: 0.96 }}
+                  animate={leadTag === 'warm' ? { backgroundColor: 'rgba(245,158,11,0.14)' } : { backgroundColor: 'rgba(0,0,0,0)' }}
+                  transition={{ duration: 0.18 }}
                 >
-                  <Sun className="h-3.5 w-3.5" />
+                  <motion.span
+                    initial={false}
+                    animate={{ rotate: leadTag === 'warm' ? 0 : 0, scale: leadTag === 'warm' ? 1.08 : 1 }}
+                    transition={{ type: 'spring', stiffness: 420, damping: 26 }}
+                  >
+                    <Sun className="h-3.5 w-3.5" />
+                  </motion.span>
                   <span>Warm</span>
-                </button>
-                <button
+                  {leadTag === 'warm' && (
+                    <motion.span
+                      key="warm-ripple"
+                      className="absolute inset-0 rounded-full"
+                      initial={{ opacity: 0.35, scale: 0.9 }}
+                      animate={{ opacity: 0, scale: 1.25 }}
+                      transition={{ duration: 0.35, ease: [0.4, 0.2, 0.2, 1] }}
+                      style={{ background: 'radial-gradient(circle, rgba(245,158,11,0.22) 0%, rgba(245,158,11,0) 60%)' }}
+                    />
+                  )}
+                </motion.button>
+                <motion.button
                   type="button"
                   onClick={() => toggleLeadTag('hot')}
-                  className={`px-3 py-1.5 rounded-full flex items-center gap-1 text-xs ${leadTag === 'hot' ? 'bg-gradient-to-br from-rose-400/20 to-rose-600/20 text-rose-600 dark:text-rose-400 ring-1 ring-rose-500/30' : 'text-muted-foreground'}`}
+                  className={`px-3 py-1.5 rounded-full flex items-center gap-1 text-xs relative overflow-hidden ${leadTag === 'hot' ? 'text-rose-600 dark:text-rose-400 ring-1 ring-rose-500/30' : 'text-muted-foreground'}`}
+                  whileTap={{ scale: 0.96 }}
+                  animate={leadTag === 'hot' ? { backgroundColor: 'rgba(244,63,94,0.14)' } : { backgroundColor: 'rgba(0,0,0,0)' }}
+                  transition={{ duration: 0.18 }}
                 >
-                  <Flame className="h-3.5 w-3.5" />
+                  <motion.span
+                    initial={false}
+                    animate={{ rotate: leadTag === 'hot' ? 0 : 0, scale: leadTag === 'hot' ? 1.08 : 1 }}
+                    transition={{ type: 'spring', stiffness: 420, damping: 26 }}
+                  >
+                    <Flame className="h-3.5 w-3.5" />
+                  </motion.span>
                   <span>Hot</span>
-                </button>
+                  {leadTag === 'hot' && (
+                    <motion.span
+                      key="hot-ripple"
+                      className="absolute inset-0 rounded-full"
+                      initial={{ opacity: 0.35, scale: 0.9 }}
+                      animate={{ opacity: 0, scale: 1.25 }}
+                      transition={{ duration: 0.35, ease: [0.4, 0.2, 0.2, 1] }}
+                      style={{ background: 'radial-gradient(circle, rgba(244,63,94,0.22) 0%, rgba(244,63,94,0) 60%)' }}
+                    />
+                  )}
+                </motion.button>
               </div>
             </div>
           </div>
