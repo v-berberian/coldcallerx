@@ -568,7 +568,7 @@ const LeadCard: React.FC<LeadCardProps> = ({
             )}
             {/* Lead priority segmented control */}
             <div className="flex items-center justify-center mt-1">
-              <div className="inline-flex items-center rounded-full border border-border/30 bg-background/60 backdrop-blur px-1 py-1"
+              <div className="inline-flex items-center rounded-full border border-border/30 bg-background/60 backdrop-blur px-1.5 py-1.5"
                    style={{ WebkitTapHighlightColor: 'transparent' }}>
                 <button
                   type="button"
