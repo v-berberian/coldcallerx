@@ -693,7 +693,7 @@ const LeadCard: React.FC<LeadCardProps> = ({
           )}
           
           {/* Action Buttons - Call and Text */}
-          <div className="flex w-full gap-4 px-3 sm:px-5">
+          <div className="flex w-full gap-3 sm:gap-4">
             <div className="flex-1 flex justify-center">
               {!isDeleteMode ? (
               <Button 
