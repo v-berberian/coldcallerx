@@ -38,6 +38,7 @@ interface MainContentProps {
   refreshTrigger?: number;
   onImportNew?: () => void;
   onDeleteLead?: (lead: Lead) => void;
+  onCommentingChange?: (commenting: boolean) => void;
 }
 
 const MainContent: React.FC<MainContentProps> = ({
@@ -73,7 +74,8 @@ const MainContent: React.FC<MainContentProps> = ({
   noLeadsMessage,
   refreshTrigger,
   onImportNew,
-  onDeleteLead
+  onDeleteLead,
+  onCommentingChange
 }) => {
   const [navigationDirection, setNavigationDirection] = useState<'forward' | 'backward'>('forward');
   const [resetSwipe, setResetSwipe] = useState<(() => void) | null>(null);
@@ -106,6 +108,7 @@ const MainContent: React.FC<MainContentProps> = ({
   // Handle commenting state from LeadCard
   const handleCommentingChange = (commenting: boolean) => {
     setIsCommenting(commenting);
+    onCommentingChange?.(commenting);
   };
 
   return (

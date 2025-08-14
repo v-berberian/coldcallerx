@@ -32,6 +32,7 @@ const CallingScreenContainer: React.FC<CallingScreenContainerProps> = memo(({
   refreshTrigger: externalRefreshTrigger = 0
 }) => {
   const { importLeadsFromCSV, updateLeadCallCount, resetCallCount, resetAllCallCounts } = useLocalLeadOperations();
+  const [isCommenting, setIsCommenting] = useState(false);
   
   const {
     componentReady,
@@ -82,6 +83,11 @@ const CallingScreenContainer: React.FC<CallingScreenContainerProps> = memo(({
     getDelayDisplayType,
     isLoaded
   } = useLocalCallingScreenState({ leads, onCallMade: undefined, refreshTrigger: externalRefreshTrigger });
+
+  // Handle commenting state from MainContent
+  const handleCommentingChange = (commenting: boolean) => {
+    setIsCommenting(commenting);
+  };
 
   useSimplifiedCallingScreenEffects({
     componentReady,
@@ -300,28 +306,30 @@ const CallingScreenContainer: React.FC<CallingScreenContainerProps> = memo(({
   return (
     <div className="h-[100dvh] flex flex-col overflow-hidden fixed inset-0">
       {/* Header */}
-      <CallingHeader
-        searchQuery={searchQuery}
-        showAutocomplete={showAutocomplete}
-        searchResults={searchResults}
-        allSearchResults={allSearchResults}
-        leadsData={leadsData}
-        fileName={fileName}
-        onSearchChange={setSearchQuery}
-        onSearchFocus={handleSearchFocus}
-        onSearchBlur={handleSearchBlur}
-        onClearSearch={clearSearch}
-        onLeadSelect={handleLeadSelect}
-        onLeadsImported={handleLeadsImported}
-        onCSVSelect={handleCSVSelect}
-        currentCSVId={currentCSVId}
-        refreshTrigger={externalRefreshTrigger}
-        loadMoreResults={loadMoreResults}
-        loadedResultsCount={loadedResultsCount}
-        totalResultsCount={allSearchResults?.length || 0}
-        onCloseAutocomplete={closeAutocomplete}
-        onAllListsDeleted={onAllListsDeleted}
-      />
+      <div className={`transition-all duration-300 ease-out ${isCommenting ? 'opacity-0 scale-95 -translate-y-2 pointer-events-none' : ''}`}>
+        <CallingHeader
+          searchQuery={searchQuery}
+          showAutocomplete={showAutocomplete}
+          searchResults={searchResults}
+          allSearchResults={allSearchResults}
+          leadsData={leadsData}
+          fileName={fileName}
+          onSearchChange={setSearchQuery}
+          onSearchFocus={handleSearchFocus}
+          onSearchBlur={handleSearchBlur}
+          onClearSearch={clearSearch}
+          onLeadSelect={handleLeadSelect}
+          onLeadsImported={handleLeadsImported}
+          onCSVSelect={handleCSVSelect}
+          currentCSVId={currentCSVId}
+          refreshTrigger={externalRefreshTrigger}
+          loadMoreResults={loadMoreResults}
+          loadedResultsCount={loadedResultsCount}
+          totalResultsCount={allSearchResults?.length || 0}
+          onCloseAutocomplete={closeAutocomplete}
+          onAllListsDeleted={onAllListsDeleted}
+        />
+      </div>
 
       {/* Main Content - takes remaining space */}
       <div className="flex-1 overflow-hidden min-h-0">
@@ -365,6 +373,7 @@ const CallingScreenContainer: React.FC<CallingScreenContainerProps> = memo(({
           }}
           onSwipeReset={handleSwipeReset}
           onDeleteLead={handleDeleteLead}
+          onCommentingChange={handleCommentingChange}
         />
       </div>
     </div>
