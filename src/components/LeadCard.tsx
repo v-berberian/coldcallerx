@@ -1339,7 +1339,7 @@ const LeadCard: React.FC<LeadCardProps> = ({
                     disabled={!modalDraft.trim()}
                     className="rounded-lg shadow-[inset_0_1px_0_rgba(255,255,255,0.2),inset_0_-1px_0_rgba(0,0,0,0.1),0_4px_6px_-1px_rgba(0,0,0,0.2),0_2px_4px_-1px_rgba(0,0,0,0.1)] hover:shadow-[inset_0_1px_0_rgba(255,255,255,0.2),inset_0_-1px_0_rgba(0,0,0,0.1),0_6px_12px_-1px_rgba(0,0,0,0.25),0_4px_6px_-1px_rgba(0,0,0,0.15)] active:shadow-[inset_0_2px_4px_rgba(0,0,0,0.2),inset_0_-1px_0_rgba(255,255,255,0.1),0_2px_4px_-1px_rgba(0,0,0,0.1)] disabled:shadow-[inset_0_1px_0_rgba(255,255,255,0.1),inset_0_-1px_0_rgba(0,0,0,0.05),0_2px_4px_-1px_rgba(0,0,0,0.1)] transition-all duration-200 active:scale-95 disabled:scale-100"
                   >
-                    Add Comment
+                    Add
                   </Button>
                 </div>
               </div>
