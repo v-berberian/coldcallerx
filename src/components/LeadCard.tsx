@@ -107,6 +107,7 @@ const LeadCard: React.FC<LeadCardProps> = ({
   const [addFxVisible, setAddFxVisible] = useState(false);
   const [selectedCommentId, setSelectedCommentId] = useState<string | null>(null);
   const [leadTag, setLeadTagState] = useState<'cold' | 'warm' | 'hot' | null>(null);
+  const [glowPulse, setGlowPulse] = useState(false);
   
   // Subtle neon backlight color based on lead tag
   const glowColor = useMemo(() => {
@@ -197,6 +198,17 @@ const LeadCard: React.FC<LeadCardProps> = ({
       await saveLeadTag(tag);
     }
   }, [leadTag, saveLeadTag]);
+
+  // Trigger a brief pulse animation when the tag changes on the front side
+  useEffect(() => {
+    if (leadTag) {
+      setGlowPulse(true);
+      const t = setTimeout(() => setGlowPulse(false), 1200);
+      return () => clearTimeout(t);
+    } else {
+      setGlowPulse(false);
+    }
+  }, [leadTag]);
 
   useEffect(() => {
     loadComments();
@@ -430,15 +442,34 @@ const LeadCard: React.FC<LeadCardProps> = ({
         {/* Subtle neon backlight glow, animated on temperature/tag selection */}
         <motion.div
           className="absolute inset-0 rounded-3xl pointer-events-none"
-          initial={false}
-          animate={{ opacity: leadTag && !isCardFlipped ? 1 : 0, scale: leadTag && !isCardFlipped ? 1.002 : 1 }}
-          transition={{ duration: 0.35, ease: [0.22, 0.61, 0.36, 1] }}
+          key={`steady-glow-${leadTag || 'none'}`}
+          initial={{ opacity: 0, scale: 0.985, filter: 'blur(10px)' }}
+          animate={leadTag && !isCardFlipped ? {
+            opacity: [0, 1, 0.9, 1],
+            scale: [0.985, 1.01, 1.003, 1],
+          } : { opacity: 0, scale: 1 }}
+          transition={{ duration: 0.9, ease: [0.22, 0.61, 0.36, 1], times: [0, 0.5, 0.8, 1] }}
           style={{
-            // Outer glow using multiple shadow layers for a subtle neon effect
             boxShadow: `0 0 0 2px ${glowColor}, 0 0 18px ${glowColor}, 0 0 36px ${glowColor}`,
             zIndex: 1
           }}
         />
+        {leadTag && !isCardFlipped && (
+          <motion.div
+            className="absolute inset-0 rounded-3xl pointer-events-none"
+            key={`pulse-glow-${glowPulse ? 'on' : 'off'}`}
+            initial={{ opacity: 0, scale: 1 }}
+            animate={glowPulse ? {
+              opacity: [0, 0.6, 0],
+              scale: [1, 1.03, 1]
+            } : { opacity: 0, scale: 1 }}
+            transition={{ duration: 0.8, ease: [0.22, 0.61, 0.36, 1] }}
+            style={{
+              boxShadow: `0 0 28px 3px ${glowColor}`,
+              zIndex: 1
+            }}
+          />
+        )}
         <Card 
           className="shadow-2xl border border-border/50 dark:border-border/60 ring-1 ring-border/40 dark:ring-border/60 rounded-3xl bg-card min-h-[420px] max-h-[520px] sm:min-h-[440px] sm:max-h-[580px] flex flex-col mb-4 overflow-hidden relative" 
           onClick={(e) => handleCardClick(e)}
