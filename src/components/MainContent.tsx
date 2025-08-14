@@ -81,6 +81,7 @@ const MainContent: React.FC<MainContentProps> = ({
   const [resetSwipe, setResetSwipe] = useState<(() => void) | null>(null);
   const [isCommenting, setIsCommenting] = useState(false);
   const [viewportHeight, setViewportHeight] = useState<number | null>(null);
+  const [keyboardHeight, setKeyboardHeight] = useState<number>(0);
 
   // Create wrapped navigation functions that set direction and close delete menu
   const handlePrevious = () => {
@@ -110,7 +111,7 @@ const MainContent: React.FC<MainContentProps> = ({
     onCommentingChange?.(commenting);
   };
 
-  // Adjust height to visualViewport when commenting to keep card aligned above keyboard (iOS)
+  // Calculate viewport and keyboard height when commenting to position card 12px above keyboard (iOS)
   useEffect(() => {
     const vv = (window as Window & { visualViewport?: VisualViewport }).visualViewport;
     let detach: (() => void) | null = null;
@@ -118,12 +119,22 @@ const MainContent: React.FC<MainContentProps> = ({
     const update = () => {
       try {
         if (vv) {
-          setViewportHeight(vv.height);
+          const originalHeight = window.innerHeight;
+          const currentHeight = vv.height;
+          const calculatedKeyboardHeight = Math.max(0, originalHeight - currentHeight);
+          
+          setViewportHeight(currentHeight);
+          setKeyboardHeight(calculatedKeyboardHeight);
         } else {
-          setViewportHeight(null);
+          // Fallback: use window height change detection
+          const originalHeight = window.innerHeight;
+          const currentHeight = window.innerHeight;
+          setViewportHeight(currentHeight);
+          setKeyboardHeight(0);
         }
       } catch {
         setViewportHeight(null);
+        setKeyboardHeight(0);
       }
     };
 
@@ -151,12 +162,21 @@ const MainContent: React.FC<MainContentProps> = ({
       };
     } else {
       setViewportHeight(null);
+      setKeyboardHeight(0);
     }
   }, [isCommenting]);
 
+  // Calculate the container height and bottom padding for 12px above keyboard
+  const commentingStyle = isCommenting ? {
+    height: viewportHeight ? `${viewportHeight}px` : '100vh',
+    paddingBottom: keyboardHeight > 0 ? '12px' : '1rem',
+  } : {
+    minHeight: 'calc(100dvh - 120px)'
+  };
+
   return (
-    <div className={`flex-1 flex justify-center min-h-0 transition-all duration-300 ${isCommenting ? 'items-start pt-2 p-2 h-full overflow-hidden' : 'items-start pt-1 p-3 sm:p-4'}`} style={{ minHeight: isCommenting ? undefined : 'calc(100dvh - 120px)', height: isCommenting ? (viewportHeight ? `${viewportHeight}px` : '100vh') : undefined }}>
-      <div className={`w-full flex flex-col ${isCommenting ? 'h-auto justify-start' : 'space-y-1 min-h-full'}`}>
+    <div className={`flex-1 flex justify-center min-h-0 transition-all duration-300 ${isCommenting ? 'items-end pt-0 px-2 h-full overflow-hidden' : 'items-start pt-1 p-3 sm:p-4'}`} style={commentingStyle}>
+      <div className={`w-full flex flex-col ${isCommenting ? 'h-auto justify-end' : 'space-y-1 min-h-full'}`}>
         {/* Filter Buttons */}
         <div className={`transition-all duration-300 ease-out ${isCommenting ? 'opacity-0 scale-95 -translate-y-2 pointer-events-none' : ''}`}>
           <FilterButtons
@@ -179,7 +199,7 @@ const MainContent: React.FC<MainContentProps> = ({
         </div>
 
         {/* Current Lead Card or No Leads Message */}
-        <div className={`animate-content-change-fast flex flex-col ${isCommenting ? 'flex-1' : 'flex-1'}`}>
+        <div className={`animate-content-change-fast flex flex-col ${isCommenting ? '' : 'flex-1'}`}>
           <LeadCard
             lead={currentLead}
             currentIndex={currentIndex}
