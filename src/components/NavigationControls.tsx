@@ -8,13 +8,15 @@ interface NavigationControlsProps {
   onNext: () => void;
   canGoPrevious: boolean;
   canGoNext: boolean;
+  isCommenting?: boolean;
 }
 
 const NavigationControls: React.FC<NavigationControlsProps> = ({
   onPrevious,
   onNext,
   canGoPrevious,
-  canGoNext
+  canGoNext,
+  isCommenting = false
 }) => {
   const handlePrevious = () => {
     onPrevious();
@@ -81,7 +83,7 @@ const NavigationControls: React.FC<NavigationControlsProps> = ({
     };
   }, []);
 
-  const paddingBottomValue = isKeyboardOpen
+  const paddingBottomValue = (isKeyboardOpen || isCommenting)
     ? '0'
     : 'max(2rem, calc(env(safe-area-inset-bottom) + 1rem))';
 
@@ -91,7 +93,7 @@ const NavigationControls: React.FC<NavigationControlsProps> = ({
         className="w-full"
         style={{ paddingBottom: paddingBottomValue, overflow: 'hidden' }}
         initial={false}
-        animate={isKeyboardOpen ? { opacity: 0, y: 12, maxHeight: 0, pointerEvents: 'none' } : { opacity: 1, y: 0, maxHeight: 400, pointerEvents: 'auto' }}
+        animate={(isKeyboardOpen || isCommenting) ? { opacity: 0, y: 12, maxHeight: 0, pointerEvents: 'none' } : { opacity: 1, y: 0, maxHeight: 400, pointerEvents: 'auto' }}
         transition={{ duration: 0.18, ease: [0.25, 0.46, 0.45, 0.94] }}
       >
         <div className="flex gap-3 sm:gap-4 w-full">
