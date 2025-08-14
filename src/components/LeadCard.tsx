@@ -107,6 +107,8 @@ const LeadCard: React.FC<LeadCardProps> = ({
   const [addFxVisible, setAddFxVisible] = useState(false);
   const [selectedCommentId, setSelectedCommentId] = useState<string | null>(null);
   const [leadTag, setLeadTagState] = useState<'cold' | 'warm' | 'hot' | null>(null);
+  const companyRef = useRef<HTMLParagraphElement | null>(null);
+  const [companyFontSizePx, setCompanyFontSizePx] = useState<number | null>(null);
   
   // Subtle neon backlight color based on lead tag
   const glowColor = useMemo(() => {
@@ -204,6 +206,42 @@ const LeadCard: React.FC<LeadCardProps> = ({
     loadComments();
     loadLeadTag();
   }, [loadComments, loadLeadTag]);
+
+  // Fit company name to a single line without changing card height
+  useEffect(() => {
+    const el = companyRef.current;
+    if (!el || !lead.company) return;
+
+    const fit = () => {
+      // Start from base size (sm: text-lg ~ 18px, base: text-base ~ 16px)
+      const base = window.matchMedia('(min-width: 640px)').matches ? 18 : 16;
+      const min = 12;
+      let size = base;
+
+      el.style.whiteSpace = 'nowrap';
+      el.style.overflow = 'hidden';
+      el.style.textOverflow = 'ellipsis';
+
+      // Set to base first, then shrink until it fits
+      el.style.fontSize = size + 'px';
+      let safety = 24;
+      while (el.scrollWidth > el.clientWidth && size > min && safety-- > 0) {
+        size -= 0.5;
+        el.style.fontSize = size + 'px';
+      }
+      setCompanyFontSizePx(size);
+    };
+
+    // Run once and on resize
+    fit();
+    const ro = new ResizeObserver(() => fit());
+    ro.observe(el);
+    window.addEventListener('resize', fit);
+    return () => {
+      ro.disconnect();
+      window.removeEventListener('resize', fit);
+    };
+  }, [lead.company]);
 
   const addComment = useCallback(() => {
     const text = draft.trim();
@@ -592,8 +630,12 @@ const LeadCard: React.FC<LeadCardProps> = ({
               </h2>
             </div>
             {lead.company && (
-              <div className="flex items-center justify-center px-2">
-                <p className="text-base sm:text-lg font-medium text-center break-words leading-relaxed bg-gradient-to-r from-muted-foreground to-muted-foreground/90 bg-clip-text text-transparent dark:bg-none dark:text-muted-foreground">
+              <div className="flex items-center justify-center px-2 w-full">
+                <p
+                  ref={companyRef}
+                  className="font-medium text-center leading-relaxed bg-gradient-to-r from-muted-foreground to-muted-foreground/90 bg-clip-text text-transparent dark:bg-none dark:text-muted-foreground truncate"
+                  style={{ fontSize: companyFontSizePx ? `${companyFontSizePx}px` : undefined, maxWidth: '92%' }}
+                >
                   {lead.company}
                 </p>
               </div>
