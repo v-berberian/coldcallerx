@@ -1182,7 +1182,7 @@ const LeadCard: React.FC<LeadCardProps> = ({
             >
               <Button
                 onClick={openAddCommentModal}
-                className="h-9 px-4 rounded-lg bg-primary/10 hover:bg-primary/20 text-primary border border-primary/20"
+                className="h-9 px-4 rounded-lg bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white shadow-lg hover:shadow-xl transition-all duration-200"
                 size="sm"
               >
                 Add Comment
