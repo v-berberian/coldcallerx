@@ -110,6 +110,7 @@ const LeadCard: React.FC<LeadCardProps> = ({
   const [isComposerFocused, setIsComposerFocused] = useState(false);
   const [isKeyboardOpen, setIsKeyboardOpen] = useState(false);
   const commentsScrollRef = useRef<HTMLDivElement | null>(null);
+  const [keyboardHeight, setKeyboardHeight] = useState(0);
   
   // Subtle neon backlight color based on lead tag
   const glowColor = useMemo(() => {
@@ -216,7 +217,13 @@ const LeadCard: React.FC<LeadCardProps> = ({
     const onResize = () => {
       try {
         const delta = baseline - vv.height;
-        setIsKeyboardOpen(delta > 140);
+        if (delta > 140) {
+          setIsKeyboardOpen(true);
+          setKeyboardHeight(delta);
+        } else {
+          setIsKeyboardOpen(false);
+          setKeyboardHeight(0);
+        }
       } catch {
         // no-op
       }
@@ -1139,7 +1146,15 @@ const LeadCard: React.FC<LeadCardProps> = ({
           initial={false}
           animate={{ boxShadow: isComposerFocused ? '0 -6px 24px rgba(0,0,0,0.12)' : '0 0 0 rgba(0,0,0,0)' }}
           transition={{ duration: 0.2, ease: [0.25, 0.46, 0.45, 0.94] }}
-          style={{ padding: '0.75rem 1rem calc(0.75rem + env(safe-area-inset-bottom))', position: isKeyboardOpen ? 'fixed' as const : 'sticky', bottom: 0, left: 0, right: 0, zIndex: 50 }}
+          style={{ 
+            padding: '0.75rem 1rem calc(0.75rem + env(safe-area-inset-bottom))', 
+            position: isKeyboardOpen ? 'fixed' as const : 'sticky', 
+            bottom: isKeyboardOpen ? keyboardHeight : 0, 
+            left: 0, 
+            right: 0, 
+            zIndex: 50,
+            transform: isKeyboardOpen ? 'translateY(-100%)' : 'none'
+          }}
         >
           <div className="flex items-end gap-2">
             <textarea
