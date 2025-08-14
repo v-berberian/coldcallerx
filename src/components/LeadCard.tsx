@@ -39,6 +39,8 @@ interface LeadCardProps {
   onImportNew?: () => void;
   navigationDirection?: 'forward' | 'backward';
   onSwipeReset?: (resetSwipe: () => void) => void;
+  onCommentingChange?: (commenting: boolean) => void;
+  isCommenting?: boolean;
 }
 
 const LeadCard: React.FC<LeadCardProps> = ({
@@ -55,7 +57,9 @@ const LeadCard: React.FC<LeadCardProps> = ({
   refreshTrigger,
   onImportNew,
   navigationDirection = 'forward',
-  onSwipeReset
+  onSwipeReset,
+  onCommentingChange,
+  isCommenting
 }) => {
   // Use the extracted hooks
   const {
@@ -107,6 +111,20 @@ const LeadCard: React.FC<LeadCardProps> = ({
   const [addFxVisible, setAddFxVisible] = useState(false);
   const [selectedCommentId, setSelectedCommentId] = useState<string | null>(null);
   const [leadTag, setLeadTagState] = useState<'cold' | 'warm' | 'hot' | null>(null);
+
+  const handleCommentFocus = useCallback(() => {
+    onCommentingChange?.(true);
+  }, [onCommentingChange]);
+
+  const handleCommentBlur = useCallback(() => {
+    onCommentingChange?.(false);
+  }, [onCommentingChange]);
+
+  useEffect(() => {
+    if (!isCardFlipped) {
+      onCommentingChange?.(false);
+    }
+  }, [isCardFlipped, onCommentingChange]);
   
   // Subtle neon backlight color based on lead tag
   const glowColor = useMemo(() => {
@@ -1123,6 +1141,8 @@ const LeadCard: React.FC<LeadCardProps> = ({
               value={draft}
               onChange={(e) => setDraft(e.target.value)}
               ref={commentInputRef}
+              onFocus={handleCommentFocus}
+              onBlur={handleCommentBlur}
               className="flex-1 rounded-md border border-border/30 bg-background px-3 text-sm focus:outline-none h-11 resize-none py-2 text-left placeholder:text-left"
               rows={1}
               placeholder="Add a comment..."

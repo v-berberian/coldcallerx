@@ -155,10 +155,13 @@ const MainContent: React.FC<MainContentProps> = ({
   }, [isCommenting]);
 
   return (
-    <div className={`flex-1 flex items-start justify-center min-h-0 transition-all duration-300 ${isCommenting ? 'pt-0 p-2 h-full overflow-hidden' : 'pt-1 p-3 sm:p-4'}`} style={{ minHeight: isCommenting ? undefined : 'calc(100dvh - 120px)', height: isCommenting ? (viewportHeight ? `${viewportHeight}px` : '100vh') : undefined }}>
-      <div className="w-full space-y-1 flex flex-col min-h-full">
+    <div
+      className={`flex-1 flex ${isCommenting ? 'items-center' : 'items-start'} justify-center min-h-0 transition-all duration-300 ${isCommenting ? 'pt-0 p-2 h-full overflow-hidden' : 'pt-1 p-3 sm:p-4'}`}
+      style={{ minHeight: isCommenting ? undefined : 'calc(100dvh - 120px)', height: isCommenting ? (viewportHeight ? `${viewportHeight}px` : '100vh') : undefined }}
+    >
+      <div className={`w-full space-y-1 flex flex-col ${isCommenting ? '' : 'min-h-full'}`}>
         {/* Filter Buttons */}
-        <div className={`transition-all duration-300 ease-out ${isCommenting ? 'opacity-0 scale-95 -translate-y-2 pointer-events-none' : ''}`}>
+        <div className={`transition-all duration-300 ease-out ${isCommenting ? 'opacity-0 scale-95 -translate-y-2 pointer-events-none hidden' : ''}`}>
           <FilterButtons
             timezoneFilter={timezoneFilter}
             callFilter={callFilter}
@@ -179,7 +182,7 @@ const MainContent: React.FC<MainContentProps> = ({
         </div>
 
         {/* Current Lead Card or No Leads Message */}
-        <div className="animate-content-change-fast flex-1 flex flex-col">
+        <div className={`animate-content-change-fast ${isCommenting ? '' : 'flex-1'} flex flex-col`}>
           <LeadCard
             lead={currentLead}
             currentIndex={currentIndex}
@@ -201,7 +204,7 @@ const MainContent: React.FC<MainContentProps> = ({
         </div>
 
         {/* Navigation Controls */}
-        <div className={`pt-3 sm:pt-4 transition-all duration-300 ease-out ${isCommenting ? 'opacity-0 scale-95 translate-y-2 pointer-events-none' : ''}`}>
+        <div className={`pt-3 sm:pt-4 transition-all duration-300 ease-out ${isCommenting ? 'opacity-0 scale-95 translate-y-2 pointer-events-none hidden' : ''}`}>
           <NavigationControls
             onPrevious={handlePrevious}
             onNext={handleNext}
