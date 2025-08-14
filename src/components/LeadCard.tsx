@@ -114,6 +114,7 @@ const LeadCard: React.FC<LeadCardProps> = ({
   const modalInputRef = useRef<HTMLTextAreaElement | null>(null);
   // Track keyboard (visual viewport) inset to lift modal above iOS keyboard
   const [keyboardInset, setKeyboardInset] = useState(0);
+  const [isModalInputFocused, setIsModalInputFocused] = useState(false);
 
   useEffect(() => {
     if (!isAddCommentModalOpen) {
@@ -1262,7 +1263,7 @@ const LeadCard: React.FC<LeadCardProps> = ({
               touchAction: 'none',
               // Lift content above the keyboard on iOS
               paddingBottom: `calc(${keyboardInset}px + env(safe-area-inset-bottom) + 12px)`,
-              alignItems: keyboardInset > 0 ? 'flex-end' as const : 'center' as const,
+              alignItems: (keyboardInset > 0 || isModalInputFocused) ? 'flex-end' as const : 'center' as const,
             }}
           >
             <motion.div
@@ -1300,11 +1301,33 @@ const LeadCard: React.FC<LeadCardProps> = ({
                       value={modalDraft}
                       onChange={(e) => setModalDraft(e.target.value)}
                       ref={modalInputRef}
+                      onFocus={() => {
+                        setIsModalInputFocused(true);
+                        // Try to eagerly compute inset right after focus
+                        const vv = (window as Window & { visualViewport?: VisualViewport }).visualViewport;
+                        if (vv) {
+                          const compute = () => {
+                            try {
+                              const layoutViewportHeight = window.innerHeight;
+                              const vvHeight = vv.height;
+                              const vvOffsetTop = (vv as unknown as { offsetTop?: number }).offsetTop ?? 0;
+                              const bottomOverlay = Math.max(0, layoutViewportHeight - (vvHeight + vvOffsetTop));
+                              setKeyboardInset(bottomOverlay);
+                            } catch {}
+                          };
+                          compute();
+                          setTimeout(compute, 60);
+                          setTimeout(compute, 140);
+                        }
+                      }}
+                      onBlur={() => setIsModalInputFocused(false)}
                       className="w-full rounded-md border border-border/30 bg-background px-3 py-3 text-sm focus:outline-none min-h-[120px] resize-none"
                       rows={5}
                       placeholder="Type your comment here..."
                       style={{
                         fontSize: '16px', // Prevent iOS zoom
+                        // Help keep the caret zone clear above the keyboard
+                        scrollMarginBottom: `calc(${keyboardInset}px + env(safe-area-inset-bottom) + 16px)`,
                       }}
                     />
                   </div>
