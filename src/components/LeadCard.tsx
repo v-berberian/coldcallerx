@@ -1256,102 +1256,120 @@ const LeadCard: React.FC<LeadCardProps> = ({
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 0.2 }}
-            className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-start justify-center z-50 p-4"
+            transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
+            className="fixed inset-0 z-50 flex items-start justify-center p-4"
             onClick={closeAddCommentModal}
             style={{
               touchAction: 'none',
-              // Position in upper half by default, with padding for safe area
-              paddingTop: 'max(env(safe-area-inset-top) + 20px, 20px)',
+              paddingTop: 'max(env(safe-area-inset-top) + 16px, 16px)',
+              background: 'rgba(0, 0, 0, 0.4)',
+              backdropFilter: 'blur(8px)',
             }}
           >
             <motion.div
-              initial={{ scale: 0.95, opacity: 0, y: 20 }}
+              initial={{ scale: 0.9, opacity: 0, y: 24 }}
               animate={{ scale: 1, opacity: 1, y: 0 }}
-              exit={{ scale: 0.95, opacity: 0, y: 20 }}
-              transition={{ type: "spring", duration: 0.3 }}
-              className="w-full max-w-lg bg-card rounded-3xl border border-border/50 shadow-2xl max-h-[80vh] flex flex-col overflow-hidden"
+              exit={{ scale: 0.9, opacity: 0, y: 24 }}
+              transition={{ 
+                type: "spring", 
+                duration: 0.4,
+                bounce: 0.1,
+                ease: [0.4, 0, 0.2, 1]
+              }}
+              className="relative w-full max-w-md bg-gradient-to-br from-background via-background to-background/95 rounded-2xl shadow-2xl overflow-hidden"
               onClick={(e) => e.stopPropagation()}
               style={{
                 touchAction: 'auto',
-                // Reduce max height further when keyboard is visible
-                maxHeight: keyboardInset > 0 ? `calc(80vh - ${keyboardInset}px)` : undefined,
+                border: '1px solid rgba(255, 255, 255, 0.08)',
+                boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(255, 255, 255, 0.05)',
+                maxHeight: keyboardInset > 0 ? `calc(80vh - ${keyboardInset}px)` : '70vh',
               }}
             >
-              {/* Modal Header */}
-              <div className="flex items-center justify-between px-6 py-4 border-b border-border/20">
-                <h3 className="text-lg font-semibold">Add Comment</h3>
-                <button
-                  onClick={closeAddCommentModal}
-                  className="p-2 rounded-full hover:bg-muted/50 transition-colors"
-                >
-                  <X className="h-5 w-5" />
-                </button>
-              </div>
-
+              {/* Subtle gradient overlay */}
+              <div className="absolute inset-0 bg-gradient-to-br from-transparent via-transparent to-white/[0.02] pointer-events-none" />
+              
               {/* Modal Content */}
-              <div className="flex-1 p-6">
-                <div className="space-y-4">
+              <div className="relative p-6">
+                {/* Header */}
+                <div className="flex items-center justify-between mb-6">
                   <div>
-                    <label className="text-sm font-medium text-muted-foreground mb-2 block">
-                      Comment for {lead.name}
-                    </label>
-                    <textarea
-                      value={modalDraft}
-                      onChange={(e) => setModalDraft(e.target.value)}
-                      ref={modalInputRef}
-                      onFocus={() => {
-                        setIsModalInputFocused(true);
-                        // Try to eagerly compute inset right after focus
-                        const vv = (window as Window & { visualViewport?: VisualViewport }).visualViewport;
-                        if (vv) {
-                          const compute = () => {
-                            try {
-                              const layoutViewportHeight = window.innerHeight;
-                              const vvHeight = vv.height;
-                              const vvOffsetTop = (vv as unknown as { offsetTop?: number }).offsetTop ?? 0;
-                              const bottomOverlay = Math.max(0, layoutViewportHeight - (vvHeight + vvOffsetTop));
-                              setKeyboardInset(bottomOverlay);
-                            } catch {
-                              // ignore errors
-                            }
-                          };
-                          compute();
-                          setTimeout(compute, 60);
-                          setTimeout(compute, 140);
-                        }
-                      }}
-                      onBlur={() => setIsModalInputFocused(false)}
-                      className="w-full rounded-md border border-border/30 bg-background px-3 py-3 text-sm focus:outline-none min-h-[120px] resize-none"
-                      rows={5}
-                      placeholder="Type your comment here..."
-                      style={{
-                        fontSize: '16px', // Prevent iOS zoom
-                        // Help keep the caret zone clear above the keyboard
-                        scrollMarginBottom: `calc(${keyboardInset}px + env(safe-area-inset-bottom) + 16px)`,
-                      }}
-                    />
+                    <h3 className="text-xl font-semibold bg-gradient-to-r from-foreground to-foreground/80 bg-clip-text text-transparent">
+                      Add Comment
+                    </h3>
+                    <p className="text-sm text-muted-foreground mt-1">
+                      for {lead.name}
+                    </p>
                   </div>
-                </div>
-              </div>
-
-              {/* Modal Footer */}
-              <div className="p-6 border-t border-border/20 bg-background/50">
-                <div className="flex items-center gap-3 justify-end">
-                  <Button
-                    variant="outline"
+                  <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
                     onClick={closeAddCommentModal}
-                    className="rounded-lg"
+                    className="p-2 rounded-xl hover:bg-muted/30 transition-all duration-200 group"
+                  >
+                    <X className="h-5 w-5 text-muted-foreground group-hover:text-foreground transition-colors" />
+                  </motion.button>
+                </div>
+
+                {/* Textarea */}
+                <div className="space-y-3">
+                  <textarea
+                    value={modalDraft}
+                    onChange={(e) => setModalDraft(e.target.value)}
+                    ref={modalInputRef}
+                    onFocus={() => {
+                      setIsModalInputFocused(true);
+                      const vv = (window as Window & { visualViewport?: VisualViewport }).visualViewport;
+                      if (vv) {
+                        const compute = () => {
+                          try {
+                            const layoutViewportHeight = window.innerHeight;
+                            const vvHeight = vv.height;
+                            const vvOffsetTop = (vv as unknown as { offsetTop?: number }).offsetTop ?? 0;
+                            const bottomOverlay = Math.max(0, layoutViewportHeight - (vvHeight + vvOffsetTop));
+                            setKeyboardInset(bottomOverlay);
+                          } catch {
+                            // ignore errors
+                          }
+                        };
+                        compute();
+                        setTimeout(compute, 60);
+                        setTimeout(compute, 140);
+                      }
+                    }}
+                    onBlur={() => setIsModalInputFocused(false)}
+                    className="w-full min-h-[140px] resize-none rounded-xl border border-border/20 bg-background/50 px-4 py-4 text-sm leading-relaxed placeholder:text-muted-foreground/60 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/30 transition-all duration-200"
+                    placeholder="Share your thoughts about this lead..."
+                    style={{
+                      fontSize: '16px',
+                      scrollMarginBottom: `calc(${keyboardInset}px + env(safe-area-inset-bottom) + 16px)`,
+                    }}
+                  />
+                </div>
+
+                {/* Footer */}
+                <div className="flex items-center gap-3 mt-6 pt-4 border-t border-border/10">
+                  <motion.button
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    onClick={closeAddCommentModal}
+                    className="flex-1 px-4 py-3 rounded-xl border border-border/30 bg-background/50 text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted/20 transition-all duration-200"
                   >
                     Cancel
-                  </Button>
-                  <Button
+                  </motion.button>
+                  <motion.button
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
                     onClick={addCommentFromModal}
                     disabled={!modalDraft.trim()}
-                    className="rounded-lg"
+                    className="flex-1 px-4 py-3 rounded-xl bg-gradient-to-r from-primary to-primary/90 text-sm font-medium text-primary-foreground shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
+                    style={{
+                      background: modalDraft.trim() 
+                        ? 'linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(var(--primary) / 0.9) 100%)'
+                        : 'hsl(var(--muted))',
+                    }}
                   >
-                    Add Comment
-                  </Button>
+                    {modalDraft.trim() ? 'Add Comment' : 'Add Comment'}
+                  </motion.button>
                 </div>
               </div>
             </motion.div>
