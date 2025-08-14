@@ -111,7 +111,7 @@ const MainContent: React.FC<MainContentProps> = ({
     onCommentingChange?.(commenting);
   };
 
-  // Calculate viewport and keyboard height when commenting to position card 12px above keyboard (iOS)
+  // Calculate keyboard height and viewport offset for iOS keyboard positioning
   useEffect(() => {
     const vv = (window as Window & { visualViewport?: VisualViewport }).visualViewport;
     let detach: (() => void) | null = null;
@@ -119,27 +119,29 @@ const MainContent: React.FC<MainContentProps> = ({
     const update = () => {
       try {
         if (vv) {
-          const originalHeight = window.innerHeight;
-          const currentHeight = vv.height;
-          const calculatedKeyboardHeight = Math.max(0, originalHeight - currentHeight);
+          // On iOS, visualViewport.height shrinks when keyboard appears
+          // But the container stays the same height - we need to calculate the offset
+          const windowHeight = window.innerHeight;
+          const visibleHeight = vv.height;
+          const calculatedKeyboardHeight = Math.max(0, windowHeight - visibleHeight);
           
-          setViewportHeight(currentHeight);
+          // Don't change viewport height - keep container full size
+          // Just track keyboard height for positioning
+          setViewportHeight(windowHeight);
           setKeyboardHeight(calculatedKeyboardHeight);
         } else {
-          // Fallback: use window height change detection
-          const originalHeight = window.innerHeight;
-          const currentHeight = window.innerHeight;
-          setViewportHeight(currentHeight);
+          // Fallback for non-supporting browsers
+          setViewportHeight(window.innerHeight);
           setKeyboardHeight(0);
         }
       } catch {
-        setViewportHeight(null);
+        setViewportHeight(window.innerHeight);
         setKeyboardHeight(0);
       }
     };
 
     if (isCommenting) {
-      // Prevent background scroll
+      // Prevent background scroll when commenting
       const originalOverflow = document.body.style.overflow;
       document.body.style.overflow = 'hidden';
 
@@ -166,17 +168,20 @@ const MainContent: React.FC<MainContentProps> = ({
     }
   }, [isCommenting]);
 
-  // Calculate the container height and bottom padding for 12px above keyboard
+  // Calculate positioning to place card 12px above keyboard on iOS
   const commentingStyle = isCommenting ? {
-    height: viewportHeight ? `${viewportHeight}px` : '100vh',
-    paddingBottom: keyboardHeight > 0 ? '12px' : '1rem',
+    height: '100vh',
+    overflow: 'hidden',
+    // Push content up by keyboard height + 12px gap
+    transform: keyboardHeight > 0 ? `translateY(-${keyboardHeight + 12}px)` : 'translateY(0)',
+    transition: 'transform 0.3s ease-out',
   } : {
     minHeight: 'calc(100dvh - 120px)'
   };
 
   return (
-    <div className={`flex-1 flex justify-center min-h-0 transition-all duration-300 ${isCommenting ? 'items-end pt-0 px-2 h-full overflow-hidden' : 'items-start pt-1 p-3 sm:p-4'}`} style={commentingStyle}>
-      <div className={`w-full flex flex-col ${isCommenting ? 'h-auto justify-end' : 'space-y-1 min-h-full'}`}>
+    <div className={`flex-1 flex justify-center min-h-0 transition-all duration-300 ${isCommenting ? 'items-end pt-0 px-2' : 'items-start pt-1 p-3 sm:p-4'}`} style={commentingStyle}>
+      <div className={`w-full flex flex-col ${isCommenting ? 'h-auto justify-end pb-4' : 'space-y-1 min-h-full'}`}>
         {/* Filter Buttons */}
         <div className={`transition-all duration-300 ease-out ${isCommenting ? 'opacity-0 scale-95 -translate-y-2 pointer-events-none' : ''}`}>
           <FilterButtons
