@@ -180,7 +180,7 @@ const MainContent: React.FC<MainContentProps> = ({
   // Calculate positioning to place card 12px above keyboard on iOS
   // Keep container full-height and use bottom padding to lift content above the keyboard
   const commentingStyle = isCommenting ? {
-    height: '100vh',
+    height: viewportHeight ? `${viewportHeight}px` : '100dvh',
     overflow: 'hidden',
     paddingBottom: `${Math.max(0, keyboardHeight + 18)}px`,
     transition: 'padding-bottom 0.18s ease-out',
