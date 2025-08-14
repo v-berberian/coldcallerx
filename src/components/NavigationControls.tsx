@@ -82,7 +82,7 @@ const NavigationControls: React.FC<NavigationControlsProps> = ({
   }, []);
 
   const paddingBottomValue = isKeyboardOpen
-    ? 'calc(env(safe-area-inset-bottom) + 0.25rem)'
+    ? '0'
     : 'max(2rem, calc(env(safe-area-inset-bottom) + 1rem))';
 
   return (
