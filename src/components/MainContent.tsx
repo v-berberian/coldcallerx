@@ -183,7 +183,7 @@ const MainContent: React.FC<MainContentProps> = ({
     height: '100vh',
     maxHeight: '100vh',
     overflow: 'hidden',
-    paddingBottom: `${Math.max(0, keyboardHeight + 18)}px`,
+    paddingBottom: `${Math.max(0, keyboardHeight)}px`,
     transition: 'padding-bottom 0.18s ease-out',
     // iOS specific: lock viewport to prevent rubber-band scrolling
     position: isIOS.current ? 'fixed' as const : undefined,
@@ -201,7 +201,7 @@ const MainContent: React.FC<MainContentProps> = ({
 
   return (
     <div className={`flex-1 flex justify-center min-h-0 transition-all duration-300 ${isCommenting ? 'items-start p-0 m-0' : 'items-start pt-1 p-3 sm:p-4'}`} style={commentingStyle}>
-      <div className={`w-full flex flex-col ${isCommenting ? 'h-full justify-center p-0 m-0' : 'space-y-1 min-h-full'}`}>
+      <div className={`w-full flex flex-col ${isCommenting ? 'h-full justify-end p-0 m-0' : 'space-y-1 min-h-full'}`}>
         {/* Filter Buttons */}
         <div className={`${isCommenting ? 'hidden' : 'transition-all duration-300 ease-out'}`}>
           <FilterButtons
