@@ -119,24 +119,37 @@ export const useFilterChangeEffects = (
             updateNavigationWithHistory(0, false);
           }
         } else {
-          // Current lead isn't visible after timezone change. Pick nearest neighbor in new filtered list.
-          // Map new filtered leads back to their indices in the original leadsData order
-          const indexMap = new Map<string, number>();
-          leadsData.forEach((l, idx) => {
-            indexMap.set(`${l.name}-${getPhoneDigits(l.phone)}`, idx);
+          // Current lead isn't visible after timezone change.
+          // Prefer the closest PREVIOUS visible lead in the original order, then the next one after.
+          const filteredIndexByKey = new Map<string, number>();
+          newFilteredLeads.forEach((l, idx) => {
+            filteredIndexByKey.set(`${l.name}-${getPhoneDigits(l.phone)}`, idx);
           });
-          const candidates = newFilteredLeads
-            .map((l, i) => ({ filteredIndex: i, originalIndex: indexMap.get(`${l.name}-${getPhoneDigits(l.phone)}`) ?? Infinity }))
-            .filter(c => Number.isFinite(c.originalIndex as number));
-          // Find the candidate with minimal distance to previous currentIndex
-          let best = candidates[0];
-          for (let i = 1; i < candidates.length; i++) {
-            if (Math.abs((candidates[i].originalIndex as number) - currentIndex) < Math.abs((best.originalIndex as number) - currentIndex)) {
-              best = candidates[i];
+
+          // Search backwards from current position in the original list
+          let chosenFilteredIndex: number | null = null;
+          for (let i = currentIndex - 1; i >= 0; i--) {
+            const key = `${leadsData[i].name}-${getPhoneDigits(leadsData[i].phone)}`;
+            const idxInFiltered = filteredIndexByKey.get(key);
+            if (idxInFiltered !== undefined) {
+              chosenFilteredIndex = idxInFiltered;
+              break;
             }
           }
-          const targetIndex = best ? best.filteredIndex : 0;
-          updateNavigationWithHistory(targetIndex, false);
+
+          // If nothing found before, search forwards
+          if (chosenFilteredIndex === null) {
+            for (let i = currentIndex + 1; i < leadsData.length; i++) {
+              const key = `${leadsData[i].name}-${getPhoneDigits(leadsData[i].phone)}`;
+              const idxInFiltered = filteredIndexByKey.get(key);
+              if (idxInFiltered !== undefined) {
+                chosenFilteredIndex = idxInFiltered;
+                break;
+              }
+            }
+          }
+
+          updateNavigationWithHistory(chosenFilteredIndex ?? 0, false);
         }
       } else if (newFilteredLeads.length > 0) {
         updateNavigationWithHistory(0, false);
@@ -165,6 +178,6 @@ export const useFilterChangeEffects = (
         resetNavigation(closestIndex);
       }
     }
-  }, [timezoneFilter, callFilter, currentIndex, getBaseLeads, resetNavigation, isFilterChanging]);
+  }, [currentIndex, getBaseLeads, resetNavigation, isFilterChanging]);
 };
 
