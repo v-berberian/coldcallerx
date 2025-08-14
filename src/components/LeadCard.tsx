@@ -107,6 +107,20 @@ const LeadCard: React.FC<LeadCardProps> = ({
   const [addFxVisible, setAddFxVisible] = useState(false);
   const [selectedCommentId, setSelectedCommentId] = useState<string | null>(null);
   const [leadTag, setLeadTagState] = useState<'cold' | 'warm' | 'hot' | null>(null);
+  
+  // Subtle neon backlight color based on lead tag
+  const glowColor = useMemo(() => {
+    switch (leadTag) {
+      case 'cold':
+        return 'rgba(59, 130, 246, 0.45)'; // blue-500
+      case 'warm':
+        return 'rgba(245, 158, 11, 0.45)'; // amber-500
+      case 'hot':
+        return 'rgba(244, 63, 94, 0.45)'; // rose-500
+      default:
+        return 'rgba(0,0,0,0)';
+    }
+  }, [leadTag]);
 
   const loadComments = useCallback(async () => {
     try {
@@ -413,6 +427,18 @@ const LeadCard: React.FC<LeadCardProps> = ({
           touchAction: isCardFlipped ? 'pan-y' : undefined
         }}
       >
+        {/* Subtle neon backlight glow, animated on temperature/tag selection */}
+        <motion.div
+          className="absolute inset-0 rounded-3xl pointer-events-none"
+          initial={false}
+          animate={{ opacity: leadTag && !isCardFlipped ? 1 : 0, scale: leadTag && !isCardFlipped ? 1.002 : 1 }}
+          transition={{ duration: 0.35, ease: [0.22, 0.61, 0.36, 1] }}
+          style={{
+            // Outer glow using multiple shadow layers for a subtle neon effect
+            boxShadow: `0 0 0 2px ${glowColor}, 0 0 18px ${glowColor}, 0 0 36px ${glowColor}`,
+            zIndex: 1
+          }}
+        />
         <Card 
           className="shadow-2xl border border-border/50 dark:border-border/60 ring-1 ring-border/40 dark:ring-border/60 rounded-3xl bg-card min-h-[420px] max-h-[520px] sm:min-h-[440px] sm:max-h-[580px] flex flex-col mb-4 overflow-hidden relative" 
           onClick={(e) => handleCardClick(e)}
@@ -423,13 +449,13 @@ const LeadCard: React.FC<LeadCardProps> = ({
             backfaceVisibility: "hidden"
           }}
         >
-      <CardContent className="flex-1 flex flex-col overflow-hidden">
+      <CardContent className="flex-1 flex flex-col overflow-hidden pt-2">
         {/* Top row with left cluster, centered count, right menu */}
-        <div className="flex items-center justify-between p-2 sm:p-3 pb-1">
+        <div className="flex items-center justify-between px-0 sm:px-1 py-2 sm:py-3 pb-1">
           <div className="flex items-center gap-1">
             <button
               onClick={handleFlip}
-              className="p-1 rounded-full"
+              className="p-0.5 rounded-full"
               title="Comments"
               style={{ pointerEvents: (isDeleteMode || isSwiping) ? 'none' : 'auto' }}
             >
@@ -536,7 +562,8 @@ const LeadCard: React.FC<LeadCardProps> = ({
             )}
             {/* Lead priority segmented control */}
             <div className="flex items-center justify-center mt-1">
-              <div className="inline-flex items-center rounded-full border border-border/30 bg-background/60 backdrop-blur px-1 py-1">
+              <div className="inline-flex items-center rounded-full border border-border/30 bg-background/60 backdrop-blur px-1 py-1"
+                   style={{ WebkitTapHighlightColor: 'transparent' }}>
                 <button
                   type="button"
                   onClick={() => toggleLeadTag('cold')}
@@ -641,13 +668,13 @@ const LeadCard: React.FC<LeadCardProps> = ({
           {/* Last called section above buttons */}
           {lead.lastCalled && (
             <div className="flex items-center justify-center w-full">
-              <div className="flex items-center justify-center">
-                <p className="text-sm text-muted-foreground transition-opacity duration-300 ease-in-out opacity-100 whitespace-nowrap my-0 py-0">
+              <div className="flex items-center justify-center gap-2 mx-auto">
+                <p className="text-sm text-muted-foreground transition-opacity duration-300 ease-in-out opacity-100 whitespace-nowrap my-0 py-0 text-center">
                   Last called: {lead.lastCalled}
                 </p>
                 <button
                   onClick={onResetCallCount}
-                  className="ml-2 p-1 bg-muted rounded transition-colors"
+                  className="p-1 bg-muted rounded transition-colors"
                   title="Clear last called"
                   style={{
                     pointerEvents: isDeleteMode ? 'none' : 'auto'
@@ -766,7 +793,11 @@ const LeadCard: React.FC<LeadCardProps> = ({
               {!isDeleteMode ? (
               <Button 
                   onClick={e => {
-                    handleCallClick();
+                    if (communicationMode === 'whatsapp') {
+                      handleCallClick();
+                    } else {
+                      handleCall();
+                    }
                   }}
                 size="lg" 
                 className="w-24 h-24 sm:w-32 sm:h-32 rounded-full bg-gradient-to-br from-green-400 to-green-600 active:from-green-600 active:to-green-800 text-white transition-all duration-300 flex items-center justify-center p-0 relative overflow-hidden neomorphic-button focus:outline-none"
@@ -886,7 +917,7 @@ const LeadCard: React.FC<LeadCardProps> = ({
       }}
     >
       <CardContent className="flex-1 flex flex-col p-0 overflow-hidden">
-        <div className="flex items-center justify-center p-2 sm:p-3 pb-1">
+        <div className="flex items-center justify-center px-0 sm:px-1 py-2 sm:py-3 pb-1">
           <button
             onClick={handleFlip}
             className="text-sm text-muted-foreground opacity-60 cursor-pointer"
