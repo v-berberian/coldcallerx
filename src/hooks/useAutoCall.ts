@@ -117,6 +117,7 @@ export const useAutoCall = (
         clearInterval(intervalRef.current);
       }
     };
+  }, []);
 
   // Energy optimization: Pause timer when app is backgrounded
   useEffect(() => {
@@ -154,7 +155,6 @@ export const useAutoCall = (
       }
     }
   }, [isAppVisible, isCountdownActive, countdownTime, pendingLead, makeCall]);
-  }, []);
 
   const handleCountdownComplete = (lead: Lead) => {
     // This function is no longer needed as the countdown automatically makes the call

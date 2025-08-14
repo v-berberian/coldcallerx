@@ -236,37 +236,40 @@ const useLeadNavigationImpl = ({
 };
 
 // Backward-compatible wrapper: allow calling with just an array of leads
-export function useLeadNavigation(arg: any): any {
-  if (Array.isArray(arg)) {
-    const {
-      currentIndex,
-      historyIndex,
-      updateNavigation,
-      updateNavigationWithHistory,
-      goToPrevious,
-      goToPreviousFromHistory,
-      resetNavigation,
-      setCurrentIndex,
-      restoreFromLocalStorage,
-      syncFromCloudSession
-    } = useNavigationState();
+export type UseLeadNavigationArg = UseLeadNavigationProps | Lead[];
+export type UseLeadNavigationReturn = ReturnType<typeof useLeadNavigationImpl>;
 
-    return useLeadNavigationImpl({
-      initialLeads: arg,
-      onCallMade: undefined,
-      refreshTrigger: 0,
-      currentIndex,
-      historyIndex,
-      updateNavigation,
-      updateNavigationWithHistory,
-      goToPrevious,
-      goToPreviousFromHistory,
-      resetNavigation,
-      setCurrentIndex,
-      restoreFromLocalStorage,
-      syncFromCloudSession
-    });
-  }
+export function useLeadNavigation(arg: UseLeadNavigationArg): UseLeadNavigationReturn {
+  const {
+    currentIndex,
+    historyIndex,
+    updateNavigation,
+    updateNavigationWithHistory,
+    goToPrevious,
+    goToPreviousFromHistory,
+    resetNavigation,
+    setCurrentIndex,
+    restoreFromLocalStorage,
+    syncFromCloudSession
+  } = useNavigationState();
 
-  return useLeadNavigationImpl(arg);
+  const params: UseLeadNavigationProps = Array.isArray(arg)
+    ? {
+        initialLeads: arg,
+        onCallMade: undefined,
+        refreshTrigger: 0,
+        currentIndex,
+        historyIndex,
+        updateNavigation,
+        updateNavigationWithHistory,
+        goToPrevious,
+        goToPreviousFromHistory,
+        resetNavigation,
+        setCurrentIndex,
+        restoreFromLocalStorage,
+        syncFromCloudSession
+      }
+    : arg;
+
+  return useLeadNavigationImpl(params);
 }

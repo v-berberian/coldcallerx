@@ -116,6 +116,48 @@ const LeadCard: React.FC<LeadCardProps> = ({
   const [leadTag, setLeadTagState] = useState<'cold' | 'warm' | 'hot' | null>(null);
   const companyRef = useRef<HTMLParagraphElement | null>(null);
   const [companyFontSizePx, setCompanyFontSizePx] = useState<number | null>(null);
+
+  const [isCommentFocused, setIsCommentFocused] = useState(false);
+  const [cardViewportOffset, setCardViewportOffset] = useState(0);
+
+  const updateViewportOffset = useCallback(() => {
+    const vv = (window as unknown as Window & { visualViewport?: VisualViewport }).visualViewport;
+    const height = vv?.height ?? window.innerHeight;
+    if (!cardRef.current) return;
+    const cardHeight = cardRef.current.offsetHeight;
+    const offset = Math.max(0, (height - cardHeight) / 2);
+    setCardViewportOffset(offset);
+  }, []);
+
+  useEffect(() => {
+    if (isCardFlipped && isCommentFocused) {
+      updateViewportOffset();
+      const vv = (window as unknown as Window & { visualViewport?: VisualViewport }).visualViewport;
+      const handler = () => updateViewportOffset();
+      vv?.addEventListener('resize', handler);
+      return () => {
+        vv?.removeEventListener('resize', handler);
+      };
+    } else {
+      setCardViewportOffset(0);
+    }
+  }, [isCardFlipped, isCommentFocused, updateViewportOffset]);
+
+  useEffect(() => {
+    if (isCardFlipped && isCommentFocused) {
+      updateViewportOffset();
+    }
+  }, [comments.length, isCardFlipped, isCommentFocused, updateViewportOffset]);
+
+  const handleCommentFocus = useCallback(() => {
+    setIsCommentFocused(true);
+    if (onCommentFocusChange) onCommentFocusChange(true);
+  }, [onCommentFocusChange]);
+
+  const handleCommentBlur = useCallback(() => {
+    setIsCommentFocused(false);
+    if (onCommentFocusChange) onCommentFocusChange(false);
+  }, [onCommentFocusChange]);
   
   // Subtle neon backlight color based on lead tag
   const glowColor = useMemo(() => {
@@ -441,7 +483,10 @@ const LeadCard: React.FC<LeadCardProps> = ({
 
   
   return (
-    <div className="relative">
+    <div
+      className="relative"
+      style={isCardFlipped && isCommentFocused ? { paddingTop: cardViewportOffset } : undefined}
+    >
       {/* Delete background indicator */}
       <div 
         className="absolute bg-red-500 rounded-3xl flex items-center justify-center"
@@ -1101,6 +1146,8 @@ const LeadCard: React.FC<LeadCardProps> = ({
                           onChange={(e) => setEditingText(e.target.value)}
                           className="flex-1 rounded-md border border-border/30 bg-background px-3 text-sm focus:outline-none min-h-[44px] py-2 resize-none"
                           rows={2}
+                          onFocus={handleCommentFocus}
+                          onBlur={handleCommentBlur}
                         />
                         <div className="flex items-center gap-2 self-center">
                           <Button size="sm" onClick={saveEdit}>Save</Button>
@@ -1175,8 +1222,8 @@ const LeadCard: React.FC<LeadCardProps> = ({
               className="flex-1 rounded-md border border-border/30 bg-background px-3 text-sm focus:outline-none h-11 resize-none py-2 text-left placeholder:text-left"
               rows={1}
               placeholder="Add a comment..."
-                  onFocus={() => onCommentFocusChange && onCommentFocusChange(true)}
-                  onBlur={() => onCommentFocusChange && onCommentFocusChange(false)}
+              onFocus={handleCommentFocus}
+              onBlur={handleCommentBlur}
             />
             <div className="relative shrink-0">
               <motion.div
