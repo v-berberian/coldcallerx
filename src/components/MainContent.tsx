@@ -151,8 +151,10 @@ const MainContent: React.FC<MainContentProps> = ({
 
     if (isCommenting) {
       // Prevent background scroll when commenting
-      const originalOverflow = document.body.style.overflow;
+      const originalBodyOverflow = document.body.style.overflow;
+      const originalHtmlOverflow = document.documentElement.style.overflow;
       document.body.style.overflow = 'hidden';
+      document.documentElement.style.overflow = 'hidden';
 
       if (vv) {
         vv.addEventListener('resize', update);
@@ -168,7 +170,8 @@ const MainContent: React.FC<MainContentProps> = ({
       }
 
       return () => {
-        document.body.style.overflow = originalOverflow;
+        document.body.style.overflow = originalBodyOverflow;
+        document.documentElement.style.overflow = originalHtmlOverflow;
         if (detach) detach();
       };
     } else {
@@ -191,8 +194,7 @@ const MainContent: React.FC<MainContentProps> = ({
     right: isIOS.current ? 0 : undefined,
     bottom: isIOS.current ? 0 : undefined,
     touchAction: isIOS.current ? 'none' as const : undefined,
-    overscrollBehavior: isIOS.current ? 'contain' as const : undefined,
-    WebkitOverflowScrolling: isIOS.current ? ('auto' as unknown as string) : undefined,
+    overscrollBehavior: isIOS.current ? 'none' as const : undefined,
   } : {
     minHeight: 'calc(100dvh - 120px)'
   };
