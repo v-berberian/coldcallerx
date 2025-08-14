@@ -100,11 +100,8 @@ const LeadCard: React.FC<LeadCardProps> = ({
   const leadKey = useMemo(() => `${lead.name}__${lead.phone}`, [lead.name, lead.phone]);
   const [csvId, setCsvId] = useState<string | null>(null);
   const [comments, setComments] = useState<LeadComment[]>([]);
-  const [draft, setDraft] = useState('');
-  const commentInputRef = useRef<HTMLTextAreaElement | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editingText, setEditingText] = useState('');
-  const [addFxVisible, setAddFxVisible] = useState(false);
   const [selectedCommentId, setSelectedCommentId] = useState<string | null>(null);
   const [leadTag, setLeadTagState] = useState<'cold' | 'warm' | 'hot' | null>(null);
   
@@ -246,23 +243,20 @@ const LeadCard: React.FC<LeadCardProps> = ({
 
   // Modal comment functions
   const openAddCommentModal = useCallback(() => {
-    // Capture the input field position for genie effect
-    if (commentInputRef.current) {
-      const rect = commentInputRef.current.getBoundingClientRect();
-      setInputFieldPosition({
-        x: rect.left + rect.width / 2,
-        y: rect.top + rect.height / 2,
-        width: rect.width,
-        height: rect.height
-      });
-    }
+    // Capture the button position for genie effect (we'll use a fallback position)
+    setInputFieldPosition({
+      x: window.innerWidth / 2,
+      y: window.innerHeight * 0.7,
+      width: 120,
+      height: 36
+    });
     setIsAddCommentModalOpen(true);
-    setModalDraft(draft);
+    setModalDraft('');
     // Focus the modal input after animation
     setTimeout(() => {
       modalInputRef.current?.focus();
     }, 300);
-  }, [draft]);
+  }, []);
 
   const closeAddCommentModal = useCallback(() => {
     setIsAddCommentModalOpen(false);
@@ -271,34 +265,16 @@ const LeadCard: React.FC<LeadCardProps> = ({
     setKeyboardInset(0);
   }, []);
 
-  const addComment = useCallback((text?: string) => {
-    const commentText = text || draft.trim();
-    if (!commentText) return;
+  const addComment = useCallback((text: string) => {
+    if (!text.trim()) return;
     const newComment: LeadComment = {
       id: `${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
-      text: commentText,
+      text: text.trim(),
       createdAt: new Date().toISOString(),
     };
     const next = [...comments, newComment];
     saveComments(next);
-    setDraft('');
-    // Trigger a brief success animation on the Add button
-    setAddFxVisible(true);
-    setTimeout(() => setAddFxVisible(false), 450);
-    // Keep keyboard open by restoring focus to the textarea
-    setTimeout(() => {
-      const el = commentInputRef.current;
-      if (el) {
-        el.focus();
-        const len = el.value.length;
-        try {
-          el.setSelectionRange(len, len);
-        } catch {
-          // ignore selection errors
-        }
-      }
-    }, 0);
-  }, [draft, comments, saveComments]);
+  }, [comments, saveComments]);
 
   const addCommentFromModal = useCallback(() => {
     if (modalDraft.trim()) {
@@ -1190,46 +1166,29 @@ const LeadCard: React.FC<LeadCardProps> = ({
           </LayoutGroup>
         </div>
 
+        {/* Comment Section Footer */}
         <div className="p-4 border-t border-border/20 bg-background/80 backdrop-blur">
-          <div className="flex items-center gap-2">
-            <textarea
-              value={draft}
-              onChange={(e) => setDraft(e.target.value)}
-              ref={commentInputRef}
-              onFocus={openAddCommentModal}
-              className="flex-1 rounded-md border border-border/30 bg-background px-3 text-sm focus:outline-none h-11 resize-none py-2 text-left placeholder:text-left cursor-pointer"
-              rows={1}
-              placeholder="Tap to add a comment..."
-              readOnly
-            />
-            <div className="relative shrink-0">
-              <motion.div
-                whileTap={{ scale: 0.92 }}
-                animate={addFxVisible ? { scale: [1, 1.12, 1] } : {}}
-                transition={{ duration: 0.2, ease: [0.2, 0.7, 0.4, 1] }}
-              >
-                <Button
-                  type="button"
-                  onClick={openAddCommentModal}
-                  className="h-11 w-11 p-0 rounded-full flex items-center justify-center"
-                  aria-label="Add comment"
-                >
-                  <Send className="h-5 w-5 block" />
-                </Button>
-              </motion.div>
-              <AnimatePresence>
-                {addFxVisible && (
-                  <motion.span
-                    key="add-ripple"
-                    className="absolute inset-0 rounded-full bg-green-500/15 pointer-events-none"
-                    initial={{ opacity: 0.35, scale: 0.92 }}
-                    animate={{ opacity: 0, scale: 1.22 }}
-                    exit={{ opacity: 0 }}
-                    transition={{ duration: 0.2, ease: [0.2, 0.7, 0.4, 1] }}
-                  />
-                )}
-              </AnimatePresence>
+          <div className="flex items-center justify-between">
+            {/* Comment Count */}
+            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+              <MessageCircle className="h-4 w-4" />
+              <span>{comments.length} comment{comments.length !== 1 ? 's' : ''}</span>
             </div>
+            
+            {/* Add Comment Button */}
+            <motion.div
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+            >
+              <Button
+                onClick={openAddCommentModal}
+                className="h-9 px-4 rounded-lg bg-primary/10 hover:bg-primary/20 text-primary border border-primary/20"
+                size="sm"
+              >
+                <MessageSquare className="h-4 w-4 mr-2" />
+                Add Comment
+              </Button>
+            </motion.div>
           </div>
         </div>
       </CardContent>
