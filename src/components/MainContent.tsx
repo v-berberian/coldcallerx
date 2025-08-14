@@ -201,7 +201,7 @@ const MainContent: React.FC<MainContentProps> = ({
         </div>
 
         {/* Navigation Controls */}
-        <div className="pt-3 sm:pt-4 transition-all duration-300 ease-out">
+        <div className="pt-3 sm:pt-4 transition-all duration-300 ease-out relative z-[60]">
           <NavigationControls
             onPrevious={handlePrevious}
             onNext={handleNext}
