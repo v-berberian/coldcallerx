@@ -306,7 +306,7 @@ const CallingScreenContainer: React.FC<CallingScreenContainerProps> = memo(({
   return (
     <div className="h-[100dvh] flex flex-col overflow-hidden fixed inset-0">
       {/* Header */}
-      <div className={`transition-all duration-300 ease-out ${isCommenting ? 'opacity-0 scale-95 -translate-y-2 pointer-events-none' : ''}`}>
+      <div className={`${isCommenting ? 'hidden' : 'transition-all duration-300 ease-out'}`}>
         <CallingHeader
           searchQuery={searchQuery}
           showAutocomplete={showAutocomplete}

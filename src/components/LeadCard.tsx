@@ -1032,7 +1032,7 @@ const LeadCard: React.FC<LeadCardProps> = ({
 
     {/* Back side of the card - Trello-style comments */}
     <Card 
-      className="shadow-2xl border border-border/50 dark:border-border/60 ring-1 ring-border/40 dark:ring-border/60 rounded-3xl bg-card min-h-[420px] max-h-[520px] sm:min-h-[440px] sm:max-h-[580px] flex flex-col mb-4 overflow-hidden absolute inset-0" 
+      className="shadow-2xl border border-border/50 dark:border-border/60 ring-1 ring-border/40 dark:ring-border/60 rounded-3xl bg-card min-h-[420px] max-h-[520px] sm:min-h-[440px] sm:max-h-[580px] flex flex-col overflow-hidden absolute inset-0" 
       style={{
         transformStyle: "preserve-3d",
         backfaceVisibility: "hidden",
