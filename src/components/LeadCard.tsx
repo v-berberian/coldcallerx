@@ -1257,13 +1257,12 @@ const LeadCard: React.FC<LeadCardProps> = ({
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.2 }}
-            className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4"
+            className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-start justify-center z-50 p-4"
             onClick={closeAddCommentModal}
             style={{
               touchAction: 'none',
-              // Lift content above the keyboard on iOS
-              paddingBottom: `calc(${keyboardInset}px + env(safe-area-inset-bottom) + 12px)`,
-              alignItems: (keyboardInset > 0 || isModalInputFocused) ? 'flex-end' as const : 'center' as const,
+              // Position in upper half by default, with padding for safe area
+              paddingTop: 'max(env(safe-area-inset-top) + 20px, 20px)',
             }}
           >
             <motion.div
@@ -1313,7 +1312,9 @@ const LeadCard: React.FC<LeadCardProps> = ({
                               const vvOffsetTop = (vv as unknown as { offsetTop?: number }).offsetTop ?? 0;
                               const bottomOverlay = Math.max(0, layoutViewportHeight - (vvHeight + vvOffsetTop));
                               setKeyboardInset(bottomOverlay);
-                            } catch {}
+                            } catch {
+                              // ignore errors
+                            }
                           };
                           compute();
                           setTimeout(compute, 60);
