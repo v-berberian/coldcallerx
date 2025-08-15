@@ -63,11 +63,13 @@ const useLeadNavigationImpl = ({
   const {
     timezoneFilter,
     callFilter,
+    temperatureFilter,
     shuffleMode,
     autoCall,
     isFilterChanging,
     toggleTimezoneFilter,
     toggleCallFilter,
+    setTemperatureFilterValue,
     toggleShuffle,
     toggleAutoCall,
     setFilterChanging

@@ -249,6 +249,15 @@ export class AppStorage {
     return result;
   }
 
+  async saveTemperatureFilter(filter: string): Promise<void> {
+    await this.setItem(STORAGE_KEYS.TEMPERATURE_FILTER, filter);
+  }
+
+  async getTemperatureFilter(): Promise<string> {
+    const result = await this.getItem(STORAGE_KEYS.TEMPERATURE_FILTER, 'ALL');
+    return result;
+  }
+
   // App modes
   async saveShuffleMode(enabled: boolean): Promise<void> {
     await this.setItem(STORAGE_KEYS.SHUFFLE_MODE, enabled);
