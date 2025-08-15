@@ -1158,12 +1158,12 @@ const LeadCard: React.FC<LeadCardProps> = ({
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.2 }}
-            className="fixed inset-0 bg-black/50 backdrop-blur-sm flex justify-center z-50 p-4"
+            className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-start justify-center z-50 p-4"
             onClick={closeAddCommentModal}
             style={{
               touchAction: 'none',
-              alignItems: 'center',
-              paddingBottom: '50vh',
+              // Position in upper half by default, with padding for safe area
+              paddingTop: 'max(env(safe-area-inset-top) + 20px, 20px)',
             }}
           >
             <motion.div
