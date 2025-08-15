@@ -16,6 +16,8 @@ interface NavigationControlsProps {
   canGoNext: boolean;
   onSkipToEnd?: () => void;
   onSkipMultiple?: (count: number) => void;
+  shuffleMode?: boolean;
+  onToggleShuffle?: () => void;
 }
 
 const NavigationControls: React.FC<NavigationControlsProps> = ({
@@ -24,7 +26,9 @@ const NavigationControls: React.FC<NavigationControlsProps> = ({
   canGoPrevious,
   canGoNext,
   onSkipToEnd,
-  onSkipMultiple
+  onSkipMultiple,
+  shuffleMode = false,
+  onToggleShuffle
 }) => {
   const handlePrevious = () => {
     onPrevious();
