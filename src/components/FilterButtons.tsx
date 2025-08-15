@@ -230,9 +230,27 @@ const FilterButtons: React.FC<FilterButtonsProps> = ({
             }}
           >
             {/* Animated background for active state */}
-            {temperatureFilter !== 'ALL' && (
+            {temperatureFilter === 'COLD' && (
               <div 
-                className="absolute inset-0 bg-gradient-to-r from-red-500/20 to-red-600/20 rounded-lg scale-100 opacity-100 pointer-events-none"
+                className="absolute inset-0 bg-gradient-to-r from-blue-500/20 to-blue-600/20 rounded-lg scale-100 opacity-100 pointer-events-none"
+                style={{
+                  transition: 'all 100ms cubic-bezier(0.25, 0.46, 0.45, 0.94)',
+                  pointerEvents: 'none'
+                }}
+              />
+            )}
+            {temperatureFilter === 'WARM' && (
+              <div 
+                className="absolute inset-0 bg-gradient-to-r from-amber-500/20 to-amber-600/20 rounded-lg scale-100 opacity-100 pointer-events-none"
+                style={{
+                  transition: 'all 100ms cubic-bezier(0.25, 0.46, 0.45, 0.94)',
+                  pointerEvents: 'none'
+                }}
+              />
+            )}
+            {temperatureFilter === 'HOT' && (
+              <div 
+                className="absolute inset-0 bg-gradient-to-r from-rose-500/20 to-rose-600/20 rounded-lg scale-100 opacity-100 pointer-events-none"
                 style={{
                   transition: 'all 100ms cubic-bezier(0.25, 0.46, 0.45, 0.94)',
                   pointerEvents: 'none'
