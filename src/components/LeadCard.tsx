@@ -860,7 +860,7 @@ const LeadCard: React.FC<LeadCardProps> = ({
                     handleTextClick(selectedTextTemplate);
                   }}
                 size="lg" 
-                className="w-24 h-24 sm:w-32 sm:h-32 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 active:from-blue-600 active:to-blue-800 text-white transition-all duration-300 flex items-center justify-center p-0 relative overflow-hidden neomorphic-button focus:outline-none dark:shadow-none"
+                className="w-24 h-24 sm:w-32 sm:h-32 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 active:from-blue-600 active:to-blue-800 text-white transition-all duration-300 flex items-center justify-center p-0 relative overflow-hidden neomorphic-button focus:outline-none dark:shadow-none bg-transparent"
                 style={{
                   boxShadow: `
                     8px 8px 16px rgba(0, 0, 0, 0.3),
@@ -970,7 +970,7 @@ const LeadCard: React.FC<LeadCardProps> = ({
                     handleCall();
                   }}
                 size="lg" 
-                className="w-24 h-24 sm:w-32 sm:h-32 rounded-full bg-gradient-to-br from-green-400 to-green-600 active:from-green-600 active:to-green-800 text-white transition-all duration-300 flex items-center justify-center p-0 relative overflow-hidden neomorphic-button focus:outline-none dark:shadow-none"
+                className="w-24 h-24 sm:w-32 sm:h-32 rounded-full bg-gradient-to-br from-green-400 to-green-600 active:from-green-600 active:to-green-800 text-white transition-all duration-300 flex items-center justify-center p-0 relative overflow-hidden neomorphic-button focus:outline-none dark:shadow-none bg-transparent"
                 style={{
                   boxShadow: `
                     8px 8px 16px rgba(0, 0, 0, 0.3),
