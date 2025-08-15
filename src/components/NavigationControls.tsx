@@ -176,10 +176,10 @@ const NavigationControls: React.FC<NavigationControlsProps> = ({
             disabled={!canGoNext} 
             className="flex-1 h-16 sm:h-20 rounded-[2rem] shadow-lg active:scale-95 active:shadow-md active:shadow-black/20 transition-all duration-100 outline-none bg-background/20 backdrop-blur-xl border-white/20 text-foreground disabled:opacity-50 disabled:backdrop-blur-sm touch-manipulation no-select text-base sm:text-lg" 
             style={{ WebkitTapHighlightColor: 'transparent', WebkitUserSelect: 'none', userSelect: 'none' }} 
-            onTouchStart={handleNextTouchStart} 
-            onTouchEnd={handleNextTouchEnd}
-            onMouseDown={handleNextTouchStart}
-            onMouseUp={handleNextTouchEnd}
+            onTouchStart={handleButtonTouchStart} 
+            onTouchEnd={handleButtonTouchEnd}
+            onMouseDown={handleButtonTouchStart}
+            onMouseUp={handleButtonTouchEnd}
             onMouseLeave={() => {
               if (longPressTimeout) {
                 clearTimeout(longPressTimeout);
@@ -193,8 +193,12 @@ const NavigationControls: React.FC<NavigationControlsProps> = ({
               e.stopPropagation();
             }}
           >
-            <span className="truncate">Next</span>
-            <ArrowRight className="h-5 w-5 sm:h-6 sm:w-6 ml-2" />
+            <span className="truncate">{shuffleMode ? 'Shuffle' : 'Next'}</span>
+            {shuffleMode ? (
+              <Shuffle className="h-5 w-5 sm:h-6 sm:w-6 ml-2" />
+            ) : (
+              <ArrowRight className="h-5 w-5 sm:h-6 sm:w-6 ml-2" />
+            )}
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end" className="w-48">
