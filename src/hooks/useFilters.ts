@@ -9,6 +9,7 @@ let filtersLoaded = false;
 export const useFilters = () => {
   const [timezoneFilter, setTimezoneFilter] = useState<TimezoneFilter>('ALL');
   const [callFilter, setCallFilter] = useState<CallFilter>('ALL');
+  const [temperatureFilter, setTemperatureFilter] = useState<TemperatureFilter>('ALL');
   const [shuffleMode, setShuffleMode] = useState(false);
   const [autoCall, setAutoCall] = useState(false);
   const [isFilterChanging, setIsFilterChanging] = useState(false);
@@ -23,12 +24,14 @@ export const useFilters = () => {
     try {
       const savedTimezoneFilter = await appStorage.getTimezoneFilter();
       const savedCallFilter = await appStorage.getCallFilter();
+      const savedTemperatureFilter = await appStorage.getTemperatureFilter();
       const savedShuffleMode = await appStorage.getShuffleMode();
       const savedAutoCall = await appStorage.getAutoCall();
       
       console.log('🔍 DEBUG - Current saved filter values:', {
         timezoneFilter: savedTimezoneFilter,
         callFilter: savedCallFilter,
+        temperatureFilter: savedTemperatureFilter,
         shuffleMode: savedShuffleMode,
         autoCall: savedAutoCall
       });
