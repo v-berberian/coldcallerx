@@ -115,8 +115,6 @@ const LeadCard: React.FC<LeadCardProps> = ({
   // Track keyboard (visual viewport) inset to lift modal above iOS keyboard
   const [keyboardInset, setKeyboardInset] = useState(0);
   const [isModalInputFocused, setIsModalInputFocused] = useState(false);
-  // Track the input field position for genie effect animation
-  const [inputFieldPosition, setInputFieldPosition] = useState({ x: 0, y: 0, width: 0, height: 0 });
 
   useEffect(() => {
     if (!isAddCommentModalOpen) {
@@ -246,22 +244,21 @@ const LeadCard: React.FC<LeadCardProps> = ({
 
   // Modal comment functions
   const openAddCommentModal = useCallback(() => {
-    // Capture the button position for genie effect (we'll use a fallback position)
-    setInputFieldPosition({
-      x: window.innerWidth / 2,
-      y: window.innerHeight * 0.7,
-      width: 120,
-      height: 36
-    });
     setIsAddCommentModalOpen(true);
     onCommentModalOpenChange?.(true);
     setModalDraft('');
-    // Focus the modal input immediately to bring up keyboard
+    // Multiple attempts to ensure keyboard appears on all devices
     setTimeout(() => {
       modalInputRef.current?.focus();
-      // Force keyboard to appear on mobile
       modalInputRef.current?.click();
     }, 100);
+    setTimeout(() => {
+      modalInputRef.current?.focus();
+      modalInputRef.current?.click();
+    }, 200);
+    setTimeout(() => {
+      modalInputRef.current?.focus();
+    }, 300);
   }, [onCommentModalOpenChange]);
 
   const closeAddCommentModal = useCallback(() => {
@@ -1239,10 +1236,10 @@ const LeadCard: React.FC<LeadCardProps> = ({
               initial={{ 
                 scale: 0.1, 
                 opacity: 0, 
-                x: inputFieldPosition.x - window.innerWidth / 2,
-                y: inputFieldPosition.y - 100,
-                width: inputFieldPosition.width,
-                height: inputFieldPosition.height
+                x: 0,
+                y: 0,
+                width: '100%',
+                height: 'auto'
               }}
               animate={{ 
                 scale: 1, 
@@ -1255,10 +1252,10 @@ const LeadCard: React.FC<LeadCardProps> = ({
               exit={{ 
                 scale: 0.1, 
                 opacity: 0, 
-                x: inputFieldPosition.x - window.innerWidth / 2,
-                y: inputFieldPosition.y - 100,
-                width: inputFieldPosition.width,
-                height: inputFieldPosition.height
+                x: 0,
+                y: 0,
+                width: '100%',
+                height: 'auto'
               }}
               transition={{ 
                 type: "spring", 
@@ -1311,10 +1308,31 @@ const LeadCard: React.FC<LeadCardProps> = ({
                           setTimeout(compute, 140);
                         }
                       }}
-                      onBlur={() => setIsModalInputFocused(false)}
+                      onBlur={() => {
+                        setIsModalInputFocused(false);
+                        // Close modal when keyboard disappears (Done button pressed)
+                        setTimeout(() => {
+                          if (modalDraft.trim()) {
+                            addComment(modalDraft.trim());
+                          }
+                          closeAddCommentModal();
+                        }, 100);
+                      }}
+                      onKeyDown={(e) => {
+                        // Handle Enter key press (Done button on mobile keyboards)
+                        if (e.key === 'Enter' && !e.shiftKey) {
+                          e.preventDefault();
+                          if (modalDraft.trim()) {
+                            addComment(modalDraft.trim());
+                          }
+                          closeAddCommentModal();
+                        }
+                      }}
                       className="w-full rounded-lg border border-border/30 bg-background px-4 py-4 text-base focus:outline-none min-h-[160px] resize-none"
                       rows={6}
                       placeholder="Type your comment here..."
+                      autoFocus
+                      autoComplete="off"
                       style={{
                         fontSize: '16px', // Prevent iOS zoom
                         // Help keep the caret zone clear above the keyboard
