@@ -215,9 +215,13 @@ const FilterButtons: React.FC<FilterButtonsProps> = ({
           <button 
             onClick={() => setIsTemperatureDropdownOpen(!isTemperatureDropdownOpen)}
             className={`group relative w-full text-sm font-medium px-4 py-3 rounded-lg overflow-hidden transition-all duration-100 ease-out touch-manipulation ${
-              temperatureFilter !== 'ALL' 
-                ? 'text-red-700 dark:text-red-300 shadow-lg shadow-red-500/30' 
-                : 'text-muted-foreground/70'
+              temperatureFilter === 'ALL' 
+                ? 'text-muted-foreground/70'
+                : temperatureFilter === 'COLD'
+                ? 'text-blue-700 dark:text-blue-300 shadow-lg shadow-blue-500/30'
+                : temperatureFilter === 'WARM'
+                ? 'text-amber-700 dark:text-amber-300 shadow-lg shadow-amber-500/30'
+                : 'text-rose-700 dark:text-rose-300 shadow-lg shadow-rose-500/30'
             }`} 
             style={{ 
               WebkitTapHighlightColor: 'transparent',
