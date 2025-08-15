@@ -244,8 +244,10 @@ const NavigationControls: React.FC<NavigationControlsProps> = ({
             className="flex-1 h-16 sm:h-20 rounded-[2rem] shadow-lg active:scale-95 active:shadow-md active:shadow-black/20 transition-all duration-100 outline-none bg-background/20 backdrop-blur-xl border-white/20 text-foreground disabled:opacity-50 disabled:backdrop-blur-sm touch-manipulation no-select text-base sm:text-lg" 
             style={{ WebkitTapHighlightColor: 'transparent', WebkitUserSelect: 'none', userSelect: 'none' }} 
             onTouchStart={handleButtonTouchStart} 
+            onTouchMove={handleButtonTouchMove}
             onTouchEnd={handleButtonTouchEnd}
             onMouseDown={handleButtonTouchStart}
+            onMouseMove={handleButtonTouchMove}
             onMouseUp={handleButtonTouchEnd}
             onMouseLeave={() => {
               if (longPressTimeout) {
