@@ -189,6 +189,12 @@ export const useFilters = () => {
     setCallFilter(prev => prev === 'ALL' ? 'UNCALLED' : 'ALL');
   };
 
+  const setTemperatureFilterValue = (value: TemperatureFilter) => {
+    console.log('🔄 Set temperature filter to:', value);
+    setUserHasInteracted(true);
+    setTemperatureFilter(value);
+  };
+
   const toggleShuffle = () => {
     console.log('🔄 Toggle shuffle clicked - current:', shuffleMode);
     setUserHasInteracted(true);
@@ -208,12 +214,14 @@ export const useFilters = () => {
   return {
     timezoneFilter,
     callFilter,
+    temperatureFilter,
     shuffleMode,
     autoCall,
     isFilterChanging,
     isLoaded,
     toggleTimezoneFilter,
     toggleCallFilter,
+    setTemperatureFilterValue,
     toggleShuffle,
     toggleAutoCall,
     setFilterChanging,
