@@ -300,7 +300,7 @@ const FilterButtons: React.FC<FilterButtonsProps> = ({
           {/* Dropdown menu - Neon filter design */}
           {isTemperatureDropdownOpen && (
             <div className={`absolute top-full left-0 right-0 mt-1 bg-background/15 backdrop-blur-sm border border-border/15 rounded-xl shadow-2xl z-50 overflow-hidden ${
-              isTemperatureDropdownClosing ? 'animate-slide-up' : 'animate-slide-down'
+              isTemperatureDropdownClosing ? 'animate-slide-up' : 'animate-slide-down-bounce'
             }`}>
               {(['ALL', 'COLD', 'WARM', 'HOT'] as const).map((option) => {
                 const isSelected = temperatureFilter === option;
