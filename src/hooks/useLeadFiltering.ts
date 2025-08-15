@@ -7,7 +7,8 @@ export const useLeadFiltering = (
   timezoneFilter: TimezoneFilter, 
   callFilter: CallFilter,
   temperatureFilter: TemperatureFilter,
-  currentCSVId: string | null
+  currentCSVId: string | null,
+  refreshTrigger?: number
 ) => {
   const [filteredLeads, setFilteredLeads] = useState<Lead[]>([]);
 
