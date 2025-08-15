@@ -122,55 +122,22 @@ const NavigationControls: React.FC<NavigationControlsProps> = ({
         <span className="truncate">Previous</span>
       </Button>
       
-      <DropdownMenu open={isDropdownOpen} onOpenChange={(open) => {
-        // Only allow closing the dropdown, not opening it
-        if (!open) {
-          setIsDropdownOpen(false);
-        }
-      }}>
-        <DropdownMenuTrigger asChild>
-          <Button 
-            variant="outline" 
-            disabled={!canGoNext} 
-            className="flex-1 h-16 sm:h-20 rounded-[2rem] shadow-lg active:scale-95 active:shadow-md active:shadow-black/20 transition-all duration-100 outline-none bg-background/20 backdrop-blur-xl border-white/20 text-foreground disabled:opacity-50 disabled:backdrop-blur-sm touch-manipulation no-select text-base sm:text-lg" 
-            style={{ WebkitTapHighlightColor: 'transparent', WebkitUserSelect: 'none', userSelect: 'none' }} 
-            onTouchStart={handleButtonTouchStart} 
-            onTouchEnd={handleButtonTouchEnd}
-            onMouseDown={handleButtonTouchStart}
-            onMouseUp={handleButtonTouchEnd}
-            onMouseLeave={() => {
-              if (longPressTimeout) {
-                clearTimeout(longPressTimeout);
-                setLongPressTimeout(null);
-              }
-              setIsLongPressing(false);
-            }}
-            onClick={(e) => {
-              // Prevent the dropdown from opening on regular clicks
-              e.preventDefault();
-              e.stopPropagation();
-            }}
-          >
-            <span className="truncate">{shuffleMode ? 'Shuffle' : 'Next'}</span>
-            {shuffleMode ? (
-              <Shuffle className="h-5 w-5 sm:h-6 sm:w-6 ml-2" />
-            ) : (
-              <ArrowRight className="h-5 w-5 sm:h-6 sm:w-6 ml-2" />
-            )}
-          </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="end" className="w-48">
-          {onToggleShuffle && (
-            <DropdownMenuItem 
-              onClick={() => handleDropdownItemClick(handleShuffle)}
-              className="flex items-center gap-2"
-            >
-              <Shuffle className="h-4 w-4" />
-              {shuffleMode ? 'Turn Off Shuffle' : 'Turn On Shuffle'}
-            </DropdownMenuItem>
-          )}
-        </DropdownMenuContent>
-      </DropdownMenu>
+      <Button 
+        variant="outline" 
+        onClick={handleNextClick} 
+        disabled={!canGoNext} 
+        className="flex-1 h-16 sm:h-20 rounded-[2rem] shadow-lg active:scale-95 active:shadow-md active:shadow-black/20 transition-all duration-100 outline-none bg-background/20 backdrop-blur-xl border-white/20 text-foreground disabled:opacity-50 disabled:backdrop-blur-sm touch-manipulation no-select text-base sm:text-lg" 
+        style={{ WebkitTapHighlightColor: 'transparent', WebkitUserSelect: 'none', userSelect: 'none' }} 
+        onTouchStart={() => {}} 
+        onTouchEnd={() => {}}
+      >
+        <span className="truncate">{shuffleMode ? 'Shuffle' : 'Next'}</span>
+        {shuffleMode ? (
+          <Shuffle className="h-5 w-5 sm:h-6 sm:w-6 ml-2" />
+        ) : (
+          <ArrowRight className="h-5 w-5 sm:h-6 sm:w-6 ml-2" />
+        )}
+      </Button>
         </div>
       </motion.div>
     </AnimatePresence>
