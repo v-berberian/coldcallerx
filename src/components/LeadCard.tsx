@@ -278,21 +278,18 @@ const LeadCard: React.FC<LeadCardProps> = ({
     };
     const next = [...comments, newComment];
     
+    // Mark as fading in initially
+    setFadingInIds(prev => new Set(prev).add(newComment.id));
     saveComments(next);
     
-    // Start fade in animation after DOM update
+    // Trigger fade in after DOM update
     setTimeout(() => {
-      setFadingInIds(prev => new Set(prev).add(newComment.id));
-      
-      // Remove from fading in after animation completes
-      setTimeout(() => {
-        setFadingInIds(prev => {
-          const newSet = new Set(prev);
-          newSet.delete(newComment.id);
-          return newSet;
-        });
-      }, 150);
-    }, 10);
+      setFadingInIds(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(newComment.id);
+        return newSet;
+      });
+    }, 150);
   }, [comments, saveComments]);
 
   const addCommentFromModal = useCallback(() => {
