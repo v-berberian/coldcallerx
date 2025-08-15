@@ -21,6 +21,7 @@ interface MainContentProps {
   onCSVSelect: (csvId: string, leads: Lead[], fileName: string) => void;
   onToggleTimezone: () => void;
   onToggleCallFilter: () => void;
+  onToggleTemperature: (value: 'ALL' | 'COLD' | 'WARM' | 'HOT') => void;
   onToggleShuffle: () => void;
   onToggleAutoCall: () => void;
   onToggleCallDelay: () => void;
@@ -53,6 +54,7 @@ const MainContent: React.FC<MainContentProps> = ({
   currentCSVId,
   timezoneFilter,
   callFilter,
+  temperatureFilter,
   shuffleMode,
   autoCall,
   callDelay,
