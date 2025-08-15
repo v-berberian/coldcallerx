@@ -211,9 +211,9 @@ const FilterButtons: React.FC<FilterButtonsProps> = ({
 
       {/* Second row: Temperature and Auto Call filters */}
       <div className="flex w-full gap-2">
-        <div className="flex-1">
+        <div className="flex-1 relative" ref={temperatureDropdownRef}>
           <button 
-            onClick={handleFilterClick(onToggleTemperature, 'temperature')} 
+            onClick={() => setIsTemperatureDropdownOpen(!isTemperatureDropdownOpen)}
             className={`group relative w-full text-sm font-medium px-4 py-3 rounded-lg overflow-hidden transition-all duration-100 ease-out touch-manipulation ${
               temperatureFilter !== 'ALL' 
                 ? 'text-red-700 dark:text-red-300 shadow-lg shadow-red-500/30' 
@@ -247,12 +247,40 @@ const FilterButtons: React.FC<FilterButtonsProps> = ({
               />
             )}
             
-            <span className={`relative z-10 block truncate transition-all duration-100 ease-out ${
-              temperatureFilter !== 'ALL' ? 'scale-100 opacity-100' : 'scale-95 opacity-90'
-            }`}>
-              {temperatureFilter === 'ALL' ? 'All Temperature' : temperatureFilter}
-            </span>
+            <div className="relative z-10 flex items-center justify-between">
+              <span className={`block truncate transition-all duration-100 ease-out ${
+                temperatureFilter !== 'ALL' ? 'scale-100 opacity-100' : 'scale-95 opacity-90'
+              }`}>
+                {temperatureFilter === 'ALL' ? 'All Temperature' : temperatureFilter}
+              </span>
+              <ChevronDown 
+                size={16} 
+                className={`ml-2 transition-transform duration-200 ${isTemperatureDropdownOpen ? 'rotate-180' : ''}`}
+              />
+            </div>
           </button>
+
+          {/* Dropdown menu */}
+          {isTemperatureDropdownOpen && (
+            <div className="absolute top-full left-0 right-0 mt-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg z-50 overflow-hidden">
+              {(['ALL', 'COLD', 'WARM', 'HOT'] as const).map((option) => (
+                <button
+                  key={option}
+                  onClick={() => {
+                    onToggleTemperature(option);
+                    setIsTemperatureDropdownOpen(false);
+                  }}
+                  className={`w-full px-4 py-3 text-left text-sm font-medium transition-colors duration-100 hover:bg-gray-50 dark:hover:bg-gray-700 ${
+                    temperatureFilter === option
+                      ? 'bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-300'
+                      : 'text-gray-700 dark:text-gray-300'
+                  }`}
+                >
+                  {option === 'ALL' ? 'All Temperature' : option}
+                </button>
+              ))}
+            </div>
+          )}
         </div>
         
         <div className="flex-1 relative">
