@@ -220,8 +220,8 @@ const MainContent: React.FC<MainContentProps> = ({
             onNext={handleNext}
             canGoPrevious={canGoPrevious}
             canGoNext={canGoNext}
-            onSkipMultiple={onSkipMultiple}
-            onSkipToEnd={onSkipToEnd}
+            shuffleMode={shuffleMode}
+            onToggleShuffle={onToggleShuffle}
           />
         </div>
       </div>
