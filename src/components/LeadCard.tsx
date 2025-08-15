@@ -1126,18 +1126,12 @@ const LeadCard: React.FC<LeadCardProps> = ({
             </div>
             
             {/* Add Comment Button */}
-            <motion.div
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
+            <button
+              onClick={openAddCommentModal}
+              className="text-sm text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
             >
-              <Button
-                onClick={openAddCommentModal}
-                className="h-12 px-6 rounded-lg bg-gradient-to-br from-violet-400 via-violet-500 to-violet-600 hover:from-violet-500 hover:via-violet-600 hover:to-violet-700 text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.2),inset_0_-1px_0_rgba(0,0,0,0.1),0_4px_6px_-1px_rgba(139,92,246,0.3),0_2px_4px_-1px_rgba(139,92,246,0.2)] hover:shadow-[inset_0_1px_0_rgba(255,255,255,0.2),inset_0_-1px_0_rgba(0,0,0,0.1),0_6px_12px_-1px_rgba(139,92,246,0.4),0_4px_6px_-1px_rgba(139,92,246,0.3)] active:shadow-[inset_0_2px_4px_rgba(0,0,0,0.2),inset_0_-1px_0_rgba(255,255,255,0.1),0_2px_4px_-1px_rgba(139,92,246,0.2)] transition-all duration-200 active:scale-95"
-                size="sm"
-              >
-                Add Comment
-              </Button>
-            </motion.div>
+              + Add comment
+            </button>
           </div>
         </div>
       </CardContent>
