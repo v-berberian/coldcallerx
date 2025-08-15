@@ -147,16 +147,28 @@ const NavigationControls: React.FC<NavigationControlsProps> = ({
       
       <Button 
         variant="outline" 
-        onClick={handleNextClick} 
         disabled={!canGoNext} 
         className="flex-1 h-16 sm:h-20 rounded-[2rem] shadow-lg active:scale-95 active:shadow-md active:shadow-black/20 transition-all duration-100 outline-none bg-background/20 backdrop-blur-xl border-white/20 text-foreground disabled:opacity-50 disabled:backdrop-blur-sm touch-manipulation no-select text-base sm:text-lg" 
         style={{ WebkitTapHighlightColor: 'transparent', WebkitUserSelect: 'none', userSelect: 'none' }} 
-        onTouchStart={() => {}} 
-        onTouchEnd={() => {}}
+        onTouchStart={handleButtonTouchStart} 
+        onTouchEnd={handleButtonTouchEnd}
+        onMouseDown={handleButtonTouchStart}
+        onMouseUp={handleButtonTouchEnd}
+        onMouseLeave={() => {
+          if (longPressTimeout) {
+            clearTimeout(longPressTimeout);
+            setLongPressTimeout(null);
+          }
+          setIsLongPressing(false);
+        }}
+        onClick={(e) => {
+          // Prevent default click behavior since we handle it in touch events
+          e.preventDefault();
+        }}
       >
-        <span className="truncate">{shuffleMode ? 'Shuffle' : 'Next'}</span>
+        <span className="truncate">Next</span>
         {shuffleMode ? (
-          <Shuffle className="h-5 w-5 sm:h-6 sm:w-6 ml-2" />
+          <Shuffle className="h-5 w-5 sm:h-6 sm:w-6 ml-2 text-orange-500" />
         ) : (
           <ArrowRight className="h-5 w-5 sm:h-6 sm:w-6 ml-2" />
         )}
