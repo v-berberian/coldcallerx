@@ -1263,21 +1263,21 @@ const LeadCard: React.FC<LeadCardProps> = ({
                 bounce: 0.2,
                 ease: [0.25, 0.46, 0.45, 0.94]
               }}
-              className="w-full max-w-lg bg-card rounded-3xl border border-border/50 shadow-2xl max-h-[80vh] flex flex-col overflow-hidden"
+              className="w-full max-w-lg bg-card rounded-3xl border border-border/50 shadow-2xl max-h-[65vh] flex flex-col overflow-hidden"
               onClick={(e) => e.stopPropagation()}
               style={{
                 touchAction: 'auto',
                 // Reduce max height further when keyboard is visible
-                maxHeight: keyboardInset > 0 ? `calc(80vh - ${keyboardInset}px)` : undefined,
+                maxHeight: keyboardInset > 0 ? `calc(65vh - ${keyboardInset}px)` : undefined,
               }}
             >
               {/* Modal Header */}
-              <div className="px-6 py-4 border-b border-border/20">
+              <div className="px-4 py-3 border-b border-border/20">
                 <h3 className="text-lg font-semibold text-center">Add Comment</h3>
               </div>
 
               {/* Modal Content */}
-              <div className="flex-1 p-6">
+              <div className="flex-1 p-4">
                 <div className="space-y-4">
                   <div>
                     <label className="text-sm font-medium text-muted-foreground mb-2 block">
@@ -1328,8 +1328,8 @@ const LeadCard: React.FC<LeadCardProps> = ({
                           closeAddCommentModal();
                         }
                       }}
-                      className="w-full rounded-lg border border-border/30 bg-background px-4 py-4 text-base focus:outline-none min-h-[160px] resize-none"
-                      rows={6}
+                      className="w-full rounded-lg border border-border/30 bg-background px-4 py-3 text-base focus:outline-none min-h-[100px] resize-none"
+                      rows={4}
                       placeholder="Type your comment here..."
                       autoFocus
                       autoComplete="off"
@@ -1344,7 +1344,7 @@ const LeadCard: React.FC<LeadCardProps> = ({
               </div>
 
               {/* Modal Footer */}
-              <div className="p-6 border-t border-border/20 bg-background/50">
+              <div className="p-4 border-t border-border/20 bg-background/50">
                 <div className="flex items-center gap-4 justify-end">
                   <Button
                     variant="outline"
