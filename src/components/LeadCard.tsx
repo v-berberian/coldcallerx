@@ -39,6 +39,8 @@ interface LeadCardProps {
   onImportNew?: () => void;
   navigationDirection?: 'forward' | 'backward';
   onSwipeReset?: (resetSwipe: () => void) => void;
+  onCommentModalOpenChange?: (open: boolean) => void;
+  onCommentingChange?: (commenting: boolean) => void;
 }
 
 const LeadCard: React.FC<LeadCardProps> = ({
@@ -55,7 +57,8 @@ const LeadCard: React.FC<LeadCardProps> = ({
   refreshTrigger,
   onImportNew,
   navigationDirection = 'forward',
-  onSwipeReset
+  onSwipeReset,
+  onCommentModalOpenChange
 }) => {
   // Use the extracted hooks
   const {
@@ -251,6 +254,7 @@ const LeadCard: React.FC<LeadCardProps> = ({
       height: 36
     });
     setIsAddCommentModalOpen(true);
+    onCommentModalOpenChange?.(true);
     setModalDraft('');
     // Focus the modal input immediately to bring up keyboard
     setTimeout(() => {
@@ -258,14 +262,15 @@ const LeadCard: React.FC<LeadCardProps> = ({
       // Force keyboard to appear on mobile
       modalInputRef.current?.click();
     }, 100);
-  }, []);
+  }, [onCommentModalOpenChange]);
 
   const closeAddCommentModal = useCallback(() => {
     setIsAddCommentModalOpen(false);
+    onCommentModalOpenChange?.(false);
     setModalDraft('');
     setIsModalInputFocused(false);
     setKeyboardInset(0);
-  }, []);
+  }, [onCommentModalOpenChange]);
 
   const addComment = useCallback((text: string) => {
     if (!text.trim()) return;
