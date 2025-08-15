@@ -93,6 +93,11 @@ const CallingScreenContainer: React.FC<CallingScreenContainerProps> = memo(({
     setIsCommenting(commenting);
   };
 
+  // Handle tag changes from LeadCard
+  const handleTagChange = () => {
+    setTagRefreshTrigger(prev => prev + 1);
+  };
+
   const handleCommentModalOpenChange = (open: boolean) => {
     setIsCommentModalOpen(open);
   };
