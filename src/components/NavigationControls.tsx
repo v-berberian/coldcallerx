@@ -36,7 +36,8 @@ const NavigationControls: React.FC<NavigationControlsProps> = ({
     handleNext();
   };
 
-  const handleButtonTouchStart = () => {
+  const handleButtonTouchStart = (e: React.TouchEvent | React.MouseEvent) => {
+    e.preventDefault();
     setIsLongPressing(false);
     const timeout = setTimeout(() => {
       setIsLongPressing(true);
@@ -48,7 +49,8 @@ const NavigationControls: React.FC<NavigationControlsProps> = ({
     setLongPressTimeout(timeout);
   };
 
-  const handleButtonTouchEnd = () => {
+  const handleButtonTouchEnd = (e: React.TouchEvent | React.MouseEvent) => {
+    e.preventDefault();
     if (longPressTimeout) {
       clearTimeout(longPressTimeout);
       setLongPressTimeout(null);
