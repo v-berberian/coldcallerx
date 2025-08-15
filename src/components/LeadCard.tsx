@@ -1077,7 +1077,7 @@ const LeadCard: React.FC<LeadCardProps> = ({
                       </p>
                     </div>
                     {selectedCommentId === c.id && (
-                      <div className="flex items-center gap-2 self-center">
+                      <div className="flex items-center gap-2 self-start flex-shrink-0">
                         <button
                           aria-label="Delete comment"
                           className="min-w-[44px] min-h-[44px] flex items-center justify-center rounded-lg bg-red-50 active:bg-red-200 dark:bg-red-900/20 dark:active:bg-red-900/40 transition-colors touch-manipulation"
