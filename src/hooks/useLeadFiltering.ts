@@ -43,27 +43,7 @@ export const useLeadFiltering = (
     };
 
     applyTemperatureFilter();
-  }, [syncFilteredLeads, temperatureFilter, currentCSVId]);
-
-  // Force re-filter when leads data changes (includes tag updates)
-  useEffect(() => {
-    if (temperatureFilter !== 'ALL' && currentCSVId) {
-      const refetchAndFilter = async () => {
-        try {
-          const temperatureFiltered = await filterLeadsByTemperature(
-            syncFilteredLeads, 
-            temperatureFilter, 
-            currentCSVId
-          );
-          setFilteredLeads(temperatureFiltered);
-        } catch (error) {
-          console.error('Error re-filtering after data change:', error);
-          setFilteredLeads(syncFilteredLeads);
-        }
-      };
-      refetchAndFilter();
-    }
-  }, [leadsData.length]); // Trigger when leads array changes
+  }, [syncFilteredLeads, temperatureFilter, currentCSVId, refreshTrigger]);
 
   const getBaseLeads = useCallback(() => {
     return filteredLeads;
