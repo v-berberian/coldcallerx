@@ -86,7 +86,7 @@ const CallingScreenContainer: React.FC<CallingScreenContainerProps> = memo(({
     closeAutocomplete,
     getDelayDisplayType,
     isLoaded
-  } = useLocalCallingScreenState({ leads, onCallMade: undefined, refreshTrigger: externalRefreshTrigger });
+  } = useLocalCallingScreenState({ leads, onCallMade: undefined, refreshTrigger: externalRefreshTrigger + tagRefreshTrigger });
 
   // Handle commenting state from MainContent
   const handleCommentingChange = (commenting: boolean) => {
