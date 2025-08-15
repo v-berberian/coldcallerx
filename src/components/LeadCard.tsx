@@ -973,11 +973,12 @@ const LeadCard: React.FC<LeadCardProps> = ({
                 className="w-24 h-24 sm:w-32 sm:h-32 rounded-full bg-gradient-to-br from-green-400 to-green-600 active:from-green-600 active:to-green-800 text-white transition-all duration-300 flex items-center justify-center p-0 relative overflow-hidden neomorphic-button focus:outline-none"
                 style={{
                   boxShadow: `
-                    8px 8px 16px rgba(0, 0, 0, 0.2),
-                    -8px -8px 16px rgba(255, 255, 255, 0.1),
-                    inset 2px 2px 4px rgba(255, 255, 255, 0.2),
-                    inset -2px -2px 4px rgba(0, 0, 0, 0.1)
+                    8px 8px 16px rgba(0, 0, 0, 0.3),
+                    -8px -8px 16px rgba(255, 255, 255, 0.03),
+                    inset 2px 2px 4px rgba(255, 255, 255, 0.1),
+                    inset -2px -2px 4px rgba(0, 0, 0, 0.2)
                   `,
+                  filter: 'brightness(1.1) contrast(1.1)',
                   WebkitTapHighlightColor: 'transparent',
                   transform: 'translateY(0)',
                     transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
