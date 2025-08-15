@@ -468,8 +468,8 @@ const LeadCard: React.FC<LeadCardProps> = ({
         style={{
           transformStyle: "preserve-3d",
           perspective: "1000px",
-          // Prefer vertical scrolling when the card is flipped
-          touchAction: isCardFlipped ? 'pan-y' : undefined
+          // Allow vertical scrolling and horizontal gestures when flipped
+          touchAction: isCardFlipped ? 'pan-y pinch-zoom' : undefined
         }}
       >
         {/* Subtler neon backlight with gentle breathing animation when active */}
