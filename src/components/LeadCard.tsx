@@ -1162,8 +1162,8 @@ const LeadCard: React.FC<LeadCardProps> = ({
             onClick={closeAddCommentModal}
             style={{
               touchAction: 'none',
-              // Position in upper half by default, with padding for safe area
-              paddingTop: 'max(env(safe-area-inset-top) + 20px, 20px)',
+              // Position modal in upper-middle area for better visual balance
+              paddingTop: 'max(env(safe-area-inset-top) + 80px, 80px)',
             }}
           >
             <motion.div
