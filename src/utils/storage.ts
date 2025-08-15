@@ -8,6 +8,7 @@ const STORAGE_KEYS = {
   SEARCH_QUERY: 'coldcaller-search-query',
   TIMEZONE_FILTER: 'coldcaller-timezone-filter',
   CALL_FILTER: 'coldcaller-call-filter',
+  TEMPERATURE_FILTER: 'coldcaller-temperature-filter',
   SHUFFLE_MODE: 'coldcaller-shuffle-mode',
   AUTO_CALL: 'coldcaller-auto-call',
   CALL_DELAY: 'coldcaller-call-delay',
