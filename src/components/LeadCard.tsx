@@ -1048,7 +1048,7 @@ const LeadCard: React.FC<LeadCardProps> = ({
         </div>
 
         <div 
-          className="flex-1 min-h-0 overflow-y-auto px-4 pb-4 space-y-3 scrollbar-thin scrollbar-thumb-border/20 scrollbar-track-transparent" 
+          className="flex-1 min-h-0 overflow-y-auto px-4 pb-4 scrollbar-thin scrollbar-thumb-border/20 scrollbar-track-transparent" 
           data-comments-scroll="true"
           tabIndex={0}
           style={{
