@@ -4,14 +4,12 @@ import { RotateCcw, Timer, Rocket } from 'lucide-react';
 interface FilterButtonsProps {
   timezoneFilter: 'ALL' | 'EST_CST';
   callFilter: 'ALL' | 'UNCALLED';
-  shuffleMode: boolean;
   autoCall: boolean;
   callDelay: number;
   isCountdownActive?: boolean;
   countdownTime?: number;
   onToggleTimezone: () => void;
   onToggleCallFilter: () => void;
-  onToggleShuffle: () => void;
   onToggleAutoCall: () => void;
   onToggleCallDelay: () => void;
   onResetAllCalls: () => void;
