@@ -449,9 +449,9 @@ const LeadCard: React.FC<LeadCardProps> = ({
       <motion.div
         ref={cardRef}
         className="relative"
-        onTouchStart={handleTouchStart}
-        onTouchMove={handleTouchMove}
-        onTouchEnd={handleTouchEnd}
+        onTouchStart={isCardFlipped ? undefined : handleTouchStart}
+        onTouchMove={isCardFlipped ? undefined : handleTouchMove}
+        onTouchEnd={isCardFlipped ? undefined : handleTouchEnd}
         animate={{ 
           // Keep rotation strictly tied to flip state to avoid overlap during swipe
           rotateY: isCardFlipped ? 180 : 0,
