@@ -34,6 +34,7 @@ const CallingScreenContainer: React.FC<CallingScreenContainerProps> = memo(({
   const { importLeadsFromCSV, updateLeadCallCount, resetCallCount, resetAllCallCounts } = useLocalLeadOperations();
   const [isCommenting, setIsCommenting] = useState(false);
   const [isCommentModalOpen, setIsCommentModalOpen] = useState(false);
+  const [tagRefreshTrigger, setTagRefreshTrigger] = useState(0);
   
   const {
     componentReady,
