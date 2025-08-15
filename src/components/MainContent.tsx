@@ -86,7 +86,8 @@ const MainContent: React.FC<MainContentProps> = ({
   onCommentingChange,
   onCommentModalOpenChange,
   onSkipMultiple,
-  onSkipToEnd
+  onSkipToEnd,
+  onTagChange
 }) => {
   const [navigationDirection, setNavigationDirection] = useState<'forward' | 'backward'>('forward');
   const [resetSwipe, setResetSwipe] = useState<(() => void) | null>(null);
@@ -215,6 +216,7 @@ const MainContent: React.FC<MainContentProps> = ({
           onDeleteLead={onDeleteLead}
           onCommentingChange={handleCommentingChange}
           onCommentModalOpenChange={handleCommentModalOpenChange}
+          onTagChange={onTagChange}
         />
       </div>
 
