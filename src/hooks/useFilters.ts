@@ -61,12 +61,14 @@ export const useFilters = () => {
         
         const savedTimezoneFilter = await appStorage.getTimezoneFilter();
         const savedCallFilter = await appStorage.getCallFilter();
+        const savedTemperatureFilter = await appStorage.getTemperatureFilter();
         const savedShuffleMode = await appStorage.getShuffleMode();
         const savedAutoCall = await appStorage.getAutoCall();
 
         console.log('Raw restored filters:', {
           timezoneFilter: savedTimezoneFilter,
           callFilter: savedCallFilter,
+          temperatureFilter: savedTemperatureFilter,
           shuffleMode: savedShuffleMode,
           autoCall: savedAutoCall
         });
@@ -85,6 +87,14 @@ export const useFilters = () => {
           console.log('Set call filter to:', savedCallFilter);
         } else {
           console.log('Invalid call filter, keeping default:', savedCallFilter);
+        }
+
+        // Validate and set temperature filter
+        if (savedTemperatureFilter && ['ALL', 'COLD', 'WARM', 'HOT'].includes(savedTemperatureFilter)) {
+          setTemperatureFilter(savedTemperatureFilter as TemperatureFilter);
+          console.log('Set temperature filter to:', savedTemperatureFilter);
+        } else {
+          console.log('Invalid temperature filter, keeping default:', savedTemperatureFilter);
         }
 
         // Validate and set shuffle mode
