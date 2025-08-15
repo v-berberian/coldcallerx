@@ -1240,10 +1240,10 @@ const LeadCard: React.FC<LeadCardProps> = ({
               }}
             >
               {/* Modal Content */}
-              <div className="flex-1 p-4">
-                <div className="space-y-4">
+              <div className="flex-1" style={{ padding: keyboardInset > 0 ? '12px 16px' : '16px' }}>
+                <div style={{ marginBottom: keyboardInset > 0 ? '12px' : '16px' }}>
                   <div>
-                    <label className="text-sm font-medium text-muted-foreground mb-2 block">
+                    <label className="text-sm font-medium text-muted-foreground block" style={{ marginBottom: keyboardInset > 0 ? '8px' : '12px' }}>
                       Comment for {lead.name}
                     </label>
                     <textarea
