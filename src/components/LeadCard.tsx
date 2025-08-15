@@ -641,13 +641,25 @@ const LeadCard: React.FC<LeadCardProps> = ({
           {/* Group 1: Name and Company */}
             <div className="space-y-1">
             <div className="flex items-center justify-center px-2">
-              <h2 className="text-2xl sm:text-3xl font-bold text-center break-words leading-tight bg-gradient-to-r from-foreground to-foreground/95 bg-clip-text text-transparent dark:bg-none dark:text-foreground">
+              <h2 
+                className="font-bold text-center break-words leading-tight bg-gradient-to-r from-foreground to-foreground/95 bg-clip-text text-transparent dark:bg-none dark:text-foreground"
+                style={{
+                  fontSize: lead.name.length > 20 ? (lead.name.length > 30 ? '1.25rem' : '1.5rem') : '1.875rem', // 20px, 24px, 30px
+                  lineHeight: lead.name.length > 20 ? '1.2' : '1.1'
+                }}
+              >
                 {lead.name}
               </h2>
             </div>
             {lead.company && (
               <div className="flex items-center justify-center px-2">
-                <p className="text-base sm:text-lg font-medium text-center break-words leading-relaxed bg-gradient-to-r from-muted-foreground to-muted-foreground/90 bg-clip-text text-transparent dark:bg-none dark:text-muted-foreground">
+                <p 
+                  className="font-medium text-center break-words leading-relaxed bg-gradient-to-r from-muted-foreground to-muted-foreground/90 bg-clip-text text-transparent dark:bg-none dark:text-muted-foreground"
+                  style={{
+                    fontSize: lead.company.length > 25 ? (lead.company.length > 40 ? '0.875rem' : '1rem') : '1.125rem', // 14px, 16px, 18px
+                    lineHeight: lead.company.length > 25 ? '1.3' : '1.4'
+                  }}
+                >
                   {lead.company}
                 </p>
               </div>
