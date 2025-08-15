@@ -38,6 +38,12 @@ const NavigationControls: React.FC<NavigationControlsProps> = ({
     onNext();
   };
 
+  const handleShuffle = () => {
+    if (onToggleShuffle) {
+      onToggleShuffle();
+    }
+  };
+
   // Long press state and handlers
   const [isDropdownOpen, setIsDropdownOpen] = React.useState(false);
   const [longPressTimeout, setLongPressTimeout] = React.useState<NodeJS.Timeout | null>(null);
