@@ -283,7 +283,7 @@ const FilterButtons: React.FC<FilterButtonsProps> = ({
                     minHeight: '48px'
                   }}
                 >
-                  {option === 'ALL' ? 'All Stages' : option}
+                  {option === 'ALL' ? 'All Stages' : option.charAt(0).toUpperCase() + option.slice(1).toLowerCase()}
                 </button>
               ))}
             </div>
