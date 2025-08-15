@@ -4,12 +4,14 @@ import { RotateCcw, Timer, Rocket } from 'lucide-react';
 interface FilterButtonsProps {
   timezoneFilter: 'ALL' | 'EST_CST';
   callFilter: 'ALL' | 'UNCALLED';
+  shuffleMode: boolean;
   autoCall: boolean;
   callDelay: number;
   isCountdownActive?: boolean;
   countdownTime?: number;
   onToggleTimezone: () => void;
   onToggleCallFilter: () => void;
+  onToggleShuffle: () => void;
   onToggleAutoCall: () => void;
   onToggleCallDelay: () => void;
   onResetAllCalls: () => void;
@@ -20,12 +22,14 @@ interface FilterButtonsProps {
 const FilterButtons: React.FC<FilterButtonsProps> = ({
   timezoneFilter,
   callFilter,
+  shuffleMode,
   autoCall,
   callDelay,
   isCountdownActive,
   countdownTime,
   onToggleTimezone,
   onToggleCallFilter,
+  onToggleShuffle,
   onToggleAutoCall,
   onToggleCallDelay,
   onResetAllCalls,
@@ -190,9 +194,53 @@ const FilterButtons: React.FC<FilterButtonsProps> = ({
         </div>
       </div>
 
-      {/* Second row: Auto Call filter */}
-      <div className="flex w-full">
-        <div className="w-full relative">
+      {/* Second row: Shuffle and Auto Call filters */}
+      <div className="flex w-full gap-2">
+        <div className="flex-1">
+          <button 
+            onClick={handleFilterClick(onToggleShuffle, 'shuffle')} 
+            className={`group relative w-full text-sm font-medium px-4 py-3 rounded-lg overflow-hidden transition-all duration-100 ease-out touch-manipulation ${
+              shuffleMode 
+                ? 'text-orange-700 dark:text-orange-300 shadow-lg shadow-orange-500/30' 
+                : 'text-muted-foreground/70'
+            }`} 
+            style={{ 
+              WebkitTapHighlightColor: 'transparent',
+              transition: 'all 100ms cubic-bezier(0.25, 0.46, 0.45, 0.94)',
+              touchAction: 'manipulation'
+            }}
+          >
+            {/* Animated background for active state */}
+            {shuffleMode && (
+              <div 
+                className="absolute inset-0 bg-gradient-to-r from-orange-500/20 to-orange-600/20 rounded-lg scale-100 opacity-100 pointer-events-none"
+                style={{
+                  transition: 'all 100ms cubic-bezier(0.25, 0.46, 0.45, 0.94)',
+                  pointerEvents: 'none'
+                }}
+              />
+            )}
+            
+            {/* Subtle background for inactive state */}
+            {!shuffleMode && (
+              <div 
+                className="absolute inset-0 bg-gray-200/20 dark:bg-gray-700/20 rounded-lg scale-100 opacity-100 pointer-events-none"
+                style={{
+                  transition: 'all 100ms cubic-bezier(0.25, 0.46, 0.45, 0.94)',
+                  pointerEvents: 'none'
+                }}
+              />
+            )}
+            
+            <span className={`relative z-10 block truncate transition-all duration-100 ease-out ${
+              shuffleMode ? 'scale-100 opacity-100' : 'scale-95 opacity-90'
+            }`}>
+              Shuffle
+            </span>
+          </button>
+        </div>
+        
+        <div className="flex-1 relative">
           <button 
             onClick={handleFilterClick(onToggleAutoCall, 'autoCall')} 
             className={`group relative w-full text-sm font-medium px-4 py-3 rounded-lg overflow-hidden transition-all duration-100 ease-out touch-manipulation ${

@@ -49,64 +49,13 @@ const NavigationControls: React.FC<NavigationControlsProps> = ({
   const [longPressTimeout, setLongPressTimeout] = React.useState<NodeJS.Timeout | null>(null);
   const [isLongPressing, setIsLongPressing] = React.useState(false);
 
-  // Swipe gesture state
-  const [swipeStart, setSwipeStart] = React.useState<{ x: number; y: number; time: number } | null>(null);
-  const [isSwiping, setIsSwiping] = React.useState(false);
-  const [swipeDirection, setSwipeDirection] = React.useState<'left' | 'right' | null>(null);
-
-  const handleButtonTouchStart = (e: React.TouchEvent | React.MouseEvent) => {
+  const handleButtonTouchStart = () => {
     setIsLongPressing(false);
-    setIsSwiping(false);
-    setSwipeDirection(null);
-
-    // Get touch/mouse coordinates
-    const clientX = 'touches' in e ? e.touches[0].clientX : e.clientX;
-    const clientY = 'touches' in e ? e.touches[0].clientY : e.clientY;
-    
-    setSwipeStart({
-      x: clientX,
-      y: clientY,
-      time: Date.now()
-    });
-
     const timeout = setTimeout(() => {
-      if (!isSwiping) {
-        setIsLongPressing(true);
-        setIsDropdownOpen(true);
-      }
+      setIsLongPressing(true);
+      setIsDropdownOpen(true);
     }, 1000); // 1000ms long press
     setLongPressTimeout(timeout);
-  };
-
-  const handleButtonTouchMove = (e: React.TouchEvent | React.MouseEvent) => {
-    if (!swipeStart) return;
-
-    const clientX = 'touches' in e ? e.touches[0].clientX : e.clientX;
-    const clientY = 'touches' in e ? e.touches[0].clientY : e.clientY;
-
-    const deltaX = clientX - swipeStart.x;
-    const deltaY = clientY - swipeStart.y;
-    const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
-
-    // Detect significant movement (minimum 30px to start considering it a swipe)
-    if (distance > 30) {
-      setIsSwiping(true);
-      
-      // Cancel long press if swiping
-      if (longPressTimeout) {
-        clearTimeout(longPressTimeout);
-        setLongPressTimeout(null);
-      }
-
-      // Determine swipe direction (horizontal swipes only)
-      const absX = Math.abs(deltaX);
-      const absY = Math.abs(deltaY);
-      
-      // Only consider horizontal swipes where horizontal movement is dominant
-      if (absX > absY && absX > 40) {
-        setSwipeDirection(deltaX > 0 ? 'right' : 'left');
-      }
-    }
   };
 
   const handleButtonTouchEnd = () => {
@@ -114,30 +63,14 @@ const NavigationControls: React.FC<NavigationControlsProps> = ({
       clearTimeout(longPressTimeout);
       setLongPressTimeout(null);
     }
-
-    const wasSwipe = isSwiping && swipeStart && swipeDirection;
-    const swipeTime = swipeStart ? Date.now() - swipeStart.time : 0;
-
-    // Reset swipe state
-    setSwipeStart(null);
-    setIsSwiping(false);
     
-    // Handle swipe gesture (only left swipe to toggle shuffle)
-    if (wasSwipe && swipeDirection === 'left' && swipeTime < 500 && swipeTime > 100) {
-      // Left swipe detected - toggle shuffle
-      if (onToggleShuffle) {
-        onToggleShuffle();
+    // Only trigger normal action if it wasn't a long press
+    if (!isLongPressing) {
+      if (shuffleMode) {
+        handleShuffle();
+      } else {
+        handleNext();
       }
-      setSwipeDirection(null);
-      setIsLongPressing(false);
-      return;
-    }
-
-    setSwipeDirection(null);
-    
-    // Only trigger normal action if it wasn't a long press or swipe
-    if (!isLongPressing && !wasSwipe) {
-      handleNext();
     }
     setIsLongPressing(false);
   };
@@ -244,10 +177,8 @@ const NavigationControls: React.FC<NavigationControlsProps> = ({
             className="flex-1 h-16 sm:h-20 rounded-[2rem] shadow-lg active:scale-95 active:shadow-md active:shadow-black/20 transition-all duration-100 outline-none bg-background/20 backdrop-blur-xl border-white/20 text-foreground disabled:opacity-50 disabled:backdrop-blur-sm touch-manipulation no-select text-base sm:text-lg" 
             style={{ WebkitTapHighlightColor: 'transparent', WebkitUserSelect: 'none', userSelect: 'none' }} 
             onTouchStart={handleButtonTouchStart} 
-            onTouchMove={handleButtonTouchMove}
             onTouchEnd={handleButtonTouchEnd}
             onMouseDown={handleButtonTouchStart}
-            onMouseMove={handleButtonTouchMove}
             onMouseUp={handleButtonTouchEnd}
             onMouseLeave={() => {
               if (longPressTimeout) {
@@ -262,30 +193,22 @@ const NavigationControls: React.FC<NavigationControlsProps> = ({
               e.stopPropagation();
             }}
           >
-            <div className="flex items-center relative">
-              <span className="truncate">Next</span>
+            <span className="truncate">{shuffleMode ? 'Shuffle' : 'Next'}</span>
+            {shuffleMode ? (
+              <Shuffle className="h-5 w-5 sm:h-6 sm:w-6 ml-2" />
+            ) : (
               <ArrowRight className="h-5 w-5 sm:h-6 sm:w-6 ml-2" />
-              {shuffleMode && (
-                <Shuffle className="h-3 w-3 absolute -top-1 -right-1 text-orange-500 bg-background/80 rounded-full p-0.5" />
-              )}
-              {isSwiping && swipeDirection === 'left' && (
-                <div className="absolute inset-0 flex items-center justify-center bg-orange-500/20 rounded-full">
-                  <Shuffle className="h-4 w-4 text-orange-600" />
-                </div>
-              )}
-            </div>
+            )}
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end" className="w-48">
-          {onToggleShuffle && (
-            <DropdownMenuItem 
-              onClick={() => handleDropdownItemClick(handleShuffle)}
-              className="flex items-center gap-2"
-            >
-              <Shuffle className="h-4 w-4" />
-              {shuffleMode ? 'Turn Off Shuffle' : 'Turn On Shuffle'}
-            </DropdownMenuItem>
-          )}
+          <DropdownMenuItem 
+            onClick={() => handleDropdownItemClick(handleNext)}
+            className="flex items-center gap-2"
+          >
+            <ArrowRight className="h-4 w-4" />
+            Next Lead
+          </DropdownMenuItem>
           {onSkipMultiple && (
             <>
               <DropdownMenuItem 
