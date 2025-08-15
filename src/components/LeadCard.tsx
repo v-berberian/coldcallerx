@@ -533,7 +533,7 @@ const LeadCard: React.FC<LeadCardProps> = ({
             {comments.length > 0 && (
               <button
                 onClick={handleFlip}
-                className="text-xs bg-muted-foreground/20 text-muted-foreground/80 px-1.5 py-0.5 rounded-full min-w-[16px] text-center hover:bg-muted-foreground/30 transition-colors"
+                className="text-xs bg-muted-foreground/20 text-muted-foreground/80 w-5 h-5 rounded-full flex items-center justify-center hover:bg-muted-foreground/30 transition-colors"
                 style={{ pointerEvents: (isDeleteMode || isSwiping) ? 'none' : 'auto' }}
               >
                 {comments.length}
@@ -1158,12 +1158,10 @@ const LeadCard: React.FC<LeadCardProps> = ({
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.2 }}
-            className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-start justify-center z-50 p-4"
+            className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4"
             onClick={closeAddCommentModal}
             style={{
               touchAction: 'none',
-              // Position in upper half by default, with padding for safe area
-              paddingTop: 'max(env(safe-area-inset-top) + 20px, 20px)',
             }}
           >
             <motion.div
