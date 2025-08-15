@@ -31,6 +31,7 @@ const NavigationControls: React.FC<NavigationControlsProps> = ({
   // Long press state for shuffle toggle
   const [isLongPressing, setIsLongPressing] = React.useState(false);
   const [longPressTimeout, setLongPressTimeout] = React.useState<NodeJS.Timeout | null>(null);
+  const [isPressing, setIsPressing] = React.useState(false);
 
   const handleNextClick = () => {
     handleNext();
