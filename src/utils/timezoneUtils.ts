@@ -1,4 +1,5 @@
-import { Lead } from '../types/lead';
+import { Lead, TemperatureFilter } from '../types/lead';
+import { appStorage } from './storage';
 
 const AREA_CODE_MAP: {
   [key: string]: {
