@@ -1,13 +1,7 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, ArrowRight, MoreVertical, SkipForward, FastForward, Shuffle } from 'lucide-react';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
+import { ArrowLeft, ArrowRight, Shuffle } from 'lucide-react';
 
 interface NavigationControlsProps {
   onPrevious: () => void;
