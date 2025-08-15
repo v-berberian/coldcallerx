@@ -150,7 +150,12 @@ const NavigationControls: React.FC<NavigationControlsProps> = ({
         <span className="truncate">Previous</span>
       </Button>
       
-      <DropdownMenu open={isDropdownOpen} onOpenChange={setIsDropdownOpen}>
+      <DropdownMenu open={isDropdownOpen} onOpenChange={(open) => {
+        // Only allow closing the dropdown, not opening it
+        if (!open) {
+          setIsDropdownOpen(false);
+        }
+      }}>
         <DropdownMenuTrigger asChild>
           <Button 
             variant="outline" 
@@ -167,6 +172,11 @@ const NavigationControls: React.FC<NavigationControlsProps> = ({
                 setLongPressTimeout(null);
               }
               setIsLongPressing(false);
+            }}
+            onClick={(e) => {
+              // Prevent the dropdown from opening on regular clicks
+              e.preventDefault();
+              e.stopPropagation();
             }}
           >
             <span className="truncate">Next</span>
