@@ -312,7 +312,7 @@ const FilterButtons: React.FC<FilterButtonsProps> = ({
                       e.preventDefault();
                       e.stopPropagation();
                       onToggleTemperature(option);
-                      setIsTemperatureDropdownOpen(false);
+                      closeTemperatureDropdown();
                     }}
                     className={`group relative w-full text-sm font-medium px-4 py-4 overflow-hidden transition-all duration-100 ease-out touch-manipulation ${
                       option === 'ALL' 
