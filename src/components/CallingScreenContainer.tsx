@@ -220,9 +220,22 @@ const CallingScreenContainer: React.FC<CallingScreenContainerProps> = memo(({
         
         // If we deleted the current lead, navigate to the next available lead
         if (wasCurrentLead && updatedLeads.length > 0) {
+          // Adjust currentIndex to show the correct "next" lead after deletion
+          // If we were at index N and deleted that lead, the lead that was at N+1 is now at N
+          // So we want to stay at the same index to show what was the "next" lead
+          const adjustedIndex = Math.min(currentIndex, updatedLeads.length - 1);
+          
           // Add a small delay to ensure the UI has updated
           setTimeout(() => {
-            handleNextWrapper();
+            // Instead of calling handleNextWrapper (which would skip a lead),
+            // directly navigate to the adjusted index to show the correct next lead
+            if (adjustedIndex < updatedLeads.length) {
+              // This will show the lead that was immediately after the deleted one
+              const currentLeads = getBaseLeads();
+              if (currentLeads.length > 0) {
+                handleNext(currentLeads);
+              }
+            }
           }, 100);
         }
       } else {
