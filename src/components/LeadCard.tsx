@@ -300,8 +300,19 @@ const LeadCard: React.FC<LeadCardProps> = ({
   }, [modalDraft, addComment, closeAddCommentModal]);
 
   const deleteComment = useCallback((id: string) => {
-    const next = comments.filter(c => c.id !== id);
-    saveComments(next);
+    // Start fade out animation
+    setFadingOutIds(prev => new Set(prev).add(id));
+    
+    // Remove comment after animation completes
+    setTimeout(() => {
+      const next = comments.filter(c => c.id !== id);
+      saveComments(next);
+      setFadingOutIds(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(id);
+        return newSet;
+      });
+    }, 150);
   }, [comments, saveComments]);
 
 
