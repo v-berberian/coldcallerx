@@ -1060,18 +1060,17 @@ const LeadCard: React.FC<LeadCardProps> = ({
           {comments.length === 0 && (
             <p className="text-sm text-muted-foreground/60 mt-2">No comments yet.</p>
           )}
-          <AnimatePresence mode="wait">
+          <AnimatePresence>
             {comments.map(c => (
               <motion.div
                 key={c.id}
                 layout
-                initial={{ opacity: 0, height: 0, marginBottom: 0 }}
-                animate={{ opacity: 1, height: "auto", marginBottom: 12 }}
-                exit={{ opacity: 0, height: 0, marginBottom: 0 }}
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.95 }}
                 transition={{ 
                   duration: 0.2, 
-                  ease: "easeInOut",
-                  layout: { duration: 0.15, ease: "easeInOut" }
+                  ease: "easeInOut"
                 }}
                 className={`border border-border/20 rounded-lg p-3 cursor-pointer transition-colors ${selectedCommentId === c.id ? 'bg-muted/20' : ''}`}
                 style={{ 
