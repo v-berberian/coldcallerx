@@ -158,6 +158,13 @@ export const useFilters = () => {
 
   useEffect(() => {
     if (isLoaded && hasInitialized && userHasInteracted && !isLoadingFromStorage && hasFinishedLoading) {
+      console.log('💾 SAVING temperature filter:', temperatureFilter);
+      appStorage.saveTemperatureFilter(temperatureFilter);
+    }
+  }, [temperatureFilter, isLoaded, hasInitialized, userHasInteracted, isLoadingFromStorage, hasFinishedLoading]);
+
+  useEffect(() => {
+    if (isLoaded && hasInitialized && userHasInteracted && !isLoadingFromStorage && hasFinishedLoading) {
       console.log('💾 SAVING shuffle mode:', shuffleMode);
       appStorage.saveShuffleMode(shuffleMode);
     }
