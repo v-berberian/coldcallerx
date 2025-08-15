@@ -222,7 +222,13 @@ const FilterButtons: React.FC<FilterButtonsProps> = ({
       <div className="flex w-full gap-2">
         <div className="flex-1 relative" ref={temperatureDropdownRef}>
           <button 
-            onClick={() => setIsTemperatureDropdownOpen(!isTemperatureDropdownOpen)}
+            onClick={() => {
+              if (isTemperatureDropdownOpen) {
+                closeTemperatureDropdown();
+              } else {
+                setIsTemperatureDropdownOpen(true);
+              }
+            }}
             className={`group relative w-full text-sm font-medium px-4 py-3 rounded-lg overflow-hidden transition-all duration-100 ease-out touch-manipulation ${
               temperatureFilter === 'ALL' 
                 ? 'text-muted-foreground/70'
@@ -293,7 +299,9 @@ const FilterButtons: React.FC<FilterButtonsProps> = ({
 
           {/* Dropdown menu - Neon filter design */}
           {isTemperatureDropdownOpen && (
-            <div className="absolute top-full left-0 right-0 mt-1 bg-background/15 backdrop-blur-sm border border-border/15 rounded-xl shadow-2xl z-50 overflow-hidden">
+            <div className={`absolute top-full left-0 right-0 mt-1 bg-background/15 backdrop-blur-sm border border-border/15 rounded-xl shadow-2xl z-50 overflow-hidden ${
+              isTemperatureDropdownClosing ? 'animate-slide-up' : 'animate-slide-down'
+            }`}>
               {(['ALL', 'COLD', 'WARM', 'HOT'] as const).map((option) => {
                 const isSelected = temperatureFilter === option;
                 
