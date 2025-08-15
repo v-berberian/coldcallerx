@@ -202,39 +202,84 @@ const NavigationControls: React.FC<NavigationControlsProps> = ({
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end" className="w-48">
-          <DropdownMenuItem 
-            onClick={() => handleDropdownItemClick(handleNext)}
-            className="flex items-center gap-2"
-          >
-            <ArrowRight className="h-4 w-4" />
-            Next Lead
-          </DropdownMenuItem>
-          {onSkipMultiple && (
+          {shuffleMode ? (
+            // When in shuffle mode, show Next option and skip options
             <>
               <DropdownMenuItem 
-                onClick={() => handleDropdownItemClick(() => onSkipMultiple(5))}
+                onClick={() => handleDropdownItemClick(handleNext)}
                 className="flex items-center gap-2"
               >
-                <SkipForward className="h-4 w-4" />
-                Skip 5 Leads
+                <ArrowRight className="h-4 w-4" />
+                Next Lead
               </DropdownMenuItem>
-              <DropdownMenuItem 
-                onClick={() => handleDropdownItemClick(() => onSkipMultiple(10))}
-                className="flex items-center gap-2"
-              >
-                <SkipForward className="h-4 w-4" />
-                Skip 10 Leads
-              </DropdownMenuItem>
+              {onSkipMultiple && (
+                <>
+                  <DropdownMenuItem 
+                    onClick={() => handleDropdownItemClick(() => onSkipMultiple(5))}
+                    className="flex items-center gap-2"
+                  >
+                    <SkipForward className="h-4 w-4" />
+                    Skip 5 Leads
+                  </DropdownMenuItem>
+                  <DropdownMenuItem 
+                    onClick={() => handleDropdownItemClick(() => onSkipMultiple(10))}
+                    className="flex items-center gap-2"
+                  >
+                    <SkipForward className="h-4 w-4" />
+                    Skip 10 Leads
+                  </DropdownMenuItem>
+                </>
+              )}
+              {onSkipToEnd && (
+                <DropdownMenuItem 
+                  onClick={() => handleDropdownItemClick(onSkipToEnd)}
+                  className="flex items-center gap-2"
+                >
+                  <FastForward className="h-4 w-4" />
+                  Skip to End
+                </DropdownMenuItem>
+              )}
             </>
-          )}
-          {onSkipToEnd && (
-            <DropdownMenuItem 
-              onClick={() => handleDropdownItemClick(onSkipToEnd)}
-              className="flex items-center gap-2"
-            >
-              <FastForward className="h-4 w-4" />
-              Skip to End
-            </DropdownMenuItem>
+          ) : (
+            // When in next mode, show Shuffle option and skip options
+            <>
+              {onToggleShuffle && (
+                <DropdownMenuItem 
+                  onClick={() => handleDropdownItemClick(handleShuffle)}
+                  className="flex items-center gap-2"
+                >
+                  <Shuffle className="h-4 w-4" />
+                  Shuffle
+                </DropdownMenuItem>
+              )}
+              {onSkipMultiple && (
+                <>
+                  <DropdownMenuItem 
+                    onClick={() => handleDropdownItemClick(() => onSkipMultiple(5))}
+                    className="flex items-center gap-2"
+                  >
+                    <SkipForward className="h-4 w-4" />
+                    Skip 5 Leads
+                  </DropdownMenuItem>
+                  <DropdownMenuItem 
+                    onClick={() => handleDropdownItemClick(() => onSkipMultiple(10))}
+                    className="flex items-center gap-2"
+                  >
+                    <SkipForward className="h-4 w-4" />
+                    Skip 10 Leads
+                  </DropdownMenuItem>
+                </>
+              )}
+              {onSkipToEnd && (
+                <DropdownMenuItem 
+                  onClick={() => handleDropdownItemClick(onSkipToEnd)}
+                  className="flex items-center gap-2"
+                >
+                  <FastForward className="h-4 w-4" />
+                  Skip to End
+                </DropdownMenuItem>
+              )}
+            </>
           )}
         </DropdownMenuContent>
       </DropdownMenu>
