@@ -171,6 +171,34 @@ const CallingScreenContainer: React.FC<CallingScreenContainerProps> = memo(({
     setResetSwipe(() => resetFn);
   };
 
+  // Handle skip multiple leads
+  const handleSkipMultiple = (count: number) => {
+    const currentLeads = getBaseLeads();
+    let newIndex = currentIndex;
+    
+    for (let i = 0; i < count && newIndex < currentLeads.length - 1; i++) {
+      newIndex++;
+    }
+    
+    if (newIndex !== currentIndex) {
+      selectLead(newIndex);
+      if (resetSwipe) {
+        resetSwipe();
+      }
+    }
+  };
+
+  // Handle skip to end
+  const handleSkipToEnd = () => {
+    const currentLeads = getBaseLeads();
+    if (currentLeads.length > 0) {
+      selectLead(currentLeads.length - 1);
+      if (resetSwipe) {
+        resetSwipe();
+      }
+    }
+  };
+
   // Handle lead deletion
   const handleDeleteLead = async (lead: Lead) => {
     if (!currentCSVId) {
