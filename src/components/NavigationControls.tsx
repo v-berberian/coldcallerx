@@ -28,14 +28,37 @@ const NavigationControls: React.FC<NavigationControlsProps> = ({
     onNext();
   };
 
+  // Long press state for shuffle toggle
+  const [isLongPressing, setIsLongPressing] = React.useState(false);
+  const [longPressTimeout, setLongPressTimeout] = React.useState<NodeJS.Timeout | null>(null);
+
   const handleNextClick = () => {
-    if (shuffleMode) {
+    handleNext();
+  };
+
+  const handleButtonTouchStart = () => {
+    setIsLongPressing(false);
+    const timeout = setTimeout(() => {
+      setIsLongPressing(true);
+      // Toggle shuffle on long press
       if (onToggleShuffle) {
         onToggleShuffle();
       }
-    } else {
-      handleNext();
+    }, 500); // 500ms long press
+    setLongPressTimeout(timeout);
+  };
+
+  const handleButtonTouchEnd = () => {
+    if (longPressTimeout) {
+      clearTimeout(longPressTimeout);
+      setLongPressTimeout(null);
     }
+    
+    // Only trigger normal click if it wasn't a long press
+    if (!isLongPressing) {
+      handleNextClick();
+    }
+    setIsLongPressing(false);
   };
 
   // Detect when the software keyboard is likely open to reduce bottom spacing
