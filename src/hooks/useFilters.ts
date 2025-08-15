@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from 'react';
-import { TimezoneFilter, CallFilter } from '../types/lead';
+import { TimezoneFilter, CallFilter, TemperatureFilter } from '../types/lead';
 import { appStorage } from '../utils/storage';
 
 // Global flag to ensure filter loading only happens once
