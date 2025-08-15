@@ -44,6 +44,7 @@ interface MainContentProps {
   onCommentModalOpenChange?: (open: boolean) => void;
   onSkipMultiple?: (count: number) => void;
   onSkipToEnd?: () => void;
+  onTagChange?: () => void;
 }
 
 const MainContent: React.FC<MainContentProps> = ({
