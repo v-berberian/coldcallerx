@@ -227,10 +227,12 @@ const LeadCard: React.FC<LeadCardProps> = ({
         // legacy: store empty string for null
         localStorage.setItem(`tag:${leadKey}`, next ?? '');
       }
+      // Notify parent that tag was changed
+      onTagChange?.();
     } catch {
       // ignore storage errors
     }
-  }, [leadKey, csvId]);
+  }, [leadKey, csvId, onTagChange]);
 
   const toggleLeadTag = useCallback(async (tag: 'cold' | 'warm' | 'hot') => {
     if (leadTag === tag) {
