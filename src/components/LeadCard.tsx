@@ -1082,47 +1082,6 @@ const LeadCard: React.FC<LeadCardProps> = ({
       </CardContent>
     </Card>
 
-    {/* Back side backlight effects */}
-    {/* Subtler neon backlight with gentle breathing animation when active */}
-    <motion.div
-      className="absolute inset-0 rounded-3xl pointer-events-none"
-      initial={false}
-      animate={glowActive 
-        ? { opacity: [0.4, 0.65, 0.4], scale: [1.0, 1.004, 1.0] } 
-        : { opacity: 0, scale: 1 }}
-      transition={glowActive 
-        ? { duration: 3.0, ease: 'easeInOut', repeat: Infinity, repeatType: 'mirror' } 
-        : { duration: 0.25, ease: [0.22, 0.61, 0.36, 1] }}
-      style={{
-        // Slightly stronger outer glow
-        boxShadow: `0 0 0 2px ${glowColor}, 0 0 14px ${glowColor}, 0 0 30px ${glowColor}`,
-        zIndex: 1,
-        transform: "rotateY(180deg)"
-      }}
-    />
-    {/* Gradient border keyed to temperature tag (static, no spin) */}
-    <div
-      className="absolute inset-0 rounded-3xl pointer-events-none"
-      style={{
-        background: `conic-gradient(from 0deg, transparent 0%, ${glowColor} 12%, transparent 24%, transparent 56%, ${glowColor} 68%, transparent 80%)`,
-        mixBlendMode: 'overlay',
-        opacity: glowActive ? 0.2 : 0,
-        zIndex: 2,
-        transform: "rotateY(180deg)"
-      }}
-    />
-    {/* Subtle glass overlay */}
-    <div
-      className="absolute inset-0 rounded-3xl pointer-events-none"
-      style={{
-        backdropFilter: 'blur(4px)',
-        WebkitBackdropFilter: 'blur(4px)',
-        background: 'linear-gradient(135deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02))',
-        zIndex: 0,
-        transform: "rotateY(180deg)"
-      }}
-    />
-
     {/* Back side of the card - Trello-style comments */}
     <Card 
       className="shadow-2xl border border-border/50 dark:border-border/60 ring-1 ring-border/40 dark:ring-border/60 rounded-3xl bg-card min-h-[420px] max-h-[520px] sm:min-h-[440px] sm:max-h-[580px] flex flex-col mb-4 overflow-hidden absolute inset-0" 
