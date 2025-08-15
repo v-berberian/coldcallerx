@@ -1095,7 +1095,7 @@ const LeadCard: React.FC<LeadCardProps> = ({
                 className={`border border-border/20 rounded-lg p-3 cursor-pointer mb-3 transition-all duration-150 ease-out ${
                   selectedCommentId === c.id ? 'bg-muted/20' : ''
                 } ${
-                  isFadingOut ? 'opacity-0' : isFadingIn ? 'opacity-100' : 'opacity-100'
+                  isFadingOut ? 'opacity-0' : isFadingIn ? 'opacity-0' : 'opacity-100'
                 }`}
                 style={{ 
                   touchAction: 'manipulation'
