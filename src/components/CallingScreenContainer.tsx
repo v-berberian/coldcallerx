@@ -33,6 +33,7 @@ const CallingScreenContainer: React.FC<CallingScreenContainerProps> = memo(({
 }) => {
   const { importLeadsFromCSV, updateLeadCallCount, resetCallCount, resetAllCallCounts } = useLocalLeadOperations();
   const [isCommenting, setIsCommenting] = useState(false);
+  const [isCommentModalOpen, setIsCommentModalOpen] = useState(false);
   
   const {
     componentReady,
@@ -87,6 +88,10 @@ const CallingScreenContainer: React.FC<CallingScreenContainerProps> = memo(({
   // Handle commenting state from MainContent
   const handleCommentingChange = (commenting: boolean) => {
     setIsCommenting(commenting);
+  };
+
+  const handleCommentModalOpenChange = (open: boolean) => {
+    setIsCommentModalOpen(open);
   };
 
   useSimplifiedCallingScreenEffects({
@@ -306,7 +311,7 @@ const CallingScreenContainer: React.FC<CallingScreenContainerProps> = memo(({
   return (
     <div className="h-[100dvh] flex flex-col overflow-hidden fixed inset-0">
       {/* Header */}
-      <div className={`transition-all duration-300 ease-out ${isCommenting ? 'opacity-0 scale-95 -translate-y-2 pointer-events-none' : ''}`}>
+      <div className={`transition-all duration-300 ease-out ${isCommenting && !isCommentModalOpen ? 'opacity-0 scale-95 -translate-y-2 pointer-events-none' : ''}`}>
         <CallingHeader
           searchQuery={searchQuery}
           showAutocomplete={showAutocomplete}
@@ -374,6 +379,7 @@ const CallingScreenContainer: React.FC<CallingScreenContainerProps> = memo(({
           onSwipeReset={handleSwipeReset}
           onDeleteLead={handleDeleteLead}
           onCommentingChange={handleCommentingChange}
+          onCommentModalOpenChange={handleCommentModalOpenChange}
         />
       </div>
     </div>

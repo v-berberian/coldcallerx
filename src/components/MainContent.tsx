@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Lead } from '../types/lead';
 import FilterButtons from './FilterButtons';
 import LeadCard from './LeadCard';
@@ -39,6 +39,7 @@ interface MainContentProps {
   onImportNew?: () => void;
   onDeleteLead?: (lead: Lead) => void;
   onCommentingChange?: (commenting: boolean) => void;
+  onCommentModalOpenChange?: (open: boolean) => void;
 }
 
 const MainContent: React.FC<MainContentProps> = ({
@@ -75,12 +76,15 @@ const MainContent: React.FC<MainContentProps> = ({
   refreshTrigger,
   onImportNew,
   onDeleteLead,
-  onCommentingChange
+  onCommentingChange,
+  onCommentModalOpenChange
 }) => {
   const [navigationDirection, setNavigationDirection] = useState<'forward' | 'backward'>('forward');
   const [resetSwipe, setResetSwipe] = useState<(() => void) | null>(null);
   const [isCommenting, setIsCommenting] = useState(false);
   const [viewportHeight, setViewportHeight] = useState<number | null>(null);
+  const [isCommentModalOpen, setIsCommentModalOpen] = useState(false);
+  const commentActive = isCommenting && !isCommentModalOpen;
 
   // Create wrapped navigation functions that set direction and close delete menu
   const handlePrevious = () => {
@@ -110,6 +114,11 @@ const MainContent: React.FC<MainContentProps> = ({
     onCommentingChange?.(commenting);
   };
 
+  const handleCommentModalOpenChange = (open: boolean) => {
+    setIsCommentModalOpen(open);
+    onCommentModalOpenChange?.(open);
+  };
+
   // Adjust height to visualViewport when commenting to keep card aligned above keyboard (iOS)
   useEffect(() => {
     const vv: any = (window as any).visualViewport;
@@ -127,7 +136,7 @@ const MainContent: React.FC<MainContentProps> = ({
       }
     };
 
-    if (isCommenting) {
+    if (commentActive) {
       // Prevent background scroll
       const originalOverflow = document.body.style.overflow;
       document.body.style.overflow = 'hidden';
@@ -152,13 +161,13 @@ const MainContent: React.FC<MainContentProps> = ({
     } else {
       setViewportHeight(null);
     }
-  }, [isCommenting]);
+  }, [commentActive]);
 
   return (
-    <div className={`flex-1 flex items-start justify-center min-h-0 transition-all duration-300 ${isCommenting ? 'pt-0 p-2 h-full overflow-hidden' : 'pt-1 p-3 sm:p-4'}`} style={{ minHeight: isCommenting ? undefined : 'calc(100dvh - 120px)', height: isCommenting ? (viewportHeight ? `${viewportHeight}px` : '100vh') : undefined }}>
+    <div className={`flex-1 flex items-start justify-center min-h-0 transition-all duration-300 ${commentActive ? 'pt-0 p-2 h-full overflow-hidden' : 'pt-1 p-3 sm:p-4'}`} style={{ minHeight: commentActive ? undefined : 'calc(100dvh - 120px)', height: commentActive ? (viewportHeight ? `${viewportHeight}px` : '100vh') : undefined }}>
       <div className="w-full space-y-1 flex flex-col min-h-full">
         {/* Filter Buttons */}
-        <div className={`transition-all duration-300 ease-out ${isCommenting ? 'opacity-0 scale-95 -translate-y-2 pointer-events-none' : ''}`}>
+        <div className="transition-all duration-300 ease-out">
           <FilterButtons
             timezoneFilter={timezoneFilter}
             callFilter={callFilter}
@@ -193,12 +202,12 @@ const MainContent: React.FC<MainContentProps> = ({
             refreshTrigger={refreshTrigger}
             onImportNew={onImportNew}
             navigationDirection={navigationDirection}
-            onSwipeReset={handleSwipeReset}
-            onDeleteLead={onDeleteLead}
-            onCommentingChange={handleCommentingChange}
-            isCommenting={isCommenting}
-          />
-        </div>
+          onSwipeReset={handleSwipeReset}
+          onDeleteLead={onDeleteLead}
+          onCommentingChange={handleCommentingChange}
+          onCommentModalOpenChange={handleCommentModalOpenChange}
+        />
+      </div>
 
         {/* Navigation Controls */}
         <div className="pt-3 sm:pt-4 transition-all duration-300 ease-out">
