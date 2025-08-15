@@ -69,6 +69,19 @@ const FilterButtons: React.FC<FilterButtonsProps> = ({
     }
   }, [isResetAnimating]);
 
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (temperatureDropdownRef.current && !temperatureDropdownRef.current.contains(event.target as Node)) {
+        setIsTemperatureDropdownOpen(false);
+      }
+    };
+
+    if (isTemperatureDropdownOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+      return () => document.removeEventListener('mousedown', handleClickOutside);
+    }
+  }, [isTemperatureDropdownOpen]);
+
   const renderTimerContent = () => {
     if (!getDelayDisplayType) return null;
     
