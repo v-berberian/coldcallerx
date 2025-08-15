@@ -283,7 +283,7 @@ const FilterButtons: React.FC<FilterButtonsProps> = ({
                     minHeight: '48px'
                   }}
                 >
-                  {option === 'ALL' ? 'All Temperature' : option}
+                  {option === 'ALL' ? 'All Stages' : option}
                 </button>
               ))}
             </div>

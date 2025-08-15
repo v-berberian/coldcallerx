@@ -10,3 +10,4 @@ export interface Lead {
 
 export type TimezoneFilter = 'ALL' | 'EST_CST';
 export type CallFilter = 'ALL' | 'UNCALLED';
+export type TemperatureFilter = 'ALL' | 'COLD' | 'WARM' | 'HOT';
