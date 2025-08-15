@@ -417,6 +417,7 @@ const CallingScreenContainer: React.FC<CallingScreenContainerProps> = memo(({
           onDeleteLead={handleDeleteLead}
           onCommentingChange={handleCommentingChange}
           onCommentModalOpenChange={handleCommentModalOpenChange}
+          onTagChange={handleTagChange}
           onSkipMultiple={handleSkipMultiple}
           onSkipToEnd={handleSkipToEnd}
         />
