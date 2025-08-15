@@ -1066,15 +1066,13 @@ const LeadCard: React.FC<LeadCardProps> = ({
             {comments.map(c => (
               <motion.div
                 key={c.id}
-                layout
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.95, transition: { duration: 0.15 } }}
                 transition={{ 
                   type: "tween",
                   duration: 0.2,
-                  ease: [0.4, 0.0, 0.2, 1],
-                  layout: { duration: 0.25, ease: [0.4, 0.0, 0.2, 1] }
+                  ease: [0.4, 0.0, 0.2, 1]
                 }}
                 className={`border border-border/20 rounded-lg p-3 cursor-pointer transition-colors ${selectedCommentId === c.id ? 'bg-muted/20' : ''}`}
                 style={{ 
