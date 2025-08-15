@@ -260,32 +260,57 @@ const FilterButtons: React.FC<FilterButtonsProps> = ({
             </div>
           </button>
 
-          {/* Dropdown menu - Mobile optimized */}
+          {/* Dropdown menu - Super modern design */}
           {isTemperatureDropdownOpen && (
-            <div className="absolute top-full left-0 right-0 mt-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg z-50 overflow-hidden">
-              {(['ALL', 'COLD', 'WARM', 'HOT'] as const).map((option) => (
-                <button
-                  key={option}
-                  onClick={(e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    onToggleTemperature(option);
-                    setIsTemperatureDropdownOpen(false);
-                  }}
-                  className={`w-full px-4 py-4 text-center text-sm font-medium transition-all duration-100 ease-out touch-manipulation active:scale-95 ${
-                    temperatureFilter === option
-                      ? 'bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-300'
-                      : 'text-gray-700 dark:text-gray-300 active:bg-gray-100 dark:active:bg-gray-600'
-                  }`}
-                  style={{ 
-                    WebkitTapHighlightColor: 'transparent',
-                    touchAction: 'manipulation',
-                    minHeight: '48px'
-                  }}
-                >
-                  {option === 'ALL' ? 'All Stages' : option.charAt(0).toUpperCase() + option.slice(1).toLowerCase()}
-                </button>
-              ))}
+            <div className="absolute top-full left-0 right-0 mt-2 bg-white/95 dark:bg-gray-900/95 backdrop-blur-xl border border-gray-200/50 dark:border-gray-700/50 rounded-xl shadow-2xl z-50 overflow-hidden">
+              {(['ALL', 'COLD', 'WARM', 'HOT'] as const).map((option) => {
+                const isSelected = temperatureFilter === option;
+                const getOptionStyles = () => {
+                  if (option === 'ALL') {
+                    return isSelected 
+                      ? 'bg-gray-100/80 dark:bg-gray-800/80 text-gray-700 dark:text-gray-300'
+                      : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50/80 dark:hover:bg-gray-800/50';
+                  }
+                  if (option === 'COLD') {
+                    return isSelected
+                      ? 'bg-blue-50/80 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 shadow-sm shadow-blue-500/20'
+                      : 'text-blue-600 dark:text-blue-400 hover:bg-blue-50/50 dark:hover:bg-blue-900/10';
+                  }
+                  if (option === 'WARM') {
+                    return isSelected
+                      ? 'bg-amber-50/80 dark:bg-amber-900/20 text-amber-600 dark:text-amber-400 shadow-sm shadow-amber-500/20'
+                      : 'text-amber-600 dark:text-amber-400 hover:bg-amber-50/50 dark:hover:bg-amber-900/10';
+                  }
+                  if (option === 'HOT') {
+                    return isSelected
+                      ? 'bg-rose-50/80 dark:bg-rose-900/20 text-rose-600 dark:text-rose-400 shadow-sm shadow-rose-500/20'
+                      : 'text-rose-600 dark:text-rose-400 hover:bg-rose-50/50 dark:hover:bg-rose-900/10';
+                  }
+                  return '';
+                };
+
+                return (
+                  <button
+                    key={option}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      onToggleTemperature(option);
+                      setIsTemperatureDropdownOpen(false);
+                    }}
+                    className={`w-full px-4 py-4 text-center text-sm font-semibold transition-all duration-200 ease-out touch-manipulation active:scale-[0.98] ${getOptionStyles()}`}
+                    style={{ 
+                      WebkitTapHighlightColor: 'transparent',
+                      touchAction: 'manipulation',
+                      minHeight: '48px'
+                    }}
+                  >
+                    <span className="relative z-10">
+                      {option === 'ALL' ? 'All Stages' : option.charAt(0).toUpperCase() + option.slice(1).toLowerCase()}
+                    </span>
+                  </button>
+                );
+              })}
             </div>
           )}
         </div>
