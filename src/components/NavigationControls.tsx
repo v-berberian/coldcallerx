@@ -1,7 +1,7 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, ArrowRight, MoreVertical, SkipForward, FastForward } from 'lucide-react';
+import { ArrowLeft, ArrowRight, MoreVertical, SkipForward, FastForward, Shuffle } from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
