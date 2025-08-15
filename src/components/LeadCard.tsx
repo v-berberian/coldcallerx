@@ -1292,14 +1292,15 @@ const LeadCard: React.FC<LeadCardProps> = ({
                         }
                       }}
                       className="w-full rounded-lg border border-border/30 bg-background px-4 py-3 text-base focus:outline-none resize-none"
-                      rows={keyboardInset > 0 ? 3 : 4}
+                      rows={keyboardInset > 0 ? 2 : 3}
                       placeholder="Type your comment here..."
                       autoFocus
                       autoComplete="off"
                       style={{
                         fontSize: '16px', // Prevent iOS zoom
-                        minHeight: keyboardInset > 0 ? '80px' : '100px', // Smaller when keyboard is visible
-                        maxHeight: keyboardInset > 0 ? '120px' : '150px',
+                        minHeight: keyboardInset > 0 ? '60px' : '80px', // More aggressive sizing for iPhone 16e
+                        maxHeight: keyboardInset > 0 ? '100px' : '120px',
+                        lineHeight: '1.4', // Tighter line height for better space usage
                       }}
                     />
                   </div>
