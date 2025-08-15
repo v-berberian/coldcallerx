@@ -1069,9 +1069,9 @@ const LeadCard: React.FC<LeadCardProps> = ({
               }}
               onClick={() => handleCommentSelect(c.id)}
             >
-                  <div className="flex items-center justify-between gap-4">
-                    <div className="text-left w-full">
-                      <p className="text-sm whitespace-pre-wrap text-left">{c.text}</p>
+                  <div className="flex items-start justify-between gap-4">
+                    <div className="text-left flex-1 min-w-0">
+                      <p className="text-sm whitespace-pre-wrap text-left break-words">{c.text}</p>
                       <p className="text-[11px] text-muted-foreground mt-1">
                         {new Date(c.createdAt).toLocaleString()}
                       </p>
