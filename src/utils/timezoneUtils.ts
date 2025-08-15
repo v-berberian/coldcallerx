@@ -362,3 +362,38 @@ export const filterLeadsByTimezone = (leads: Lead[], timezoneFilter: 'ALL' | 'ES
     return timezoneGroup === 'EST' || timezoneGroup === 'CST';
   });
 };
+
+export const filterLeadsByTemperature = async (
+  leads: Lead[], 
+  temperatureFilter: TemperatureFilter,
+  csvId: string
+): Promise<Lead[]> => {
+  if (temperatureFilter === 'ALL') return leads;
+  
+  try {
+    const leadTags = await appStorage.getCSVLeadTags(csvId);
+    
+    // For large lists, use a more efficient approach
+    if (leads.length > 1000) {
+      const results: Lead[] = [];
+      for (const lead of leads) {
+        const leadKey = `${lead.name}__${lead.phone}`;
+        const leadTag = leadTags[leadKey];
+        if (leadTag === temperatureFilter.toLowerCase()) {
+          results.push(lead);
+        }
+      }
+      return results;
+    }
+    
+    // For smaller lists, use filter method
+    return leads.filter(lead => {
+      const leadKey = `${lead.name}__${lead.phone}`;
+      const leadTag = leadTags[leadKey];
+      return leadTag === temperatureFilter.toLowerCase();
+    });
+  } catch (error) {
+    console.error('Error filtering leads by temperature:', error);
+    return leads; // Return unfiltered leads on error
+  }
+};
