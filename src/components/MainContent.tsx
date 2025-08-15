@@ -40,6 +40,8 @@ interface MainContentProps {
   onDeleteLead?: (lead: Lead) => void;
   onCommentingChange?: (commenting: boolean) => void;
   onCommentModalOpenChange?: (open: boolean) => void;
+  onSkipMultiple?: (count: number) => void;
+  onSkipToEnd?: () => void;
 }
 
 const MainContent: React.FC<MainContentProps> = ({
