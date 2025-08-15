@@ -91,18 +91,13 @@ export const useLeadCardSwipe = (
       }
       const baseFlipThreshold = 45;
       const threshold = startedInScrollAreaRef.current ? baseFlipThreshold * 1.6 : baseFlipThreshold;
-      if (gestureTypeRef.current === 'flip') {
-        // When card is showing front: left-to-right swipe flips to comments
-        // When card is showing back: right-to-left swipe flips to front
-        const shouldFlip = (!isFlipped && deltaX > threshold) || (isFlipped && deltaX < -threshold);
-        
-        if (shouldFlip) {
-          setIsSwiping(false);
-          gestureTypeRef.current = 'none';
-          setGestureType('none');
-          if (onFlip) {
-            onFlip();
-          }
+      if (gestureTypeRef.current === 'flip' && deltaX > threshold) {
+        // Left-to-right swipe flips the card (works on both front and back sides)
+        setIsSwiping(false);
+        gestureTypeRef.current = 'none';
+        setGestureType('none');
+        if (onFlip) {
+          onFlip();
         }
       }
     }
