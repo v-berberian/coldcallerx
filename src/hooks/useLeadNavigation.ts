@@ -94,7 +94,7 @@ const useLeadNavigationImpl = ({
     originalMakeCall(lead, markAsCalled, onCallMade, onTransitionDetected);
   };
 
-  const { getBaseLeads } = useLeadFiltering(leadsData, timezoneFilter, callFilter, temperatureFilter, currentCSVId);
+  const { getBaseLeads } = useLeadFiltering(leadsData, timezoneFilter, callFilter, temperatureFilter, currentCSVId, refreshTrigger);
 
   const { isAutoCallInProgress, isCountdownActive, countdownTime, executeAutoCall, handleCountdownComplete, resetAutoCall, shouldBlockNavigation } = useAutoCall(makeCall, callDelay);
 
