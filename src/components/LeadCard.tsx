@@ -1071,7 +1071,10 @@ const LeadCard: React.FC<LeadCardProps> = ({
                   exit={{ opacity: 0, y: -8, scale: 0.98 }}
                   transition={{ type: 'spring', stiffness: 520, damping: 30, mass: 0.45, layout: { type: 'spring', stiffness: 520, damping: 30, mass: 0.45 } }}
                   className={`border border-border/20 rounded-lg p-3 cursor-pointer transition-colors ${selectedCommentId === c.id ? 'bg-muted/20' : ''}`}
-                  style={{ willChange: 'transform' }}
+                  style={{ 
+                    willChange: 'transform',
+                    touchAction: 'manipulation'
+                  }}
                   onClick={() => handleCommentSelect(c.id)}
                 >
                   <div className="flex items-center justify-between gap-4">
