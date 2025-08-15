@@ -1110,11 +1110,11 @@ const LeadCard: React.FC<LeadCardProps> = ({
                         {new Date(c.createdAt).toLocaleString()}
                       </p>
                     </div>
-                    {selectedCommentId === c.id && (
+                    <div className={`overflow-hidden transition-all duration-200 ease-out ${selectedCommentId === c.id ? 'max-w-[60px] opacity-100' : 'max-w-0 opacity-0'}`}>
                       <div className="flex items-center gap-2 self-start flex-shrink-0">
                         <button
                           aria-label="Delete comment"
-                          className="min-w-[44px] min-h-[44px] flex items-center justify-center rounded-lg bg-red-50 active:bg-red-200 dark:bg-red-900/20 dark:active:bg-red-900/40 transition-colors touch-manipulation"
+                          className={`min-w-[44px] min-h-[44px] flex items-center justify-center rounded-lg bg-red-50 active:bg-red-200 dark:bg-red-900/20 dark:active:bg-red-900/40 transition-all duration-200 touch-manipulation ${selectedCommentId === c.id ? 'scale-100 translate-x-0' : 'scale-95 translate-x-2'}`}
                           style={{ WebkitTapHighlightColor: 'transparent' }}
                           onClick={(e) => {
                             e.stopPropagation();
@@ -1124,7 +1124,7 @@ const LeadCard: React.FC<LeadCardProps> = ({
                           <Trash className="h-5 w-5 text-red-600" />
                         </button>
                       </div>
-                    )}
+                    </div>
                   </div>
                 </div>
               );
