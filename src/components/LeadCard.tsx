@@ -1311,19 +1311,20 @@ const LeadCard: React.FC<LeadCardProps> = ({
               <div 
                 className="bg-background/95 backdrop-blur-sm border-t border-border/20" 
                 style={{ 
-                  padding: keyboardInset > 0 ? '12px 16px' : '24px 24px',
+                  padding: keyboardInset > 0 ? '8px 16px' : '16px 16px', // More compact padding for iPhone 16e
                   paddingBottom: keyboardInset > 0 
-                    ? 'max(12px, calc(env(safe-area-inset-bottom) + 8px))' 
-                    : 'max(1.5rem, calc(env(safe-area-inset-bottom) + 1rem))'
+                    ? 'max(8px, calc(env(safe-area-inset-bottom) + 4px))' 
+                    : 'max(1rem, calc(env(safe-area-inset-bottom) + 0.5rem))'
                 }}
               >
-                <div className="flex items-center gap-3">
+                <div className="flex items-center" style={{ gap: keyboardInset > 0 ? '8px' : '12px' }}>
                   <button
                     onClick={closeAddCommentModal}
-                    className="flex-1 text-base font-medium text-foreground bg-muted rounded-xl hover:bg-muted/80 active:bg-muted/60 active:scale-[0.98] transition-all duration-150 touch-manipulation"
+                    className="flex-1 font-medium text-foreground bg-muted rounded-xl hover:bg-muted/80 active:bg-muted/60 active:scale-[0.98] transition-all duration-150 touch-manipulation"
                     style={{ 
                       WebkitTapHighlightColor: 'transparent',
-                      height: keyboardInset > 0 ? '44px' : '48px' // Slightly smaller when keyboard is visible
+                      height: keyboardInset > 0 ? '40px' : '44px', // More aggressive sizing for iPhone 16e
+                      fontSize: keyboardInset > 0 ? '15px' : '16px', // Slightly smaller text when keyboard is visible
                     }}
                   >
                     Cancel
@@ -1331,10 +1332,11 @@ const LeadCard: React.FC<LeadCardProps> = ({
                   <button
                     onClick={addCommentFromModal}
                     disabled={!modalDraft.trim()}
-                    className="flex-1 text-base font-medium text-white bg-blue-500 rounded-xl hover:bg-blue-600 active:bg-blue-700 active:scale-[0.98] disabled:bg-muted/50 disabled:text-muted-foreground disabled:active:scale-100 transition-all duration-150 touch-manipulation"
+                    className="flex-1 font-medium text-white bg-blue-500 rounded-xl hover:bg-blue-600 active:bg-blue-700 active:scale-[0.98] disabled:bg-muted/50 disabled:text-muted-foreground disabled:active:scale-100 transition-all duration-150 touch-manipulation"
                     style={{ 
                       WebkitTapHighlightColor: 'transparent',
-                      height: keyboardInset > 0 ? '44px' : '48px' // Slightly smaller when keyboard is visible
+                      height: keyboardInset > 0 ? '40px' : '44px', // More aggressive sizing for iPhone 16e
+                      fontSize: keyboardInset > 0 ? '15px' : '16px', // Slightly smaller text when keyboard is visible
                     }}
                   >
                     Add
