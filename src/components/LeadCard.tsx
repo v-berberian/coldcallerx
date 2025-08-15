@@ -1072,7 +1072,7 @@ const LeadCard: React.FC<LeadCardProps> = ({
                   duration: 0.2, 
                   ease: "easeInOut"
                 }}
-                className={`border border-border/20 rounded-lg p-3 cursor-pointer transition-colors ${selectedCommentId === c.id ? 'bg-muted/20' : ''}`}
+                className={`border border-border/20 rounded-lg p-3 cursor-pointer transition-colors mb-3 ${selectedCommentId === c.id ? 'bg-muted/20' : ''}`}
                 style={{ 
                   touchAction: 'manipulation'
                 }}
