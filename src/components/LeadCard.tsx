@@ -541,9 +541,9 @@ const LeadCard: React.FC<LeadCardProps> = ({
             backfaceVisibility: "hidden"
           }}
         >
-      <CardContent className="flex-1 flex flex-col overflow-hidden pt-2">
+      <CardContent className="flex-1 flex flex-col overflow-hidden pt-1">
         {/* Top row with left cluster, centered count, right menu */}
-        <div className="flex items-center justify-between px-0 sm:px-1 py-2 sm:py-3 pb-1">
+        <div className="flex items-center justify-between px-0 sm:px-1 py-1 sm:py-2 pb-0">
           <div className="flex items-center gap-1">
             <button
               onClick={handleFlip}
