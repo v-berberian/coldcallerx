@@ -262,12 +262,18 @@ const NavigationControls: React.FC<NavigationControlsProps> = ({
               e.stopPropagation();
             }}
           >
-            <span className="truncate">{shuffleMode ? 'Shuffle' : 'Next'}</span>
-            {shuffleMode ? (
-              <Shuffle className="h-5 w-5 sm:h-6 sm:w-6 ml-2" />
-            ) : (
+            <div className="flex items-center relative">
+              <span className="truncate">Next</span>
               <ArrowRight className="h-5 w-5 sm:h-6 sm:w-6 ml-2" />
-            )}
+              {shuffleMode && (
+                <Shuffle className="h-3 w-3 absolute -top-1 -right-1 text-orange-500 bg-background/80 rounded-full p-0.5" />
+              )}
+              {isSwiping && swipeDirection === 'left' && (
+                <div className="absolute inset-0 flex items-center justify-center bg-orange-500/20 rounded-full">
+                  <Shuffle className="h-4 w-4 text-orange-600" />
+                </div>
+              )}
+            </div>
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end" className="w-48">
