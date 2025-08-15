@@ -59,7 +59,9 @@ const LeadCard: React.FC<LeadCardProps> = ({
   onImportNew,
   navigationDirection = 'forward',
   onSwipeReset,
-  onCommentModalOpenChange
+  onCommentModalOpenChange,
+  onCommentingChange,
+  onTagChange
 }) => {
   // Use the extracted hooks
   const {
