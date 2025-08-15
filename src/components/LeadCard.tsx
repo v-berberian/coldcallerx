@@ -1062,24 +1062,15 @@ const LeadCard: React.FC<LeadCardProps> = ({
           {comments.length === 0 && (
             <p className="text-sm text-muted-foreground/60 mt-2">No comments yet.</p>
           )}
-          <AnimatePresence mode="popLayout">
-            {comments.map(c => (
-              <motion.div
-                key={c.id}
-                initial={{ opacity: 1, scale: 1 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.95, transition: { duration: 0.15 } }}
-                transition={{ 
-                  type: "tween",
-                  duration: 0.2,
-                  ease: [0.4, 0.0, 0.2, 1]
-                }}
-                className={`border border-border/20 rounded-lg p-3 cursor-pointer transition-colors ${selectedCommentId === c.id ? 'bg-muted/20' : ''}`}
-                style={{ 
-                  touchAction: 'manipulation'
-                }}
-                onClick={() => handleCommentSelect(c.id)}
-              >
+          {comments.map(c => (
+            <div
+              key={c.id}
+              className={`border border-border/20 rounded-lg p-3 cursor-pointer transition-colors ${selectedCommentId === c.id ? 'bg-muted/20' : ''}`}
+              style={{ 
+                touchAction: 'manipulation'
+              }}
+              onClick={() => handleCommentSelect(c.id)}
+            >
                   <div className="flex items-center justify-between gap-4">
                     <div className="text-left w-full">
                       <p className="text-sm whitespace-pre-wrap text-left">{c.text}</p>
