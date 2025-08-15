@@ -226,6 +226,7 @@ const useLeadNavigationImpl = ({
     selectLead: selectLeadWrapper,
     toggleTimezoneFilter: toggleTimezoneFilterWrapper,
     toggleCallFilter: toggleCallFilterWrapper,
+    setTemperatureFilterValue,
     toggleShuffle: toggleShuffleWrapper,
     toggleAutoCall: toggleAutoCallWrapper,
     toggleCallDelay: toggleCallDelayWrapper,
