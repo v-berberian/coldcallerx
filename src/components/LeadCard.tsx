@@ -1060,14 +1060,19 @@ const LeadCard: React.FC<LeadCardProps> = ({
           {comments.length === 0 && (
             <p className="text-sm text-muted-foreground/60 mt-2">No comments yet.</p>
           )}
-          <AnimatePresence>
+          <AnimatePresence mode="wait">
             {comments.map(c => (
               <motion.div
                 key={c.id}
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: 0.2, ease: "easeInOut" }}
+                layout
+                initial={{ opacity: 0, height: 0, marginBottom: 0 }}
+                animate={{ opacity: 1, height: "auto", marginBottom: 12 }}
+                exit={{ opacity: 0, height: 0, marginBottom: 0 }}
+                transition={{ 
+                  duration: 0.2, 
+                  ease: "easeInOut",
+                  layout: { duration: 0.15, ease: "easeInOut" }
+                }}
                 className={`border border-border/20 rounded-lg p-3 cursor-pointer transition-colors ${selectedCommentId === c.id ? 'bg-muted/20' : ''}`}
                 style={{ 
                   touchAction: 'manipulation'
@@ -1097,8 +1102,9 @@ const LeadCard: React.FC<LeadCardProps> = ({
                       </div>
                     )}
                   </div>
-                </div>
+                </motion.div>
               ))}
+            </AnimatePresence>
         </div>
 
         {/* Comment Section Footer */}
