@@ -15,6 +15,7 @@ interface UseLocalCallingScreenStateProps {
 export const useLocalCallingScreenState = ({ leads, onCallMade, refreshTrigger = 0 }: UseLocalCallingScreenStateProps) => {
   const [componentReady, setComponentReady] = useState(false);
   const [leadsInitialized, setLeadsInitialized] = useState(false);
+  const [currentCSVId, setCurrentCSVId] = useState<string | null>(null);
   const localStorageRestoredRef = useRef(false);
 
   // Use the new async hooks
