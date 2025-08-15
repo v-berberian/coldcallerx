@@ -34,6 +34,38 @@ const NavigationControls: React.FC<NavigationControlsProps> = ({
     onNext();
   };
 
+  // Long press state and handlers
+  const [isDropdownOpen, setIsDropdownOpen] = React.useState(false);
+  const [longPressTimeout, setLongPressTimeout] = React.useState<NodeJS.Timeout | null>(null);
+  const [isLongPressing, setIsLongPressing] = React.useState(false);
+
+  const handleNextTouchStart = () => {
+    setIsLongPressing(false);
+    const timeout = setTimeout(() => {
+      setIsLongPressing(true);
+      setIsDropdownOpen(true);
+    }, 500); // 500ms long press
+    setLongPressTimeout(timeout);
+  };
+
+  const handleNextTouchEnd = () => {
+    if (longPressTimeout) {
+      clearTimeout(longPressTimeout);
+      setLongPressTimeout(null);
+    }
+    
+    // Only trigger normal next if it wasn't a long press
+    if (!isLongPressing) {
+      handleNext();
+    }
+    setIsLongPressing(false);
+  };
+
+  const handleDropdownItemClick = (action: () => void) => {
+    setIsDropdownOpen(false);
+    action();
+  };
+
   // Detect when the software keyboard is likely open to reduce bottom spacing
   const [isKeyboardOpen, setIsKeyboardOpen] = React.useState(false);
 
