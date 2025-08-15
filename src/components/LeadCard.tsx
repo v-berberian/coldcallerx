@@ -1196,12 +1196,10 @@ const LeadCard: React.FC<LeadCardProps> = ({
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.2 }}
-            className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-start justify-center z-50 p-4"
+            className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50"
             onClick={closeAddCommentModal}
             style={{
               touchAction: 'none',
-              // Position modal in upper-middle area for better visual balance
-              paddingTop: 'max(env(safe-area-inset-top) + 80px, 80px)',
             }}
           >
             <motion.div
@@ -1210,24 +1208,18 @@ const LeadCard: React.FC<LeadCardProps> = ({
                 opacity: 0, 
                 x: 0,
                 y: 0,
-                width: '100%',
-                height: 'auto'
               }}
               animate={{ 
                 scale: 1, 
                 opacity: 1, 
                 x: 0,
                 y: 0,
-                width: '100%',
-                height: 'auto'
               }}
               exit={{ 
                 scale: 0.1, 
                 opacity: 0, 
                 x: 0,
                 y: 0,
-                width: '100%',
-                height: 'auto'
               }}
               transition={{ 
                 type: "spring", 
@@ -1235,12 +1227,16 @@ const LeadCard: React.FC<LeadCardProps> = ({
                 bounce: 0.2,
                 ease: [0.25, 0.46, 0.45, 0.94]
               }}
-              className="w-full max-w-lg bg-card rounded-3xl border border-border/50 shadow-2xl max-h-[65vh] flex flex-col overflow-hidden"
+              className="absolute left-4 right-4 bg-card rounded-3xl border border-border/50 shadow-2xl flex flex-col overflow-hidden"
               onClick={(e) => e.stopPropagation()}
               style={{
                 touchAction: 'auto',
-                // Reduce max height further when keyboard is visible
-                maxHeight: keyboardInset > 0 ? `calc(65vh - ${keyboardInset}px)` : undefined,
+                // Dynamic positioning and sizing based on keyboard state
+                top: keyboardInset > 0 ? 'max(env(safe-area-inset-top) + 20px, 20px)' : 'max(env(safe-area-inset-top) + 80px, 80px)',
+                maxHeight: keyboardInset > 0 
+                  ? `calc(100vh - ${keyboardInset}px - max(env(safe-area-inset-top) + 40px, 40px))` 
+                  : 'calc(65vh)',
+                minHeight: '280px', // Ensure minimum space for content + buttons
               }}
             >
               {/* Modal Content */}
