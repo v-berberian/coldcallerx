@@ -1093,7 +1093,7 @@ const LeadCard: React.FC<LeadCardProps> = ({
                       <div className="flex items-center gap-2 self-center">
                         <button
                           aria-label="Delete comment"
-                          className="min-w-[44px] min-h-[44px] flex items-center justify-center rounded-lg bg-red-50 hover:bg-red-100 active:bg-red-200 dark:bg-red-900/20 dark:hover:bg-red-900/30 dark:active:bg-red-900/40 transition-colors touch-manipulation"
+                          className="min-w-[44px] min-h-[44px] flex items-center justify-center rounded-lg bg-red-50 active:bg-red-200 dark:bg-red-900/20 dark:active:bg-red-900/40 transition-colors touch-manipulation"
                           style={{ WebkitTapHighlightColor: 'transparent' }}
                           onClick={(e) => {
                             e.stopPropagation();
