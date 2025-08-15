@@ -1281,20 +1281,19 @@ const LeadCard: React.FC<LeadCardProps> = ({
               {/* Modal Footer */}
               <div className="p-4 border-t border-border/20 bg-background/50">
                 <div className="flex items-center gap-4 justify-end">
-                  <Button
-                    variant="outline"
+                  <button
                     onClick={closeAddCommentModal}
-                    className="h-12 px-6 rounded-lg shadow-[inset_0_1px_0_rgba(255,255,255,0.8),inset_0_-1px_0_rgba(0,0,0,0.1),0_2px_4px_-1px_rgba(0,0,0,0.1)] hover:shadow-[inset_0_1px_0_rgba(255,255,255,0.8),inset_0_-1px_0_rgba(0,0,0,0.1),0_4px_6px_-1px_rgba(0,0,0,0.15)] active:shadow-[inset_0_2px_4px_rgba(0,0,0,0.15),inset_0_-1px_0_rgba(255,255,255,0.6),0_1px_2px_-1px_rgba(0,0,0,0.1)] transition-all duration-200 active:scale-95"
+                    className="px-4 py-2 text-sm text-gray-600 hover:text-gray-800 transition-colors"
                   >
                     Cancel
-                  </Button>
-                  <Button
+                  </button>
+                  <button
                     onClick={addCommentFromModal}
                     disabled={!modalDraft.trim()}
-                    className="h-12 px-6 rounded-lg shadow-[inset_0_1px_0_rgba(255,255,255,0.2),inset_0_-1px_0_rgba(0,0,0,0.1),0_4px_6px_-1px_rgba(0,0,0,0.2),0_2px_4px_-1px_rgba(0,0,0,0.1)] hover:shadow-[inset_0_1px_0_rgba(255,255,255,0.2),inset_0_-1px_0_rgba(0,0,0,0.1),0_6px_12px_-1px_rgba(0,0,0,0.25),0_4px_6px_-1px_rgba(0,0,0,0.15)] active:shadow-[inset_0_2px_4px_rgba(0,0,0,0.2),inset_0_-1px_0_rgba(255,255,255,0.1),0_2px_4px_-1px_rgba(0,0,0,0.1)] disabled:shadow-[inset_0_1px_0_rgba(255,255,255,0.1),inset_0_-1px_0_rgba(0,0,0,0.05),0_2px_4px_-1px_rgba(0,0,0,0.1)] transition-all duration-200 active:scale-95 disabled:scale-100"
+                    className="px-4 py-2 text-sm bg-blue-600 text-white rounded hover:bg-blue-700 disabled:bg-gray-300 disabled:text-gray-500 transition-colors"
                   >
                     Add
-                  </Button>
+                  </button>
                 </div>
               </div>
             </motion.div>
