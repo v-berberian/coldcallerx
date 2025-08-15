@@ -251,7 +251,7 @@ const FilterButtons: React.FC<FilterButtonsProps> = ({
               <span className={`block truncate transition-all duration-100 ease-out ${
                 temperatureFilter !== 'ALL' ? 'scale-100 opacity-100' : 'scale-95 opacity-90'
               }`}>
-                {temperatureFilter === 'ALL' ? 'All Temperature' : temperatureFilter}
+                {temperatureFilter === 'ALL' ? 'All Stages' : temperatureFilter}
               </span>
               <ChevronDown 
                 size={16} 
