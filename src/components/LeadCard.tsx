@@ -794,7 +794,22 @@ const LeadCard: React.FC<LeadCardProps> = ({
             {hasValidEmail && (
               <div className="flex items-center justify-center">
                   <div className="flex items-center gap-2">
-                    <Mail className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                    <button
+                      onClick={() => handleEmailClick(selectedEmailTemplate)}
+                      className="w-6 h-6 rounded-full bg-gradient-to-br from-gray-400 to-gray-600 active:from-gray-600 active:to-gray-800 text-white transition-all duration-200 flex items-center justify-center p-0 relative overflow-hidden focus:outline-none"
+                      title="Click to send email"
+                      style={{
+                        boxShadow: `
+                          2px 2px 4px rgba(0, 0, 0, 0.2),
+                          -2px -2px 4px rgba(255, 255, 255, 0.1),
+                          inset 1px 1px 2px rgba(255, 255, 255, 0.2),
+                          inset -1px -1px 2px rgba(0, 0, 0, 0.1)
+                        `,
+                        pointerEvents: isDeleteMode ? 'none' : 'auto'
+                      }}
+                    >
+                      <Mail className="h-3 w-3 text-white flex-shrink-0" />
+                    </button>
                   <button
                     onClick={() => handleEmailClick(selectedEmailTemplate)}
                     className="text-sm text-muted-foreground text-center break-words transition-colors duration-200 cursor-pointer"
