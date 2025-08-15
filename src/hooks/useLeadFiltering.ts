@@ -5,10 +5,14 @@ import { filterLeadsByTimezone, filterLeadsByTemperature } from '../utils/timezo
 export const useLeadFiltering = (
   leadsData: Lead[], 
   timezoneFilter: TimezoneFilter, 
-  callFilter: CallFilter
+  callFilter: CallFilter,
+  temperatureFilter: TemperatureFilter,
+  currentCSVId: string | null
 ) => {
-  // Memoize filtered leads to avoid recalculation
-  const baseLeads = useMemo(() => {
+  const [filteredLeads, setFilteredLeads] = useState<Lead[]>([]);
+
+  // Apply synchronous filters first
+  const syncFilteredLeads = useMemo(() => {
     let filtered = filterLeadsByTimezone(leadsData, timezoneFilter);
     if (callFilter === 'UNCALLED') {
       filtered = filtered.filter(lead => !lead.lastCalled);
@@ -16,9 +20,33 @@ export const useLeadFiltering = (
     return filtered;
   }, [leadsData, timezoneFilter, callFilter]);
 
+  // Apply async temperature filtering
+  useEffect(() => {
+    const applyTemperatureFilter = async () => {
+      if (temperatureFilter === 'ALL' || !currentCSVId) {
+        setFilteredLeads(syncFilteredLeads);
+        return;
+      }
+
+      try {
+        const temperatureFiltered = await filterLeadsByTemperature(
+          syncFilteredLeads, 
+          temperatureFilter, 
+          currentCSVId
+        );
+        setFilteredLeads(temperatureFiltered);
+      } catch (error) {
+        console.error('Error applying temperature filter:', error);
+        setFilteredLeads(syncFilteredLeads); // Fallback to sync filtered leads
+      }
+    };
+
+    applyTemperatureFilter();
+  }, [syncFilteredLeads, temperatureFilter, currentCSVId]);
+
   const getBaseLeads = useCallback(() => {
-    return baseLeads;
-  }, [baseLeads]);
+    return filteredLeads;
+  }, [filteredLeads]);
 
   return { getBaseLeads };
 };
