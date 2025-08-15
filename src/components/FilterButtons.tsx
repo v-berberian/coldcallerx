@@ -131,7 +131,7 @@ const FilterButtons: React.FC<FilterButtonsProps> = ({
             {/* Animated background for active state */}
             {timezoneFilter === 'EST_CST' && (
               <div 
-                className="absolute inset-0 bg-gradient-to-r from-teal-500/20 to-teal-600/20 rounded-lg scale-100 opacity-100 pointer-events-none"
+                className="absolute inset-0 bg-gradient-to-r from-indigo-500/20 to-indigo-600/20 rounded-lg scale-100 opacity-100 pointer-events-none"
                 style={{
                   transition: 'all 100ms cubic-bezier(0.25, 0.46, 0.45, 0.94)',
                   pointerEvents: 'none'
