@@ -194,14 +194,14 @@ const FilterButtons: React.FC<FilterButtonsProps> = ({
         </div>
       </div>
 
-      {/* Second row: Shuffle and Auto Call filters */}
+      {/* Second row: Temperature and Auto Call filters */}
       <div className="flex w-full gap-2">
         <div className="flex-1">
           <button 
-            onClick={handleFilterClick(onToggleShuffle, 'shuffle')} 
+            onClick={handleFilterClick(onToggleTemperature, 'temperature')} 
             className={`group relative w-full text-sm font-medium px-4 py-3 rounded-lg overflow-hidden transition-all duration-100 ease-out touch-manipulation ${
-              shuffleMode 
-                ? 'text-orange-700 dark:text-orange-300 shadow-lg shadow-orange-500/30' 
+              temperatureFilter !== 'ALL' 
+                ? 'text-red-700 dark:text-red-300 shadow-lg shadow-red-500/30' 
                 : 'text-muted-foreground/70'
             }`} 
             style={{ 
@@ -211,9 +211,9 @@ const FilterButtons: React.FC<FilterButtonsProps> = ({
             }}
           >
             {/* Animated background for active state */}
-            {shuffleMode && (
+            {temperatureFilter !== 'ALL' && (
               <div 
-                className="absolute inset-0 bg-gradient-to-r from-orange-500/20 to-orange-600/20 rounded-lg scale-100 opacity-100 pointer-events-none"
+                className="absolute inset-0 bg-gradient-to-r from-red-500/20 to-red-600/20 rounded-lg scale-100 opacity-100 pointer-events-none"
                 style={{
                   transition: 'all 100ms cubic-bezier(0.25, 0.46, 0.45, 0.94)',
                   pointerEvents: 'none'
@@ -222,7 +222,7 @@ const FilterButtons: React.FC<FilterButtonsProps> = ({
             )}
             
             {/* Subtle background for inactive state */}
-            {!shuffleMode && (
+            {temperatureFilter === 'ALL' && (
               <div 
                 className="absolute inset-0 bg-gray-200/20 dark:bg-gray-700/20 rounded-lg scale-100 opacity-100 pointer-events-none"
                 style={{
@@ -233,9 +233,9 @@ const FilterButtons: React.FC<FilterButtonsProps> = ({
             )}
             
             <span className={`relative z-10 block truncate transition-all duration-100 ease-out ${
-              shuffleMode ? 'scale-100 opacity-100' : 'scale-95 opacity-90'
+              temperatureFilter !== 'ALL' ? 'scale-100 opacity-100' : 'scale-95 opacity-90'
             }`}>
-              Shuffle
+              {temperatureFilter === 'ALL' ? 'All Temperature' : temperatureFilter}
             </span>
           </button>
         </div>
