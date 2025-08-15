@@ -44,6 +44,7 @@ const CallingScreenContainer: React.FC<CallingScreenContainerProps> = memo(({
     currentIndex,
     timezoneFilter,
     callFilter,
+    temperatureFilter,
     shuffleMode,
     autoCall,
     callDelay,

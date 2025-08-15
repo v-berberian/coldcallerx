@@ -285,6 +285,7 @@ export const useLocalCallingScreenState = ({ leads, onCallMade, refreshTrigger =
     currentIndex,
     timezoneFilter,
     callFilter,
+    temperatureFilter,
     shuffleMode,
     autoCall,
     callDelay,
