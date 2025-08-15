@@ -49,6 +49,11 @@ const NavigationControls: React.FC<NavigationControlsProps> = ({
   const [longPressTimeout, setLongPressTimeout] = React.useState<NodeJS.Timeout | null>(null);
   const [isLongPressing, setIsLongPressing] = React.useState(false);
 
+  // Swipe gesture state
+  const [swipeStart, setSwipeStart] = React.useState<{ x: number; y: number; time: number } | null>(null);
+  const [isSwiping, setIsSwiping] = React.useState(false);
+  const [swipeDirection, setSwipeDirection] = React.useState<'left' | 'right' | null>(null);
+
   const handleButtonTouchStart = () => {
     setIsLongPressing(false);
     const timeout = setTimeout(() => {
