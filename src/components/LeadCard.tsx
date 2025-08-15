@@ -1311,7 +1311,7 @@ const LeadCard: React.FC<LeadCardProps> = ({
               </div>
 
               {/* Modal Footer */}
-              <div className="p-6 bg-background/95 backdrop-blur-sm border-t border-border/20">
+              <div className="px-6 pt-6 bg-background/95 backdrop-blur-sm border-t border-border/20" style={{ paddingBottom: 'max(1.5rem, calc(env(safe-area-inset-bottom) + 1rem))' }}>
                 <div className="flex items-center gap-3">
                   <button
                     onClick={closeAddCommentModal}
