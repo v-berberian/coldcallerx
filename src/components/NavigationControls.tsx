@@ -49,7 +49,7 @@ const NavigationControls: React.FC<NavigationControlsProps> = ({
   const [longPressTimeout, setLongPressTimeout] = React.useState<NodeJS.Timeout | null>(null);
   const [isLongPressing, setIsLongPressing] = React.useState(false);
 
-  const handleNextTouchStart = () => {
+  const handleButtonTouchStart = () => {
     setIsLongPressing(false);
     const timeout = setTimeout(() => {
       setIsLongPressing(true);
@@ -58,15 +58,19 @@ const NavigationControls: React.FC<NavigationControlsProps> = ({
     setLongPressTimeout(timeout);
   };
 
-  const handleNextTouchEnd = () => {
+  const handleButtonTouchEnd = () => {
     if (longPressTimeout) {
       clearTimeout(longPressTimeout);
       setLongPressTimeout(null);
     }
     
-    // Only trigger normal next if it wasn't a long press
+    // Only trigger normal action if it wasn't a long press
     if (!isLongPressing) {
-      handleNext();
+      if (shuffleMode) {
+        handleShuffle();
+      } else {
+        handleNext();
+      }
     }
     setIsLongPressing(false);
   };
