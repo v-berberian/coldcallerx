@@ -41,6 +41,7 @@ interface LeadCardProps {
   onSwipeReset?: (resetSwipe: () => void) => void;
   onCommentModalOpenChange?: (open: boolean) => void;
   onCommentingChange?: (commenting: boolean) => void;
+  onTagChange?: () => void;
 }
 
 const LeadCard: React.FC<LeadCardProps> = ({
