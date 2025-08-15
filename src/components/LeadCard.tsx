@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react'
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from '@/components/ui/dropdown-menu';
-import { X, Phone, Mail, ChevronDown, Check, MessageSquare, MessagesSquare, Upload, Settings, Edit3, Trash, Send, Text, Ellipsis, Snowflake, Sun, Flame, MessageCircle } from 'lucide-react';
+import { X, Phone, Mail, ChevronDown, Check, MessageSquare, MessagesSquare, Upload, Settings, Trash, Send, Text, Ellipsis, Snowflake, Sun, Flame, MessageCircle } from 'lucide-react';
 import {
   AlertDialog,
   AlertDialogContent,
@@ -103,8 +103,6 @@ const LeadCard: React.FC<LeadCardProps> = ({
   const leadKey = useMemo(() => `${lead.name}__${lead.phone}`, [lead.name, lead.phone]);
   const [csvId, setCsvId] = useState<string | null>(null);
   const [comments, setComments] = useState<LeadComment[]>([]);
-  const [editingId, setEditingId] = useState<string | null>(null);
-  const [editingText, setEditingText] = useState('');
   const [selectedCommentId, setSelectedCommentId] = useState<string | null>(null);
   const [leadTag, setLeadTagState] = useState<'cold' | 'warm' | 'hot' | null>(null);
   
@@ -292,26 +290,6 @@ const LeadCard: React.FC<LeadCardProps> = ({
     saveComments(next);
   }, [comments, saveComments]);
 
-  const startEdit = useCallback((id: string) => {
-    const c = comments.find(c => c.id === id);
-    if (!c) return;
-    setEditingId(id);
-    setEditingText(c.text);
-  }, [comments]);
-
-  const cancelEdit = useCallback(() => {
-    setEditingId(null);
-    setEditingText('');
-  }, []);
-
-  const saveEdit = useCallback(() => {
-    if (!editingId) return;
-    const text = editingText.trim();
-    if (!text) { cancelEdit(); return; }
-    const next = comments.map(c => c.id === editingId ? { ...c, text } : c);
-    saveComments(next);
-    cancelEdit();
-  }, [editingId, editingText, comments, saveComments, cancelEdit]);
 
   const handleCommentSelect = useCallback((commentId: string) => {
     setSelectedCommentId(prev => prev === commentId ? null : commentId);
@@ -1089,81 +1067,37 @@ const LeadCard: React.FC<LeadCardProps> = ({
                   style={{ willChange: 'transform' }}
                   onClick={() => handleCommentSelect(c.id)}
                 >
-                  <AnimatePresence mode="wait" initial={false}>
-                    {editingId === c.id ? (
-                      <motion.div
-                        key="edit"
-                        layout
-                        initial={{ opacity: 0, y: 6 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: -6 }}
-                        transition={{ type: 'spring', stiffness: 520, damping: 28, mass: 0.45, layout: { type: 'spring', stiffness: 520, damping: 28, mass: 0.45 } }}
-                        className="flex items-center gap-3"
-                      >
-                        <textarea
-                          value={editingText}
-                          onChange={(e) => setEditingText(e.target.value)}
-                          className="flex-1 rounded-md border border-border/30 bg-background px-3 text-sm focus:outline-none min-h-[44px] py-2 resize-none"
-                          rows={2}
-                        />
-                        <div className="flex items-center gap-2 self-center">
-                          <Button size="sm" onClick={saveEdit}>Save</Button>
-                          <Button size="sm" variant="secondary" onClick={cancelEdit}>Cancel</Button>
-                        </div>
-                      </motion.div>
-                    ) : (
-                      <motion.div
-                        key="view"
-                        layout
-                        initial={{ opacity: 0, y: -6 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: 6 }}
-                        transition={{ type: 'spring', stiffness: 520, damping: 28, mass: 0.45, layout: { type: 'spring', stiffness: 520, damping: 28, mass: 0.45 } }}
-                        className="flex items-center justify-between gap-4"
-                      >
-                        <div className="text-left w-full">
-                          <p className="text-sm whitespace-pre-wrap text-left">{c.text}</p>
-                          <p className="text-[11px] text-muted-foreground mt-1">
-                            {new Date(c.createdAt).toLocaleString()}
-                          </p>
-                        </div>
-                        <AnimatePresence>
-                          {selectedCommentId === c.id && (
-                            <motion.div 
-                              className="flex items-center gap-2 self-center"
-                              initial={{ opacity: 0, scale: 0.8 }}
-                              animate={{ opacity: 1, scale: 1 }}
-                              exit={{ opacity: 0, scale: 0.8 }}
-                              transition={{ duration: 0.02, ease: "easeOut" }}
-                            >
-                              <motion.button
-                                whileTap={{ scale: 0.92 }}
-                                aria-label="Edit comment"
-                                className="rounded-md p-2 active:bg-muted/80"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  startEdit(c.id);
-                                }}
-                              >
-                                <Edit3 className="h-4 w-4 text-muted-foreground" />
-                              </motion.button>
-                              <motion.button
-                                whileTap={{ scale: 0.92 }}
-                                aria-label="Delete comment"
-                                className="rounded-md p-2 active:bg-muted/80"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  deleteComment(c.id);
-                                }}
-                              >
-                                <Trash className="h-4 w-4 text-red-600" />
-                              </motion.button>
-                            </motion.div>
-                          )}
-                        </AnimatePresence>
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
+                  <div className="flex items-center justify-between gap-4">
+                    <div className="text-left w-full">
+                      <p className="text-sm whitespace-pre-wrap text-left">{c.text}</p>
+                      <p className="text-[11px] text-muted-foreground mt-1">
+                        {new Date(c.createdAt).toLocaleString()}
+                      </p>
+                    </div>
+                    <AnimatePresence>
+                      {selectedCommentId === c.id && (
+                        <motion.div 
+                          className="flex items-center gap-2 self-center"
+                          initial={{ opacity: 0, scale: 0.8 }}
+                          animate={{ opacity: 1, scale: 1 }}
+                          exit={{ opacity: 0, scale: 0.8 }}
+                          transition={{ duration: 0.02, ease: "easeOut" }}
+                        >
+                          <motion.button
+                            whileTap={{ scale: 0.92 }}
+                            aria-label="Delete comment"
+                            className="rounded-md p-2 active:bg-muted/80"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              deleteComment(c.id);
+                            }}
+                          >
+                            <Trash className="h-4 w-4 text-red-600" />
+                          </motion.button>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </div>
                 </motion.div>
               ))}
             </AnimatePresence>
@@ -1271,11 +1205,6 @@ const LeadCard: React.FC<LeadCardProps> = ({
                 maxHeight: keyboardInset > 0 ? `calc(65vh - ${keyboardInset}px)` : undefined,
               }}
             >
-              {/* Modal Header */}
-              <div className="px-4 py-3 border-b border-border/20">
-                <h3 className="text-lg font-semibold text-center">Add Comment</h3>
-              </div>
-
               {/* Modal Content */}
               <div className="flex-1 p-4">
                 <div className="space-y-4">
