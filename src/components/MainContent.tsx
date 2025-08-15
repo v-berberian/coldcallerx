@@ -175,14 +175,14 @@ const MainContent: React.FC<MainContentProps> = ({
           <FilterButtons
             timezoneFilter={timezoneFilter}
             callFilter={callFilter}
-            shuffleMode={shuffleMode}
+            temperatureFilter={'ALL'}
             autoCall={autoCall}
             callDelay={callDelay}
             isCountdownActive={isCountdownActive}
             countdownTime={countdownTime}
             onToggleTimezone={onToggleTimezone}
             onToggleCallFilter={onToggleCallFilter}
-            onToggleShuffle={onToggleShuffle}
+            onToggleTemperature={() => {}}
             onToggleAutoCall={onToggleAutoCall}
             onToggleCallDelay={onToggleCallDelay}
             onResetCallDelay={onResetCallDelay}
