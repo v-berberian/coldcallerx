@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { RotateCcw, Timer, Rocket } from 'lucide-react';
+import { RotateCcw, Timer, Rocket, ChevronDown } from 'lucide-react';
 
 interface FilterButtonsProps {
   timezoneFilter: 'ALL' | 'EST_CST';
