@@ -1049,7 +1049,14 @@ const LeadCard: React.FC<LeadCardProps> = ({
           </button>
         </div>
 
-        <div className="flex-1 min-h-0 overflow-y-auto px-4 pb-4 space-y-3 scrollbar-thin scrollbar-thumb-border/20 scrollbar-track-transparent" data-comments-scroll="true">
+        <div 
+          className="flex-1 min-h-0 overflow-y-auto px-4 pb-4 space-y-3 scrollbar-thin scrollbar-thumb-border/20 scrollbar-track-transparent" 
+          data-comments-scroll="true"
+          style={{
+            touchAction: 'pan-y',
+            WebkitOverflowScrolling: 'touch'
+          }}
+        >
           {comments.length === 0 && (
             <p className="text-sm text-muted-foreground/60 mt-2">No comments yet.</p>
           )}
