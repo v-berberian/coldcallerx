@@ -14,13 +14,17 @@ interface NavigationControlsProps {
   onNext: () => void;
   canGoPrevious: boolean;
   canGoNext: boolean;
+  onSkipToEnd?: () => void;
+  onSkipMultiple?: (count: number) => void;
 }
 
 const NavigationControls: React.FC<NavigationControlsProps> = ({
   onPrevious,
   onNext,
   canGoPrevious,
-  canGoNext
+  canGoNext,
+  onSkipToEnd,
+  onSkipMultiple
 }) => {
   const handlePrevious = () => {
     onPrevious();
