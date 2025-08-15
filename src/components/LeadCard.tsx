@@ -1092,9 +1092,8 @@ const LeadCard: React.FC<LeadCardProps> = ({
                       </div>
                     )}
                   </div>
-                </motion.div>
+                </div>
               ))}
-            </AnimatePresence>
         </div>
 
         {/* Comment Section Footer */}
