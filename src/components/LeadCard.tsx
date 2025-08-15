@@ -510,8 +510,8 @@ const LeadCard: React.FC<LeadCardProps> = ({
         />
         <Card 
           className="shadow-2xl border border-border/50 dark:border-border/60 ring-1 ring-border/40 dark:ring-border/60 rounded-3xl bg-card min-h-[420px] max-h-[520px] sm:min-h-[440px] sm:max-h-[580px] flex flex-col mb-4 overflow-hidden relative" 
-          onClick={(e) => handleCardClick(e)}
-          onTouchStart={(e) => handleCardClick(e)}
+          onClick={(e) => isCardFlipped ? undefined : handleCardClick(e)}
+          onTouchStart={(e) => isCardFlipped ? undefined : handleCardClick(e)}
           style={{
             pointerEvents: 'auto',
             transformStyle: "preserve-3d",
