@@ -1085,15 +1085,24 @@ const LeadCard: React.FC<LeadCardProps> = ({
           {comments.length === 0 && (
             <p className="text-sm text-muted-foreground/60 mt-2">No comments yet.</p>
           )}
-          {comments.map(c => (
-            <div
-              key={c.id}
-              className={`border border-border/20 rounded-lg p-3 cursor-pointer transition-colors mb-3 ${selectedCommentId === c.id ? 'bg-muted/20' : ''}`}
-              style={{ 
-                touchAction: 'manipulation'
-              }}
-              onClick={() => handleCommentSelect(c.id)}
-            >
+          {comments.map(c => {
+            const isFadingIn = fadingInIds.has(c.id);
+            const isFadingOut = fadingOutIds.has(c.id);
+            
+            return (
+              <div
+                key={c.id}
+                className={`border border-border/20 rounded-lg p-3 cursor-pointer mb-3 transition-all duration-150 ease-out ${
+                  selectedCommentId === c.id ? 'bg-muted/20' : ''
+                } ${
+                  isFadingIn ? 'opacity-0' : isFadingOut ? 'opacity-0' : 'opacity-100'
+                }`}
+                style={{ 
+                  touchAction: 'manipulation'
+                }}
+                onClick={() => handleCommentSelect(c.id)}
+              >
+            
                   <div className="flex items-start justify-between gap-4">
                     <div className="text-left flex-1 min-w-0">
                       <p className="text-sm whitespace-pre-wrap text-left break-words">{c.text}</p>
