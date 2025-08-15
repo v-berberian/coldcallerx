@@ -25,6 +25,19 @@ export const useLocalCallingScreenState = ({ leads, onCallMade, refreshTrigger =
   // Wait for both to load
   const isLoaded = navLoaded && leadsLoaded;
 
+  // Get current CSV ID
+  useEffect(() => {
+    const getCurrentCSVId = async () => {
+      try {
+        const csvId = await appStorage.getCurrentCSVId();
+        setCurrentCSVId(csvId);
+      } catch (error) {
+        console.error('Error getting current CSV ID:', error);
+      }
+    };
+    getCurrentCSVId();
+  }, [refreshTrigger]);
+
   // Initialize hooks - only pass leads to useLeadNavigation
   const {
     timezoneFilter,
@@ -62,6 +75,7 @@ export const useLocalCallingScreenState = ({ leads, onCallMade, refreshTrigger =
   } = useLeadNavigation({ 
     initialLeads: leads, 
     onCallMade,
+    currentCSVId,
     currentIndex,
     historyIndex,
     updateNavigation,
