@@ -1231,12 +1231,12 @@ const LeadCard: React.FC<LeadCardProps> = ({
               onClick={(e) => e.stopPropagation()}
               style={{
                 touchAction: 'auto',
-                // Dynamic positioning and sizing based on keyboard state
-                top: keyboardInset > 0 ? 'max(env(safe-area-inset-top) + 20px, 20px)' : 'max(env(safe-area-inset-top) + 80px, 80px)',
+                // Dynamic positioning and sizing based on keyboard state - optimized for iPhone 16e
+                top: keyboardInset > 0 ? 'max(env(safe-area-inset-top) + 12px, 12px)' : 'max(env(safe-area-inset-top) + 60px, 60px)',
                 maxHeight: keyboardInset > 0 
-                  ? `calc(100vh - ${keyboardInset}px - max(env(safe-area-inset-top) + 40px, 40px))` 
-                  : 'calc(65vh)',
-                minHeight: '280px', // Ensure minimum space for content + buttons
+                  ? `calc(100vh - ${keyboardInset}px - max(env(safe-area-inset-top) + 24px, 24px))` 
+                  : 'calc(70vh)', // Slightly larger when no keyboard for better UX
+                minHeight: keyboardInset > 0 ? '240px' : '280px', // More aggressive min height when keyboard is visible
               }}
             >
               {/* Modal Content */}
