@@ -64,6 +64,7 @@ const CallingScreenContainer: React.FC<CallingScreenContainerProps> = memo(({
     selectLead,
     toggleTimezoneFilter,
     toggleCallFilter,
+    setTemperatureFilterValue,
     toggleShuffle,
     toggleAutoCall,
     toggleCallDelay,
@@ -374,6 +375,7 @@ const CallingScreenContainer: React.FC<CallingScreenContainerProps> = memo(({
           currentCSVId={currentCSVId}
           timezoneFilter={timezoneFilter}
           callFilter={callFilter}
+          temperatureFilter={temperatureFilter}
           shuffleMode={shuffleMode}
           autoCall={autoCall}
           callDelay={callDelay}
