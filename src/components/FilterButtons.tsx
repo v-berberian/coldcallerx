@@ -272,7 +272,7 @@ const FilterButtons: React.FC<FilterButtonsProps> = ({
                     onToggleTemperature(option);
                     setIsTemperatureDropdownOpen(false);
                   }}
-                  className={`w-full px-4 py-4 text-left text-sm font-medium transition-all duration-100 ease-out touch-manipulation active:scale-95 ${
+                  className={`w-full px-4 py-4 text-center text-sm font-medium transition-all duration-100 ease-out touch-manipulation active:scale-95 ${
                     temperatureFilter === option
                       ? 'bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-300'
                       : 'text-gray-700 dark:text-gray-300 active:bg-gray-100 dark:active:bg-gray-600'
