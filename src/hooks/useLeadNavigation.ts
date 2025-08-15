@@ -17,6 +17,7 @@ interface UseLeadNavigationProps {
   initialLeads: Lead[];
   onCallMade?: () => void;
   refreshTrigger?: number;
+  currentCSVId?: string | null;
   // Navigation state from parent
   currentIndex: number;
   historyIndex: number;
