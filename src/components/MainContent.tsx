@@ -79,7 +79,9 @@ const MainContent: React.FC<MainContentProps> = ({
   onImportNew,
   onDeleteLead,
   onCommentingChange,
-  onCommentModalOpenChange
+  onCommentModalOpenChange,
+  onSkipMultiple,
+  onSkipToEnd
 }) => {
   const [navigationDirection, setNavigationDirection] = useState<'forward' | 'backward'>('forward');
   const [resetSwipe, setResetSwipe] = useState<(() => void) | null>(null);
@@ -218,6 +220,8 @@ const MainContent: React.FC<MainContentProps> = ({
             onNext={handleNext}
             canGoPrevious={canGoPrevious}
             canGoNext={canGoNext}
+            onSkipMultiple={onSkipMultiple}
+            onSkipToEnd={onSkipToEnd}
           />
         </div>
       </div>
