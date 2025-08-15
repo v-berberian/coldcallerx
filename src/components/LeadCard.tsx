@@ -104,6 +104,8 @@ const LeadCard: React.FC<LeadCardProps> = ({
   const [csvId, setCsvId] = useState<string | null>(null);
   const [comments, setComments] = useState<LeadComment[]>([]);
   const [selectedCommentId, setSelectedCommentId] = useState<string | null>(null);
+  const [fadingOutIds, setFadingOutIds] = useState<Set<string>>(new Set());
+  const [fadingInIds, setFadingInIds] = useState<Set<string>>(new Set());
   const [leadTag, setLeadTagState] = useState<'cold' | 'warm' | 'hot' | null>(null);
   
   // Modal state for adding comments
