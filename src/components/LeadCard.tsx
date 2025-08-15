@@ -39,6 +39,8 @@ interface LeadCardProps {
   onImportNew?: () => void;
   navigationDirection?: 'forward' | 'backward';
   onSwipeReset?: (resetSwipe: () => void) => void;
+  isCommenting?: boolean;
+  onCommentingChange?: (commenting: boolean) => void;
 }
 
 const LeadCard: React.FC<LeadCardProps> = ({
@@ -55,7 +57,9 @@ const LeadCard: React.FC<LeadCardProps> = ({
   refreshTrigger,
   onImportNew,
   navigationDirection = 'forward',
-  onSwipeReset
+  onSwipeReset,
+  isCommenting = false,
+  onCommentingChange
 }) => {
   // Use the extracted hooks
   const {
@@ -243,6 +247,8 @@ const LeadCard: React.FC<LeadCardProps> = ({
 
   // Modal comment functions
   const openAddCommentModal = useCallback(() => {
+    // Notify parent that commenting has started
+    onCommentingChange?.(true);
     // Capture the button position for genie effect (we'll use a fallback position)
     setInputFieldPosition({
       x: window.innerWidth / 2,
@@ -258,14 +264,16 @@ const LeadCard: React.FC<LeadCardProps> = ({
       // Force keyboard to appear on mobile
       modalInputRef.current?.click();
     }, 100);
-  }, []);
+  }, [onCommentingChange]);
 
   const closeAddCommentModal = useCallback(() => {
     setIsAddCommentModalOpen(false);
     setModalDraft('');
     setIsModalInputFocused(false);
     setKeyboardInset(0);
-  }, []);
+    // Notify parent that commenting has ended
+    onCommentingChange?.(false);
+  }, [onCommentingChange]);
 
   const addComment = useCallback((text: string) => {
     if (!text.trim()) return;
@@ -447,7 +455,7 @@ const LeadCard: React.FC<LeadCardProps> = ({
 
   
   return (
-    <div className="relative">
+    <div className={`relative ${isCommenting ? 'pointer-events-none opacity-50' : ''}`}>
       {/* Delete background indicator */}
       <div 
         className="absolute bg-red-500 rounded-3xl flex items-center justify-center"
