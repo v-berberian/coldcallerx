@@ -1078,29 +1078,20 @@ const LeadCard: React.FC<LeadCardProps> = ({
                         {new Date(c.createdAt).toLocaleString()}
                       </p>
                     </div>
-                    <AnimatePresence>
-                      {selectedCommentId === c.id && (
-                        <motion.div 
-                          className="flex items-center gap-2 self-center"
-                          initial={{ opacity: 0, scale: 0.8 }}
-                          animate={{ opacity: 1, scale: 1 }}
-                          exit={{ opacity: 0, scale: 0.8 }}
-                          transition={{ duration: 0.02, ease: "easeOut" }}
+                    {selectedCommentId === c.id && (
+                      <div className="flex items-center gap-2 self-center">
+                        <button
+                          aria-label="Delete comment"
+                          className="rounded-md p-2 active:bg-muted/80"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            deleteComment(c.id);
+                          }}
                         >
-                          <motion.button
-                            whileTap={{ scale: 0.92 }}
-                            aria-label="Delete comment"
-                            className="rounded-md p-2 active:bg-muted/80"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              deleteComment(c.id);
-                            }}
-                          >
-                            <Trash className="h-4 w-4 text-red-600" />
-                          </motion.button>
-                        </motion.div>
-                      )}
-                    </AnimatePresence>
+                          <Trash className="h-4 w-4 text-red-600" />
+                        </button>
+                      </div>
+                    )}
                   </div>
                 </motion.div>
               ))}
