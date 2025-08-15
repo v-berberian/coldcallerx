@@ -17,8 +17,6 @@ const NavigationControls: React.FC<NavigationControlsProps> = ({
   onNext,
   canGoPrevious,
   canGoNext,
-  onSkipToEnd,
-  onSkipMultiple,
   shuffleMode = false,
   onToggleShuffle
 }) => {
@@ -30,46 +28,14 @@ const NavigationControls: React.FC<NavigationControlsProps> = ({
     onNext();
   };
 
-  const handleShuffle = () => {
-    if (onToggleShuffle) {
-      onToggleShuffle();
-    }
-  };
-
-  // Long press state and handlers
-  const [isDropdownOpen, setIsDropdownOpen] = React.useState(false);
-  const [longPressTimeout, setLongPressTimeout] = React.useState<NodeJS.Timeout | null>(null);
-  const [isLongPressing, setIsLongPressing] = React.useState(false);
-
-  const handleButtonTouchStart = () => {
-    setIsLongPressing(false);
-    const timeout = setTimeout(() => {
-      setIsLongPressing(true);
-      setIsDropdownOpen(true);
-    }, 1000); // 1000ms long press
-    setLongPressTimeout(timeout);
-  };
-
-  const handleButtonTouchEnd = () => {
-    if (longPressTimeout) {
-      clearTimeout(longPressTimeout);
-      setLongPressTimeout(null);
-    }
-    
-    // Only trigger normal action if it wasn't a long press
-    if (!isLongPressing) {
-      if (shuffleMode) {
-        handleShuffle();
-      } else {
-        handleNext();
+  const handleNextClick = () => {
+    if (shuffleMode) {
+      if (onToggleShuffle) {
+        onToggleShuffle();
       }
+    } else {
+      handleNext();
     }
-    setIsLongPressing(false);
-  };
-
-  const handleDropdownItemClick = (action: () => void) => {
-    setIsDropdownOpen(false);
-    action();
   };
 
   // Detect when the software keyboard is likely open to reduce bottom spacing
