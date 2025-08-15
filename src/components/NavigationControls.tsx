@@ -49,7 +49,7 @@ const NavigationControls: React.FC<NavigationControlsProps> = ({
       if (onToggleShuffle) {
         onToggleShuffle();
       }
-    }, 500); // 500ms long press
+    }, 750); // 750ms long press
     setLongPressTimeout(timeout);
   };
 
@@ -170,6 +170,7 @@ const NavigationControls: React.FC<NavigationControlsProps> = ({
             setLongPressTimeout(null);
           }
           setIsLongPressing(false);
+          setIsPressing(false);
         }}
         onClick={(e) => {
           // Prevent default click behavior since we handle it in touch events
