@@ -119,7 +119,7 @@ const FilterButtons: React.FC<FilterButtonsProps> = ({
             onClick={handleFilterClick(onToggleTimezone, 'timezone')} 
             className={`group relative w-full text-sm font-medium px-4 py-3 rounded-lg overflow-hidden transition-all duration-100 ease-out touch-manipulation ${
               timezoneFilter === 'EST_CST' 
-                ? 'text-teal-700 dark:text-teal-300 shadow-lg shadow-teal-500/30' 
+                ? 'text-indigo-700 dark:text-indigo-300 shadow-lg shadow-indigo-500/30' 
                 : 'text-muted-foreground/70'
             }`} 
             style={{ 
