@@ -106,7 +106,7 @@ export const useLeadCardSwipe = (
         }
       }
     }
-  }, [isSwiping, onFlip]);
+  }, [isSwiping, onFlip, isFlipped]);
 
   const handleTouchEnd = useCallback(() => {
     if (!isSwiping) return;
