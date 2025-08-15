@@ -203,6 +203,7 @@ const useLeadNavigationImpl = ({
     currentIndex,
     timezoneFilter,
     callFilter,
+    temperatureFilter,
     shuffleMode,
     autoCall,
     callDelay,
