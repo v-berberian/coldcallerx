@@ -49,6 +49,14 @@ const FilterButtons: React.FC<FilterButtonsProps> = ({
     handler();
   };
 
+  const closeTemperatureDropdown = () => {
+    setIsTemperatureDropdownClosing(true);
+    setTimeout(() => {
+      setIsTemperatureDropdownOpen(false);
+      setIsTemperatureDropdownClosing(false);
+    }, 200); // Match the slide-up animation duration
+  };
+
   const handleResetClick = (e: React.MouseEvent | React.TouchEvent) => {
     e.preventDefault();
     e.stopPropagation();
