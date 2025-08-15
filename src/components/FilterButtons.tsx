@@ -255,7 +255,7 @@ const FilterButtons: React.FC<FilterButtonsProps> = ({
               </span>
               <ChevronDown 
                 size={16} 
-                className={`ml-2 transition-transform duration-200 ${isTemperatureDropdownOpen ? 'rotate-180' : ''}`}
+                className={`absolute right-3 transition-transform duration-200 ${isTemperatureDropdownOpen ? 'rotate-180' : ''}`}
               />
             </div>
           </button>
