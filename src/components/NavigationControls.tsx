@@ -44,7 +44,7 @@ const NavigationControls: React.FC<NavigationControlsProps> = ({
     const timeout = setTimeout(() => {
       setIsLongPressing(true);
       setIsDropdownOpen(true);
-    }, 500); // 500ms long press
+    }, 1000); // 1000ms long press
     setLongPressTimeout(timeout);
   };
 
