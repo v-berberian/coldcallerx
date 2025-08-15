@@ -39,6 +39,9 @@ const NavigationControls: React.FC<NavigationControlsProps> = ({
 
   const handleButtonTouchStart = (e: React.TouchEvent | React.MouseEvent) => {
     e.preventDefault();
+    if (isPressing) return; // Prevent multiple triggers
+    
+    setIsPressing(true);
     setIsLongPressing(false);
     const timeout = setTimeout(() => {
       setIsLongPressing(true);
@@ -52,6 +55,8 @@ const NavigationControls: React.FC<NavigationControlsProps> = ({
 
   const handleButtonTouchEnd = (e: React.TouchEvent | React.MouseEvent) => {
     e.preventDefault();
+    if (!isPressing) return; // Prevent multiple triggers
+    
     if (longPressTimeout) {
       clearTimeout(longPressTimeout);
       setLongPressTimeout(null);
@@ -61,7 +66,9 @@ const NavigationControls: React.FC<NavigationControlsProps> = ({
     if (!isLongPressing) {
       handleNextClick();
     }
+    
     setIsLongPressing(false);
+    setIsPressing(false);
   };
 
   // Detect when the software keyboard is likely open to reduce bottom spacing
