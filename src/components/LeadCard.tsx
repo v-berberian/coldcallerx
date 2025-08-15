@@ -1279,18 +1279,20 @@ const LeadCard: React.FC<LeadCardProps> = ({
               </div>
 
               {/* Modal Footer */}
-              <div className="p-4 border-t border-border/20 bg-background/50">
-                <div className="flex items-center gap-4 justify-end">
+              <div className="p-6 bg-white/95 backdrop-blur-sm">
+                <div className="flex items-center gap-3">
                   <button
                     onClick={closeAddCommentModal}
-                    className="px-4 py-2 text-sm text-gray-600 hover:text-gray-800 transition-colors"
+                    className="flex-1 h-12 text-base font-medium text-gray-900 bg-gray-100 rounded-xl hover:bg-gray-200 active:bg-gray-300 active:scale-[0.98] transition-all duration-150 touch-manipulation"
+                    style={{ WebkitTapHighlightColor: 'transparent' }}
                   >
                     Cancel
                   </button>
                   <button
                     onClick={addCommentFromModal}
                     disabled={!modalDraft.trim()}
-                    className="px-4 py-2 text-sm bg-blue-600 text-white rounded hover:bg-blue-700 disabled:bg-gray-300 disabled:text-gray-500 transition-colors"
+                    className="flex-1 h-12 text-base font-medium text-white bg-blue-500 rounded-xl hover:bg-blue-600 active:bg-blue-700 active:scale-[0.98] disabled:bg-gray-200 disabled:text-gray-400 disabled:active:scale-100 transition-all duration-150 touch-manipulation"
+                    style={{ WebkitTapHighlightColor: 'transparent' }}
                   >
                     Add
                   </button>
