@@ -54,13 +54,59 @@ const NavigationControls: React.FC<NavigationControlsProps> = ({
   const [isSwiping, setIsSwiping] = React.useState(false);
   const [swipeDirection, setSwipeDirection] = React.useState<'left' | 'right' | null>(null);
 
-  const handleButtonTouchStart = () => {
+  const handleButtonTouchStart = (e: React.TouchEvent | React.MouseEvent) => {
     setIsLongPressing(false);
+    setIsSwiping(false);
+    setSwipeDirection(null);
+
+    // Get touch/mouse coordinates
+    const clientX = 'touches' in e ? e.touches[0].clientX : e.clientX;
+    const clientY = 'touches' in e ? e.touches[0].clientY : e.clientY;
+    
+    setSwipeStart({
+      x: clientX,
+      y: clientY,
+      time: Date.now()
+    });
+
     const timeout = setTimeout(() => {
-      setIsLongPressing(true);
-      setIsDropdownOpen(true);
+      if (!isSwiping) {
+        setIsLongPressing(true);
+        setIsDropdownOpen(true);
+      }
     }, 1000); // 1000ms long press
     setLongPressTimeout(timeout);
+  };
+
+  const handleButtonTouchMove = (e: React.TouchEvent | React.MouseEvent) => {
+    if (!swipeStart) return;
+
+    const clientX = 'touches' in e ? e.touches[0].clientX : e.clientX;
+    const clientY = 'touches' in e ? e.touches[0].clientY : e.clientY;
+
+    const deltaX = clientX - swipeStart.x;
+    const deltaY = clientY - swipeStart.y;
+    const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+
+    // Detect significant movement (minimum 30px to start considering it a swipe)
+    if (distance > 30) {
+      setIsSwiping(true);
+      
+      // Cancel long press if swiping
+      if (longPressTimeout) {
+        clearTimeout(longPressTimeout);
+        setLongPressTimeout(null);
+      }
+
+      // Determine swipe direction (horizontal swipes only)
+      const absX = Math.abs(deltaX);
+      const absY = Math.abs(deltaY);
+      
+      // Only consider horizontal swipes where horizontal movement is dominant
+      if (absX > absY && absX > 40) {
+        setSwipeDirection(deltaX > 0 ? 'right' : 'left');
+      }
+    }
   };
 
   const handleButtonTouchEnd = () => {
@@ -68,14 +114,30 @@ const NavigationControls: React.FC<NavigationControlsProps> = ({
       clearTimeout(longPressTimeout);
       setLongPressTimeout(null);
     }
+
+    const wasSwipe = isSwiping && swipeStart && swipeDirection;
+    const swipeTime = swipeStart ? Date.now() - swipeStart.time : 0;
+
+    // Reset swipe state
+    setSwipeStart(null);
+    setIsSwiping(false);
     
-    // Only trigger normal action if it wasn't a long press
-    if (!isLongPressing) {
-      if (shuffleMode) {
-        handleShuffle();
-      } else {
-        handleNext();
+    // Handle swipe gesture (only left swipe to toggle shuffle)
+    if (wasSwipe && swipeDirection === 'left' && swipeTime < 500 && swipeTime > 100) {
+      // Left swipe detected - toggle shuffle
+      if (onToggleShuffle) {
+        onToggleShuffle();
       }
+      setSwipeDirection(null);
+      setIsLongPressing(false);
+      return;
+    }
+
+    setSwipeDirection(null);
+    
+    // Only trigger normal action if it wasn't a long press or swipe
+    if (!isLongPressing && !wasSwipe) {
+      handleNext();
     }
     setIsLongPressing(false);
   };
