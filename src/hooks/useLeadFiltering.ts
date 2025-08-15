@@ -1,6 +1,6 @@
-import { useMemo, useCallback } from 'react';
-import { Lead, TimezoneFilter, CallFilter } from '../types/lead';
-import { filterLeadsByTimezone } from '../utils/timezoneUtils';
+import { useMemo, useCallback, useState, useEffect } from 'react';
+import { Lead, TimezoneFilter, CallFilter, TemperatureFilter } from '../types/lead';
+import { filterLeadsByTimezone, filterLeadsByTemperature } from '../utils/timezoneUtils';
 
 export const useLeadFiltering = (
   leadsData: Lead[], 
