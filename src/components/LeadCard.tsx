@@ -639,7 +639,7 @@ const LeadCard: React.FC<LeadCardProps> = ({
             {leadState || 'Unknown State'}
           </p>
           {/* Group 1: Name and Company */}
-            <div className="space-y-1">
+            <div className="space-y-1" style={{ minHeight: '80px', maxHeight: '80px', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
             <div className="flex items-center justify-center px-2">
               <h2 
                 className="font-bold text-center break-words leading-tight bg-gradient-to-r from-foreground to-foreground/95 bg-clip-text text-transparent dark:bg-none dark:text-foreground"
