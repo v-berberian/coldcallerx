@@ -1064,13 +1064,10 @@ const LeadCard: React.FC<LeadCardProps> = ({
             {comments.map(c => (
               <motion.div
                 key={c.id}
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.95 }}
-                transition={{ 
-                  duration: 0.2, 
-                  ease: "easeInOut"
-                }}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.1 }}
                 className={`border border-border/20 rounded-lg p-3 cursor-pointer transition-colors mb-3 ${selectedCommentId === c.id ? 'bg-muted/20' : ''}`}
                 style={{ 
                   touchAction: 'manipulation'
