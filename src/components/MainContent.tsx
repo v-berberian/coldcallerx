@@ -12,6 +12,7 @@ interface MainContentProps {
   currentCSVId: string | null;
   timezoneFilter: 'ALL' | 'EST_CST';
   callFilter: 'ALL' | 'UNCALLED';
+  temperatureFilter: 'ALL' | 'COLD' | 'WARM' | 'HOT';
   shuffleMode: boolean;
   autoCall: boolean;
   callDelay: number;
