@@ -1068,9 +1068,9 @@ const LeadCard: React.FC<LeadCardProps> = ({
                 <motion.div
                   key={c.id}
                   layout
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -10 }}
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
                   transition={{ duration: 0.2, ease: "easeOut" }}
                   className={`border border-border/20 rounded-lg p-3 cursor-pointer transition-colors ${selectedCommentId === c.id ? 'bg-muted/20' : ''}`}
                   style={{ 
