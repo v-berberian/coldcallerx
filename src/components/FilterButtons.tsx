@@ -260,35 +260,12 @@ const FilterButtons: React.FC<FilterButtonsProps> = ({
             </div>
           </button>
 
-          {/* Dropdown menu - Super modern design */}
+          {/* Dropdown menu - Neon filter design */}
           {isTemperatureDropdownOpen && (
-            <div className="absolute top-full left-0 right-0 mt-2 bg-white/95 dark:bg-gray-900/95 backdrop-blur-xl border border-gray-200/50 dark:border-gray-700/50 rounded-xl shadow-2xl z-50 overflow-hidden">
+            <div className="absolute top-full left-0 right-0 mt-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg z-50 overflow-hidden">
               {(['ALL', 'COLD', 'WARM', 'HOT'] as const).map((option) => {
                 const isSelected = temperatureFilter === option;
-                const getOptionStyles = () => {
-                  if (option === 'ALL') {
-                    return isSelected 
-                      ? 'bg-gray-100/80 dark:bg-gray-800/80 text-gray-700 dark:text-gray-300'
-                      : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50/80 dark:hover:bg-gray-800/50';
-                  }
-                  if (option === 'COLD') {
-                    return isSelected
-                      ? 'bg-blue-50/80 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 shadow-sm shadow-blue-500/20'
-                      : 'text-blue-600 dark:text-blue-400 hover:bg-blue-50/50 dark:hover:bg-blue-900/10';
-                  }
-                  if (option === 'WARM') {
-                    return isSelected
-                      ? 'bg-amber-50/80 dark:bg-amber-900/20 text-amber-600 dark:text-amber-400 shadow-sm shadow-amber-500/20'
-                      : 'text-amber-600 dark:text-amber-400 hover:bg-amber-50/50 dark:hover:bg-amber-900/10';
-                  }
-                  if (option === 'HOT') {
-                    return isSelected
-                      ? 'bg-rose-50/80 dark:bg-rose-900/20 text-rose-600 dark:text-rose-400 shadow-sm shadow-rose-500/20'
-                      : 'text-rose-600 dark:text-rose-400 hover:bg-rose-50/50 dark:hover:bg-rose-900/10';
-                  }
-                  return '';
-                };
-
+                
                 return (
                   <button
                     key={option}
@@ -298,14 +275,74 @@ const FilterButtons: React.FC<FilterButtonsProps> = ({
                       onToggleTemperature(option);
                       setIsTemperatureDropdownOpen(false);
                     }}
-                    className={`w-full px-4 py-4 text-center text-sm font-semibold transition-all duration-200 ease-out touch-manipulation active:scale-[0.98] ${getOptionStyles()}`}
+                    className={`group relative w-full text-sm font-medium px-4 py-4 overflow-hidden transition-all duration-100 ease-out touch-manipulation ${
+                      option === 'ALL' 
+                        ? (isSelected ? 'text-gray-700 dark:text-gray-300' : 'text-muted-foreground/70')
+                        : option === 'COLD'
+                        ? (isSelected ? 'text-blue-700 dark:text-blue-300 shadow-lg shadow-blue-500/30' : 'text-muted-foreground/70')
+                        : option === 'WARM'
+                        ? (isSelected ? 'text-amber-700 dark:text-amber-300 shadow-lg shadow-amber-500/30' : 'text-muted-foreground/70')
+                        : (isSelected ? 'text-rose-700 dark:text-rose-300 shadow-lg shadow-rose-500/30' : 'text-muted-foreground/70')
+                    }`}
                     style={{ 
                       WebkitTapHighlightColor: 'transparent',
+                      transition: 'all 100ms cubic-bezier(0.25, 0.46, 0.45, 0.94)',
                       touchAction: 'manipulation',
                       minHeight: '48px'
                     }}
                   >
-                    <span className="relative z-10">
+                    {/* Animated background for active state */}
+                    {isSelected && option === 'ALL' && (
+                      <div 
+                        className="absolute inset-0 bg-gradient-to-r from-gray-500/20 to-gray-600/20 scale-100 opacity-100 pointer-events-none"
+                        style={{
+                          transition: 'all 100ms cubic-bezier(0.25, 0.46, 0.45, 0.94)',
+                          pointerEvents: 'none'
+                        }}
+                      />
+                    )}
+                    {isSelected && option === 'COLD' && (
+                      <div 
+                        className="absolute inset-0 bg-gradient-to-r from-blue-500/20 to-blue-600/20 scale-100 opacity-100 pointer-events-none"
+                        style={{
+                          transition: 'all 100ms cubic-bezier(0.25, 0.46, 0.45, 0.94)',
+                          pointerEvents: 'none'
+                        }}
+                      />
+                    )}
+                    {isSelected && option === 'WARM' && (
+                      <div 
+                        className="absolute inset-0 bg-gradient-to-r from-amber-500/20 to-amber-600/20 scale-100 opacity-100 pointer-events-none"
+                        style={{
+                          transition: 'all 100ms cubic-bezier(0.25, 0.46, 0.45, 0.94)',
+                          pointerEvents: 'none'
+                        }}
+                      />
+                    )}
+                    {isSelected && option === 'HOT' && (
+                      <div 
+                        className="absolute inset-0 bg-gradient-to-r from-rose-500/20 to-rose-600/20 scale-100 opacity-100 pointer-events-none"
+                        style={{
+                          transition: 'all 100ms cubic-bezier(0.25, 0.46, 0.45, 0.94)',
+                          pointerEvents: 'none'
+                        }}
+                      />
+                    )}
+                    
+                    {/* Subtle background for inactive state */}
+                    {!isSelected && (
+                      <div 
+                        className="absolute inset-0 bg-gray-200/20 dark:bg-gray-700/20 scale-100 opacity-100 pointer-events-none"
+                        style={{
+                          transition: 'all 100ms cubic-bezier(0.25, 0.46, 0.45, 0.94)',
+                          pointerEvents: 'none'
+                        }}
+                      />
+                    )}
+                    
+                    <span className={`relative z-10 block text-center transition-all duration-100 ease-out ${
+                      isSelected ? 'scale-100 opacity-100' : 'scale-95 opacity-90'
+                    }`}>
                       {option === 'ALL' ? 'All Stages' : option.charAt(0).toUpperCase() + option.slice(1).toLowerCase()}
                     </span>
                   </button>
