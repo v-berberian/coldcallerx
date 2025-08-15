@@ -164,6 +164,7 @@ const NavigationControls: React.FC<NavigationControlsProps> = ({
         onClick={(e) => {
           // Prevent default click behavior since we handle it in touch events
           e.preventDefault();
+          e.stopPropagation();
         }}
       >
         <span className="truncate">Next</span>
