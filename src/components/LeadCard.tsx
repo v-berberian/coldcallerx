@@ -1093,19 +1093,21 @@ const LeadCard: React.FC<LeadCardProps> = ({
                       <div className="flex items-center gap-2 self-center">
                         <button
                           aria-label="Delete comment"
-                          className="rounded-md p-2 active:bg-muted/80"
+                          className="min-w-[44px] min-h-[44px] flex items-center justify-center rounded-lg bg-red-50 hover:bg-red-100 active:bg-red-200 transition-colors touch-manipulation"
+                          style={{ WebkitTapHighlightColor: 'transparent' }}
                           onClick={(e) => {
                             e.stopPropagation();
                             deleteComment(c.id);
                           }}
                         >
-                          <Trash className="h-4 w-4 text-red-600" />
+                          <Trash className="h-5 w-5 text-red-600" />
                         </button>
                       </div>
                     )}
                   </div>
-                </div>
+                </motion.div>
               ))}
+            </AnimatePresence>
         </div>
 
         {/* Comment Section Footer */}
