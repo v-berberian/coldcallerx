@@ -222,6 +222,8 @@ const MainContent: React.FC<MainContentProps> = ({
             canGoNext={canGoNext}
             onSkipMultiple={onSkipMultiple}
             onSkipToEnd={onSkipToEnd}
+            shuffleMode={shuffleMode}
+            onToggleShuffle={onToggleShuffle}
           />
         </div>
       </div>
