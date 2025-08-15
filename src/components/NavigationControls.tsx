@@ -8,8 +8,6 @@ interface NavigationControlsProps {
   onNext: () => void;
   canGoPrevious: boolean;
   canGoNext: boolean;
-  onSkipToEnd?: () => void;
-  onSkipMultiple?: (count: number) => void;
   shuffleMode?: boolean;
   onToggleShuffle?: () => void;
 }
