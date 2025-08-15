@@ -277,7 +277,19 @@ const LeadCard: React.FC<LeadCardProps> = ({
       createdAt: new Date().toISOString(),
     };
     const next = [...comments, newComment];
+    
+    // Start fade in animation
+    setFadingInIds(prev => new Set(prev).add(newComment.id));
     saveComments(next);
+    
+    // Remove from fading in after animation completes
+    setTimeout(() => {
+      setFadingInIds(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(newComment.id);
+        return newSet;
+      });
+    }, 150);
   }, [comments, saveComments]);
 
   const addCommentFromModal = useCallback(() => {
