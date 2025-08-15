@@ -38,6 +38,7 @@ const FilterButtons: React.FC<FilterButtonsProps> = ({
 }) => {
   const [isResetAnimating, setIsResetAnimating] = useState(false);
   const [isTemperatureDropdownOpen, setIsTemperatureDropdownOpen] = useState(false);
+  const [isTemperatureDropdownClosing, setIsTemperatureDropdownClosing] = useState(false);
   const temperatureDropdownRef = useRef<HTMLDivElement>(null);
 
   const handleFilterClick = (handler: () => void, filterName: string) => (e: React.MouseEvent | React.TouchEvent) => {
